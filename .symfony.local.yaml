@@ -1,0 +1,4 @@
+http:
+  allow_http: true
+  port: 7015
+  use_gzip: true
