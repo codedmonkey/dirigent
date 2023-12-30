@@ -1,6 +1,8 @@
 {
+    "name": "codedmonkey/conductor",
+    "description": "A private proxy for Composer registries",
     "type": "project",
-    "license": "proprietary",
+    "license": "MIT",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
@@ -54,12 +56,12 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "CodedMonkey\\Conductor\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests/"
+            "CodedMonkey\\Conductor\\Tests\\": "tests/"
         }
     },
     "replace": {
