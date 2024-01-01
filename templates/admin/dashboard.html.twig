@@ -1,0 +1,23 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}
+  {{ ea.dashboardTitle }}
+{% endblock %}
+
+{% block page_content %}
+  <p>Welcome to <a href="#">Conductor</a>, a private proxy for Composer registries.</p>
+
+  <hr>
+
+  <p>To use this repository in your project, run the following command in your terminal:</p>
+
+  <div class="bg-secondary px-3 py-2 mb-3 rounded">
+    <pre class="m-0"><code>composer config repositories.conductor composer {{ app.request.getSchemeAndHttpHost() }}</code></pre>
+  </div>
+
+  <p>Or add it directly in your <code>composer.json</code>:</p>
+
+  <div class="bg-secondary px-3 py-2 mb-3 rounded">
+    <pre class="m-0"><code>foo</code></pre>
+  </div>
+{% endblock %}

@@ -13,6 +13,7 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode->children()
+            ->scalarNode('title')->defaultValue('My Conductor')->end()
             ->arrayNode('storage')
                 ->addDefaultsIfNotSet()
                 ->children()
