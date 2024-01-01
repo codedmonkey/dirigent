@@ -1,0 +1,5 @@
+/config/conductor.yaml
+/config/packages/conductor.yaml
+/storage/
+/var/
+/vendor/

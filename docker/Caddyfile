@@ -1,0 +1,15 @@
+:7015 {
+    root * /srv/public
+
+    encode zstd gzip
+    file_server
+
+    php_fastcgi localhost:9000 {
+        resolve_root_symlink
+    }
+
+    @phpFile {
+        path *.php*
+    }
+    error @phpFile "Not found" 404
+}
