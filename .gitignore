@@ -1,3 +1,5 @@
+/config/conductor.yaml
+/config/packages/conductor.yaml
 /storage/
 
 ###> symfony/framework-bundle ###
