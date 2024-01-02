@@ -27,6 +27,10 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('url')->isRequired()->end()
                         ->scalarNode('type')->defaultValue('composer')->end()
                         ->integerNode('delay')->defaultValue(3600)->end()
+                        ->arrayNode('auth')
+                            ->requiresAtLeastOneElement()
+                            ->scalarPrototype()->end()
+                        ->end()
                     ->end()
                 ->end()
             ->end();

@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Conductor;
 
+use CodedMonkey\Conductor\Repository\RepositoryInterface;
 use Composer\MetadataMinifier\MetadataMinifier;
 use Composer\Package\AliasPackage;
 use Composer\Package\Dumper\ArrayDumper;
@@ -22,6 +23,7 @@ class Conductor
     private readonly string $providerPath;
 
     public function __construct(
+        /** @var RepositoryInterface[] */
         private readonly array $repositories,
         private readonly HttpClientInterface $httpClient,
         private readonly UrlGeneratorInterface $urlGenerator,
@@ -144,14 +146,8 @@ class Conductor
             $package = $package->getAliasOf();
         }
 
-        $url = $package->getDistUrl();
-        $response = $this->httpClient->request('GET', $url);
-
-        $path = $this->getDistributionPath($packageName, $version, sha1($url), $package->getDistType());
-
-        (new Filesystem())->mkdir(dirname($path));
-
-        file_put_contents($path, $response->getContent());
+        $repository = $this->repositories[$packageData['_provider']];
+        $repository->fetchPackageDistribution($package);
     }
 
     public function getDistributionPath(string $packageName, string $version, string $key, string $ext): string

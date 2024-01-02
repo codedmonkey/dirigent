@@ -5,8 +5,10 @@ namespace CodedMonkey\Conductor\Repository;
 use CodedMonkey\Conductor\CacheTrait;
 use Composer\MetadataMinifier\MetadataMinifier;
 use Composer\Package\Loader\ArrayLoader;
+use Composer\Package\PackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Util\Url;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ComposerRepository implements RepositoryInterface
@@ -14,10 +16,11 @@ class ComposerRepository implements RepositoryInterface
     use CacheTrait;
 
     protected readonly string $cachePath;
-    private readonly string $url;
+    private readonly string $distributionPath;
 
     private ?array $rootData = null;
     private ?string $packageProviderUrl = null;
+    private readonly string $url;
 
     public function __construct(
         private readonly array $config,
@@ -29,6 +32,7 @@ class ComposerRepository implements RepositoryInterface
         $sanitizedRepositoryUrl = Preg::replace('{[^a-z0-9.]}i', '-', Url::sanitize($this->url));
         $sanitizedRepositoryUrl = trim($sanitizedRepositoryUrl, '-');
         $this->cachePath = "{$storagePath}/repo/{$sanitizedRepositoryUrl}";
+        $this->distributionPath = "{$storagePath}/dist";
     }
 
     public function fetchPackageMetadata(string $name): ?array
@@ -39,7 +43,7 @@ class ComposerRepository implements RepositoryInterface
         $releaseProviderData = $this->read("p2/{$name}.json", $releaseProviderUrl);
 
         $releasePackagesData = $releaseProviderData['packages'][$name] ?? [];
-        if ('composer/2.0' === $releaseProviderData['minified'] ?? null) {
+        if ('composer/2.0' === ($releaseProviderData['minified'] ?? null)) {
             $releasePackagesData = MetadataMinifier::expand($releasePackagesData);
         }
 
@@ -47,7 +51,7 @@ class ComposerRepository implements RepositoryInterface
         $devProviderData = $this->read("p2/{$name}~dev.json", $devProviderUrl);
 
         $devPackagesData = $devProviderData['packages'][$name] ?? [];
-        if ('composer/2.0' === $devProviderData['minified'] ?? null) {
+        if ('composer/2.0' === ($devProviderData['minified'] ?? null)) {
             $devPackagesData = MetadataMinifier::expand($devPackagesData);
         }
 
@@ -58,6 +62,37 @@ class ComposerRepository implements RepositoryInterface
         }
 
         return (new ArrayLoader())->loadPackages($packagesData);
+    }
+
+    public function fetchPackageDistribution(PackageInterface $package): bool
+    {
+        $url = $package->getDistUrl();
+        $path = $this->getDistributionPath($package->getName(), $package->getPrettyVersion(), $package->getDistType(), sha1($url));
+
+        if (file_exists($path)) {
+            return true;
+        }
+
+        $requestHeaders = [];
+        $requestOptions = [];
+
+        $this->prepareRequest($requestOptions, $requestHeaders);
+
+        $url = $package->getDistUrl();
+        $response = $this->httpClient->request('GET', $url, $requestOptions);
+
+        if ($response->getStatusCode() > 200) {
+            return false;
+        }
+
+        (new Filesystem())->mkdir(dirname($path));
+
+        $fileHandler = fopen($path, 'w');
+        foreach ($this->httpClient->stream($response) as $chunk) {
+            fwrite($fileHandler, $chunk->getContent());
+        }
+
+        return true;
     }
 
     private function loadRootServerFile(): void
@@ -97,7 +132,18 @@ class ComposerRepository implements RepositoryInterface
             return $this->url;
         }
 
-        return $this->url . '/packages.json';
+        return "{$this->url}/packages.json";
+    }
+
+    public function getDistributionPath(string $packageName, string $version, string $type, string $key): string
+    {
+        if ('zip' === $type) {
+            $ext = 'zip';
+        } else {
+            throw new \RuntimeException("Unknown distribution type \"$type\".");
+        }
+
+        return "{$this->distributionPath}/{$packageName}/{$version}-{$key}.{$ext}";
     }
 
     private function read(string $path, string $url): ?array
@@ -106,7 +152,7 @@ class ComposerRepository implements RepositoryInterface
         $cacheMetadata = $cachedData['_metadata'] ?? null;
 
         $requestedAt = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
-        $lastModifiedAt = null;
+        $lastModified = null;
 
         if (null !== $cacheMetadata) {
             unset($cachedData['_metadata']);
@@ -114,7 +160,7 @@ class ComposerRepository implements RepositoryInterface
             $lastRequestedAt = \DateTimeImmutable::createFromFormat(\DateTimeInterface::RFC7231, $cacheMetadata['last-requested'], new \DateTimeZone('UTC'));
             $secondsSinceRequest = $requestedAt->getTimestamp() - $lastRequestedAt->getTimestamp();
 
-            if ($secondsSinceRequest < 300) {
+            if ($secondsSinceRequest < $this->config['delay']) {
                 if (!$cacheMetadata['found']) {
                     return null;
                 }
@@ -122,16 +168,19 @@ class ComposerRepository implements RepositoryInterface
                 return $cachedData;
             }
 
-            $lastModifiedAt = $cacheMetadata['last-modified'];
+            $lastModified = $cacheMetadata['last-modified'];
         }
 
         $requestHeaders = [];
+        $requestOptions = [];
 
-        if ($lastModifiedAt) {
-            $requestHeaders['If-Modified-Since'] = [$lastModifiedAt];
+        if ($lastModified) {
+            $requestHeaders['If-Modified-Since'] = [$lastModified];
         }
 
-        $response = $this->httpClient->request('GET', $url, ['headers' => $requestHeaders]);
+        $this->prepareRequest($requestOptions, $requestHeaders);
+
+        $response = $this->httpClient->request('GET', $url, $requestOptions);
         $statusCode = $response->getStatusCode();
 
         $degraded = false;
@@ -149,7 +198,7 @@ class ComposerRepository implements RepositoryInterface
         $cacheMetadata = [
             'degraded' => $degraded,
             'found' => $found,
-            'last-modified' => $lastModifiedAt,
+            'last-modified' => $lastModified,
             'last-requested' => $requestedAt->format(\DateTimeInterface::RFC7231),
         ];
 
@@ -169,10 +218,25 @@ class ComposerRepository implements RepositoryInterface
 
         $data = json_decode($response->getContent(), true);
 
-        $cacheMetadata['last-modified'] = $response->getHeaders()['last-modified'][0];
+        if ($lastModified = $response->getHeaders()['last-modified'][0] ?? null) {
+            $cacheMetadata['last-modified'] = $lastModified;
+        }
 
         $this->writeToCache($path, $data, $cacheMetadata);
 
         return $data;
+    }
+
+    private function prepareRequest(array &$options, array &$headers): void
+    {
+        if ($authConfig = $this->config['auth'] ?? null) {
+            $authType = $authConfig['type'] ?? null;
+
+            if ('http_basic' === $authType) {
+                $options['auth_basic'] = [$authConfig['username'], $authConfig['password']];
+            }
+        }
+
+        $options['headers'] = $headers;
     }
 }

@@ -10,4 +10,6 @@ interface RepositoryInterface
      * @return PackageInterface[]|null
      */
     public function fetchPackageMetadata(string $name): ?array;
+
+    public function fetchPackageDistribution(PackageInterface $package): bool;
 }
