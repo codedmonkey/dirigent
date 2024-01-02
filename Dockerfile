@@ -24,6 +24,7 @@ RUN set -eux; \
         curl \
         php82 \
         php82-ctype \
+        php82-curl \
         php82-dom \
         php82-fileinfo \
         php82-fpm \

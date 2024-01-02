@@ -8,6 +8,7 @@
     "require": {
         "php": ">=8.2",
         "ext-ctype": "*",
+        "ext-curl": "*",
         "ext-iconv": "*",
         "composer/composer": "^2.6",
         "doctrine/doctrine-bundle": "^2.11",
