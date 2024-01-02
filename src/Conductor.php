@@ -150,9 +150,9 @@ class Conductor
         $repository->fetchPackageDistribution($package);
     }
 
-    public function getDistributionPath(string $packageName, string $version, string $key, string $ext): string
+    public function getDistributionPath(string $packageName, string $version, string $reference, string $type): string
     {
-        return "{$this->distributionPath}/{$packageName}/{$version}-{$key}.{$ext}";
+        return "{$this->distributionPath}/{$packageName}/{$version}-{$reference}.{$type}";
     }
 
     /**
@@ -162,17 +162,6 @@ class Conductor
     {
         if (!count($packages)) {
             return;
-        }
-
-        foreach ($packages as $package) {
-            $distPackage = $package instanceof AliasPackage ? $package->getAliasOf() : $package;
-
-            $package->setDistUrl($this->urlGenerator->generate('api_package_distribution', [
-                'packageName' => $packageName,
-                'version' => $distPackage->getPrettyVersion(),
-                'key' => sha1($distPackage->getDistUrl()),
-                'ext' => $distPackage->getDistType(),
-            ], UrlGeneratorInterface::ABSOLUTE_URL));
         }
 
         $packagesData = array_map([new ArrayDumper(), 'dump'], $packages);
@@ -187,6 +176,6 @@ class Conductor
 
         (new Filesystem())->mkdir(dirname($path));
 
-        file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        file_put_contents($path, json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
 }

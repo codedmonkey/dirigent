@@ -66,8 +66,7 @@ class ComposerRepository implements RepositoryInterface
 
     public function fetchPackageDistribution(PackageInterface $package): bool
     {
-        $url = $package->getDistUrl();
-        $path = $this->getDistributionPath($package->getName(), $package->getPrettyVersion(), $package->getDistType(), sha1($url));
+        $path = $this->getDistributionPath($package->getName(), $package->getVersion(), $package->getDistReference(), $package->getDistType());
 
         if (file_exists($path)) {
             return true;
@@ -135,15 +134,9 @@ class ComposerRepository implements RepositoryInterface
         return "{$this->url}/packages.json";
     }
 
-    public function getDistributionPath(string $packageName, string $version, string $type, string $key): string
+    public function getDistributionPath(string $packageName, string $version, string $reference, string $type): string
     {
-        if ('zip' === $type) {
-            $ext = 'zip';
-        } else {
-            throw new \RuntimeException("Unknown distribution type \"$type\".");
-        }
-
-        return "{$this->distributionPath}/{$packageName}/{$version}-{$key}.{$ext}";
+        return "{$this->distributionPath}/{$packageName}/{$version}-{$reference}.{$type}";
     }
 
     private function read(string $path, string $url): ?array
