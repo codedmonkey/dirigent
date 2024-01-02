@@ -56,6 +56,7 @@ class Conductor
         } else {
             $data = [
                 'aliases' => [],
+                'provider' => null,
                 'versions' => [],
             ];
         }
@@ -67,16 +68,14 @@ class Conductor
                 continue;
             }
 
+            $data['provider'] = $repositoryName;
             $data['aliases'] = [];
             $data['versions'] = [];
 
             foreach ($packages as $package) {
                 $distPackage = $package instanceof AliasPackage ? $package->getAliasOf() : $package;
 
-                $packageDump = $dumper->dump($distPackage);
-                $packageDump['_provider'] = $repositoryName;
-
-                $data['versions'][$distPackage->getVersion()] = $packageDump;
+                $data['versions'][$distPackage->getVersion()] = $dumper->dump($distPackage);
 
                 if ($package !== $distPackage) {
                     $data['aliases'][$package->getVersion()] = [
@@ -146,7 +145,7 @@ class Conductor
             $package = $package->getAliasOf();
         }
 
-        $repository = $this->repositories[$packageData['_provider']];
+        $repository = $this->repositories[$data['provider']];
         $repository->fetchPackageDistribution($package);
     }
 
