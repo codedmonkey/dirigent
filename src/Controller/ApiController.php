@@ -35,7 +35,7 @@ class ApiController extends AbstractController
 
     #[Route('/p2/{packageName}.json',
         name: 'api_package_metadata',
-        requirements: ['packageName' => '^[a-z0-9_.-]+/[a-z0-9_.-]+(~dev)?$'],
+        requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+(~dev)?'],
         methods: ['GET'],
     )]
     public function packageMetadata(string $packageName, Conductor $conductor): Response

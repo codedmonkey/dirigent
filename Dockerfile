@@ -17,7 +17,8 @@ RUN set -eux; \
 
 FROM alpine:3.19
 
-RUN addgroup -S conductor; \
+RUN set -eux; \
+    addgroup -S conductor; \
     adduser -S -G conductor conductor;
 
 RUN set -eux; \
@@ -34,6 +35,8 @@ RUN set -eux; \
         php82-iconv \
         php82-mbstring \
         php82-openssl \
+        php82-pdo \
+        php82-pdo_sqlite \
         php82-phar \
         php82-session \
         php82-simplexml \

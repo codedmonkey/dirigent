@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Conductor;
 
+use CodedMonkey\Conductor\Message\SavePackage;
 use CodedMonkey\Conductor\Repository\RepositoryInterface;
 use Composer\MetadataMinifier\MetadataMinifier;
 use Composer\Package\AliasPackage;
@@ -11,8 +12,7 @@ use Composer\Package\PackageInterface;
 use Composer\Package\Version\VersionParser;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class Conductor
 {
@@ -25,14 +25,28 @@ class Conductor
     public function __construct(
         /** @var RepositoryInterface[] */
         private readonly array $repositories,
-        private readonly HttpClientInterface $httpClient,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly MessageBusInterface $messageBus,
         #[Autowire(param: 'conductor.storage.path')]
         string $storagePath,
     ) {
         $this->cachePath = "{$storagePath}/metadata";
         $this->distributionPath = "{$storagePath}/dist";
         $this->providerPath = "{$storagePath}/provider";
+    }
+
+    public function getPackageMetadata(string $packageName): ?array
+    {
+        $this->resolvePackageMetadata($packageName);
+
+        $path = "{$packageName}.json";
+
+        if (!$data = $this->readFromCache($path)) {
+            return null;
+        }
+
+        unset($data['_metadata']);
+
+        return $data;
     }
 
     public function resolvePackageMetadata(string $packageName): void
@@ -100,6 +114,8 @@ class Conductor
         ];
 
         $this->writeToCache($path, $data, $cacheMetadata);
+
+        $this->messageBus->dispatch(new SavePackage($packageName));
 
         $packages = (new ArrayLoader())->loadPackages(array_values($data['versions']));
 
