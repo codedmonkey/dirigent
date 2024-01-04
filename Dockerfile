@@ -56,7 +56,7 @@ USER conductor
 WORKDIR /srv
 
 COPY --chown=conductor:conductor --from=build /srv ./
-COPY --chown=conductor:conductor .env importmap.php ./
+COPY --chown=conductor:conductor .env importmap.php readme.md license.md ./
 COPY --chown=conductor:conductor assets assets/
 COPY --chown=conductor:conductor bin bin/
 COPY --chown=conductor:conductor config config/
