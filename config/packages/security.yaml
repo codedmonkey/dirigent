@@ -4,14 +4,29 @@ security:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        database_users:
+            entity:
+                class: CodedMonkey\Conductor\Doctrine\Entity\User
+                property: email
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        api:
+            pattern: ^/(packages.json|p2/|dist/)
+            provider: database_users
+            access_token:
+                token_handler: CodedMonkey\Conductor\Security\AccessTokenHandler
         main:
             lazy: true
-            provider: users_in_memory
+            provider: database_users
+            logout:
+                path: logout
+                target: admin
+            form_login:
+                login_path: /?routeName=login
+                check_path: login
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

@@ -10,11 +10,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use function Symfony\Component\String\u;
 
 class ApiController extends AbstractController
 {
     #[Route('/packages.json', name: 'api_root', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function root(RouterInterface $router): JsonResponse
     {
         $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())

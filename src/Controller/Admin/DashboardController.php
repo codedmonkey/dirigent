@@ -2,6 +2,8 @@
 
 namespace CodedMonkey\Conductor\Controller\Admin;
 
+use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
+use CodedMonkey\Conductor\Doctrine\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -31,9 +33,21 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
+        $user = $this->getUser();
+
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
         yield MenuItem::linkToRoute('Repositories', 'fa fa-server', 'admin_repositories');
-        // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
+
+        if ($user?->isAdmin()) {
+            yield MenuItem::linkToCrud('Users', 'fa fa-user', User::class);
+        }
+
+        yield MenuItem::section('Personal');
+        if ($user) {
+            yield MenuItem::linkToCrud('Access Tokens', 'fa fa-key', AccessToken::class);
+        } else {
+            yield MenuItem::linkToRoute('Log In', 'fa fa-user', 'login');
+        }
     }
 
     #[Route('/admin/repositories', name: 'admin_repositories')]
