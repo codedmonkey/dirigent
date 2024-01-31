@@ -17,9 +17,12 @@ RUN set -eux; \
 
 FROM alpine:3.19
 
+ARG UID=1000
+ARG GID=1000
+
 RUN set -eux; \
-    addgroup -S conductor; \
-    adduser -S -G conductor conductor;
+    addgroup -g $GID -S conductor; \
+    adduser -u $UID -S -G conductor conductor;
 
 RUN set -eux; \
     apk upgrade --no-cache; \
