@@ -9,7 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class DashboardController extends AbstractDashboardController
 {
@@ -17,12 +17,6 @@ class DashboardController extends AbstractDashboardController
         #[Autowire(param: 'conductor.title')]
         private readonly string $title,
     ) {
-    }
-
-    #[Route('/', name: 'admin')]
-    public function index(): Response
-    {
-        return $this->render('admin/dashboard.html.twig');
     }
 
     public function configureDashboard(): Dashboard
@@ -44,10 +38,17 @@ class DashboardController extends AbstractDashboardController
 
         yield MenuItem::section('Personal');
         if ($user) {
-            yield MenuItem::linkToCrud('Access Tokens', 'fa fa-key', AccessToken::class);
+            yield MenuItem::linkToCrud('Access tokens', 'fa fa-key', AccessToken::class);
         } else {
-            yield MenuItem::linkToRoute('Log In', 'fa fa-user', 'login');
+            //yield MenuItem::linkToRoute('Create account', 'fa fa-user', 'login');
+            yield MenuItem::linkToRoute('Log in', 'fa fa-user', 'login');
         }
+    }
+
+    #[Route('/', name: 'admin')]
+    public function index(): Response
+    {
+        return $this->render('admin/dashboard.html.twig');
     }
 
     #[Route('/admin/repositories', name: 'admin_repositories')]
