@@ -1,0 +1,31 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Packages{% endblock %}
+
+{% block page_actions %}
+  <div class="global-actions">
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Add Package
+      </button>
+      <ul class="dropdown-menu">
+        {% set addFromRegistryUrl = ea_url()
+          .setRoute('admin_packages_add_registry') %}
+        <li><a class="dropdown-item" href="{{ addFromRegistryUrl }}">Mirror from registry</a></li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_content %}
+  {% for package in packages %}
+    {% set packageUrl = ea_url()
+      .setRoute('admin_packages_info', {packageName: package.name}) %}
+    <a href="{{ packageUrl }}" class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ package.name }}</h5>
+        <p class="card-text">{{ package.description }}</p>
+      </div>
+    </a>
+  {% endfor %}
+{% endblock %}

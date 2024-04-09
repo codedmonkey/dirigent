@@ -3,6 +3,8 @@
 namespace CodedMonkey\Conductor\Controller\Admin;
 
 use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
+use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
+use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use CodedMonkey\Conductor\Doctrine\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -30,11 +32,7 @@ class DashboardController extends AbstractDashboardController
         $user = $this->getUser();
 
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        yield MenuItem::linkToRoute('Repositories', 'fa fa-server', 'admin_repositories');
-
-        if ($user?->isAdmin()) {
-            yield MenuItem::linkToCrud('Users', 'fa fa-user', User::class);
-        }
+        yield MenuItem::linkToRoute('Packages', 'fa fa-cubes', 'admin_packages');
 
         yield MenuItem::section('Personal');
         if ($user) {
@@ -42,6 +40,13 @@ class DashboardController extends AbstractDashboardController
         } else {
             //yield MenuItem::linkToRoute('Create account', 'fa fa-user', 'login');
             yield MenuItem::linkToRoute('Log in', 'fa fa-user', 'login');
+        }
+
+        if ($user?->isAdmin()) {
+            yield MenuItem::section('Admin');
+            yield MenuItem::linkToCrud('Registries', 'fa fa-server', Registry::class);
+            yield MenuItem::linkToCrud('Credentials', 'fa fa-lock-open', Credentials::class);
+            yield MenuItem::linkToCrud('Users', 'fa fa-user', User::class);
         }
     }
 

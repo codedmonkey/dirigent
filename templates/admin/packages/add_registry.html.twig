@@ -1,0 +1,13 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Mirror packages from registry{% endblock %}
+
+{% block page_content %}
+  {{ form_start(form) }}
+    {{ form_row(form.packages, {attr: {rows: 10}}) }}
+
+    {{ form_row(form.registry) }}
+
+    <button class="btn btn-primary">Add packages</button>
+  {{ form_end(form) }}
+{% endblock %}

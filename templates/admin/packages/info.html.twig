@@ -1,0 +1,27 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}{{ package.name }} <small>3.0.x</small>{% endblock %}
+
+{% block page_content %}
+  <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 mb-3">
+    <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="#">Info</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Versions</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Dependants</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Statistics</a>
+    </li>
+  </ul>
+
+  <hr>
+
+  <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
+    <pre class="m-0"><code>composer require {{ package.name }}</code></pre>
+  </div>
+
+{% endblock %}

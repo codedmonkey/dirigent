@@ -3,28 +3,31 @@
 namespace CodedMonkey\Conductor\Doctrine\Entity;
 
 use CodedMonkey\Conductor\Doctrine\Repository\UserRepository;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Id;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[Column]
+    #[GeneratedValue]
+    #[Id]
     public ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[Column(length: 255)]
     public ?string $name = null;
 
-    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[Column(length: 255, unique: true)]
     public ?string $email = null;
 
-    #[ORM\Column(type: 'json')]
+    #[Column]
     private array $roles = [];
 
-    #[ORM\Column(type: 'string')]
+    #[Column]
     public ?string $password = null;
 
     public ?string $plainPassword = null;
@@ -95,6 +98,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
     }
 }

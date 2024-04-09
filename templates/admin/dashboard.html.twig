@@ -1,8 +1,6 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block content_title %}
-  {{ ea.dashboardTitle }}
-{% endblock %}
+{% block page_title %}{{ ea.dashboardTitle }}{% endblock %}
 
 {% block page_content %}
   <p>Welcome to <a href="#">Conductor</a>, a private proxy for Composer registries.</p>

@@ -2,15 +2,15 @@
 
 namespace CodedMonkey\Conductor\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Conductor\Doctrine\Repository\CredentialsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 
-#[Entity(repositoryClass: PackageRepository::class)]
-class Package
+#[Entity(repositoryClass: CredentialsRepository::class)]
+class Credentials
 {
     #[Column]
     #[GeneratedValue]

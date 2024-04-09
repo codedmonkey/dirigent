@@ -2,15 +2,15 @@
 
 namespace CodedMonkey\Conductor\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 
-#[Entity(repositoryClass: PackageRepository::class)]
-class Package
+#[Entity(repositoryClass: RegistryRepository::class)]
+class Registry
 {
     #[Column]
     #[GeneratedValue]
@@ -22,4 +22,15 @@ class Package
 
     #[Column(type: Types::TEXT, nullable: true)]
     public ?string $description = null;
+
+    #[Column(length: 1024)]
+    public ?string $url = null;
+
+    #[Column(length: 16)]
+    public ?string $mirroring = 'none';
+
+    public function __toString(): string
+    {
+        return $this->name;
+    }
 }
