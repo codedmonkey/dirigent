@@ -3,7 +3,9 @@
 namespace CodedMonkey\Conductor\Doctrine\Repository;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
+use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -19,6 +21,35 @@ class RegistryRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Registry::class);
+    }
+
+    public function createPackageMirroringQueryBuilder(RegistryPackageMirroring|string $packageMirroring): QueryBuilder
+    {
+        $builder = $this->createQueryBuilder('registry');
+
+        if (is_string($packageMirroring)) {
+            $packageMirroring = RegistryPackageMirroring::from($packageMirroring);
+        }
+
+        if ($packageMirroring === RegistryPackageMirroring::Manual) {
+            $builder->andWhere($builder->expr()->orX(
+                $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('manual')),
+                $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('auto')),
+            ));
+        } elseif ($packageMirroring === RegistryPackageMirroring::Automatic) {
+            $builder->andWhere($builder->expr()->orX(
+                $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('auto')),
+            ));
+        } else {
+            throw new \LogicException();
+        }
+
+        return $builder;
+    }
+
+    public function findByPackageMirroring(RegistryPackageMirroring $packageMirroring): array
+    {
+        return $this->createPackageMirroringQueryBuilder($packageMirroring)->getQuery()->getResult();
     }
 
     public function save(Registry $entity, bool $flush = false): void

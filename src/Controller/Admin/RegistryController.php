@@ -3,6 +3,7 @@
 namespace CodedMonkey\Conductor\Controller\Admin;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
+use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
@@ -23,13 +24,12 @@ class RegistryController extends AbstractCrudController
 
         yield TextField::new('url');
 
-        yield ChoiceField::new('mirroring')
-            ->setChoices([
-                'No mirroring' => 'none',
-                'Manually specify packages' => 'manual',
-                'Automatically add packages' => 'auto',
-            ])
-            ->renderExpanded()
-            ->onlyOnForms();
+        yield ChoiceField::new('packageMirroring')
+            ->setRequired(true)
+            ->setChoices(RegistryPackageMirroring::cases())
+            ->setFormTypeOption('choice_label', function ($choice, string $key): string {
+                return "registry.package_mirroring.{$key}";
+            })
+            ->renderExpanded();
     }
 }

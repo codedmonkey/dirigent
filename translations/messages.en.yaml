@@ -1,0 +1,5 @@
+registry:
+  package_mirroring:
+    Disabled: Package mirroring disabled
+    Manual: Only mirror specified packages
+    Automatic: Automatically mirror packages on request

@@ -26,8 +26,8 @@ class Registry
     #[Column(length: 1024)]
     public ?string $url = null;
 
-    #[Column(length: 16)]
-    public ?string $mirroring = 'none';
+    #[Column(type: Types::STRING, enumType:RegistryPackageMirroring::class)]
+    public $packageMirroring;
 
     public function __toString(): string
     {

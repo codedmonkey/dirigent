@@ -21,18 +21,8 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
             ->arrayNode('repositories')
-                ->useAttributeAsKey('name')
-                ->arrayPrototype()
-                    ->children()
-                        ->scalarNode('url')->isRequired()->end()
-                        ->scalarNode('type')->defaultValue('composer')->end()
-                        ->integerNode('delay')->defaultValue(3600)->end()
-                        ->arrayNode('auth')
-                            ->requiresAtLeastOneElement()
-                            ->scalarPrototype()->end()
-                        ->end()
-                    ->end()
-                ->end()
+                ->setDeprecated('conductor', 'dev', 'Use database instead')
+                ->ignoreExtraKeys(false)
             ->end();
 
         return $treeBuilder;

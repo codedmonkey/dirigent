@@ -1,0 +1,15 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Mirror packages from registry{% endblock %}
+
+{% block page_content %}
+  <ul>
+    {% for result in results %}
+      {% if result.error %}
+        <li class="bg-warning">{{ result.message }}</li>
+      {% else %}
+        <li>{{ result.message }}</li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endblock %}

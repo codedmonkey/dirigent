@@ -3,7 +3,6 @@
 namespace CodedMonkey\Conductor;
 
 use CodedMonkey\Conductor\DependencyInjection\Extension;
-use CodedMonkey\Conductor\DependencyInjection\RepositoryPass;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -25,6 +24,5 @@ class Kernel extends BaseKernel
     protected function build(ContainerBuilder $container): void
     {
         $container->registerExtension(new Extension());
-        $container->addCompilerPass(new RepositoryPass());
     }
 }
