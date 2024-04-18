@@ -24,28 +24,73 @@
 
   <hr>
 
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-8">
-        <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
-          <pre class="m-0"><code>composer require {{ package.name }}</code></pre>
-        </div>
-
-        <p class="lead">{{ composerPackage.description }}</p>
+  <div class="row mb-3">
+    <div class="col-md-8">
+      <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
+        <pre class="m-0"><code>composer require {{ package.name }}</code></pre>
       </div>
-      <div class="col-md-4">
-        <div class="bg-body-secondary px-3 py-2 rounded">
-          <div>
-            <a href="{{ composerPackage.sourceUrl }}">{{ composerPackage.sourceUrl }}</a>
-          </div>
-          {% if package.mirrorRegistry %}
-            <div>Mirrored from {{ package.mirrorRegistry.name }}</div>
-          {% endif %}
+
+      <p class="lead mb-0">{{ composerPackage.description }}</p>
+    </div>
+    <div class="col-md-4">
+      <div class="bg-body-secondary px-3 py-2 rounded">
+        <div>
+          <a href="{{ composerPackage.sourceUrl }}">{{ composerPackage.sourceUrl }}</a>
+        </div>
+        {% if package.mirrorRegistry %}
+          <div>Mirrored from {{ package.mirrorRegistry.name }}</div>
+        {% endif %}
+        {% if composerPackage.homepage %}
+          <div><a href="{{ composerPackage.homepage }}">Homepage</a></div>
+        {% endif %}
+        <div>
+          License: {{ composerPackage.license|join(', ') }}
         </div>
       </div>
     </div>
   </div>
 
-  {{ dump(composerPackage) }}
+  <div class="d-flex justify-content-between border-top border-bottom py-3 mb-3">
+    <div><strong>{{ composerPackage.prettyVersion }}</strong></div>
+    <div>{{ composerPackage.releaseDate.format('Y-m-d H:i') }} UTC</div>
+  </div>
 
+  <div class="row border-bottom pb-3 mb-3">
+    {{ _self.linkBlock("requires", composerPackage.requires) }}
+    {{ _self.linkBlock("requires (dev)", composerPackage.devRequires) }}
+    {{ _self.linkBlock("provides", composerPackage.provides) }}
+    {{ _self.suggestBlock("suggests", composerPackage.suggests) }}
+    {{ _self.linkBlock("conflicts", composerPackage.conflicts) }}
+    {{ _self.linkBlock("replaces", composerPackage.replaces) }}
+  </div>
+
+  {{ dump(composerPackage) }}
 {% endblock %}
+
+{% macro linkBlock(title, links) %}
+  <div class="col-md-6 col-lg-4">
+    <div class="h5">{{ title }}</div>
+
+    <ul>
+      {% for link in links %}
+        <li>{{ link.target }}: {{ link.prettyConstraint }}</li>
+      {% else %}
+        <li>None</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
+
+{% macro suggestBlock(title, links) %}
+  <div class="col-md-6 col-lg-4">
+    <div class="h5">{{ title }}</div>
+
+    <ul>
+      {% for target, info in links %}
+        <li>{{ target }}: {{ info }}</li>
+      {% else %}
+        <li>None</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
