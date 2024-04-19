@@ -1,3 +1,4 @@
+/compose.override.yaml
 /config/conductor.yaml
 /config/packages/conductor.yaml
 /storage/
@@ -18,6 +19,6 @@
 ###< phpunit/phpunit ###
 
 ###> symfony/asset-mapper ###
+/assets/vendor/
 /public/assets/
-/assets/vendor
 ###< symfony/asset-mapper ###
