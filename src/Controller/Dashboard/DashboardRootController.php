@@ -39,7 +39,7 @@ class DashboardRootController extends AbstractDashboardController
             yield MenuItem::linkToCrud('Access tokens', 'fa fa-key', AccessToken::class);
         } else {
             //yield MenuItem::linkToRoute('Create account', 'fa fa-user', 'login');
-            yield MenuItem::linkToRoute('Log in', 'fa fa-user', 'login');
+            yield MenuItem::linkToRoute('Log in', 'fa fa-user', 'dashboard_login');
         }
 
         if ($user?->isAdmin()) {

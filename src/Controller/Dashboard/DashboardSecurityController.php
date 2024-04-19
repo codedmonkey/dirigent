@@ -13,7 +13,7 @@ class DashboardSecurityController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         return $this->render('@EasyAdmin/page/login.html.twig', [
-            'action' => $this->generateUrl('login'),
+            'action' => $this->generateUrl('dashboard_login'),
             'error' => $authenticationUtils->getLastAuthenticationError(),
             'last_username' => $authenticationUtils->getLastUsername(),
             'username_label' => 'Email',
