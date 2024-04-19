@@ -34,6 +34,10 @@ class ApiController extends AbstractController
     #[Route('/packages.json', name: 'api_root', methods: ['GET'])]
     public function root(RouterInterface $router): JsonResponse
     {
+        $metadataUrlPattern = u($router->getRouteCollection()->get('api_package_metadata')->getPath())
+            ->replace('{packageName}', '%package%')
+            ->toString();
+
         $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
             ->replace('{packageName}', '%package%')
             ->replace('{version}', '%version%')
@@ -42,10 +46,11 @@ class ApiController extends AbstractController
             ->toString();
 
         return new JsonResponse(json_encode([
-            'metadata-url' => '/p2/%package%.json',
+            'metadata-url' => $metadataUrlPattern,
             'mirrors' => [
                 ['dist-url' => $distributionUrlPattern, 'preferred' => true],
             ],
+            'notify-batch' => $router->generate('api_track_downloads'),
             'packages' => [],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), json: true);
     }
@@ -100,6 +105,12 @@ class ApiController extends AbstractController
         $path = $this->distributionResolver->path($packageName, $version, $reference, $type);
 
         return $this->file($path);
+    }
+
+    #[Route('/downloads', name: 'api_track_downloads', methods: ['POST'])]
+    public function trackDownloads(): Response
+    {
+        return new Response();
     }
 
     private function findPackage(string $packageName): ?Package
