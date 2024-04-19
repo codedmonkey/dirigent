@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Admin;
+namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class PackagesController extends AbstractController
+class DashboardPackagesController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -24,17 +24,17 @@ class PackagesController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/packages', name: 'admin_packages')]
+    #[Route('/dashboard/packages', name: 'dashboard_packages')]
     public function list(): Response
     {
         $packages = $this->packageRepository->findBy([], ['name' => 'ASC']);
 
-        return $this->render('admin/packages/list.html.twig', [
+        return $this->render('dashboard/packages/list.html.twig', [
             'packages' => $packages,
         ]);
     }
 
-    #[Route('/admin/packages/info/{packageName}/{version}', name: 'admin_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/dashboard/packages/info/{packageName}/{version}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     public function info(string $packageName, ?string $version = null): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
@@ -47,13 +47,13 @@ class PackagesController extends AbstractController
         $versionMetadata = $metadata['versions'][$version];
         $composerPackage = (new ArrayLoader())->load($versionMetadata);
 
-        return $this->render('admin/packages/package_info.html.twig', [
+        return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'composerPackage' => $composerPackage,
         ]);
     }
 
-    #[Route('/admin/packages/versions/{packageName}', name: 'admin_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/dashboard/packages/versions/{packageName}', name: 'dashboard_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     public function versions(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
@@ -65,13 +65,13 @@ class PackagesController extends AbstractController
             array_map(fn (array $vars) => $vars['version'], $metadata['versions']),
         );
 
-        return $this->render('admin/packages/package_versions.html.twig', [
+        return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
             'versions' => $versions,
         ]);
     }
 
-    #[Route('/admin/packages/add-registry', name: 'admin_packages_add_registry')]
+    #[Route('/dashboard/packages/add-registry', name: 'dashboard_packages_add_registry')]
     public function addFromRegistry(Request $request): Response
     {
         $form = $this->createForm(PackageAddRegistryType::class);
@@ -124,12 +124,12 @@ class PackagesController extends AbstractController
 
             $this->entityManager->flush();
 
-            return $this->render('admin/packages/add_registry_results.html.twig', [
+            return $this->render('dashboard/packages/add_registry_results.html.twig', [
                 'results' => $results,
             ]);
         }
 
-        return $this->render('admin/packages/add_registry.html.twig', [
+        return $this->render('dashboard/packages/add_registry.html.twig', [
             'form' => $form,
         ]);
     }

@@ -22,11 +22,11 @@ security:
             lazy: true
             provider: database_users
             logout:
-                path: logout
+                path: dashboard_logout
                 target: admin
             form_login:
-                login_path: /?routeName=login
-                check_path: login
+                login_path: /?routeName=dashboard_login
+                check_path: dashboard_login
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Admin;
+namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
@@ -9,7 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-class RegistryController extends AbstractCrudController
+class DashboardRegistryController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {

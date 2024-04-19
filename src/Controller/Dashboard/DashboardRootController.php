@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Admin;
+namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
 use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class DashboardController extends AbstractDashboardController
+class DashboardRootController extends AbstractDashboardController
 {
     public function __construct(
         #[Autowire(param: 'conductor.title')]
@@ -32,7 +32,7 @@ class DashboardController extends AbstractDashboardController
         $user = $this->getUser();
 
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        yield MenuItem::linkToRoute('Packages', 'fa fa-cubes', 'admin_packages');
+        yield MenuItem::linkToRoute('Packages', 'fa fa-cubes', 'dashboard_packages');
 
         yield MenuItem::section('Personal');
         if ($user) {
@@ -50,17 +50,9 @@ class DashboardController extends AbstractDashboardController
         }
     }
 
-    #[Route('/', name: 'admin')]
+    #[Route('/', name: 'dashboard')]
     public function index(): Response
     {
-        return $this->render('admin/dashboard.html.twig');
-    }
-
-    #[Route('/admin/repositories', name: 'admin_repositories')]
-    public function repositories(#[Autowire(param: 'conductor.repositories')] array $repositories): Response
-    {
-        return $this->render('admin/repositories.html.twig', [
-            'repositories' => $repositories,
-        ]);
+        return $this->render('dashboard/index.html.twig');
     }
 }

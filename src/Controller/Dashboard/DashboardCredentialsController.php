@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Admin;
+namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -8,7 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-class CredentialsController extends AbstractCrudController
+class DashboardCredentialsController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {

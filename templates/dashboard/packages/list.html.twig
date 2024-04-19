@@ -10,7 +10,7 @@
       </button>
       <ul class="dropdown-menu">
         {% set addFromRegistryUrl = ea_url()
-          .setRoute('admin_packages_add_registry') %}
+          .setRoute('dashboard_packages_add_registry') %}
         <li><a class="dropdown-item" href="{{ addFromRegistryUrl }}">Mirror from registry</a></li>
       </ul>
     </div>
@@ -20,7 +20,7 @@
 {% block page_content %}
   {% for package in packages %}
     {% set packageInfoUrl = ea_url()
-      .setRoute('admin_packages_info', {packageName: package.name}) %}
+      .setRoute('dashboard_packages_info', {packageName: package.name}) %}
     <div class="card mb-3">
       <div class="card-body">
         <a href="{{ packageInfoUrl }}"><h5 class="card-title">{{ package.name }}</h5></a>

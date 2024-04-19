@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Admin;
+namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
 use Doctrine\ORM\QueryBuilder;
@@ -14,7 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class AccessTokenController extends AbstractCrudController implements EventSubscriberInterface
+class DashboardAccessTokenController extends AbstractCrudController implements EventSubscriberInterface
 {
     public static function getEntityFqcn(): string
     {

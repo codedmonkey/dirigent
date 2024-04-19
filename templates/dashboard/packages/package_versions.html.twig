@@ -6,12 +6,12 @@
   <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 mb-3">
     <li class="nav-item">
       {% set packageInfoUrl = ea_url()
-        .setRoute('admin_packages_info', {packageName: package.name}) %}
+        .setRoute('dashboard_packages_info', {packageName: package.name}) %}
       <a class="nav-link" href="{{ packageInfoUrl }}">Info</a>
     </li>
     <li class="nav-item">
       {% set packageVersionsUrl = ea_url()
-        .setRoute('admin_packages_versions', {packageName: package.name}) %}
+        .setRoute('dashboard_packages_versions', {packageName: package.name}) %}
       <a class="nav-link active" aria-current="page" href="{{ packageVersionsUrl }}">Versions</a>
     </li>
     <li class="nav-item">
@@ -27,7 +27,7 @@
   <div class="list-group list-group-flush">
     {% for versionKey, version in versions %}
       {% set packageVersionInfoUrl = ea_url()
-        .setRoute('admin_packages_info', {packageName: package.name, version: versionKey}) %}
+        .setRoute('dashboard_packages_info', {packageName: package.name, version: versionKey}) %}
       <a href="{{ packageVersionInfoUrl }}" class="list-group-item">{{ version }}</a>
     {% endfor %}
   </div>
