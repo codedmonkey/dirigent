@@ -14,7 +14,6 @@ class Extension extends ConfigurableExtension
 
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
-        $container->setParameter('conductor.repositories', $mergedConfig['repositories']);
         $container->setParameter('conductor.storage.path', $mergedConfig['storage']['path']);
         $container->setParameter('conductor.title', $mergedConfig['title']);
     }

@@ -19,10 +19,6 @@ class Configuration implements ConfigurationInterface
                 ->children()
                     ->scalarNode('path')->defaultValue('%kernel.project_dir%/storage')->end()
                 ->end()
-            ->end()
-            ->arrayNode('repositories')
-                ->setDeprecated('conductor', 'dev', 'Use database instead')
-                ->ignoreExtraKeys(false)
             ->end();
 
         return $treeBuilder;
