@@ -22,4 +22,18 @@ class Credentials
 
     #[Column(type: Types::TEXT, nullable: true)]
     public ?string $description = null;
+
+    #[Column(type: Types::STRING, enumType: CredentialsType::class)]
+    public CredentialsType|string $type = CredentialsType::HttpBasic;
+
+    #[Column(nullable: true)]
+    public ?string $username = null;
+
+    #[Column(nullable: true)]
+    public ?string $password = null;
+
+    public function __toString(): string
+    {
+        return $this->name;
+    }
 }

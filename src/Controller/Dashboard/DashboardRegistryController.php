@@ -5,6 +5,7 @@ namespace CodedMonkey\Conductor\Controller\Dashboard;
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -23,6 +24,9 @@ class DashboardRegistryController extends AbstractCrudController
             ->onlyOnForms();
 
         yield TextField::new('url');
+
+        yield AssociationField::new('credentials')
+            ->onlyOnForms();
 
         yield ChoiceField::new('packageMirroring')
             ->setRequired(true)

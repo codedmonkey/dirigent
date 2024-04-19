@@ -52,7 +52,9 @@
 
   <div class="d-flex justify-content-between border-top border-bottom py-3 mb-3">
     <div><strong>{{ composerPackage.prettyVersion }}</strong></div>
-    <div>{{ composerPackage.releaseDate.format('Y-m-d H:i') }} UTC</div>
+    {% if composerPackage.releaseDate %}
+      <div>{{ composerPackage.releaseDate.format('Y-m-d H:i') }} UTC</div>
+    {% endif %}
   </div>
 
   <div class="row border-bottom pb-3 mb-3">

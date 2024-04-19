@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 #[Entity(repositoryClass: RegistryRepository::class)]
 class Registry
@@ -26,8 +27,11 @@ class Registry
     #[Column(length: 1024)]
     public ?string $url = null;
 
-    #[Column(type: Types::STRING, enumType:RegistryPackageMirroring::class)]
-    public $packageMirroring;
+    #[ManyToOne]
+    public ?Credentials $credentials = null;
+
+    #[Column(type: Types::STRING, enumType: RegistryPackageMirroring::class)]
+    public RegistryPackageMirroring|string $packageMirroring = RegistryPackageMirroring::Automatic;
 
     public function __toString(): string
     {

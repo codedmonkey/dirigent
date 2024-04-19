@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Conductor\Registry;
 
+use CodedMonkey\Conductor\Doctrine\Entity\CredentialsType;
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use Composer\MetadataMinifier\MetadataMinifier;
 use Composer\Package\Loader\ArrayLoader;
@@ -224,11 +225,9 @@ class ComposerRegistryClient implements RegistryClientInterface
 
     private function prepareRequestOptions(array &$options, array &$headers): void
     {
-        if ($authConfig = $this->config['auth'] ?? null) {
-            $authType = $authConfig['type'] ?? null;
-
-            if ('http_basic' === $authType) {
-                $options['auth_basic'] = [$authConfig['username'], $authConfig['password']];
+        if ($credentials = $this->registry->credentials) {
+            if ($credentials->type === CredentialsType::HttpBasic) {
+                $options['auth_basic'] = [$credentials->username, $credentials->password];
             }
         }
 

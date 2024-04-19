@@ -3,6 +3,7 @@
 namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
+use CodedMonkey\Conductor\Doctrine\Entity\CredentialsType;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
@@ -19,6 +20,17 @@ class DashboardCredentialsController extends AbstractCrudController
     {
         yield TextField::new('name');
         yield TextareaField::new('description')
+            ->onlyOnForms();
+        yield ChoiceField::new('type')
+            ->setRequired(true)
+            ->setChoices(CredentialsType::cases())
+            ->setFormTypeOption('choice_label', function ($choice, string $key): string {
+                return "credentials.type.{$key}";
+            })
+            ->renderExpanded();
+        yield TextField::new('username')
+            ->onlyOnForms();
+        yield TextField::new('password')
             ->onlyOnForms();
     }
 }
