@@ -33,6 +33,9 @@ class Registry
     #[Column(type: Types::STRING, enumType: RegistryPackageMirroring::class)]
     public RegistryPackageMirroring|string $packageMirroring = RegistryPackageMirroring::Automatic;
 
+    #[Column]
+    public ?int $mirroringPriority = null;
+
     public function __toString(): string
     {
         return $this->name;

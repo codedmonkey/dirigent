@@ -44,12 +44,50 @@ class RegistryRepository extends ServiceEntityRepository
             throw new \LogicException();
         }
 
+        $builder->addOrderBy('registry.mirroringPriority', 'ASC');
+
         return $builder;
     }
 
     public function findByPackageMirroring(RegistryPackageMirroring $packageMirroring): array
     {
         return $this->createPackageMirroringQueryBuilder($packageMirroring)->getQuery()->getResult();
+    }
+
+    public function increaseMirroringPriority(Registry $registry, bool $flush = true): void
+    {
+        if (1 === $registry->mirroringPriority) {
+            return;
+        }
+
+        $currentPriority = $registry->mirroringPriority;
+        $targetPriority = $currentPriority - 1;
+
+        $targetRegistry = $this->findOneBy(['mirroringPriority' => $targetPriority]);
+
+        $registry->mirroringPriority = $targetPriority;
+        $targetRegistry->mirroringPriority = $currentPriority;
+
+        $this->save($registry);
+        $this->save($targetRegistry, $flush);
+    }
+
+    public function decreaseMirroringPriority(Registry $registry, bool $flush = true): void
+    {
+        $currentPriority = $registry->mirroringPriority;
+        $targetPriority = $currentPriority + 1;
+
+        $targetRegistry = $this->findOneBy(['mirroringPriority' => $targetPriority]);
+
+        if (null === $targetRegistry) {
+            return;
+        }
+
+        $registry->mirroringPriority = $targetPriority;
+        $targetRegistry->mirroringPriority = $currentPriority;
+
+        $this->save($registry);
+        $this->save($targetRegistry, $flush);
     }
 
     public function save(Registry $entity, bool $flush = false): void
