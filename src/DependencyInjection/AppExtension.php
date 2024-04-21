@@ -2,10 +2,11 @@
 
 namespace CodedMonkey\Conductor\DependencyInjection;
 
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class Extension extends ConfigurableExtension
+class AppExtension extends ConfigurableExtension
 {
     public function getAlias(): string
     {
@@ -16,5 +17,10 @@ class Extension extends ConfigurableExtension
     {
         $container->setParameter('conductor.storage.path', $mergedConfig['storage']['path']);
         $container->setParameter('conductor.title', $mergedConfig['title']);
+    }
+
+    public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
+    {
+        return new AppConfiguration();
     }
 }
