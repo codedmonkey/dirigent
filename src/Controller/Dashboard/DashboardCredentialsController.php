@@ -4,6 +4,7 @@ namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
 use CodedMonkey\Conductor\Doctrine\Entity\CredentialsType;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
@@ -14,6 +15,13 @@ class DashboardCredentialsController extends AbstractCrudController
     public static function getEntityFqcn(): string
     {
         return Credentials::class;
+    }
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return parent::configureCrud($crud)
+            ->setDefaultSort(['name' => 'ASC'])
+            ->setEntityPermission('ROLE_ADMIN');
     }
 
     public function configureFields(string $pageName): iterable

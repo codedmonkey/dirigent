@@ -8,6 +8,9 @@ security:
             entity:
                 class: CodedMonkey\Conductor\Doctrine\Entity\User
                 property: email
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
     firewalls:
         dev:
@@ -21,12 +24,13 @@ security:
         main:
             lazy: true
             provider: database_users
-            logout:
-                path: dashboard_logout
-                target: admin
             form_login:
                 login_path: /?routeName=dashboard_login
                 check_path: dashboard_login
+            logout:
+                path: dashboard_logout
+                target: dashboard
+            switch_user: true
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall

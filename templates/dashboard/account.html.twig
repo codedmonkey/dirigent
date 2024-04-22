@@ -1,0 +1,58 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Account{% endblock %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-6 col-xxl-5">
+      {{ form_start(accountForm) }}
+        {{ form_rest(accountForm) }}
+
+        <div class="form-group">
+          <button class="btn btn-primary">Update info</button>
+        </div>
+      {{ form_end(accountForm) }}
+    </div>
+  </div>
+
+  <div class="form-fieldset field-form_fieldset">
+    <div class="form-fieldset-header with-help">
+      <div class="form-fieldset-title">
+        <span class="not-collapsible form-fieldset-title-content">Password</span>
+        <div class="form-fieldset-help">Keep your password safe and secure</div>
+      </div>
+    </div>
+
+    <div class="form-fieldset-body show">
+      <div class="row">
+        <div class="col-md-6 col-xxl-5">
+          {{ form_start(passwordForm) }}
+            {{ form_rest(passwordForm) }}
+
+            <div class="form-group">
+              <button class="btn btn-primary">Update password</button>
+            </div>
+          {{ form_end(passwordForm) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-fieldset field-form_fieldset">
+    <div class="form-fieldset-header with-help">
+      <div class="form-fieldset-title">
+        <span class="not-collapsible form-fieldset-title-content">Multi-Factor Authentication</span>
+        <div class="form-fieldset-help">Add an extra layer of security</div>
+      </div>
+    </div>
+
+    <div class="form-fieldset-body show">
+      <div class="row">
+        <div class="col-md-6 col-xxl-5">
+          todo
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

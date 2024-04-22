@@ -83,6 +83,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
     }
 
+    public function setPlainPassword(string $password): self
+    {
+        $this->plainPassword = $password;
+        $this->password = null;
+
+        return $this;
+    }
+
     public function getUserIdentifier(): string
     {
         return (string) $this->email;

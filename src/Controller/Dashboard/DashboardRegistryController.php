@@ -28,8 +28,8 @@ class DashboardRegistryController extends AbstractCrudController
     {
         return $crud
             ->setPageTitle(Crud::PAGE_INDEX, 'Registries')
-            ->setDefaultSort(['mirroringPriority' => 'ASC']);
-//            ->showEntityActionsInlined();
+            ->setDefaultSort(['mirroringPriority' => 'ASC'])
+            ->setEntityPermission('ROLE_ADMIN');
     }
 
     public function configureActions(Actions $actions): Actions
