@@ -36,18 +36,20 @@ RUN set -eux; \
         php82-fileinfo \
         php82-fpm \
         php82-iconv \
+        php82-intl \
         php82-mbstring \
         php82-openssl \
         php82-pdo \
-        php82-pdo_sqlite \
+        php82-pdo_pgsql \
         php82-phar \
         php82-session \
         php82-simplexml \
         php82-tokenizer \
         php82-xml \
-        sqlite; \
+        postgresql; \
     ln -s /usr/sbin/php-fpm82 /usr/sbin/php-fpm; \
-    chown -R conductor:conductor /run /srv;
+    mkdir -p /run/postgresql /var/lib/postgresql/data; \
+    chown -R conductor:conductor /run /srv /var/lib/postgresql;
 
 COPY --from=build /usr/bin/composer /usr/bin/composer
 
@@ -55,9 +57,14 @@ COPY docker/Caddyfile /etc/caddy/
 COPY docker/php-fpm.conf /etc/php82/
 COPY docker/init.sh /
 
-ENV APP_ENV="prod"
-
 USER conductor
+
+RUN set -eux; \
+    initdb /var/lib/postgresql/data;
+
+VOLUME /var/lib/postgresql/data
+
+ENV APP_ENV="prod"
 
 WORKDIR /srv
 
