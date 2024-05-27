@@ -17,6 +17,10 @@ RUN set -eux; \
 
 FROM alpine:3.19
 
+LABEL org.opencontainers.image.source=https://github.com/codedmonkey/conductor
+LABEL org.opencontainers.image.description="Conductor PHP Package Registry"
+LABEL org.opencontainers.image.licenses=MIT
+
 ARG UID=1000
 ARG GID=1000
 
