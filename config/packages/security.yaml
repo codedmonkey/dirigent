@@ -28,7 +28,6 @@ security:
                 login_path: /?routeName=dashboard_login
                 check_path: dashboard_login
             logout:
-                path: dashboard_logout
                 target: dashboard
             switch_user: true
 

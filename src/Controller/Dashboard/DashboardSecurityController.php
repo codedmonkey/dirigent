@@ -19,10 +19,4 @@ class DashboardSecurityController extends AbstractController
             'username_label' => 'Email',
         ]);
     }
-
-    #[Route('/logout', name: 'dashboard_logout')]
-    public function logout(): void
-    {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on the firewall.');
-    }
 }
