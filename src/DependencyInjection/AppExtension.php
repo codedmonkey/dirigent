@@ -17,6 +17,8 @@ class AppExtension extends ConfigurableExtension
     {
         $container->setParameter('conductor.storage.path', $mergedConfig['storage']['path']);
         $container->setParameter('conductor.title', $mergedConfig['title']);
+        $container->setParameter('conductor.security.public_access', $mergedConfig['security']['public']);
+        $container->setParameter('conductor.security.registration_enabled', $mergedConfig['security']['registration']);
     }
 
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface

@@ -14,6 +14,13 @@ class AppConfiguration implements ConfigurationInterface
 
         $rootNode->children()
             ->scalarNode('title')->defaultValue('My Conductor')->end()
+            ->arrayNode('security')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->booleanNode('public')->defaultFalse()->end()
+                    ->booleanNode('registration')->defaultFalse()->end()
+                ->end()
+            ->end()
             ->arrayNode('storage')
                 ->addDefaultsIfNotSet()
                 ->children()

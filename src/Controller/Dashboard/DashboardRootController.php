@@ -20,6 +20,8 @@ class DashboardRootController extends AbstractDashboardController
     public function __construct(
         #[Autowire(param: 'conductor.title')]
         private readonly string $title,
+        #[Autowire(param: 'conductor.security.registration_enabled')]
+        private readonly bool $registrationEnabled,
     ) {
     }
 
@@ -43,6 +45,10 @@ class DashboardRootController extends AbstractDashboardController
             yield MenuItem::linkToLogout('Sign out', 'fa fa-user');
         } else {
             yield MenuItem::linkToRoute('Sign in', 'fa fa-user', 'dashboard_login');
+
+            if ($this->registrationEnabled) {
+                yield MenuItem::linkToRoute('Register', 'fa fa-user-plus', 'dashboard_register');
+            }
         }
 
         if ($user?->isAdmin()) {
