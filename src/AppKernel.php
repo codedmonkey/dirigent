@@ -21,6 +21,14 @@ class AppKernel extends BaseKernel
         $container->import($configDir . '/services.yaml');
     }
 
+    public function boot(): void
+    {
+        parent::boot();
+
+        $_SERVER['COMPOSER_CACHE_DIR'] = $this->container->getParameter('conductor.storage.path') . '/composer-cache';
+        $_SERVER['COMPOSER_HOME'] = $this->container->getParameter('conductor.storage.path') . '/composer';
+    }
+
     protected function build(ContainerBuilder $container): void
     {
         $container->registerExtension(new AppExtension());

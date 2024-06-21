@@ -10,6 +10,7 @@ use CodedMonkey\Conductor\Package\PackageDistributionResolver;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
 use CodedMonkey\Conductor\Package\PackageProviderPool;
 use CodedMonkey\Conductor\Registry\RegistryClientManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,12 +23,11 @@ use function Symfony\Component\String\u;
 class ApiController extends AbstractController
 {
     public function __construct(
+        private readonly EntityManagerInterface $entityManager,
         private readonly PackageRepository $packageRepository,
-        private readonly RegistryRepository $registryRepository,
         private readonly PackageMetadataResolver $metadataResolver,
         private readonly PackageDistributionResolver $distributionResolver,
         private readonly PackageProviderPool $providerPool,
-        private readonly RegistryClientManager $registryClientManager,
     ) {
     }
 
@@ -70,6 +70,10 @@ class ApiController extends AbstractController
         }
 
         $this->metadataResolver->resolve($package);
+
+        if (null !== $package->getCrawledAt()) {
+            $this->entityManager->flush();
+        }
 
         if (!$this->providerPool->exists($packageName)) {
             throw new NotFoundHttpException();
@@ -119,26 +123,15 @@ class ApiController extends AbstractController
             return $package;
         }
 
-        $registries = $this->registryRepository->findByPackageMirroring(RegistryPackageMirroring::Automatic);
+        $package = new Package();
+        $package->setName($packageName);
 
-        foreach ($registries as $registry) {
-            $registryClient = $this->registryClientManager->getClient($registry);
-
-            if (!$registryClient->packageExists($packageName)) {
-                continue;
-            }
-
-            $package = new Package();
-            $package->name = $packageName;
-            $package->mirrorRegistry = $registry;
-
-            $this->metadataResolver->resolve($package);
-
-            $this->packageRepository->save($package, true);
-
-            return $package;
+        if (null === $registry = $this->metadataResolver->whatProvides($package)) {
+            return null;
         }
 
-        return null;
+        $package->setMirrorRegistry($registry);
+
+        return $package;
     }
 }

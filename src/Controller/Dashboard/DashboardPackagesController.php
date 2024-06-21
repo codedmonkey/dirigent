@@ -3,7 +3,9 @@
 namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
+use CodedMonkey\Conductor\Doctrine\Entity\Version;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Conductor\Form\PackageAddRegistryType;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
 use CodedMonkey\Conductor\Registry\RegistryClientManager;
@@ -21,6 +23,7 @@ class DashboardPackagesController extends AbstractController
         private readonly PackageRepository $packageRepository,
         private readonly PackageMetadataResolver $metadataResolver,
         private readonly RegistryClientManager $registryClientManager,
+        private readonly VersionRepository $versionRepository,
     ) {
     }
 
@@ -34,22 +37,23 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/info/{packageName}/{version}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
-    public function info(string $packageName, ?string $version = null): Response
+    #[Route('/dashboard/packages/info/{packageName}/{packageVersion}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    public function info(string $packageName, ?string $packageVersion = null): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-        $metadata = $this->metadataResolver->resolve($package);
 
-        if (null === $version) {
-            $version = array_key_first($metadata['versions']);
+        if (null !== $packageVersion) {
+            $version = $this->versionRepository->findOneBy(['package' => $package, 'version' => $packageVersion]);
+        } else {
+            $version = $this->versionRepository->findOneBy(['package' => $package, 'defaultBranch' => true]);
         }
 
-        $versionMetadata = $metadata['versions'][$version];
-        $composerPackage = (new ArrayLoader())->load($versionMetadata);
+        dump($version);
+        dump($this->versionRepository->findBy(['package' => $package]));
 
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
-            'composerPackage' => $composerPackage,
+            'version' => $version,
         ]);
     }
 
@@ -57,17 +61,16 @@ class DashboardPackagesController extends AbstractController
     public function versions(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $versions = $package->getVersions()->toArray();
 
-        $metadata = $this->metadataResolver->resolve($package);
-
-        $versions = array_combine(
-            array_map(fn (array $vars) => $vars['version_normalized'], $metadata['versions']),
-            array_map(fn (array $vars) => $vars['version'], $metadata['versions']),
+        $versionsMap = array_combine(
+            array_map(fn (Version $version) => $version->getNormalizedVersion(), $versions),
+            array_map(fn (Version $version) => $version->getVersion(), $versions),
         );
 
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
-            'versions' => $versions,
+            'versionsMap' => $versionsMap,
         ]);
     }
 
@@ -109,8 +112,8 @@ class DashboardPackagesController extends AbstractController
                 }
 
                 $package = new Package();
-                $package->name = $packageName;
-                $package->mirrorRegistry = $formData['registry'];
+                $package->setName($packageName);
+                $package->setMirrorRegistry($formData['registry']);
 
                 $this->metadataResolver->resolve($package);
 
@@ -119,10 +122,8 @@ class DashboardPackagesController extends AbstractController
                     'message' => "The package $packageName was created successfully",
                 ];
 
-                $this->packageRepository->save($package);
+                $this->entityManager->flush();
             }
-
-            $this->entityManager->flush();
 
             return $this->render('dashboard/packages/add_registry_results.html.twig', [
                 'results' => $results,

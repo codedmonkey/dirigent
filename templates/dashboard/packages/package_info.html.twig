@@ -1,6 +1,6 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block page_title %}{{ package.name }} <small>{{ composerPackage.prettyVersion }}</small>{% endblock %}
+{% block page_title %}{{ package.name }} <small>{{ version.version }}</small>{% endblock %}
 
 {% block page_content %}
   <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 mb-3">
@@ -30,43 +30,46 @@
         <pre class="m-0"><code>composer require {{ package.name }}</code></pre>
       </div>
 
-      <p class="lead mb-0">{{ composerPackage.description }}</p>
+      <p class="lead mb-0">{{ version.description }}</p>
     </div>
     <div class="col-md-4">
       <div class="bg-body-secondary px-3 py-2 rounded">
         <div>
-          <a href="{{ composerPackage.sourceUrl }}">{{ composerPackage.sourceUrl }}</a>
+          <a href="{{ version.homepage ?? version.source.url }}">{{ version.homepage ?? version.source.url }}</a>
         </div>
         {% if package.mirrorRegistry %}
           <div>Mirrored from {{ package.mirrorRegistry.name }}</div>
         {% endif %}
-        {% if composerPackage.homepage %}
-          <div><a href="{{ composerPackage.homepage }}">Homepage</a></div>
+        {% if version.homepage %}
+          <div><a href="{{ version.homepage }}">Homepage</a></div>
+        {% endif %}
+        {% if version.source %}
+          <div><a href="{{ version.source.url }}">Source</a></div>
         {% endif %}
         <div>
-          License: {{ composerPackage.license|join(', ') }}
+          License: {{ version.license|join(', ') }}
         </div>
       </div>
     </div>
   </div>
 
   <div class="d-flex justify-content-between border-top border-bottom py-3 mb-3">
-    <div><strong>{{ composerPackage.prettyVersion }}</strong></div>
-    {% if composerPackage.releaseDate %}
-      <div>{{ composerPackage.releaseDate.format('Y-m-d H:i') }} UTC</div>
+    <div><strong>{{ version.version }}</strong></div>
+    {% if version.releasedAt %}
+      <div>{{ version.releasedAt.format('Y-m-d H:i') }} UTC</div>
     {% endif %}
   </div>
 
   <div class="row border-bottom pb-3 mb-3">
-    {{ _self.linkBlock("requires", composerPackage.requires) }}
-    {{ _self.linkBlock("requires (dev)", composerPackage.devRequires) }}
-    {{ _self.linkBlock("provides", composerPackage.provides) }}
-    {{ _self.suggestBlock("suggests", composerPackage.suggests) }}
-    {{ _self.linkBlock("conflicts", composerPackage.conflicts) }}
-    {{ _self.linkBlock("replaces", composerPackage.replaces) }}
+    {{ _self.linkBlock("requires", version.require) }}
+    {{ _self.linkBlock("requires (dev)", version.devRequire) }}
+    {{ _self.linkBlock("provides", version.provide) }}
+    {{ _self.suggestBlock("suggests", version.suggest) }}
+    {{ _self.linkBlock("conflicts", version.conflict) }}
+    {{ _self.linkBlock("replaces", version.replace) }}
   </div>
 
-  {{ dump(composerPackage) }}
+  {{ dump(version) }}
 {% endblock %}
 
 {% macro linkBlock(title, links) %}
@@ -75,7 +78,7 @@
 
     <ul>
       {% for link in links %}
-        <li>{{ link.target }}: {{ link.prettyConstraint }}</li>
+        <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
       {% else %}
         <li>None</li>
       {% endfor %}
@@ -88,8 +91,8 @@
     <div class="h5">{{ title }}</div>
 
     <ul>
-      {% for target, info in links %}
-        <li>{{ target }}: {{ info }}</li>
+      {% for link in links %}
+        <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
       {% else %}
         <li>None</li>
       {% endfor %}
