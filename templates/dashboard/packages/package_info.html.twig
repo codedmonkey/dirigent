@@ -1,6 +1,33 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block page_title %}{{ package.name }} <small>{{ version.version }}</small>{% endblock %}
+{% block page_title %}
+  {%- apply spaceless -%}
+    {{ package.name }}
+    <small>
+      {{ version.version }}
+      {% if version.hasVersionAlias() %}
+        / {{ version.versionAlias }}
+      {% endif %}
+    </small>
+  {%- endapply -%}
+{% endblock %}
+
+{% block page_actions %}
+  {% if is_granted('ROLE_ADMIN') %}
+    <div class="global-actions">
+      {% set updatePackageUrl = ea_url()
+        .setRoute('dashboard_packages_update', {packageName: package.name}) %}
+      <a class="btn btn-warning" href="{{ updatePackageUrl }}">
+        <span class="action-label">Update</span>
+      </a>
+      {% set deletePackageUrl = ea_url()
+        .setRoute('dashboard_packages_delete', {packageName: package.name}) %}
+      <a class="btn btn-danger" href="{{ deletePackageUrl }}">
+        <span class="action-label">Delete</span>
+      </a>
+    </div>
+  {% endif %}
+{% endblock %}
 
 {% block page_content %}
   <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 mb-3">

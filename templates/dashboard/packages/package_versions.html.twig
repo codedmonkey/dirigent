@@ -28,7 +28,12 @@
     {% for version in package.versions %}
       {% set packageVersionInfoUrl = ea_url()
         .setRoute('dashboard_packages_info', {packageName: package.name, packageVersion: version.version}) %}
-      <a href="{{ packageVersionInfoUrl }}" class="list-group-item">{{ version.version }}</a>
+      <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
+        {{ version.version }}
+        {% if version.hasVersionAlias() %}
+          / {{ version.versionAlias }}
+        {% endif %}
+      </a>
     {% endfor %}
   </div>
 {% endblock %}

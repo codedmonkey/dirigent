@@ -3,6 +3,8 @@
 namespace CodedMonkey\Conductor\Package;
 
 use CodedMonkey\Conductor\Composer\HttpDownloaderOptionsFactory;
+use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
+use CodedMonkey\Conductor\Doctrine\Entity\CredentialsType;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
@@ -13,10 +15,12 @@ use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use Composer\Factory;
 use Composer\IO\NullIO;
 use Composer\MetadataMinifier\MetadataMinifier;
+use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\Dumper\ArrayDumper;
 use Composer\Pcre\Preg;
 use Composer\Repository\ComposerRepository;
+use Composer\Repository\VcsRepository;
 use Composer\Util\HttpDownloader;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -47,8 +51,9 @@ class PackageMetadataResolver
 
     public function __construct(
         private readonly PackageProviderPool $providerPool,
-        private readonly VersionRepository   $versionRepository,
-        private readonly RegistryRepository  $registryRepository, private readonly EntityManagerInterface $entityManager,
+        private readonly VersionRepository $versionRepository,
+        private readonly RegistryRepository $registryRepository,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -74,46 +79,112 @@ class PackageMetadataResolver
             return;
         }
 
-        $io = new NullIO();
-        $config = Factory::createConfig();
-        $io->loadConfiguration($config);
-        $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
-
-        if ($registry = $package->getMirrorRegistry()) {
-            $repository = new ComposerRepository(['url' => $registry->url], $io, $config, $httpDownloader);
-            $composerPackages = $repository->findPackages($package->getName());
-
-            $crawledAt = new \DateTime();
-            $package->setCrawledAt($crawledAt);
-
-            $this->updatePackage($package, $composerPackages);
+        if (null !== $registry = $package->getMirrorRegistry()) {
+            $composerPackages = $this->resolveFromRegistry($package->getName(), $registry);
+        } elseif (null !== $repositoryUrl = $package->getRepositoryUrl()) {
+            $composerPackages = $this->resolveVcsRepository($repositoryUrl, $package->getRepositoryType(), $package->getRepositoryCredentials());
         } else {
             // todo resolve from other sources
             throw new \LogicException();
         }
+
+        $crawledAt = new \DateTime();
+        $package->setCrawledAt($crawledAt);
+
+        $this->updatePackage($package, $composerPackages);
 
         $this->dumpProviders($package, $composerPackages);
     }
 
     public function whatProvides(Package $package): ?Registry
     {
-        $io = new NullIO();
-        $config = Factory::createConfig();
-        $io->loadConfiguration($config);
-        $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
-
         $registries = $this->registryRepository->findByPackageMirroring(RegistryPackageMirroring::Automatic);
 
         foreach ($registries as $registry) {
-            $repository = new ComposerRepository(['url' => $registry->url], $io, $config, $httpDownloader);
-            $composerPackages = $repository->findPackages($package->getName());
-
-            if (count($composerPackages) > 0) {
+            if ($this->doesProvide($package->getName(), $registry)) {
                 return $registry;
             }
         }
 
         return null;
+    }
+
+    public function doesProvide(string $packageName, Registry $registry): bool
+    {
+        $composerPackages = $this->resolveFromRegistry($packageName, $registry);
+
+        return count($composerPackages) > 0;
+    }
+
+    private function resolveFromRegistry(string $packageName, Registry $registry): array
+    {
+        $io = new NullIO();
+        $config = Factory::createConfig();
+
+        if ($credentials = $registry->getCredentials()) {
+            if ($credentials->getType() === CredentialsType::HttpBasic) {
+                $config->merge([
+                    'config' => [
+                        'http-basic' => [
+                            $registry->getDomain() => [
+                                'username' => $credentials->getUsername(),
+                                'password' => $credentials->getPassword(),
+                            ],
+                        ],
+                    ],
+                ]);
+            } elseif ($credentials->getType() === CredentialsType::GitlabOauth) {
+                $config->merge([
+                    'config' => [
+                        'gitlab-oauth' => [
+                            $registry->getDomain() => [
+                                'token' => $credentials->getPassword(),
+                            ],
+                        ],
+                    ],
+                ]);
+            }
+        }
+
+        $io->loadConfiguration($config);
+        $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
+
+        $repository = new ComposerRepository(['url' => $registry->url], $io, $config, $httpDownloader);
+        return $repository->findPackages($packageName);
+    }
+
+    private function resolveVcsRepository(string $repositoryUrl, ?string $repositoryType, ?Credentials $repositoryCredentials): array
+    {
+        $io = new NullIO();
+        $config = Factory::createConfig();
+
+        if ($repositoryCredentials?->getType() === CredentialsType::GitlabOauth) {
+            $config->merge([
+                'config' => [
+                    'gitlab-oauth' => [
+                        parse_url($repositoryUrl, PHP_URL_HOST) => [
+                            'token' => $repositoryCredentials->getPassword(),
+                        ],
+                    ],
+                ],
+            ]);
+        }
+
+        $io->loadConfiguration($config);
+        $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
+        $repository = new VcsRepository(['url' => $repositoryUrl], $io, $config, $httpDownloader);
+
+        $driver = $repository->getDriver();
+        if (!$driver) {
+            throw new \LogicException();
+        }
+        $information = $driver->getComposerInformation($driver->getRootIdentifier());
+        if (!isset($information['name']) || !is_string($information['name'])) {
+            throw new \LogicException();
+        }
+        $packageName = trim($information['name']);
+
+        return $repository->findPackages($packageName);
     }
 
     private function dumpProviders(Package $package, array $composerPackages): void
@@ -145,9 +216,16 @@ class PackageMetadataResolver
         ];
     }
 
+    /**
+     * @param CompletePackageInterface[] $composerPackages
+     */
     private function updatePackage(Package $package, array $composerPackages): void
     {
         foreach ($composerPackages as $composerPackage) {
+            if ($composerPackage instanceof CompleteAliasPackage) {
+                continue;
+            }
+
             $version = $this->versionRepository->findOneBy(['package' => $package, 'version' => $composerPackage->getVersion()]) ?: new Version();
 
             if (!$package->getVersions()->contains($version)) {

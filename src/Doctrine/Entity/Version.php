@@ -3,6 +3,8 @@
 namespace CodedMonkey\Conductor\Doctrine\Entity;
 
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
+use Composer\Package\Version\VersionParser;
+use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -52,25 +54,25 @@ class Version
     #[ORM\Column(nullable: true)]
     private ?array $dist = null;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: RequireLink::class, cascade: ['persist', 'detach'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: RequireLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $require;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: DevRequireLink::class, cascade: ['persist', 'detach'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: DevRequireLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $devRequire;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ConflictLink::class, cascade: ['persist', 'detach'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ConflictLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $conflict;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ProvideLink::class, cascade: ['persist', 'detach'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ProvideLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $provide;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ReplaceLink::class, cascade: ['persist', 'detach'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ReplaceLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $replace;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: SuggestLink::class, cascade: ['persist', 'detach'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: SuggestLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $suggest;
 
-    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'versions', cascade: ['persist', 'detach'])]
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'versions', cascade: ['persist', 'detach', 'remove'])]
     private Collection $tags;
 
     #[ORM\Column]
@@ -128,6 +130,11 @@ class Version
         $this->suggest = new ArrayCollection();
         $this->tags = new ArrayCollection();
         $this->createdAt = new \DateTime();
+    }
+
+    public function __toString(): string
+    {
+        return "$this->name $this->version ($this->normalizedVersion)";
     }
 
     public function getId(): int
@@ -493,5 +500,24 @@ class Version
     public function setReleasedAt(?\DateTimeInterface $releasedAt): void
     {
         $this->releasedAt = $releasedAt;
+    }
+
+    public function hasVersionAlias(): bool
+    {
+        return $this->isDevelopment() && $this->getVersionAlias();
+    }
+
+    public function getVersionAlias(): string
+    {
+        $extra = $this->getExtra();
+
+        if (isset($extra['branch-alias'][$this->getVersion()])) {
+            $parser = new VersionParser;
+            $version = $parser->normalizeBranch(str_replace('-dev', '', $extra['branch-alias'][$this->getVersion()]));
+
+            return Preg::replace('{(\.9{7})+}', '.x', $version);
+        }
+
+        return '';
     }
 }

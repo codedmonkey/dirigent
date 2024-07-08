@@ -36,4 +36,44 @@ class Credentials
     {
         return $this->name;
     }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): void
+    {
+        $this->description = $description;
+    }
+
+    public function getType(): CredentialsType|string
+    {
+        return $this->type;
+    }
+
+    public function setType(CredentialsType|string $type): void
+    {
+        $this->type = $type;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): void
+    {
+        $this->username = $username;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(?string $password): void
+    {
+        $this->password = $password;
+    }
 }

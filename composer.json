@@ -5,6 +5,9 @@
     "license": "MIT",
     "minimum-stability": "stable",
     "prefer-stable": true,
+    "repositories": [
+        {"url": "https://repo.packagist.org", "type": "composer"}
+    ],
     "require": {
         "php": ">=8.2",
         "ext-ctype": "*",

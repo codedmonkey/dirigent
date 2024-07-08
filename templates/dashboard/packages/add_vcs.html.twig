@@ -1,0 +1,13 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Add VCS repository{% endblock %}
+
+{% block page_content %}
+  {{ form_start(form) }}
+    {{ form_row(form.repositoryUrl) }}
+
+    {{ form_row(form.repositoryCredentials) }}
+
+    <button class="btn btn-primary">Add VCS repository</button>
+  {{ form_end(form) }}
+{% endblock %}

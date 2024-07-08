@@ -48,7 +48,7 @@ class DashboardSecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if (0 === $userCount) {
-                $user->setRoles(['ROLE_OWNER', 'ROLE_USER']);
+                $user->setRoles(['ROLE_SUPER_ADMIN', 'ROLE_USER']);
             }
 
             $this->userRepository->save($user, true);

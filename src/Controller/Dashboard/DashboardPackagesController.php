@@ -6,11 +6,11 @@ use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Entity\Version;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
-use CodedMonkey\Conductor\Form\PackageAddRegistryType;
+use CodedMonkey\Conductor\Form\PackageAddMirroringType;
+use CodedMonkey\Conductor\Form\PackageAddVcsType;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
-use CodedMonkey\Conductor\Registry\RegistryClientManager;
-use Composer\Package\Loader\ArrayLoader;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,8 +22,8 @@ class DashboardPackagesController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly PackageRepository $packageRepository,
         private readonly PackageMetadataResolver $metadataResolver,
-        private readonly RegistryClientManager $registryClientManager,
         private readonly VersionRepository $versionRepository,
+        private readonly AdminUrlGenerator $adminUrlGenerator,
     ) {
     }
 
@@ -42,17 +42,34 @@ class DashboardPackagesController extends AbstractController
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
 
+        $versions = $package->getVersions()->toArray();
+
+        usort($versions, Package::class.'::sortVersions');
+
+        // load the default branch version as it is used to display the latest available source.* and homepage info
+        $latestVersion = reset($versions);
+        foreach ($versions as $v) {
+            if ($v->isDefaultBranch()) {
+                $latestVersion = $v;
+                break;
+            }
+        }
+
         if (null !== $packageVersion) {
             $version = $this->versionRepository->findOneBy(['package' => $package, 'version' => $packageVersion]);
         } else {
-            $version = $this->versionRepository->findOneBy(['package' => $package, 'defaultBranch' => true]);
+            $version = $latestVersion;
+            foreach ($versions as $candidate) {
+                if (!$candidate->isDevelopment()) {
+                    $version = $candidate;
+                    break;
+                }
+            }
         }
-
-        dump($version);
-        dump($this->versionRepository->findBy(['package' => $package]));
 
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
+            'latestVersion' => $latestVersion,
             'version' => $version,
         ]);
     }
@@ -62,6 +79,8 @@ class DashboardPackagesController extends AbstractController
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
         $versions = $package->getVersions()->toArray();
+
+        usort($versions, Package::class.'::sortVersions');
 
         $versionsMap = array_combine(
             array_map(fn (Version $version) => $version->getNormalizedVersion(), $versions),
@@ -74,10 +93,12 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/add-registry', name: 'dashboard_packages_add_registry')]
-    public function addFromRegistry(Request $request): Response
+    #[Route('/dashboard/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
+    public function addMirror(Request $request): Response
     {
-        $form = $this->createForm(PackageAddRegistryType::class);
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $form = $this->createForm(PackageAddMirroringType::class);
 
         $form->handleRequest($request);
 
@@ -85,7 +106,6 @@ class DashboardPackagesController extends AbstractController
             $formData = $form->getData();
 
             $registry = $formData['registry'];
-            $registryClient = $this->registryClientManager->getClient($registry);
 
             $packageNames = explode(PHP_EOL, $formData['packages']);
             $packageNames = array_map('trim', $packageNames);
@@ -102,7 +122,7 @@ class DashboardPackagesController extends AbstractController
                     continue;
                 }
 
-                if (!$registryClient->packageExists($packageName)) {
+                if (!$this->metadataResolver->doesProvide($packageName, $registry)) {
                     $results[] = [
                         'error' => true,
                         'message' => "The package $packageName could not be found and was skipped",
@@ -125,13 +145,68 @@ class DashboardPackagesController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            return $this->render('dashboard/packages/add_registry_results.html.twig', [
+            return $this->render('dashboard/packages/add_mirroring_results.html.twig', [
                 'results' => $results,
             ]);
         }
 
-        return $this->render('dashboard/packages/add_registry.html.twig', [
+        return $this->render('dashboard/packages/add_mirroring.html.twig', [
             'form' => $form,
         ]);
+    }
+
+    #[Route('/dashboard/packages/add-vcs', name: 'dashboard_packages_add_vcs')]
+    public function addVcsRepository(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $form = $this->createForm(PackageAddVcsType::class);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $form->getData();
+
+            $package = new Package();
+            $package->setRepositoryCredentials($formData['repositoryCredentials']);
+            $package->setRepositoryUrl($formData['repositoryUrl']);
+
+            $this->metadataResolver->resolve($package);
+
+            $this->entityManager->flush();
+
+            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());
+        }
+
+        return $this->render('dashboard/packages/add_vcs.html.twig', [
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/update/{packageName}', name: 'dashboard_packages_update', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    public function update(string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        $this->metadataResolver->resolve($package);
+
+        $this->entityManager->flush();
+
+        return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
+    }
+
+    #[Route('/dashboard/packages/delete/{packageName}', name: 'dashboard_packages_delete', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    public function delete(string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        foreach ($package->getVersions() as $version) {
+            $this->entityManager->remove($version);
+        }
+
+        $this->entityManager->remove($package);
+        $this->entityManager->flush();
+
+        return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());
     }
 }

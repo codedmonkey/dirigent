@@ -3,18 +3,23 @@
 {% block page_title %}Packages{% endblock %}
 
 {% block page_actions %}
-  <div class="global-actions">
-    <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Add Package
-      </button>
-      <ul class="dropdown-menu">
-        {% set addFromRegistryUrl = ea_url()
-          .setRoute('dashboard_packages_add_registry') %}
-        <li><a class="dropdown-item" href="{{ addFromRegistryUrl }}">Mirror from registry</a></li>
-      </ul>
+  {% if is_granted('ROLE_ADMIN') %}
+    <div class="global-actions">
+      <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Add Package
+        </button>
+        <ul class="dropdown-menu">
+          {% set addVcsUrl = ea_url()
+            .setRoute('dashboard_packages_add_vcs') %}
+          <li><a class="dropdown-item" href="{{ addVcsUrl }}">Add VCS repository</a></li>
+          {% set addMirroringUrl = ea_url()
+            .setRoute('dashboard_packages_add_mirroring') %}
+          <li><a class="dropdown-item" href="{{ addMirroringUrl }}">Mirror from registry</a></li>
+        </ul>
+      </div>
     </div>
-  </div>
+  {% endif %}
 {% endblock %}
 
 {% block page_content %}

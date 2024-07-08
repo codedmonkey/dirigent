@@ -28,7 +28,7 @@ class Registry
     public ?string $url = null;
 
     #[ManyToOne]
-    public ?Credentials $credentials = null;
+    private ?Credentials $credentials = null;
 
     #[Column(type: Types::STRING, enumType: RegistryPackageMirroring::class)]
     public RegistryPackageMirroring|string $packageMirroring = RegistryPackageMirroring::Automatic;
@@ -39,5 +39,30 @@ class Registry
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): void
+    {
+        $this->description = $description;
+    }
+
+    public function getCredentials(): ?Credentials
+    {
+        return $this->credentials;
+    }
+
+    public function setCredentials(?Credentials $credentials): void
+    {
+        $this->credentials = $credentials;
+    }
+
+    public function getDomain(): string
+    {
+        return parse_url($this->url, PHP_URL_HOST);
     }
 }

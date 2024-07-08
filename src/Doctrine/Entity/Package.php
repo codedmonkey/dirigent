@@ -15,6 +15,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 #[ORM\Entity(repositoryClass: PackageRepository::class)]
 class Package
@@ -53,6 +54,9 @@ class Package
 
     #[ORM\Column(nullable: true)]
     private ?string $repositoryUrl = null;
+
+    #[ManyToOne]
+    private ?Credentials $repositoryCredentials = null;
 
     #[ORM\Column(nullable: true)]
     private ?string $remoteId = null;
@@ -250,6 +254,19 @@ class Package
         try {
             $io = new NullIO();
             $config = Factory::createConfig();
+
+            if ($this->repositoryCredentials?->getType() === CredentialsType::GitlabOauth) {
+                $config->merge([
+                    'config' => [
+                        'gitlab-oauth' => [
+                            parse_url($this->repositoryUrl, PHP_URL_HOST) => [
+                                'token' => $this->repositoryCredentials->getPassword(),
+                            ],
+                        ],
+                    ],
+                ]);
+            }
+
             $io->loadConfiguration($config);
             $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
             $repository = new VcsRepository(['url' => $this->repositoryUrl], $io, $config, $httpDownloader);
@@ -262,7 +279,7 @@ class Package
             if (!isset($information['name']) || !is_string($information['name'])) {
                 return;
             }
-            if ('' === $this->name) {
+            if (!isset($this->name)) {
                 $this->setName(trim($information['name']));
             }
             if ($driver instanceof GitHubDriver) {
@@ -274,6 +291,16 @@ class Package
         } catch (\Exception $e) {
             $this->vcsDriverError = '['.get_class($e).'] '.$e->getMessage();
         }
+    }
+
+    public function getRepositoryCredentials(): ?Credentials
+    {
+        return $this->repositoryCredentials;
+    }
+
+    public function setRepositoryCredentials(?Credentials $repositoryCredentials): void
+    {
+        $this->repositoryCredentials = $repositoryCredentials;
     }
 
     public function getRemoteId(): ?string
@@ -363,5 +390,43 @@ class Package
     public function setMirrorRegistry(?Registry $mirrorRegistry): void
     {
         $this->mirrorRegistry = $mirrorRegistry;
+    }
+
+    public static function sortVersions(Version $a, Version $b): int
+    {
+        $aVersion = $a->getNormalizedVersion();
+        $bVersion = $b->getNormalizedVersion();
+
+        // use branch alias for sorting if one is provided
+        if (isset($a->getExtra()['branch-alias'][$aVersion])) {
+            $aVersion = Preg::replace('{(.x)?-dev$}', '.9999999-dev', $a->getExtra()['branch-alias'][$aVersion]);
+        }
+        if (isset($b->getExtra()['branch-alias'][$bVersion])) {
+            $bVersion = Preg::replace('{(.x)?-dev$}', '.9999999-dev', $b->getExtra()['branch-alias'][$bVersion]);
+        }
+
+        $aVersion = Preg::replace('{^dev-.*}', '0.0.0-alpha', $aVersion);
+        $bVersion = Preg::replace('{^dev-.*}', '0.0.0-alpha', $bVersion);
+
+        // sort default branch first if it is non numeric
+        if ($aVersion === '0.0.0-alpha' && $a->isDefaultBranch()) {
+            return -1;
+        }
+        if ($bVersion === '0.0.0-alpha' && $b->isDefaultBranch()) {
+            return 1;
+        }
+
+        // equal versions are sorted by date
+        if ($aVersion === $bVersion) {
+            // make sure sort is stable
+            if ($a->getReleasedAt() == $b->getReleasedAt()) {
+                return $a->getNormalizedVersion() <=> $b->getNormalizedVersion();
+            }
+
+            return $b->getReleasedAt() > $a->getReleasedAt() ? 1 : -1;
+        }
+
+        // the rest is sorted by version
+        return version_compare($bVersion, $aVersion);
     }
 }
