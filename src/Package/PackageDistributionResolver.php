@@ -3,8 +3,6 @@
 namespace CodedMonkey\Conductor\Package;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Registry\RegistryClientManager;
-use CodedMonkey\Conductor\Registry\RegistryResolveStatus;
 use Composer\Package\AliasPackage;
 use Composer\Package\Loader\ArrayLoader;
 use Composer\Package\Version\VersionParser;
@@ -15,7 +13,6 @@ class PackageDistributionResolver
     private readonly string $storagePath;
 
     public function __construct(
-        private readonly RegistryClientManager $registryClientManager,
         private readonly PackageMetadataResolver $metadataResolver,
         #[Autowire(param: 'conductor.storage.path')]
         string $storagePath,

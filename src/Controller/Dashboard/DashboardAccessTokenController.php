@@ -6,6 +6,7 @@ use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
@@ -26,6 +27,13 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
         return [
             BeforeEntityPersistedEvent::class => 'beforeEntityPersisted',
         ];
+    }
+
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('Access token')
+            ->setEntityLabelInPlural('Access tokens');
     }
 
     public function configureFields(string $pageName): iterable

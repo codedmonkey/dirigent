@@ -11,6 +11,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VersionRepository::class)]
+#[ORM\UniqueConstraint(name: 'pkg_ver_idx', columns: ['package_id', 'normalized_version'])]
 class Version
 {
     #[ORM\Id]

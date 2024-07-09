@@ -3,11 +3,11 @@
 {% block page_title %}{{ ea.dashboardTitle }}{% endblock %}
 
 {% block page_content %}
-  <p>Welcome to <a href="#">Conductor</a>, a private proxy for Composer registries.</p>
+  <p>Welcome to <a href="#">Conductor</a>, a selfhosted Composer registry.</p>
 
   <hr>
 
-  <p>To use this repository in your project, run the following command in your terminal:</p>
+  <p>To use this registry in your project, run the following command in your terminal:</p>
 
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
     <pre class="m-0"><code>composer config repositories.conductor composer {{ app.request.getSchemeAndHttpHost() }}</code></pre>
@@ -16,6 +16,12 @@
   <p>Or add it directly in your <code>composer.json</code>:</p>
 
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
-    <pre class="m-0"><code>foo</code></pre>
+<pre class="m-0"><code>{
+    ...
+    "repositories": {
+        "conductor": { "type": "composer", "url": "{{ app.request.getSchemeAndHttpHost() }}" }
+    },
+    ...
+}</code></pre>
   </div>
 {% endblock %}

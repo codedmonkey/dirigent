@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Conductor\Doctrine\Repository;
 
+use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Entity\Version;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -37,5 +38,23 @@ class VersionRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function getVersionMetadataForUpdate(Package $package): array
+    {
+        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            'SELECT id, version, normalized_version, source FROM version v WHERE v.package_id = :id',
+            ['id' => $package->getId()]
+        );
+
+        $versions = [];
+        foreach ($rows as $row) {
+            if ($row['source']) {
+                $row['source'] = json_decode($row['source'], true);
+            }
+            $versions[strtolower($row['normalized_version'])] = $row;
+        }
+
+        return $versions;
     }
 }

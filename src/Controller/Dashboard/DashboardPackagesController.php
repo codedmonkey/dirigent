@@ -82,14 +82,9 @@ class DashboardPackagesController extends AbstractController
 
         usort($versions, Package::class.'::sortVersions');
 
-        $versionsMap = array_combine(
-            array_map(fn (Version $version) => $version->getNormalizedVersion(), $versions),
-            array_map(fn (Version $version) => $version->getVersion(), $versions),
-        );
-
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
-            'versionsMap' => $versionsMap,
+            'versions' => $versions,
         ]);
     }
 

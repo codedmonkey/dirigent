@@ -15,7 +15,7 @@ use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use Composer\Factory;
 use Composer\IO\NullIO;
 use Composer\MetadataMinifier\MetadataMinifier;
-use Composer\Package\CompleteAliasPackage;
+use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\Dumper\ArrayDumper;
 use Composer\Pcre\Preg;
@@ -76,7 +76,7 @@ class PackageMetadataResolver
     public function resolve(Package $package): void
     {
         if ($this->isFresh($package)) {
-            return;
+            //return;
         }
 
         if (null !== $registry = $package->getMirrorRegistry()) {
@@ -221,18 +221,30 @@ class PackageMetadataResolver
      */
     private function updatePackage(Package $package, array $composerPackages): void
     {
+        $versionRepository = $this->entityManager->getRepository(Version::class);
+
+        $existingVersions = $versionRepository->getVersionMetadataForUpdate($package);
+
         foreach ($composerPackages as $composerPackage) {
-            if ($composerPackage instanceof CompleteAliasPackage) {
+            if ($composerPackage instanceof AliasPackage) {
                 continue;
             }
 
-            $version = $this->versionRepository->findOneBy(['package' => $package, 'version' => $composerPackage->getVersion()]) ?: new Version();
+            $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $composerPackage->getVersion()]) ?: new Version();
 
             if (!$package->getVersions()->contains($version)) {
                 $package->getVersions()->add($version);
             }
 
             $this->updateVersion($package, $version, $composerPackage);
+
+            unset($existingVersions[$version->getNormalizedVersion()]);
+        }
+
+        foreach ($existingVersions as $version) {
+            $versionEntity = $versionRepository->find($version['id']);
+
+            $this->entityManager->remove($versionEntity);
         }
 
         $this->entityManager->persist($package);
