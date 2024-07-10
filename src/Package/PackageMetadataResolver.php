@@ -14,10 +14,8 @@ use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use Composer\Factory;
 use Composer\IO\NullIO;
-use Composer\MetadataMinifier\MetadataMinifier;
 use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
-use Composer\Package\Dumper\ArrayDumper;
 use Composer\Pcre\Preg;
 use Composer\Repository\ComposerRepository;
 use Composer\Repository\VcsRepository;
@@ -50,10 +48,10 @@ class PackageMetadataResolver
     ];
 
     public function __construct(
-        private readonly PackageProviderPool $providerPool,
-        private readonly VersionRepository $versionRepository,
-        private readonly RegistryRepository $registryRepository,
+        private readonly PackageProviderManager $providerManager,
         private readonly EntityManagerInterface $entityManager,
+        private readonly RegistryRepository     $registryRepository,
+        private readonly VersionRepository      $versionRepository,
     ) {
     }
 
@@ -76,7 +74,7 @@ class PackageMetadataResolver
     public function resolve(Package $package): void
     {
         if ($this->isFresh($package)) {
-            //return;
+            return;
         }
 
         if (null !== $registry = $package->getMirrorRegistry()) {
@@ -93,15 +91,15 @@ class PackageMetadataResolver
 
         $this->updatePackage($package, $composerPackages);
 
-        $this->dumpProviders($package, $composerPackages);
+        $this->providerManager->dump($package, $composerPackages);
     }
 
-    public function whatProvides(Package $package): ?Registry
+    public function findPackageProvider(string $packageName): ?Registry
     {
         $registries = $this->registryRepository->findByPackageMirroring(RegistryPackageMirroring::Automatic);
 
         foreach ($registries as $registry) {
-            if ($this->doesProvide($package->getName(), $registry)) {
+            if ($this->provides($packageName, $registry)) {
                 return $registry;
             }
         }
@@ -109,7 +107,7 @@ class PackageMetadataResolver
         return null;
     }
 
-    public function doesProvide(string $packageName, Registry $registry): bool
+    public function provides(string $packageName, Registry $registry): bool
     {
         $composerPackages = $this->resolveFromRegistry($packageName, $registry);
 
@@ -185,35 +183,6 @@ class PackageMetadataResolver
         $packageName = trim($information['name']);
 
         return $repository->findPackages($packageName);
-    }
-
-    private function dumpProviders(Package $package, array $composerPackages): void
-    {
-        $releasePackages = [];
-        $devPackages = [];
-
-        foreach ($composerPackages as $composerPackage) {
-            if (!$composerPackage->isDev()) {
-                $releasePackages[] = $composerPackage;
-            } else {
-                $devPackages[] = $composerPackage;
-            }
-        }
-
-        $this->providerPool->write($package->getName(), $this->compileProvider($package->getName(), $releasePackages));
-        $this->providerPool->write("{$package->getName()}~dev", $this->compileProvider($package->getName(), $devPackages));
-    }
-
-    private function compileProvider(string $packageName, array $composerPackages): array
-    {
-        $data = array_map([new ArrayDumper(), 'dump'], $composerPackages);
-
-        return [
-            'minified' => 'composer/2.0',
-            'packages' => [
-                $packageName => MetadataMinifier::minify($data),
-            ],
-        ];
     }
 
     /**

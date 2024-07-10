@@ -503,6 +503,21 @@ class Version
         $this->releasedAt = $releasedAt;
     }
 
+    public function getDistReference(): ?string
+    {
+        return $this->dist['reference'] ?? null;
+    }
+
+    public function getDistType(): ?string
+    {
+        return $this->dist['type'] ?? null;
+    }
+
+    public function getDistUrl(): ?string
+    {
+        return $this->dist['url'] ?? null;
+    }
+
     public function hasVersionAlias(): bool
     {
         return $this->isDevelopment() && $this->getVersionAlias();

@@ -117,7 +117,7 @@ class DashboardPackagesController extends AbstractController
                     continue;
                 }
 
-                if (!$this->metadataResolver->doesProvide($packageName, $registry)) {
+                if (!$this->metadataResolver->provides($packageName, $registry)) {
                     $results[] = [
                         'error' => true,
                         'message' => "The package $packageName could not be found and was skipped",

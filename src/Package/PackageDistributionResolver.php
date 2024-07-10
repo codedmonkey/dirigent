@@ -2,79 +2,63 @@
 
 namespace CodedMonkey\Conductor\Package;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use Composer\Package\AliasPackage;
-use Composer\Package\Loader\ArrayLoader;
-use Composer\Package\Version\VersionParser;
+use CodedMonkey\Conductor\Composer\HttpDownloaderOptionsFactory;
+use CodedMonkey\Conductor\Doctrine\Entity\Version;
+use Composer\Factory;
+use Composer\IO\NullIO;
+use Composer\Util\HttpDownloader;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Filesystem\Filesystem;
 
-class PackageDistributionResolver
+readonly class PackageDistributionResolver
 {
-    private readonly string $storagePath;
+    private Filesystem $filesystem;
+    private string $storagePath;
 
     public function __construct(
-        private readonly PackageMetadataResolver $metadataResolver,
         #[Autowire(param: 'conductor.storage.path')]
         string $storagePath,
     ) {
+        $this->filesystem = new Filesystem();
         $this->storagePath = "$storagePath/distribution";
     }
 
-    public function exists(string $packageName, string $version, string $reference, string $type): bool
+    public function exists(string $packageName, string $packageVersion, string $reference, string $type): bool
     {
-        return file_exists($this->path($packageName, $version, $reference, $type));
+        return $this->filesystem->exists($this->path($packageName, $packageVersion, $reference, $type));
     }
 
-    public function path(string $packageName, string $version, string $reference, string $type): string
+    public function path(string $packageName, string $packageVersion, string $reference, string $type): string
     {
-        return "{$this->storagePath}/{$packageName}/{$version}-{$reference}.{$type}";
+        return "{$this->storagePath}/{$packageName}/{$packageVersion}-{$reference}.{$type}";
     }
 
-    public function resolve(Package $package, string $version, string $reference, string $type): bool
+    public function resolve(Version $version, string $reference, string $type): bool
     {
-        if ($this->exists($package->name, $version, $reference, $type)) {
+        $package = $version->getPackage();
+        $packageName = $package->getName();
+        $packageVersion = $version->getNormalizedVersion();
+
+        if ($this->exists($packageName, $packageVersion, $reference, $type)) {
             return true;
         }
 
-        if (null !== $package->mirrorRegistry) {
-            return $this->resolveFromRegistry($package, $version, $reference, $type);
-        } else {
-            // todo resolve from other sources
-            throw new \LogicException();
-        }
-    }
-
-    private function resolveFromRegistry(Package $package, string $version, string $reference, string $type): bool
-    {
-        $registryClient = $this->registryClientManager->getClient($package->mirrorRegistry);
-
-        if (!$registryClient->packageExists($package->name)) {
+        if ($reference !== $version->getDistReference() || $type !== $version->getDistType()) {
             return false;
         }
 
-        $metadata = $this->metadataResolver->resolve($package);
+        $distUrl = $version->getDistUrl();
+        $path = $this->path($packageName, $packageVersion, $reference, $type);
 
-        $normalizedVersion = (new VersionParser())->normalize($version);
-        if ($alias = $metadata['aliases'][$normalizedVersion] ?? null) {
-            $normalizedVersion = $alias['version'];
-        }
+        $this->filesystem->mkdir(dirname($path));
 
-        if (!$composerPackageData = $metadata['versions'][$normalizedVersion] ?? null) {
-            return false;
-        }
+        $io = new NullIO();
+        $config = Factory::createConfig();
+        $io->loadConfiguration($config);
+        $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
 
-        $composerPackage = (new ArrayLoader())->load($composerPackageData);
-        if ($composerPackage instanceof AliasPackage) {
-            $composerPackage = $composerPackage->getAliasOf();
-        }
+        $httpDownloader->copy($distUrl, $path);
 
-        if ($reference !== $composerPackage->getDistReference() || $type !== $composerPackage->getDistType()) {
-            return false;
-        }
-
-        $path = $this->path($composerPackage->getName(), $composerPackage->getVersion(), $composerPackage->getDistReference(), $composerPackage->getDistType());
-        $resolved = $registryClient->resolvePackageDistribution($composerPackage, $path);
-
-        return $resolved === RegistryResolveStatus::Modified;
+        return true;
     }
 }

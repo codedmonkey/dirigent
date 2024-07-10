@@ -3,13 +3,11 @@
 namespace CodedMonkey\Conductor\Controller;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Conductor\Package\PackageDistributionResolver;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
-use CodedMonkey\Conductor\Package\PackageProviderPool;
-use CodedMonkey\Conductor\Registry\RegistryClientManager;
+use CodedMonkey\Conductor\Package\PackageProviderManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -23,11 +21,12 @@ use function Symfony\Component\String\u;
 class ApiController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly PackageRepository $packageRepository,
-        private readonly PackageMetadataResolver $metadataResolver,
+        private readonly EntityManagerInterface      $entityManager,
+        private readonly PackageRepository           $packageRepository,
+        private readonly VersionRepository           $versionRepository,
+        private readonly PackageMetadataResolver     $metadataResolver,
         private readonly PackageDistributionResolver $distributionResolver,
-        private readonly PackageProviderPool $providerPool,
+        private readonly PackageProviderManager      $providerManager,
     ) {
     }
 
@@ -40,7 +39,7 @@ class ApiController extends AbstractController
 
         $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
             ->replace('{packageName}', '%package%')
-            ->replace('{version}', '%version%')
+            ->replace('{packageVersion}', '%version%')
             ->replace('{reference}', '%reference%')
             ->replace('{type}', '%type%')
             ->toString();
@@ -63,50 +62,54 @@ class ApiController extends AbstractController
     public function packageMetadata(string $packageName): Response
     {
         $basePackageName = u($packageName)->trimSuffix('~dev')->toString();
-        $package = $this->findPackage($basePackageName);
 
-        if (null === $package) {
+        if (null === $package = $this->findPackage($basePackageName)) {
             throw new NotFoundHttpException();
         }
 
         $this->metadataResolver->resolve($package);
+        $this->entityManager->flush();
 
-        if (null !== $package->getCrawledAt()) {
-            $this->entityManager->flush();
-        }
-
-        if (!$this->providerPool->exists($packageName)) {
+        if (!$this->providerManager->exists($packageName)) {
             throw new NotFoundHttpException();
         }
 
-        return new BinaryFileResponse($this->providerPool->path($packageName), headers: ['Content-Type' => 'application/json']);
+        return new BinaryFileResponse($this->providerManager->path($packageName), headers: ['Content-Type' => 'application/json']);
     }
 
-    #[Route('/dist/{packageName}/{version}-{reference}.{type}',
+    #[Route('/dist/{packageName}/{packageVersion}-{reference}.{type}',
         name: 'api_package_distribution',
         requirements: [
             'packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+',
-            'version' => '.+',
+            'packageVersion' => '.+',
             'reference' => '[a-z0-9]+',
             'type' => '(zip)',
         ],
         methods: ['GET'],
     )]
-    public function packageDistribution(string $packageName, string $version, string $reference, string $type): Response
+    public function packageDistribution(string $packageName, string $packageVersion, string $reference, string $type): Response
     {
-        if (!$this->distributionResolver->exists($packageName, $version, $reference, $type)) {
-            $package = $this->findPackage($packageName);
-
-            if (null === $package) {
+        if (!$this->distributionResolver->exists($packageName, $packageVersion, $reference, $type)) {
+            if (null === $package = $this->packageRepository->findOneBy(['name' => $packageName])) {
                 throw new NotFoundHttpException();
             }
 
-            if (!$this->distributionResolver->resolve($package, $version, $reference, $type)) {
+            $this->metadataResolver->resolve($package);
+
+            if (null !== $package->getCrawledAt()) {
+                $this->entityManager->flush();
+            }
+
+            if (null === $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $packageVersion])) {
+                throw new NotFoundHttpException();
+            }
+
+            if (!$this->distributionResolver->resolve($version, $reference, $type)) {
                 throw new NotFoundHttpException();
             }
         }
 
-        $path = $this->distributionResolver->path($packageName, $version, $reference, $type);
+        $path = $this->distributionResolver->path($packageName, $packageVersion, $reference, $type);
 
         return $this->file($path);
     }
@@ -119,17 +122,16 @@ class ApiController extends AbstractController
 
     private function findPackage(string $packageName): ?Package
     {
-        if ($package = $this->packageRepository->findOneBy(['name' => $packageName])) {
+        if (null !== $package = $this->packageRepository->findOneBy(['name' => $packageName])) {
             return $package;
+        }
+
+        if (null === $registry = $this->metadataResolver->findPackageProvider($packageName)) {
+            return null;
         }
 
         $package = new Package();
         $package->setName($packageName);
-
-        if (null === $registry = $this->metadataResolver->whatProvides($package)) {
-            return null;
-        }
-
         $package->setMirrorRegistry($registry);
 
         return $package;
