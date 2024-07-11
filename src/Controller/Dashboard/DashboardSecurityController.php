@@ -7,7 +7,6 @@ use CodedMonkey\Conductor\Doctrine\Repository\UserRepository;
 use CodedMonkey\Conductor\Form\RegistrationFormType;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -32,8 +31,9 @@ class DashboardSecurityController extends AbstractController
     }
 
     #[Route('/register', name: 'dashboard_register')]
-    public function register(Request $request, AdminUrlGenerator $adminUrlGenerator, #[Autowire(param: 'conductor.security.registration_enabled')] bool $registrationEnabled): Response
+    public function register(Request $request, AdminUrlGenerator $adminUrlGenerator): Response
     {
+        $registrationEnabled = $this->getParameter('conductor.security.registration_enabled');
         $userCount = $this->userRepository->count([]);
 
         if (!$registrationEnabled && 0 !== $userCount) {

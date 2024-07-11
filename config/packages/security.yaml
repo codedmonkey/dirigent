@@ -24,6 +24,8 @@ security:
         main:
             lazy: true
             provider: database_users
+            access_token:
+                token_handler: CodedMonkey\Conductor\Security\AccessTokenHandler
             form_login:
                 login_path: /?routeName=dashboard_login
                 check_path: dashboard_login

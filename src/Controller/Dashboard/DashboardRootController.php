@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Conductor\Controller\Dashboard;
 
+use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
 use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
 use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
@@ -75,12 +76,14 @@ class DashboardRootController extends AbstractDashboardController
     }
 
     #[Route('/', name: 'dashboard')]
+    #[IsGrantedAccess]
     public function index(): Response
     {
         return $this->render('dashboard/index.html.twig');
     }
 
     #[Route('/dashboard/docs', name: 'dashboard_docs')]
+    #[IsGrantedAccess]
     public function docs(): Response
     {
         return $this->render('dashboard/docs.html.twig');

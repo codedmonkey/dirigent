@@ -2,8 +2,8 @@
 
 namespace CodedMonkey\Conductor\Controller\Dashboard;
 
+use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Entity\Version;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Conductor\Form\PackageAddMirroringType;
@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class DashboardPackagesController extends AbstractController
 {
@@ -28,6 +29,7 @@ class DashboardPackagesController extends AbstractController
     }
 
     #[Route('/dashboard/packages', name: 'dashboard_packages')]
+    #[IsGrantedAccess]
     public function list(): Response
     {
         $packages = $this->packageRepository->findBy([], ['name' => 'ASC']);
@@ -38,6 +40,7 @@ class DashboardPackagesController extends AbstractController
     }
 
     #[Route('/dashboard/packages/info/{packageName}/{packageVersion}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
     public function info(string $packageName, ?string $packageVersion = null): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
@@ -75,6 +78,7 @@ class DashboardPackagesController extends AbstractController
     }
 
     #[Route('/dashboard/packages/versions/{packageName}', name: 'dashboard_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
     public function versions(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
@@ -89,10 +93,9 @@ class DashboardPackagesController extends AbstractController
     }
 
     #[Route('/dashboard/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
+    #[IsGranted('ROLE_ADMIN')]
     public function addMirror(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
         $form = $this->createForm(PackageAddMirroringType::class);
 
         $form->handleRequest($request);
@@ -151,10 +154,9 @@ class DashboardPackagesController extends AbstractController
     }
 
     #[Route('/dashboard/packages/add-vcs', name: 'dashboard_packages_add_vcs')]
+    #[IsGranted('ROLE_ADMIN')]
     public function addVcsRepository(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
         $form = $this->createForm(PackageAddVcsType::class);
 
         $form->handleRequest($request);
@@ -179,6 +181,7 @@ class DashboardPackagesController extends AbstractController
     }
 
     #[Route('/dashboard/packages/update/{packageName}', name: 'dashboard_packages_update', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function update(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
@@ -191,6 +194,7 @@ class DashboardPackagesController extends AbstractController
     }
 
     #[Route('/dashboard/packages/delete/{packageName}', name: 'dashboard_packages_delete', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);

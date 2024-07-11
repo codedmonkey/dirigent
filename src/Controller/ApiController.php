@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Conductor\Controller;
 
+use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
@@ -31,6 +32,7 @@ class ApiController extends AbstractController
     }
 
     #[Route('/packages.json', name: 'api_root', methods: ['GET'])]
+    #[IsGrantedAccess]
     public function root(RouterInterface $router): JsonResponse
     {
         $metadataUrlPattern = u($router->getRouteCollection()->get('api_package_metadata')->getPath())
@@ -59,6 +61,7 @@ class ApiController extends AbstractController
         requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+(~dev)?'],
         methods: ['GET'],
     )]
+    #[IsGrantedAccess]
     public function packageMetadata(string $packageName): Response
     {
         $basePackageName = u($packageName)->trimSuffix('~dev')->toString();
@@ -87,6 +90,7 @@ class ApiController extends AbstractController
         ],
         methods: ['GET'],
     )]
+    #[IsGrantedAccess]
     public function packageDistribution(string $packageName, string $packageVersion, string $reference, string $type): Response
     {
         if (!$this->distributionResolver->exists($packageName, $packageVersion, $reference, $type)) {
@@ -115,6 +119,7 @@ class ApiController extends AbstractController
     }
 
     #[Route('/downloads', name: 'api_track_downloads', methods: ['POST'])]
+    #[IsGrantedAccess]
     public function trackDownloads(): Response
     {
         return new Response();
