@@ -26,6 +26,13 @@ class AppConfiguration implements ConfigurationInterface
                 ->children()
                     ->scalarNode('path')->defaultValue('%kernel.project_dir%/storage')->end()
                 ->end()
+            ->end()
+            ->arrayNode('dist_mirroring')
+                ->canBeEnabled()
+                ->children()
+                    ->booleanNode('preferred')->defaultTrue()->end()
+                    ->booleanNode('dev_packages')->defaultFalse()->end()
+                ->end()
             ->end();
 
         return $treeBuilder;

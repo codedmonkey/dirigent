@@ -19,6 +19,9 @@ class AppExtension extends ConfigurableExtension
         $container->setParameter('conductor.title', $mergedConfig['title']);
         $container->setParameter('conductor.security.public_access', $mergedConfig['security']['public']);
         $container->setParameter('conductor.security.registration_enabled', $mergedConfig['security']['registration']);
+        $container->setParameter('conductor.dist_mirroring.enabled', $mergedConfig['dist_mirroring']['enabled']);
+        $container->setParameter('conductor.dist_mirroring.preferred', $mergedConfig['dist_mirroring']['preferred']);
+        $container->setParameter('conductor.dist_mirroring.dev_packages', $mergedConfig['dist_mirroring']['dev_packages']);
     }
 
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface

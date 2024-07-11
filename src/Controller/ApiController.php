@@ -39,21 +39,29 @@ class ApiController extends AbstractController
             ->replace('{packageName}', '%package%')
             ->toString();
 
-        $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
-            ->replace('{packageName}', '%package%')
-            ->replace('{packageVersion}', '%version%')
-            ->replace('{reference}', '%reference%')
-            ->replace('{type}', '%type%')
-            ->toString();
-
-        return new JsonResponse(json_encode([
-            'metadata-url' => $metadataUrlPattern,
-            'mirrors' => [
-                ['dist-url' => $distributionUrlPattern, 'preferred' => true],
-            ],
-            'notify-batch' => $router->generate('api_track_downloads'),
+        $data = [
             'packages' => [],
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), json: true);
+            'metadata-url' => $metadataUrlPattern,
+            'notify-batch' => $router->generate('api_track_downloads'),
+        ];
+
+        if ($this->getParameter('conductor.dist_mirroring.enabled')) {
+            $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
+                ->replace('{packageName}', '%package%')
+                ->replace('{packageVersion}', '%version%')
+                ->replace('{reference}', '%reference%')
+                ->replace('{type}', '%type%')
+                ->toString();
+
+            $data['mirrors'] = [
+                [
+                    'dist-url' => $distributionUrlPattern,
+                    'preferred' => $this->getParameter('conductor.dist_mirroring.preferred'),
+                ],
+            ];
+        }
+
+        return new JsonResponse(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), json: true);
     }
 
     #[Route('/p2/{packageName}.json',
@@ -93,20 +101,25 @@ class ApiController extends AbstractController
     #[IsGrantedAccess]
     public function packageDistribution(string $packageName, string $packageVersion, string $reference, string $type): Response
     {
+        if (!$this->getParameter('conductor.dist_mirroring.enabled')) {
+            throw new NotFoundHttpException();
+        }
+
         if (!$this->distributionResolver->exists($packageName, $packageVersion, $reference, $type)) {
             if (null === $package = $this->packageRepository->findOneBy(['name' => $packageName])) {
                 throw new NotFoundHttpException();
             }
 
-            $this->metadataResolver->resolve($package);
-
-            if (null !== $package->getCrawledAt()) {
-                $this->entityManager->flush();
-            }
-
             if (null === $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $packageVersion])) {
                 throw new NotFoundHttpException();
             }
+
+            if ($version->isDevelopment() && !$this->getParameter('conductor.dist_mirroring.dev_packages')) {
+                throw new NotFoundHttpException();
+            }
+
+            $this->metadataResolver->resolve($package);
+            $this->entityManager->flush();
 
             if (!$this->distributionResolver->resolve($version, $reference, $type)) {
                 throw new NotFoundHttpException();
