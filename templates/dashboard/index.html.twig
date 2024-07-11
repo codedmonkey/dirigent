@@ -3,9 +3,9 @@
 {% block page_title %}{{ ea.dashboardTitle }}{% endblock %}
 
 {% block page_content %}
-  <p>Welcome to <a href="#">Conductor</a>, a selfhosted Composer registry.</p>
+  <p>Welcome to <a href="#">Conductor</a>, a free and open package registry for <a href="https://getcomposer.org">Composer</a>.</p>
 
-  <hr>
+  <h2 class="h5">Add this registry to the composer.json</h2>
 
   <p>To use this registry in your project, run the following command in your terminal:</p>
 
@@ -17,11 +17,13 @@
 
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
 <pre class="m-0"><code>{
-    ...
     "repositories": {
         "conductor": { "type": "composer", "url": "{{ app.request.getSchemeAndHttpHost() }}" }
-    },
-    ...
+    }
 }</code></pre>
   </div>
+
+  <h2 class="h5">Setup authentication</h2>
+
+  <p>Store the authentication credentials in your global Composer auth.json with the command below.</p>
 {% endblock %}

@@ -1,6 +1,6 @@
 {
     "name": "codedmonkey/conductor",
-    "description": "A private proxy for Composer registries",
+    "description": "A free and open package registry for Composer",
     "type": "project",
     "license": "MIT",
     "minimum-stability": "stable",
