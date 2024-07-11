@@ -15,22 +15,22 @@ class Credentials
     #[Column]
     #[GeneratedValue]
     #[Id]
-    public ?int $id = null;
+    private ?int $id = null;
 
     #[Column]
-    public ?string $name = null;
+    private ?string $name = null;
 
     #[Column(type: Types::TEXT, nullable: true)]
-    public ?string $description = null;
+    private ?string $description = null;
 
     #[Column(type: Types::STRING, enumType: CredentialsType::class)]
-    public CredentialsType|string $type = CredentialsType::HttpBasic;
+    private CredentialsType|string $type = CredentialsType::HttpBasic;
 
     #[Column(nullable: true)]
-    public ?string $username = null;
+    private ?string $username = null;
 
     #[Column(nullable: true)]
-    public ?string $password = null;
+    private ?string $password = null;
 
     public function __toString(): string
     {

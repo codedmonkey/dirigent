@@ -18,21 +18,59 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Column]
     #[GeneratedValue]
     #[Id]
-    public ?int $id = null;
+    private ?int $id = null;
 
-    #[Column(length: 255)]
-    public ?string $name = null;
+    #[Column(length: 80)]
+    private ?string $username = null;
 
-    #[Column(length: 255, unique: true)]
-    public ?string $email = null;
+    #[Column(length: 180, nullable: true)]
+    private ?string $name = null;
+
+    #[Column(length: 180, unique: true, nullable: true)]
+    private ?string $email = null;
 
     #[Column]
     private array $roles = [];
 
     #[Column]
-    public ?string $password = null;
+    private ?string $password = null;
 
-    public ?string $plainPassword = null;
+    private ?string $plainPassword = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): void
+    {
+        $this->username = $username;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): void
+    {
+        $this->email = $email;
+    }
 
     public function getRoles(): array
     {
@@ -45,6 +83,44 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRoles(array $roles): void
     {
         $this->roles = $roles;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(string $password): self
+    {
+        $this->plainPassword = $password;
+        $this->password = null;
+
+        return $this;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->username;
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        $this->plainPassword = null;
     }
 
     public function isAdmin(): bool
@@ -81,33 +157,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 unset($this->roles[$key]);
             }
         }
-    }
-
-    public function setPlainPassword(string $password): self
-    {
-        $this->plainPassword = $password;
-        $this->password = null;
-
-        return $this;
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    public function eraseCredentials(): void
-    {
-        $this->plainPassword = null;
     }
 }

@@ -47,7 +47,7 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
     {
         $builder = $this->container->get(EntityRepository::class)->createQueryBuilder($searchDto, $entityDto, $fields, $filters);
 
-        $builder->andWhere($builder->expr()->eq('entity.user', $this->getUser()->id));
+        $builder->andWhere($builder->expr()->eq('entity.user', $this->getUser()->getId()));
 
         return $builder;
     }

@@ -26,7 +26,6 @@ class DashboardSecurityController extends AbstractController
             'action' => $this->generateUrl('dashboard_login'),
             'error' => $authenticationUtils->getLastAuthenticationError(),
             'last_username' => $authenticationUtils->getLastUsername(),
-            'username_label' => 'Email',
         ]);
     }
 

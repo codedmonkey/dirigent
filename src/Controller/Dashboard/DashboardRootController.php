@@ -69,7 +69,7 @@ class DashboardRootController extends AbstractDashboardController
     public function configureUserMenu(UserInterface $user): UserMenu
     {
         return parent::configureUserMenu($user)
-            ->setName($user->name)
+            ->setName($user->getUserIdentifier())
             ->addMenuItems([
                 MenuItem::linkToRoute('Account', 'fa fa-id-card', 'dashboard_account'),
             ]);

@@ -40,14 +40,4 @@ abstract class Tag
     {
         $this->name = $name;
     }
-
-    public function getVersion(): ?Version
-    {
-        return $this->version;
-    }
-
-    public function setVersion(Version $version): void
-    {
-        $this->version = $version;
-    }
 }

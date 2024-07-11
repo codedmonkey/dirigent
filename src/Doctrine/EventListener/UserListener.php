@@ -18,7 +18,7 @@ class UserListener
 
     public function prePersist(User $user): void
     {
-        if (null === $user->plainPassword) {
+        if (null === $user->getPlainPassword()) {
             throw new \LogicException('A new user can\'t be created without a password.');
         }
 
@@ -27,15 +27,15 @@ class UserListener
 
     public function preUpdate(User $user): void
     {
-        if (null !== $user->plainPassword) {
+        if (null !== $user->getPlainPassword()) {
             $this->hashPassword($user);
         }
     }
 
     private function hashPassword(User $user): void
     {
-        $password = $this->passwordHasher->hashPassword($user, $user->plainPassword);
-        $user->password = $password;
+        $password = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
+        $user->setPassword($password);
 
         $user->eraseCredentials();
     }

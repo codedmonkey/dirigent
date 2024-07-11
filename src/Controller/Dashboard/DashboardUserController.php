@@ -45,6 +45,7 @@ class DashboardUserController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        yield TextField::new('username');
         yield TextField::new('name');
         yield EmailField::new('email');
         yield TextField::new('plainPassword')
