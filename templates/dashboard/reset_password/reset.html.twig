@@ -15,17 +15,15 @@
     </header>
 
     <section class="content">
-      <p class="lead">Create an account</p>
+      <p class="lead">Reset acccount password</p>
 
-      {{ form_start(form) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.plainPassword) }}
+      {{ form_start(resetForm) }}
+        {{ form_row(resetForm.plainPassword) }}
 
         <div class="form-group">
-          <button class="btn btn-primary">Create account</button>
+          <button class="btn btn-primary">Reset</button>
         </div>
-      {{ form_end(form) }}
+      {{ form_end(resetForm) }}
     </section>
   </div>
 

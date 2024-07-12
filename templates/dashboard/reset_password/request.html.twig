@@ -15,17 +15,19 @@
     </header>
 
     <section class="content">
-      <p class="lead">Create an account</p>
+      <p class="lead">Reset account password</p>
 
-      {{ form_start(form) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.plainPassword) }}
+      {% for flash_error in app.flashes('reset_password_error') %}
+        <div class="alert alert-danger rounded mb-3" role="alert">{{ flash_error }}</div>
+      {% endfor %}
+
+      {{ form_start(requestForm) }}
+        {{ form_row(requestForm.email) }}
 
         <div class="form-group">
-          <button class="btn btn-primary">Create account</button>
+          <button class="btn btn-primary">Send email</button>
         </div>
-      {{ form_end(form) }}
+      {{ form_end(requestForm) }}
     </section>
   </div>
 

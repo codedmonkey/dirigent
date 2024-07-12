@@ -20,12 +20,14 @@ class DashboardSecurityController extends AbstractController
     }
 
     #[Route('/login', name: 'dashboard_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, AdminUrlGenerator $adminUrlGenerator): Response
     {
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'action' => $this->generateUrl('dashboard_login'),
             'error' => $authenticationUtils->getLastAuthenticationError(),
             'last_username' => $authenticationUtils->getLastUsername(),
+            'forgot_password_enabled' => true,
+            'forgot_password_path' => $adminUrlGenerator->setRoute('dashboard_reset_password_request')->generateUrl(),
         ]);
     }
 

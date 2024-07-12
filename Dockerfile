@@ -57,9 +57,9 @@ RUN set -eux; \
 
 COPY --from=build /usr/bin/composer /usr/bin/composer
 
+COPY docker/init.sh /
 COPY docker/Caddyfile /etc/caddy/
 COPY docker/php-fpm.conf /etc/php82/
-COPY docker/init.sh /
 
 USER conductor
 
