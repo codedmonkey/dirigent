@@ -15,7 +15,7 @@ class Credentials
     #[Column]
     #[GeneratedValue]
     #[Id]
-    private ?int $id = null;
+    private int $id;
 
     #[Column]
     private ?string $name = null;
@@ -31,6 +31,11 @@ class Credentials
 
     #[Column(nullable: true)]
     private ?string $password = null;
+
+    public function getId(): ?int
+    {
+        return $this->id ?? null;
+    }
 
     public function __toString(): string
     {
@@ -57,14 +62,14 @@ class Credentials
         $this->type = $type;
     }
 
-    public function getUsername(): ?string
+    public function getName(): ?string
     {
-        return $this->username;
+        return $this->name;
     }
 
-    public function setUsername(?string $username): void
+    public function setName(?string $name): void
     {
-        $this->username = $username;
+        $this->name = $name;
     }
 
     public function getPassword(): ?string
