@@ -6,10 +6,12 @@ use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Conductor\EasyAdmin\PackagePaginator;
 use CodedMonkey\Conductor\Form\PackageAddMirroringType;
 use CodedMonkey\Conductor\Form\PackageAddVcsType;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,12 +32,24 @@ class DashboardPackagesController extends AbstractController
 
     #[Route('/dashboard/packages', name: 'dashboard_packages')]
     #[IsGrantedAccess]
-    public function list(): Response
+    public function list(Request $request): Response
     {
-        $packages = $this->packageRepository->findBy([], ['name' => 'ASC']);
+        $queryBuilder = $this->packageRepository->createQueryBuilder('package');
+        $queryBuilder->addOrderBy('package.name', 'ASC');
+
+        if (null !== $query = $request->query->get('query')) {
+            $queryBuilder->andWhere($queryBuilder->expr()->like('package.name', ':query'));
+            $queryBuilder->setParameter('query', "%{$query}%");
+        }
+
+        $paginatorDto = new PaginatorDto(20,3, 1, true, null);
+        $paginatorDto->setPageNumber($request->query->getInt('page', 1));
+        $paginator = (new PackagePaginator($this->adminUrlGenerator))->paginate($paginatorDto, $queryBuilder);
+        $packages = $paginator->getResults();
 
         return $this->render('dashboard/packages/list.html.twig', [
             'packages' => $packages,
+            'paginator' => $paginator,
         ]);
     }
 

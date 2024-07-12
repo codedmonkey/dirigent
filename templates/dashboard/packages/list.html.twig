@@ -2,6 +2,41 @@
 
 {% block page_title %}Packages{% endblock %}
 
+{% block search_wrapper %}
+  <div class="content-search">
+    <form class="form-action-search" method="get">
+      <div class="form-group">
+        <input type="hidden" name="routeName" value="dashboard_packages">
+        <input type="hidden" name="page" value="1">
+
+        <div class="form-widget">
+          <i class="fas fa-search content-search-icon"></i>
+
+          <label class="content-search-label" data-value="{{ app.request.get('query') }}">
+            <input
+              name="query"
+              class="form-control {{ app.request.get('query') is null ? 'is-blank' }}"
+              type="search"
+              value="{{ app.request.get('query') ?? '' }}"
+              placeholder="{{ t('action.search', ea.i18n.translationParameters, 'EasyAdminBundle')|trans }}"
+              spellcheck="false"
+              autocorrect="off"
+              autofocus="autofocus"
+              onInput="this.parentNode.dataset.value=this.value"
+            >
+          </label>
+
+          {% if app.request.get('query') %}
+            <a href="{{ ea_url().unset('query') }}" class="content-search-reset">
+              <i class="fas fa-fw fa-times"></i>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
 {% block page_actions %}
   {% if is_granted('ROLE_ADMIN') %}
     <div class="global-actions">
@@ -23,17 +58,25 @@
 {% endblock %}
 
 {% block page_content %}
-  {% for package in packages %}
-    {% set packageInfoUrl = ea_url()
-      .setRoute('dashboard_packages_info', {packageName: package.name}) %}
-    <div class="card mb-3">
-      <div class="card-body">
-        <a href="{{ packageInfoUrl }}"><h5 class="card-title">{{ package.name }}</h5></a>
-        {% if package.mirrorRegistry %}
-          <p class="card-text mb-1 text-body-secondary">Mirrored from {{ package.mirrorRegistry.name }}</p>
-        {% endif %}
-        <p class="card-text">{{ package.description }}</p>
+  <div class="d-grid gap-3">
+    {% for package in packages %}
+      {% set packageInfoUrl = ea_url()
+        .setRoute('dashboard_packages_info', {packageName: package.name}) %}
+      <div class="card">
+        <div class="card-body py-2">
+          <a href="{{ packageInfoUrl }}"><h5 class="card-title">{{ package.name }}</h5></a>
+          {% if package.mirrorRegistry %}
+            <p class="card-text mb-1 text-body-secondary">Mirrored from {{ package.mirrorRegistry.name }}</p>
+          {% endif %}
+          <p class="card-text">{{ package.description }}</p>
+        </div>
       </div>
-    </div>
-  {% endfor %}
+    {% endfor %}
+  </div>
+
+  <div class="content-panel-footer without-padding without-border">
+    {% block paginator %}
+      {{ include(ea.templatePath('crud/paginator')) }}
+    {% endblock paginator %}
+  </div>
 {% endblock %}
