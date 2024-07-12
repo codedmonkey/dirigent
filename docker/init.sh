@@ -15,6 +15,7 @@ bin/console messenger:setup-transports --no-ansi --no-interaction
 
 caddy run --config /etc/caddy/Caddyfile &
 php-fpm &
+bin/console messenger:consume --all &
 
 wait -n
 exit $?

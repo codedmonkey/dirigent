@@ -2,3 +2,8 @@ http:
   allow_http: true
   port: 7015
   use_gzip: true
+
+workers:
+  messenger_consume:
+    cmd: ['symfony', 'console', 'messenger:consume', '--all', '--sleep', '10']
+    watch: ['config', 'src', 'templates']
