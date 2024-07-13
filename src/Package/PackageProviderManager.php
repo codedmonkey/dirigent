@@ -35,7 +35,7 @@ readonly class PackageProviderManager
         }
 
         $this->write($package->getName(), $releasePackages);
-        $this->write("{$package->getName()}~dev", $devPackages);
+        $this->write($package->getName(), $devPackages, true);
     }
 
     public function exists(string $packageName): bool
@@ -48,9 +48,10 @@ readonly class PackageProviderManager
         return "{$this->storagePath}/{$packageName}.json";
     }
 
-    private function write(string $packageName, array $composerPackages): void
+    private function write(string $packageName, array $composerPackages, bool $development = false): void
     {
-        $path = $this->path($packageName);
+
+        $path = $this->path(!$development ? $packageName : "{$packageName}~dev");
         $data = $this->compile($packageName, $composerPackages);
 
         $this->filesystem->mkdir(dirname($path));

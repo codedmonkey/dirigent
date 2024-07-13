@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Conductor\Package;
 
+use CodedMonkey\Conductor\Composer\ConfigFactory;
 use CodedMonkey\Conductor\Composer\HttpDownloaderOptionsFactory;
 use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
 use CodedMonkey\Conductor\Doctrine\Entity\CredentialsType;
@@ -50,8 +51,8 @@ class PackageMetadataResolver
     public function __construct(
         private readonly PackageProviderManager $providerManager,
         private readonly EntityManagerInterface $entityManager,
-        private readonly RegistryRepository     $registryRepository,
-        private readonly VersionRepository      $versionRepository,
+        private readonly RegistryRepository $registryRepository,
+        private readonly VersionRepository $versionRepository,
     ) {
     }
 
@@ -117,33 +118,7 @@ class PackageMetadataResolver
     private function resolveFromRegistry(string $packageName, Registry $registry): array
     {
         $io = new NullIO();
-        $config = Factory::createConfig();
-
-        if ($credentials = $registry->getCredentials()) {
-            if ($credentials->getType() === CredentialsType::HttpBasic) {
-                $config->merge([
-                    'config' => [
-                        'http-basic' => [
-                            $registry->getDomain() => [
-                                'username' => $credentials->getUsername(),
-                                'password' => $credentials->getPassword(),
-                            ],
-                        ],
-                    ],
-                ]);
-            } elseif ($credentials->getType() === CredentialsType::GitlabOauth) {
-                $config->merge([
-                    'config' => [
-                        'gitlab-oauth' => [
-                            $registry->getDomain() => [
-                                'token' => $credentials->getPassword(),
-                            ],
-                        ],
-                    ],
-                ]);
-            }
-        }
-
+        $config = ConfigFactory::createForRegistry($registry);
         $io->loadConfiguration($config);
         $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
 
@@ -154,20 +129,7 @@ class PackageMetadataResolver
     private function resolveVcsRepository(string $repositoryUrl, ?string $repositoryType, ?Credentials $repositoryCredentials): array
     {
         $io = new NullIO();
-        $config = Factory::createConfig();
-
-        if ($repositoryCredentials?->getType() === CredentialsType::GitlabOauth) {
-            $config->merge([
-                'config' => [
-                    'gitlab-oauth' => [
-                        parse_url($repositoryUrl, PHP_URL_HOST) => [
-                            'token' => $repositoryCredentials->getPassword(),
-                        ],
-                    ],
-                ],
-            ]);
-        }
-
+        $config = ConfigFactory::createForVcsRepository($repositoryUrl, $repositoryCredentials);
         $io->loadConfiguration($config);
         $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
         $repository = new VcsRepository(['url' => $repositoryUrl], $io, $config, $httpDownloader);
