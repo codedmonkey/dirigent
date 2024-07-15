@@ -11,7 +11,7 @@ abstract class PackageLink
     #[ORM\Id]
     #[ORM\Column]
     #[ORM\GeneratedValue]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\Column(length: 191)]
     private string $packageName;
@@ -21,11 +21,11 @@ abstract class PackageLink
 
     /**
      * Base property holding the version - this must remain protected since it
-     * is redefined with an annotation in the child class
+     * is redefined with an attribute in the child class
      */
     protected Version $version;
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

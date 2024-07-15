@@ -15,14 +15,10 @@
 {% block page_actions %}
   {% if is_granted('ROLE_ADMIN') %}
     <div class="global-actions">
-      {% set updatePackageUrl = ea_url()
-        .setRoute('dashboard_packages_update', {packageName: package.name}) %}
-      <a class="btn btn-warning" href="{{ updatePackageUrl }}">
+      <a class="btn btn-warning" href="{{ dashboard_path('dashboard_packages_update', {packageName: package.name}) }}">
         <span class="action-label">Update</span>
       </a>
-      {% set deletePackageUrl = ea_url()
-        .setRoute('dashboard_packages_delete', {packageName: package.name}) %}
-      <a class="btn btn-danger" href="{{ deletePackageUrl }}">
+      <a class="btn btn-danger" href="{{ dashboard_path('dashboard_packages_delete', {packageName: package.name}) }}">
         <span class="action-label">Delete</span>
       </a>
     </div>
@@ -32,14 +28,10 @@
 {% block page_content %}
   <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 pb-3 mb-3 border-bottom">
     <li class="nav-item">
-      {% set packageInfoUrl = ea_url()
-        .setRoute('dashboard_packages_info', {packageName: package.name}) %}
-      <a class="nav-link active" aria-current="page" href="{{ packageInfoUrl }}">Info</a>
+      <a class="nav-link active" aria-current="page" href="{{ dashboard_path('dashboard_packages_info', {packageName: package.name}) }}">Info</a>
     </li>
     <li class="nav-item">
-      {% set packageVersionsUrl = ea_url()
-        .setRoute('dashboard_packages_versions', {packageName: package.name}) %}
-      <a class="nav-link" href="{{ packageVersionsUrl }}">Versions</a>
+      <a class="nav-link" href="{{ dashboard_path('dashboard_packages_versions', {packageName: package.name}) }}">Versions</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="#">Dependants</a>
@@ -71,9 +63,11 @@
         {% if version.source %}
           <div><a href="{{ version.source.url }}">Source</a></div>
         {% endif %}
-        <div>
-          License: {{ version.license|join(', ') }}
-        </div>
+        {% if version.license %}
+          <div>License: {{ version.license|join(', ') }}</div>
+        {% else %}
+          <div>No license specified</div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -103,7 +97,11 @@
 
     <ul>
       {% for link in links %}
-        <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
+        {% if link.packageName is existing_package %}
+          <li><a href="{{ dashboard_path('dashboard_packages_info', {packageName: link.packageName}) }}">{{ link.packageName }}</a>: {{ link.packageVersion }}</li>
+        {% else %}
+          <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
+        {% endif %}
       {% else %}
         <li>None</li>
       {% endfor %}
@@ -117,7 +115,11 @@
 
     <ul>
       {% for link in links %}
-        <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
+        {% if link.packageName is existing_package %}
+          <li><a href="{{ dashboard_path('dashboard_packages_info', {packageName: link.packageName}) }}">{{ link.packageName }}</a>: {{ link.packageVersion }}</li>
+        {% else %}
+          <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
+        {% endif %}
       {% else %}
         <li>None</li>
       {% endfor %}
