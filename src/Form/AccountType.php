@@ -14,6 +14,9 @@ class AccountType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('username', TextType::class, [
+                'disabled' => true,
+            ])
             ->add('name', TextType::class, [
                 'required' => true,
             ])

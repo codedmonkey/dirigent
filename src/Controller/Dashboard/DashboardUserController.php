@@ -9,9 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class DashboardUserController extends AbstractCrudController
@@ -25,7 +23,7 @@ class DashboardUserController extends AbstractCrudController
     {
         return parent::configureCrud($crud)
             ->setPageTitle(Crud::PAGE_INDEX, 'Users')
-            ->setDefaultSort(['name' => 'ASC'])
+            ->setDefaultSort(['username' => 'ASC'])
             ->setEntityPermission('ROLE_ADMIN');
     }
 
