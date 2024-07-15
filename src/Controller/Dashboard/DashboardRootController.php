@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class DashboardRootController extends AbstractDashboardController
 {
@@ -61,9 +62,9 @@ class DashboardRootController extends AbstractDashboardController
 
         yield MenuItem::section('Documentation');
         yield MenuItem::linkToRoute('Usage', 'fa fa-file', 'dashboard_docs');
-        yield MenuItem::linkToRoute('Administration', 'fa fa-file', 'dashboard_docs')
+        yield MenuItem::linkToRoute('Administration', 'fa fa-file', 'dashboard_admin_docs')
             ->setPermission('ROLE_ADMIN');
-        yield MenuItem::linkToRoute('Credits', 'fa fa-file', 'dashboard_docs');
+        yield MenuItem::linkToRoute('Credits', 'fa fa-file', 'dashboard_credits');
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu
@@ -87,6 +88,19 @@ class DashboardRootController extends AbstractDashboardController
     #[IsGrantedAccess]
     public function docs(): Response
     {
-        return $this->render('dashboard/docs.html.twig');
+        return $this->render('dashboard/docs/index.html.twig');
+    }
+
+    #[Route('/dashboard/docs/admin', name: 'dashboard_admin_docs')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function adminDocs(): Response
+    {
+        return $this->render('dashboard/docs/admin.html.twig');
+    }
+
+    #[Route('/dashboard/credits', name: 'dashboard_credits')]
+    public function credits(): Response
+    {
+        return $this->render('dashboard/credits.html.twig');
     }
 }
