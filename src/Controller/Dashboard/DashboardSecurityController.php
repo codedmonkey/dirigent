@@ -22,6 +22,12 @@ class DashboardSecurityController extends AbstractController
     #[Route('/login', name: 'dashboard_login')]
     public function login(AuthenticationUtils $authenticationUtils, AdminUrlGenerator $adminUrlGenerator): Response
     {
+        $userCount = $this->userRepository->count([]);
+
+        if (0 === $userCount) {
+            return $this->redirect($adminUrlGenerator->setRoute('dashboard_register')->generateUrl());
+        }
+
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'action' => $this->generateUrl('dashboard_login'),
             'error' => $authenticationUtils->getLastAuthenticationError(),

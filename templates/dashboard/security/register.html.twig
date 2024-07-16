@@ -18,6 +18,7 @@
       <p class="lead">Create an account</p>
 
       {{ form_start(form) }}
+        {{ form_row(form.username) }}
         {{ form_row(form.name) }}
         {{ form_row(form.email) }}
         {{ form_row(form.plainPassword) }}
