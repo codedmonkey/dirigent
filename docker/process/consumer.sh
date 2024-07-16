@@ -7,4 +7,4 @@ while [ -z "$(netstat -an | grep :9000)" ]; do
   sleep 5;
 done;
 
-exec /srv/app/bin/console messenger:consume async --sleep 10
+exec /srv/app/bin/console messenger:consume async scheduler_packages --sleep 10

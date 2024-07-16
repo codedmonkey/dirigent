@@ -23,7 +23,7 @@ class Package
     #[ORM\Id]
     #[ORM\Column]
     #[ORM\GeneratedValue]
-    private int $id;
+    private ?int $id = null;
 
     /**
      * Unique package name
@@ -74,6 +74,9 @@ class Package
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $updateScheduledAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $crawledAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -109,7 +112,7 @@ class Package
 
     public function getId(): ?int
     {
-        return $this->id ?? null;
+        return $this->id;
     }
 
     public function getName(): string
@@ -350,6 +353,16 @@ class Package
     public function setUpdatedAt(\DateTimeInterface $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    public function getUpdateScheduledAt(): ?\DateTimeInterface
+    {
+        return $this->updateScheduledAt;
+    }
+
+    public function setUpdateScheduledAt(?\DateTimeInterface $updateScheduledAt): void
+    {
+        $this->updateScheduledAt = $updateScheduledAt;
     }
 
     public function getCrawledAt(): ?\DateTimeInterface

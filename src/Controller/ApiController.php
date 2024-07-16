@@ -6,6 +6,7 @@ use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Conductor\Message\UpdatePackage;
 use CodedMonkey\Conductor\Package\PackageDistributionResolver;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
 use CodedMonkey\Conductor\Package\PackageProviderManager;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
 use function Symfony\Component\String\u;
@@ -22,12 +24,12 @@ use function Symfony\Component\String\u;
 class ApiController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface      $entityManager,
-        private readonly PackageRepository           $packageRepository,
-        private readonly VersionRepository           $versionRepository,
-        private readonly PackageMetadataResolver     $metadataResolver,
+        private readonly PackageRepository $packageRepository,
+        private readonly VersionRepository $versionRepository,
+        private readonly PackageMetadataResolver $metadataResolver,
         private readonly PackageDistributionResolver $distributionResolver,
-        private readonly PackageProviderManager      $providerManager,
+        private readonly PackageProviderManager $providerManager,
+        private readonly MessageBusInterface $messenger,
     ) {
     }
 
@@ -53,12 +55,10 @@ class ApiController extends AbstractController
                 ->replace('{type}', '%type%')
                 ->toString();
 
-            $data['mirrors'] = [
-                [
-                    'dist-url' => $distributionUrlPattern,
-                    'preferred' => $this->getParameter('conductor.dist_mirroring.preferred'),
-                ],
-            ];
+            $data['mirrors'] = [[
+                'dist-url' => $distributionUrlPattern,
+                'preferred' => $this->getParameter('conductor.dist_mirroring.preferred'),
+            ]];
         }
 
         return new JsonResponse(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), json: true);
@@ -78,8 +78,7 @@ class ApiController extends AbstractController
             throw new NotFoundHttpException();
         }
 
-        $this->metadataResolver->resolve($package);
-        $this->entityManager->flush();
+        $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
         if (!$this->providerManager->exists($packageName)) {
             throw new NotFoundHttpException();
@@ -118,8 +117,7 @@ class ApiController extends AbstractController
                 throw new NotFoundHttpException();
             }
 
-            $this->metadataResolver->resolve($package);
-            $this->entityManager->flush();
+            $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
             if (!$this->distributionResolver->resolve($version, $reference, $type)) {
                 throw new NotFoundHttpException();
@@ -151,6 +149,8 @@ class ApiController extends AbstractController
         $package = new Package();
         $package->setName($packageName);
         $package->setMirrorRegistry($registry);
+
+        $this->packageRepository->save($package, true);
 
         return $package;
     }

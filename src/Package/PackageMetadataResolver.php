@@ -54,28 +54,8 @@ class PackageMetadataResolver
     ) {
     }
 
-    public function isFresh(Package $package, ?\DateTimeImmutable $crawledAt = null): bool
-    {
-        $crawledAt ??= (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
-
-        if (null !== $lastCrawledAt = $package->getCrawledAt()) {
-            $interval = $crawledAt->getTimestamp() - $lastCrawledAt->getTimestamp();
-            $delay = 3600;
-
-            if ($interval < $delay) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public function resolve(Package $package): void
     {
-        if ($this->isFresh($package)) {
-            return;
-        }
-
         if (null !== $registry = $package->getMirrorRegistry()) {
             $composerPackages = $this->resolveFromRegistry($package->getName(), $registry);
         } elseif (null !== $repositoryUrl = $package->getRepositoryUrl()) {
@@ -85,8 +65,9 @@ class PackageMetadataResolver
             throw new \LogicException();
         }
 
-        $crawledAt = new \DateTime();
-        $package->setCrawledAt($crawledAt);
+        $updatedAt = new \DateTime();
+        $package->setCrawledAt($updatedAt);
+        $package->setUpdatedAt($updatedAt);
 
         $this->updatePackage($package, $composerPackages);
 
@@ -150,9 +131,7 @@ class PackageMetadataResolver
      */
     private function updatePackage(Package $package, array $composerPackages): void
     {
-        $versionRepository = $this->entityManager->getRepository(Version::class);
-
-        $existingVersions = $versionRepository->getVersionMetadataForUpdate($package);
+        $existingVersions = $this->versionRepository->getVersionMetadataForUpdate($package);
 
         foreach ($composerPackages as $composerPackage) {
             if ($composerPackage instanceof AliasPackage) {
@@ -171,7 +150,7 @@ class PackageMetadataResolver
         }
 
         foreach ($existingVersions as $version) {
-            $versionEntity = $versionRepository->find($version['id']);
+            $versionEntity = $this->versionRepository->find($version['id']);
 
             $this->entityManager->remove($versionEntity);
         }

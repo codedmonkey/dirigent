@@ -9,6 +9,7 @@ use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Conductor\EasyAdmin\PackagePaginator;
 use CodedMonkey\Conductor\Form\PackageAddMirroringType;
 use CodedMonkey\Conductor\Form\PackageAddVcsType;
+use CodedMonkey\Conductor\Message\UpdatePackage;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
@@ -16,6 +17,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -24,8 +26,9 @@ class DashboardPackagesController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly PackageRepository $packageRepository,
-        private readonly PackageMetadataResolver $metadataResolver,
         private readonly VersionRepository $versionRepository,
+        private readonly PackageMetadataResolver $metadataResolver,
+        private readonly MessageBusInterface $messenger,
         private readonly AdminUrlGenerator $adminUrlGenerator,
     ) {
     }
@@ -115,11 +118,9 @@ class DashboardPackagesController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
+            $registry = $form->get('registry')->getData();
 
-            $registry = $formData['registry'];
-
-            $packageNames = explode(PHP_EOL, $formData['packages']);
+            $packageNames = explode(PHP_EOL, $form->get('packages')->getData());
             $packageNames = array_map('trim', $packageNames);
 
             $results = [];
@@ -145,9 +146,11 @@ class DashboardPackagesController extends AbstractController
 
                 $package = new Package();
                 $package->setName($packageName);
-                $package->setMirrorRegistry($formData['registry']);
+                $package->setMirrorRegistry($registry);
 
-                $this->metadataResolver->resolve($package);
+                $this->packageRepository->save($package, true);
+
+                $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
                 $results[] = [
                     'error' => false,
@@ -182,9 +185,9 @@ class DashboardPackagesController extends AbstractController
             $package->setRepositoryCredentials($formData['repositoryCredentials']);
             $package->setRepositoryUrl($formData['repositoryUrl']);
 
-            $this->metadataResolver->resolve($package);
+            $this->packageRepository->save($package, true);
 
-            $this->entityManager->flush();
+            $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
             return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());
         }
@@ -198,11 +201,9 @@ class DashboardPackagesController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function update(string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
 
-        $this->metadataResolver->resolve($package);
-
-        $this->entityManager->flush();
+        $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
         return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
     }
@@ -211,7 +212,7 @@ class DashboardPackagesController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function delete(string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
 
         foreach ($package->getVersions() as $version) {
             $this->entityManager->remove($version);

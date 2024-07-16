@@ -36,6 +36,8 @@ readonly class PackageProviderManager
 
         $this->write($package->getName(), $releasePackages);
         $this->write($package->getName(), $devPackages, true);
+
+        $package->setDumpedAt(new \DateTime());
     }
 
     public function exists(string $packageName): bool

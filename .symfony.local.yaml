@@ -5,5 +5,5 @@ http:
 
 workers:
   messenger_consume:
-    cmd: ['symfony', 'console', 'messenger:consume', 'async', '--sleep', '10']
+    cmd: ['symfony', 'console', 'messenger:consume', 'async', 'scheduler_packages', '--sleep', '10']
     watch: ['config', 'src', 'templates']
