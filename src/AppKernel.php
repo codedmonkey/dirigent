@@ -19,6 +19,10 @@ class AppKernel extends BaseKernel
         $container->import($configDir . '/conductor.{json,php,yaml}');
         $container->import($configDir . '/packages/*.yaml');
         $container->import($configDir . '/services.yaml');
+
+        if (isset($_SERVER['CONDUCTOR_IMAGE'])) {
+            $container->import('/srv/config/*.{json,php,yaml}');
+        }
     }
 
     public function boot(): void

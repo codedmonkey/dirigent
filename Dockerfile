@@ -1,19 +1,17 @@
 FROM composer:2 AS build
 
-WORKDIR /srv
+WORKDIR /srv/app
 
 COPY composer.json composer.lock ./
 
-RUN set -eux; \
-    composer install \
+RUN composer install \
         --no-ansi \
         --no-autoloader \
         --no-interaction \
         --no-plugins \
         --no-progress \
         --no-scripts \
-        --no-suggest \
-        --prefer-dist;
+        --prefer-dist
 
 FROM alpine:3.19
 
@@ -24,15 +22,14 @@ LABEL org.opencontainers.image.licenses=MIT
 ARG UID=1000
 ARG GID=1000
 
-RUN set -eux; \
+RUN set -e; \
     addgroup -g $GID -S conductor; \
-    adduser -u $UID -S -G conductor conductor;
-
-RUN set -eux; \
+    adduser -u $UID -S -G conductor conductor; \
     apk upgrade --no-cache; \
     apk add --no-cache --upgrade \
         caddy \
         curl \
+        git \
         php82 \
         php82-ctype \
         php82-curl \
@@ -50,29 +47,30 @@ RUN set -eux; \
         php82-simplexml \
         php82-tokenizer \
         php82-xml \
-        postgresql; \
+        postgresql \
+        supervisor; \
     ln -s /usr/sbin/php-fpm82 /usr/sbin/php-fpm; \
-    mkdir -p /run/postgresql /var/lib/postgresql/data; \
-    chown -R conductor:conductor /run /srv /var/lib/postgresql;
+    mkdir -p /run/postgresql; \
+    chown -R conductor:conductor /run /srv;
 
 COPY --from=build /usr/bin/composer /usr/bin/composer
 
 COPY docker/init.sh /
 COPY docker/Caddyfile /etc/caddy/
+COPY docker/php.ini /etc/php82/conf.d/
 COPY docker/php-fpm.conf /etc/php82/
+COPY docker/supervisord.conf /etc/
+COPY docker/process /srv/process/
 
 USER conductor
 
-RUN set -eux; \
-    initdb /var/lib/postgresql/data;
-
-VOLUME /var/lib/postgresql/data
-
 ENV APP_ENV="prod"
+ENV DATABASE_URL="postgresql://conductor@127.0.0.1:5432/conductor?serverVersion=16&charset=utf8"
+ENV CONDUCTOR_IMAGE=1
 
-WORKDIR /srv
+WORKDIR /srv/app
 
-COPY --chown=conductor:conductor --from=build /srv ./
+COPY --chown=conductor:conductor --from=build /srv/app ./
 COPY --chown=conductor:conductor .env importmap.php readme.md license.md ./
 COPY --chown=conductor:conductor assets assets/
 COPY --chown=conductor:conductor bin bin/
@@ -80,12 +78,16 @@ COPY --chown=conductor:conductor config config/
 COPY --chown=conductor:conductor migrations migrations/
 COPY --chown=conductor:conductor public public/
 COPY --chown=conductor:conductor src src/
+COPY --chown=conductor:conductor translations translations/
 COPY --chown=conductor:conductor templates templates/
 
-RUN set -eux; \
+COPY docker/conductor.yaml /srv/app/config/packages/
+
+RUN set -e; \
     chmod +x bin/console; \
-    composer dump-autoload --classmap-authoritative --no-ansi --no-interaction; \
-    mkdir -p storage;
+    composer dump-autoload --classmap-authoritative --no-ansi --no-interaction
+
+VOLUME /srv/data
 
 EXPOSE 7015
 
