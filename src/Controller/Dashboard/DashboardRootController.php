@@ -42,8 +42,8 @@ class DashboardRootController extends AbstractDashboardController
 
         yield MenuItem::section('Personal');
         if ($user) {
-            yield MenuItem::linkToRoute('Account', 'fa fa-id-card', 'dashboard_account');
             yield MenuItem::linkToCrud('Access tokens', 'fa fa-key', AccessToken::class);
+            yield MenuItem::linkToRoute('Account', 'fa fa-id-card', 'dashboard_account');
             yield MenuItem::linkToLogout('Sign out', 'fa fa-user');
         } else {
             yield MenuItem::linkToRoute('Sign in', 'fa fa-user', 'dashboard_login');

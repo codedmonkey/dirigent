@@ -30,10 +30,11 @@ class DashboardCredentialsController extends AbstractCrudController
         yield TextareaField::new('description')
             ->onlyOnForms();
         yield ChoiceField::new('type')
+            ->setTemplatePath('dashboard/fields/credentials_type.html.twig')
             ->setRequired(true)
             ->setChoices(CredentialsType::cases())
-            ->setFormTypeOption('choice_label', function ($choice, string $key): string {
-                return "credentials.type.{$key}";
+            ->setFormTypeOption('choice_label', function (CredentialsType $choice): string {
+                return "credentials.type.{$choice->value}";
             })
             ->renderExpanded();
         yield TextField::new('username')

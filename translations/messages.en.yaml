@@ -1,5 +1,49 @@
+Account: Account
+Administration: Administration
+Credits: Credits
+Dashboard: Dashboard
+Documentation: Documentation
+Packages: Packages
+Personal: Personal
+Sign out: Sign out
+Usage: Usage
+
+Access token: Access token
+Access tokens: Access tokens
+Credentials: Credentials
+Registry: Registry
+Registries: Registries
+User: User
+Users: Users
+
+Current password: Current password
+Description: Description
+Email: Email
+New password: New password
+Name: Name
+Package Mirroring: Package Mirroring
+Password: Password
+Repeat new password: Repeat new password
+Roles: Roles
+Token: Token
+Type: Type
+URL: URL
+Username: Username
+
+Impersonate: Impersonate
+Move Down: Move own
+Move Up: Move Up
+
+Admin: Admin
+Owner: Owner
+
+credentials:
+  type:
+    http-basic: HTTP Basic credentials
+    gitlab-oauth: GitLab OAuth token
+    gitlab-token: GitLab access token
 registry:
   package_mirroring:
-    Disabled: Package mirroring disabled
-    Manual: Only mirror specified packages
-    Automatic: Automatically mirror packages on request
+    none: Package mirroring disabled
+    manual: Only mirror specified packages
+    auto: Automatically mirror packages on request
