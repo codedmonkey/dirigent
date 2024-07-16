@@ -5,7 +5,6 @@ namespace CodedMonkey\Conductor\Form;
 use CodedMonkey\Conductor\Doctrine\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -18,14 +17,10 @@ class RegistrationFormType extends AbstractType
             ->add('username', TextType::class, [
                 'required' => true,
             ])
-            ->add('name', TextType::class, [
-                'required' => false,
-            ])
             ->add('email', EmailType::class, [
                 'required' => false,
             ])
-            ->add('plainPassword', PasswordType::class, [
-                'label' => 'Password',
+            ->add('plainPassword', NewPasswordType::class, [
                 'required' => true,
             ]);
     }

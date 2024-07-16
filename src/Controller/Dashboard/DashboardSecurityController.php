@@ -34,6 +34,7 @@ class DashboardSecurityController extends AbstractController
             'last_username' => $authenticationUtils->getLastUsername(),
             'forgot_password_enabled' => true,
             'forgot_password_path' => $adminUrlGenerator->setRoute('dashboard_reset_password_request')->generateUrl(),
+            'remember_me_enabled' => true,
         ]);
     }
 

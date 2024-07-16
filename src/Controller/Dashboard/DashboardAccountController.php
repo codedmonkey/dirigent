@@ -4,8 +4,8 @@ namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\User;
 use CodedMonkey\Conductor\Doctrine\Repository\UserRepository;
-use CodedMonkey\Conductor\Form\AccountType;
-use CodedMonkey\Conductor\Form\ChangePasswordType;
+use CodedMonkey\Conductor\Form\AccountFormType;
+use CodedMonkey\Conductor\Form\ChangePasswordFormType;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -35,8 +35,8 @@ class DashboardAccountController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function account(Request $request, #[CurrentUser] User $user): Response
     {
-        $accountForm = $this->createForm(AccountType::class, $user);
-        $passwordForm = $this->createForm(ChangePasswordType::class);
+        $accountForm = $this->createForm(AccountFormType::class, $user);
+        $passwordForm = $this->createForm(ChangePasswordFormType::class);
 
         $accountForm->handleRequest($request);
 

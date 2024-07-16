@@ -27,15 +27,15 @@ security:
             form_login:
                 login_path: /?routeName=dashboard_login
                 check_path: dashboard_login
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800 # 1 week in seconds
             logout:
                 target: dashboard
             switch_user: true
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used

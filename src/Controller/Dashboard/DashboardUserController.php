@@ -3,6 +3,7 @@
 namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\User;
+use CodedMonkey\Conductor\Form\NewPasswordType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -49,6 +50,7 @@ class DashboardUserController extends AbstractCrudController
         yield TextField::new('plainPassword')
             ->setLabel('Password')
             ->setFormType(PasswordType::class)
+            ->setFormTypeOption('constraints', NewPasswordType::constraints())
             ->onlyOnForms();
         yield ChoiceField::new('roles')
             ->setChoices([

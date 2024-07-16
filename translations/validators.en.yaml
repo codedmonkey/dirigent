@@ -1,0 +1,5 @@
+Enter an email address: Enter an email address
+
+Please enter a password: Please enter a password
+The password fields must match: The password fields must match
+Your password should be at least {{ limit }} characters: Your password should be at least {{ limit }} characters

@@ -3,8 +3,8 @@
 namespace CodedMonkey\Conductor\Controller\Dashboard;
 
 use CodedMonkey\Conductor\Doctrine\Entity\User;
-use CodedMonkey\Conductor\Form\ResetPasswordRequestType;
-use CodedMonkey\Conductor\Form\ResetPasswordType;
+use CodedMonkey\Conductor\Form\ResetPasswordFormType;
+use CodedMonkey\Conductor\Form\ResetPasswordRequestFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -34,7 +34,7 @@ class DashboardResetPasswordController extends AbstractController
     #[Route('/reset-password', name: 'dashboard_reset_password_request')]
     public function request(Request $request): Response
     {
-        $form = $this->createForm(ResetPasswordRequestType::class);
+        $form = $this->createForm(ResetPasswordRequestFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -85,7 +85,7 @@ class DashboardResetPasswordController extends AbstractController
             return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_reset_password_request')->generateUrl());
         }
 
-        $form = $this->createForm(ResetPasswordType::class);
+        $form = $this->createForm(ResetPasswordFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
