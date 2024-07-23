@@ -5,6 +5,7 @@ namespace CodedMonkey\Conductor\Controller\Dashboard;
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Conductor\EasyAdmin\DateIntervalField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -12,9 +13,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\Form\Extension\Core\Type\DateIntervalType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class DashboardRegistryController extends AbstractCrudController
@@ -48,6 +51,7 @@ class DashboardRegistryController extends AbstractCrudController
     {
         yield TextField::new('name')
             ->setSortable(false);
+
         yield TextareaField::new('description')
             ->onlyOnForms();
 
@@ -66,6 +70,17 @@ class DashboardRegistryController extends AbstractCrudController
                 return "registry.package_mirroring.{$choice->value}";
             })
             ->renderExpanded();
+
+        yield DateIntervalField::new('dynamicUpdateDelay')
+            ->setFormTypeOptions([
+                'with_years' => false,
+                'with_months' => false,
+                'with_weeks' => false,
+                'with_days' => false,
+                'with_hours' => true,
+                'with_minutes' => true,
+            ])
+            ->onlyOnForms();
     }
 
     public function moveUp(AdminContext $context, RegistryRepository $registryRepository): RedirectResponse

@@ -77,12 +77,6 @@ class Package
     private ?\DateTimeInterface $updateScheduledAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $crawledAt = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $indexedAt = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dumpedAt = null;
 
     #[ORM\ManyToOne]
@@ -363,26 +357,6 @@ class Package
     public function setUpdateScheduledAt(?\DateTimeInterface $updateScheduledAt): void
     {
         $this->updateScheduledAt = $updateScheduledAt;
-    }
-
-    public function getCrawledAt(): ?\DateTimeInterface
-    {
-        return $this->crawledAt;
-    }
-
-    public function setCrawledAt(?\DateTimeInterface $crawledAt): void
-    {
-        $this->crawledAt = $crawledAt;
-    }
-
-    public function getIndexedAt(): ?\DateTimeInterface
-    {
-        return $this->indexedAt;
-    }
-
-    public function setIndexedAt(?\DateTimeInterface $indexedAt): void
-    {
-        $this->indexedAt = $indexedAt;
     }
 
     public function getDumpedAt(): ?\DateTimeInterface

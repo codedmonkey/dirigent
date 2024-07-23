@@ -32,9 +32,9 @@ readonly class SchedulePackageUpdateHandler
         ]);
 
         if ($message->randomTime) {
-            // Delay message between 1 and 600 seconds
+            // Delay message up to 12 minutes
             $updateEnvelope = $updateEnvelope->with(
-                new DelayStamp(random_int(1, 600) * 1000),
+                new DelayStamp(random_int(1, 720) * 1000),
             );
         }
 

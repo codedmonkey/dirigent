@@ -203,7 +203,7 @@ class DashboardPackagesController extends AbstractController
     {
         $package = $this->packageRepository->findOneByName($packageName);
 
-        $this->messenger->dispatch(new UpdatePackage($package->getId()));
+        $this->messenger->dispatch(new UpdatePackage($package->getId(), forceRefresh: true));
 
         return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
     }
@@ -218,8 +218,7 @@ class DashboardPackagesController extends AbstractController
             $this->entityManager->remove($version);
         }
 
-        $this->entityManager->remove($package);
-        $this->entityManager->flush();
+        $this->packageRepository->remove($package, true);
 
         return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());
     }

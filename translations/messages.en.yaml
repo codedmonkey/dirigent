@@ -18,6 +18,7 @@ Users: Users
 
 Current password: Current password
 Description: Description
+Dynamic Update Delay: Dynamic Update Delay
 Email: Email
 New password: New password
 Name: Name
@@ -31,7 +32,7 @@ URL: URL
 Username: Username
 
 Impersonate: Impersonate
-Move Down: Move own
+Move Down: Move Down
 Move Up: Move Up
 
 Admin: Admin

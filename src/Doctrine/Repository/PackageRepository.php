@@ -5,6 +5,7 @@ namespace CodedMonkey\Conductor\Doctrine\Repository;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * @extends ServiceEntityRepository<Package>
@@ -17,9 +18,16 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PackageRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    private \DateInterval $updateInterval;
+
+    public function __construct(
+        ManagerRegistry $registry,
+        #[Autowire(param: 'conductor.packages.periodic_update_interval')]
+        string $updateInterval,
+    ) {
         parent::__construct($registry, Package::class);
+
+        $this->updateInterval = new \DateInterval($updateInterval);
     }
 
     public function save(Package $entity, bool $flush = false): void
@@ -47,14 +55,16 @@ class PackageRepository extends ServiceEntityRepository
     {
         $connection = $this->getEntityManager()->getConnection();
 
+        $now = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
+        $before = $now->sub($this->updateInterval);
+
         return $connection->fetchAllAssociative(
             'SELECT p.id FROM package p
-            WHERE p.abandoned = false
-                AND (p.crawled_at IS NULL OR p.crawled_at < :crawled)
+            WHERE p.update_scheduled_at IS NULL
+                AND (p.updated_at IS NULL OR p.updated_at < :crawled)
             ORDER BY p.id',
             [
-                // crawl packages every 2 weeks
-                'crawled' => date('Y-m-d H:i:s', strtotime('-2week')),
+                'crawled' => $before->format('Y-m-d H:i:s'),
             ]
         );
     }

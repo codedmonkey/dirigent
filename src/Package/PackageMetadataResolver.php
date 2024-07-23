@@ -66,7 +66,6 @@ class PackageMetadataResolver
         }
 
         $updatedAt = new \DateTime();
-        $package->setCrawledAt($updatedAt);
         $package->setUpdatedAt($updatedAt);
 
         $this->updatePackage($package, $composerPackages);
@@ -101,7 +100,7 @@ class PackageMetadataResolver
         $io->loadConfiguration($config);
         $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
 
-        $repository = new ComposerRepository(['url' => $registry->url], $io, $config, $httpDownloader);
+        $repository = new ComposerRepository(['url' => $registry->getUrl()], $io, $config, $httpDownloader);
         return $repository->findPackages($packageName);
     }
 
