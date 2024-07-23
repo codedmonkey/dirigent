@@ -6,13 +6,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
-class AppExtension extends ConfigurableExtension
+class ConductorExtension extends ConfigurableExtension
 {
-    public function getAlias(): string
-    {
-        return 'conductor';
-    }
-
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $container->setParameter('conductor.storage.path', $mergedConfig['storage']['path']);
@@ -26,6 +21,6 @@ class AppExtension extends ConfigurableExtension
 
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
     {
-        return new AppConfiguration();
+        return new ConductorConfiguration();
     }
 }
