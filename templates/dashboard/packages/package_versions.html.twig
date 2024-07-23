@@ -3,34 +3,23 @@
 {% block page_title %}{{ package.name }}{% endblock %}
 
 {% block page_content %}
-  <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 pb-3 mb-3 border-bottom">
-    <li class="nav-item">
-      {% set packageInfoUrl = ea_url()
-        .setRoute('dashboard_packages_info', {packageName: package.name}) %}
-      <a class="nav-link" href="{{ packageInfoUrl }}">Info</a>
-    </li>
-    <li class="nav-item">
-      {% set packageVersionsUrl = ea_url()
-        .setRoute('dashboard_packages_versions', {packageName: package.name}) %}
-      <a class="nav-link active" aria-current="page" href="{{ packageVersionsUrl }}">Versions</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Dependants</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Statistics</a>
-    </li>
-  </ul>
+  {% include 'dashboard/packages/package_header.html.twig' with {currentPage: 'versions'} %}
 
   <div class="list-group mb-3">
     {% for version in versions %}
       {% set packageVersionInfoUrl = ea_url()
         .setRoute('dashboard_packages_info', {packageName: package.name, packageVersion: version.version}) %}
       <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
-        {{ version.version }}
-        {% if version.hasVersionAlias() %}
-          / {{ version.versionAlias }}
-        {% endif %}
+        <div class="d-flex justify-content-between">
+          <span>
+            {{ version.version }}
+            {% if version.hasVersionAlias() %}
+              / {{ version.versionAlias }}
+            {% endif %}
+          </span>
+          <span class="text-muted">{{ version.releasedAt|date }}</span>
+        </div>
+
       </a>
     {% endfor %}
   </div>

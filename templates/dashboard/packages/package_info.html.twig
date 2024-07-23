@@ -26,28 +26,17 @@
 {% endblock %}
 
 {% block page_content %}
-  <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 pb-3 mb-3 border-bottom">
-    <li class="nav-item">
-      <a class="nav-link active" aria-current="page" href="{{ dashboard_path('dashboard_packages_info', {packageName: package.name}) }}">Info</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{{ dashboard_path('dashboard_packages_versions', {packageName: package.name}) }}">Versions</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Dependants</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Statistics</a>
-    </li>
-  </ul>
+  {% include 'dashboard/packages/package_header.html.twig' with {currentPage: 'info'} %}
 
   <div class="row mb-3">
     <div class="col-md-8">
-      <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
+      <div class="bg-body-secondary px-3 py-2 mb-2 rounded">
         <pre class="m-0"><code>composer require {{ package.name }}</code></pre>
       </div>
 
-      <p class="lead mb-0">{{ version.description }}</p>
+      <p class="lead">{{ version.description }}</p>
+
+      <p class="mb-0">Last update: {{ package.updatedAt|date }}</p>
     </div>
     <div class="col-md-4">
       <div class="bg-body-secondary px-3 py-2 rounded">
