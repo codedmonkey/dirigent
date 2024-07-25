@@ -16,7 +16,7 @@ class RegistryListener
     {
         $repository = $event->getObjectManager()->getRepository(Registry::class);
 
-        $registry->mirroringPriority = $repository->count([]) + 1;
+        $registry->setMirroringPriority($repository->count([]) + 1);
     }
 
     public function preRemove(Registry $registry, PreRemoveEventArgs $event): void
@@ -25,8 +25,8 @@ class RegistryListener
         $registries = $repository->findAll();
 
         foreach ($registries as $existingRegistry) {
-            if ($existingRegistry->mirroringPriority > $registry->mirroringPriority) {
-                $existingRegistry->mirroringPriority--;
+            if ($existingRegistry->getMirroringPriority() > $registry->getMirroringPriority()) {
+                $existingRegistry->setMirroringPriority($existingRegistry->getMirroringPriority() - 1);
 
                 $repository->save($existingRegistry);
             }

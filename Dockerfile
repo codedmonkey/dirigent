@@ -50,7 +50,7 @@ RUN set -e; \
         postgresql \
         supervisor; \
     ln -s /usr/sbin/php-fpm82 /usr/sbin/php-fpm; \
-    mkdir -p /run/postgresql; \
+    mkdir -p /run/postgresql /srv/config; \
     chown -R conductor:conductor /run /srv;
 
 COPY --from=build /usr/bin/composer /usr/bin/composer
