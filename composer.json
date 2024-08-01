@@ -2,7 +2,7 @@
     "name": "codedmonkey/conductor",
     "description": "A free and open package registry for Composer",
     "type": "project",
-    "license": "MIT",
+    "license": "FSL-1.1-MIT",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "repositories": [
