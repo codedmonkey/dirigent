@@ -32,6 +32,9 @@ class Credentials
     #[Column(nullable: true)]
     private ?string $password = null;
 
+    #[Column(nullable: true)]
+    private ?string $token = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -90,5 +93,15 @@ class Credentials
     public function setPassword(?string $password): void
     {
         $this->password = $password;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function setToken(?string $token): void
+    {
+        $this->token = $token;
     }
 }

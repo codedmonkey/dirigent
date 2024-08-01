@@ -41,5 +41,7 @@ class DashboardCredentialsController extends AbstractCrudController
             ->onlyOnForms();
         yield TextField::new('password')
             ->onlyOnForms();
+        yield TextField::new('token')
+            ->onlyOnForms();
     }
 }

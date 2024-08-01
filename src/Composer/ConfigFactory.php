@@ -56,6 +56,17 @@ class ConfigFactory
                     ],
                 ],
             ]);
+        } elseif ($credentials?->getType() === CredentialsType::GitlabPersonalAccessToken) {
+            $config->merge([
+                'config' => [
+                    'gitlab-token' => [
+                        $registry->getDomain() => [
+                            'username' => $credentials->getToken(),
+                            'token' => 'private-token',
+                        ],
+                    ],
+                ],
+            ]);
         }
 
         return $config;

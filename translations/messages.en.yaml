@@ -42,7 +42,7 @@ credentials:
   type:
     http-basic: HTTP Basic credentials
     gitlab-oauth: GitLab OAuth token
-    gitlab-token: GitLab access token
+    gitlab-pat: GitLab personal access token
 registry:
   package_mirroring:
     none: Package mirroring disabled
