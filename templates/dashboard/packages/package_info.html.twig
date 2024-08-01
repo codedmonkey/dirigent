@@ -76,9 +76,6 @@
     {{ _self.linkBlock("conflicts", version.conflict) }}
     {{ _self.linkBlock("replaces", version.replace) }}
   </div>
-
-  {{ dump(package) }}
-  {{ dump(version) }}
 {% endblock %}
 
 {% macro linkBlock(title, links) %}

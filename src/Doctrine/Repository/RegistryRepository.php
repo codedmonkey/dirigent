@@ -56,17 +56,17 @@ class RegistryRepository extends ServiceEntityRepository
 
     public function increaseMirroringPriority(Registry $registry, bool $flush = true): void
     {
-        if (1 === $registry->mirroringPriority) {
+        if (1 === $registry->getMirroringPriority()) {
             return;
         }
 
-        $currentPriority = $registry->mirroringPriority;
+        $currentPriority = $registry->getMirroringPriority();
         $targetPriority = $currentPriority - 1;
 
         $targetRegistry = $this->findOneBy(['mirroringPriority' => $targetPriority]);
 
-        $registry->mirroringPriority = $targetPriority;
-        $targetRegistry->mirroringPriority = $currentPriority;
+        $registry->setMirroringPriority($targetPriority);
+        $targetRegistry->setMirroringPriority($currentPriority);
 
         $this->save($registry);
         $this->save($targetRegistry, $flush);
@@ -74,7 +74,7 @@ class RegistryRepository extends ServiceEntityRepository
 
     public function decreaseMirroringPriority(Registry $registry, bool $flush = true): void
     {
-        $currentPriority = $registry->mirroringPriority;
+        $currentPriority = $registry->getMirroringPriority();
         $targetPriority = $currentPriority + 1;
 
         $targetRegistry = $this->findOneBy(['mirroringPriority' => $targetPriority]);
@@ -83,8 +83,8 @@ class RegistryRepository extends ServiceEntityRepository
             return;
         }
 
-        $registry->mirroringPriority = $targetPriority;
-        $targetRegistry->mirroringPriority = $currentPriority;
+        $registry->setMirroringPriority($targetPriority);
+        $targetRegistry->setMirroringPriority($currentPriority);
 
         $this->save($registry);
         $this->save($targetRegistry, $flush);
