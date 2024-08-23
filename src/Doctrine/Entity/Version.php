@@ -112,6 +112,9 @@ class Version
     #[ORM\ManyToOne(targetEntity: Package::class, inversedBy: 'versions')]
     private ?Package $package;
 
+    #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist'])]
+    private VersionDownloads $downloads;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $createdAt;
 
@@ -130,6 +133,7 @@ class Version
         $this->replace = new ArrayCollection();
         $this->suggest = new ArrayCollection();
         $this->tags = new ArrayCollection();
+        $this->downloads = new VersionDownloads($this);
         $this->createdAt = new \DateTime();
     }
 
@@ -476,6 +480,11 @@ class Version
     public function setPackage(Package $package): void
     {
         $this->package = $package;
+    }
+
+    public function getDownloads(): VersionDownloads
+    {
+        return $this->downloads;
     }
 
     public function getCreatedAt(): \DateTimeInterface

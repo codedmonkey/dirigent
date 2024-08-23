@@ -6,6 +6,7 @@ use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Conductor\Message\TrackDownloads;
 use CodedMonkey\Conductor\Message\UpdatePackage;
 use CodedMonkey\Conductor\Package\PackageDistributionResolver;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
@@ -14,9 +15,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
 use function Symfony\Component\String\u;
@@ -131,9 +135,25 @@ class ApiController extends AbstractController
 
     #[Route('/downloads', name: 'api_track_downloads', methods: ['POST'])]
     #[IsGrantedAccess]
-    public function trackDownloads(): Response
+    public function trackDownloads(Request $request): Response
     {
-        return new Response();
+        $contents = json_decode($request->getContent(), true);
+        $invalidInputs = static function ($item) {
+            return !isset($item['name'], $item['version']);
+        };
+
+        if (!is_array($contents) || !isset($contents['downloads']) || !is_array($contents['downloads']) || array_filter($contents['downloads'], $invalidInputs)) {
+            return new JsonResponse(['status' => 'error', 'message' => 'Invalid request format, must be a json object containing a downloads key filled with an array of name/version objects'], 200);
+        }
+
+        $message = new TrackDownloads($contents['downloads'], new \DateTime());
+        $envelope = new Envelope($message, [
+            new TransportNamesStamp('async'),
+        ]);
+
+        $this->messenger->dispatch($envelope);
+
+        return new JsonResponse(['status' => 'success'], Response::HTTP_CREATED);
     }
 
     private function findPackage(string $packageName): ?Package

@@ -57,6 +57,12 @@ class Package
     #[ORM\Column(nullable: true)]
     private ?string $remoteId = null;
 
+    #[ORM\ManyToOne]
+    private ?Registry $mirrorRegistry = null;
+
+    #[ORM\OneToOne(mappedBy: 'package', cascade: ['persist'])]
+    private PackageDownloads $downloads;
+
     /**
      * @var Collection<int, Version>
      */
@@ -75,9 +81,6 @@ class Package
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dumpedAt = null;
 
-    #[ORM\ManyToOne]
-    private ?Registry $mirrorRegistry = null;
-
     /**
      * @var array<string, Version>|null lookup table for versions
      */
@@ -85,6 +88,7 @@ class Package
 
     public function __construct()
     {
+        $this->downloads = new PackageDownloads($this);
         $this->versions = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
@@ -244,6 +248,21 @@ class Package
         $this->remoteId = $remoteId;
     }
 
+    public function getMirrorRegistry(): ?Registry
+    {
+        return $this->mirrorRegistry;
+    }
+
+    public function setMirrorRegistry(?Registry $mirrorRegistry): void
+    {
+        $this->mirrorRegistry = $mirrorRegistry;
+    }
+
+    public function getDownloads(): PackageDownloads
+    {
+        return $this->downloads;
+    }
+
     /**
      * @return Collection<int, Version>
      */
@@ -301,16 +320,6 @@ class Package
     public function setDumpedAt(?\DateTimeInterface $dumpedAt): void
     {
         $this->dumpedAt = $dumpedAt;
-    }
-
-    public function getMirrorRegistry(): ?Registry
-    {
-        return $this->mirrorRegistry;
-    }
-
-    public function setMirrorRegistry(?Registry $mirrorRegistry): void
-    {
-        $this->mirrorRegistry = $mirrorRegistry;
     }
 
     public static function sortVersions(Version $a, Version $b): int
