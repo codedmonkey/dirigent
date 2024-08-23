@@ -414,7 +414,7 @@ class Version
 
     public function getAuthors(): array
     {
-        return $this->authors;
+        return $this->authors ?? [];
     }
 
     public function setAuthors(array $authors): void
@@ -535,5 +535,136 @@ class Version
         }
 
         return '';
+    }
+
+    /**
+     * Get funding, sorted to help the V2 metadata compression algo
+     * @return array<array{type?: string, url?: string}>|null
+     */
+    public function getFundingSorted(): ?array
+    {
+        if ($this->funding === null) {
+            return null;
+        }
+
+        $funding = $this->funding;
+        usort($funding, static function ($a, $b) {
+            $keyA = ($a['type'] ?? '') . ($a['url'] ?? '');
+            $keyB = ($b['type'] ?? '') . ($b['url'] ?? '');
+
+            return $keyA <=> $keyB;
+        });
+
+        return $funding;
+    }
+
+    public function toComposerArray(): array
+    {
+        $tags = [];
+        foreach ($this->getTags() as $tag) {
+            $tags[] = $tag->getName();
+        }
+
+        $authors = $this->getAuthors();
+        foreach ($authors as &$author) {
+            uksort($author, [$this, 'sortAuthorKeys']);
+        }
+        unset($author);
+
+        $data = [
+            'name' => $this->getName(),
+            'description' => (string) $this->getDescription(),
+            'keywords' => $tags,
+            'homepage' => (string) $this->getHomepage(),
+            'version' => $this->getVersion(),
+            'version_normalized' => $this->getNormalizedVersion(),
+            'license' => $this->getLicense(),
+            'authors' => $authors,
+            'source' => $this->getSource(),
+            'dist' => $this->getDist(),
+            'type' => $this->getType(),
+        ];
+
+        if ($this->getSupport()) {
+            $data['support'] = $this->getSupport();
+        }
+        if ($this->getPhpExt() !== null) {
+            $data['php-ext'] = $this->getPhpExt();
+        }
+        $funding = $this->getFundingSorted();
+        if ($funding !== null) {
+            $data['funding'] = $funding;
+        }
+        if ($this->getReleasedAt()) {
+            $data['time'] = $this->getReleasedAt()->format('Y-m-d\TH:i:sP');
+        }
+        if ($this->getAutoload()) {
+            $data['autoload'] = $this->getAutoload();
+        }
+        if ($this->getExtra()) {
+            $data['extra'] = $this->getExtra();
+        }
+        if ($this->getTargetDir()) {
+            $data['target-dir'] = $this->getTargetDir();
+        }
+        if ($this->getIncludePaths()) {
+            $data['include-path'] = $this->getIncludePaths();
+        }
+        if ($this->getBinaries()) {
+            $data['bin'] = $this->getBinaries();
+        }
+
+        $supportedLinkTypes = [
+            'require' => 'require',
+            'devRequire' => 'require-dev',
+            'suggest' => 'suggest',
+            'conflict' => 'conflict',
+            'provide' => 'provide',
+            'replace' => 'replace',
+        ];
+
+        if ($this->isDefaultBranch()) {
+            $data['default-branch'] = true;
+        }
+
+        foreach ($supportedLinkTypes as $method => $linkType) {
+            if (isset($versionData[$this->id][$method])) {
+                foreach ($versionData[$this->id][$method] as $link) {
+                    $data[$linkType][$link['name']] = $link['version'];
+                }
+                continue;
+            }
+            /** @var PackageLink $link */
+            foreach ($this->{'get'.$method}() as $link) {
+                $link = $link->toArray();
+                $data[$linkType][key($link)] = current($link);
+            }
+        }
+
+        if ($this->getPackage()->isAbandoned()) {
+            $data['abandoned'] = $this->getPackage()->getReplacementPackage() ?: true;
+        }
+
+        if (isset($data['support'])) {
+            ksort($data['support']);
+        }
+
+        if (isset($data['php-ext']['configure-options'])) {
+            usort($data['php-ext']['configure-options'], fn ($a, $b) => $a['name'] ?? '' <=> $b['name'] ?? '');
+        }
+
+        return $data;
+    }
+
+    private function sortAuthorKeys(string $a, string $b): int
+    {
+        static $order = ['name' => 1, 'email' => 2, 'homepage' => 3, 'role' => 4];
+        $aIndex = $order[$a] ?? 5;
+        $bIndex = $order[$b] ?? 5;
+        if ($aIndex === $bIndex) {
+            return $a <=> $b;
+        }
+
+        return $aIndex <=> $bIndex;
     }
 }

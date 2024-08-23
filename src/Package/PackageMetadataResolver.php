@@ -12,6 +12,7 @@ use CodedMonkey\Conductor\Doctrine\Entity\SuggestLink;
 use CodedMonkey\Conductor\Doctrine\Entity\Version;
 use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Conductor\Message\DumpPackageProvider;
 use Composer\IO\NullIO;
 use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
@@ -20,6 +21,7 @@ use Composer\Repository\ComposerRepository;
 use Composer\Repository\VcsRepository;
 use Composer\Util\HttpDownloader;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class PackageMetadataResolver
 {
@@ -47,7 +49,7 @@ class PackageMetadataResolver
     ];
 
     public function __construct(
-        private readonly PackageProviderManager $providerManager,
+        private readonly MessageBusInterface $messenger,
         private readonly EntityManagerInterface $entityManager,
         private readonly RegistryRepository $registryRepository,
         private readonly VersionRepository $versionRepository,
@@ -70,7 +72,7 @@ class PackageMetadataResolver
 
         $this->updatePackage($package, $composerPackages);
 
-        $this->providerManager->dump($package, $composerPackages);
+        $this->messenger->dispatch(new DumpPackageProvider($package->getId()));
     }
 
     public function findPackageProvider(string $packageName): ?Registry
@@ -177,13 +179,38 @@ class PackageMetadataResolver
         $version->setIncludePaths($data->getIncludePaths());
         $version->setSupport($data->getSupport());
         $version->setFunding($data->getFunding());
-
         $version->setHomepage($data->getHomepage());
         $version->setLicense($data->getLicense() ?: []);
+        $version->setType($this->sanitize($data->getType()));
 
         $version->setPackage($package);
         $version->setUpdatedAt(new \DateTime());
         $version->setReleasedAt($data->getReleaseDate());
+
+        $version->setAuthors([]);
+        if ($data->getAuthors()) {
+            $authors = [];
+            foreach ($data->getAuthors() as $authorData) {
+                $author = [];
+
+                foreach (['email', 'name', 'homepage', 'role'] as $field) {
+                    if (isset($authorData[$field])) {
+                        $author[$field] = trim($authorData[$field]);
+                        if ('' === $author[$field]) {
+                            unset($author[$field]);
+                        }
+                    }
+                }
+
+                // skip authors with no information
+                if (!isset($authorData['email']) && !isset($authorData['name'])) {
+                    continue;
+                }
+
+                $authors[] = $author;
+            }
+            $version->setAuthors($authors);
+        }
 
         if ($data->getSourceType()) {
             $source['type'] = $data->getSourceType();
@@ -210,7 +237,7 @@ class PackageMetadataResolver
 
         if ($data->isDefaultBranch()) {
             $package->setDescription($description);
-            $package->setRepositoryType($this->sanitize($data->getType()));
+            $package->setType($this->sanitize($data->getType()));
             if ($data->isAbandoned() && !$package->isAbandoned()) {
                 //$io->write('Marking package abandoned as per composer metadata from '.$version->getVersion());
                 $package->setAbandoned(true);

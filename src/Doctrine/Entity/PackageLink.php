@@ -59,4 +59,12 @@ abstract class PackageLink
     {
         $this->version = $version;
     }
+
+    /**
+     * @return non-empty-array<string, string>
+     */
+    public function toArray(): array
+    {
+        return [$this->getPackageName() => $this->getPackageVersion()];
+    }
 }

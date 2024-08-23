@@ -4,7 +4,6 @@ namespace CodedMonkey\Conductor\Package;
 
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use Composer\MetadataMinifier\MetadataMinifier;
-use Composer\Package\Dumper\ArrayDumper;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -21,16 +20,21 @@ readonly class PackageProviderManager
         $this->storagePath = "$storagePath/provider";
     }
 
-    public function dump(Package $package, array $composerPackages): void
+    public function dump(Package $package): void
     {
         $releasePackages = [];
         $devPackages = [];
 
-        foreach ($composerPackages as $composerPackage) {
-            if (!$composerPackage->isDev()) {
-                $releasePackages[] = $composerPackage;
+        $versions = $package->getVersions()->toArray();
+        usort($versions, [Package::class, 'sortVersions']);
+
+        foreach ($versions as $version) {
+            $versionData = $version->toComposerArray();
+
+            if (!$version->isDevelopment()) {
+                $releasePackages[] = $versionData;
             } else {
-                $devPackages[] = $composerPackage;
+                $devPackages[] = $versionData;
             }
         }
 
@@ -52,7 +56,6 @@ readonly class PackageProviderManager
 
     private function write(string $packageName, array $composerPackages, bool $development = false): void
     {
-
         $path = $this->path(!$development ? $packageName : "{$packageName}~dev");
         $data = $this->compile($packageName, $composerPackages);
 
@@ -65,12 +68,10 @@ readonly class PackageProviderManager
 
     private function compile(string $packageName, array $composerPackages): array
     {
-        $data = array_map([new ArrayDumper(), 'dump'], $composerPackages);
-
         return [
             'minified' => 'composer/2.0',
             'packages' => [
-                $packageName => MetadataMinifier::minify($data),
+                $packageName => MetadataMinifier::minify($composerPackages),
             ],
         ];
     }

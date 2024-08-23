@@ -38,6 +38,9 @@ class Package
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
+    private ?string $type = null;
+
+    #[ORM\Column(nullable: true)]
     private ?string $language = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -144,6 +147,16 @@ class Package
     public function setDescription(?string $description): void
     {
         $this->description = $description;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): void
+    {
+        $this->type = $type;
     }
 
     public function getLanguage(): ?string
