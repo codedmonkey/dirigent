@@ -21,7 +21,8 @@ class DashboardCredentialsController extends AbstractCrudController
     {
         return parent::configureCrud($crud)
             ->setDefaultSort(['name' => 'ASC'])
-            ->setEntityPermission('ROLE_ADMIN');
+            ->setEntityPermission('ROLE_ADMIN')
+            ->overrideTemplate('layout', 'dashboard/credentials/layout.html.twig');
     }
 
     public function configureFields(string $pageName): iterable
@@ -38,10 +39,13 @@ class DashboardCredentialsController extends AbstractCrudController
             })
             ->renderExpanded();
         yield TextField::new('username')
+            ->setFormTypeOption('row_attr', ['data-credentials-field' => 'username'])
             ->onlyOnForms();
         yield TextField::new('password')
+            ->setFormTypeOption('row_attr', ['data-credentials-field' => 'password'])
             ->onlyOnForms();
         yield TextField::new('token')
+            ->setFormTypeOption('row_attr', ['data-credentials-field' => 'token'])
             ->onlyOnForms();
     }
 }

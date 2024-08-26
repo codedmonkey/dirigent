@@ -14,18 +14,6 @@ class ConfigFactory
     {
         $config = Factory::createConfig();
 
-        if ($credentials?->getType() === CredentialsType::GitlabOauth) {
-            $config->merge([
-                'config' => [
-                    'gitlab-oauth' => [
-                        parse_url($url, PHP_URL_HOST) => [
-                            'token' => $credentials->getPassword(),
-                        ],
-                    ],
-                ],
-            ]);
-        }
-
         return $config;
     }
 
@@ -46,12 +34,13 @@ class ConfigFactory
                     ],
                 ],
             ]);
-        } elseif ($credentials?->getType() === CredentialsType::GitlabOauth) {
+        } elseif ($credentials?->getType() === CredentialsType::GitlabDeployToken) {
             $config->merge([
                 'config' => [
-                    'gitlab-oauth' => [
+                    'gitlab-token' => [
                         $registry->getDomain() => [
-                            'token' => $credentials->getPassword(),
+                            'username' => $credentials->getUsername(),
+                            'token' => $credentials->getToken(),
                         ],
                     ],
                 ],

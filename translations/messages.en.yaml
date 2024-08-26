@@ -41,7 +41,7 @@ Owner: Owner
 credentials:
   type:
     http-basic: HTTP Basic credentials
-    gitlab-oauth: GitLab OAuth token
+    gitlab-dt: GitLab deploy token
     gitlab-pat: GitLab personal access token
 registry:
   package_mirroring:
