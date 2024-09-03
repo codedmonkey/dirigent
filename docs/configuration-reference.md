@@ -1,8 +1,10 @@
 # Conductor Configuration Reference
 
-## title
+## conductor (root)
 
-## slug
+### title
+
+### slug
 
 ## security
 

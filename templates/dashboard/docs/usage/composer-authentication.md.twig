@@ -1,0 +1,7 @@
+---
+title: Authenticate with Composer
+---
+
+```shell
+ composer config --global --auth http-basic.{{ app.request.getHost() }} {{ app.user.username }} <access-token>
+```

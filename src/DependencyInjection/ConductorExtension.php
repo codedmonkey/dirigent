@@ -5,12 +5,19 @@ namespace CodedMonkey\Conductor\DependencyInjection;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class ConductorExtension extends ConfigurableExtension
 {
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
+        if (null === $slug = $mergedConfig['slug']) {
+            $slug = (new AsciiSlugger())->slug($mergedConfig['title']);
+            $slug = strtolower($slug);
+        }
+
         $container->setParameter('conductor.title', $mergedConfig['title']);
+        $container->setParameter('conductor.slug', $slug);
 
         $container->setParameter('conductor.security.public_access', $mergedConfig['security']['public']);
         $container->setParameter('conductor.security.registration_enabled', $mergedConfig['security']['registration']);

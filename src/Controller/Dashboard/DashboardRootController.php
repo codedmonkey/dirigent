@@ -11,11 +11,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Yaml\Yaml;
 
 class DashboardRootController extends AbstractDashboardController
 {
@@ -61,7 +64,7 @@ class DashboardRootController extends AbstractDashboardController
         }
 
         yield MenuItem::section('Documentation');
-        yield MenuItem::linkToRoute('Usage', 'fa fa-file', 'dashboard_docs');
+        yield MenuItem::linkToRoute('Usage', 'fa fa-file', 'dashboard_usage_docs');
         yield MenuItem::linkToRoute('Administration', 'fa fa-file', 'dashboard_admin_docs')
             ->setPermission('ROLE_ADMIN');
         yield MenuItem::linkToRoute('Credits', 'fa fa-file', 'dashboard_credits');
@@ -89,23 +92,69 @@ class DashboardRootController extends AbstractDashboardController
         return $this->render('dashboard/index.html.twig');
     }
 
-    #[Route('/dashboard/docs', name: 'dashboard_docs')]
+    #[Route('/dashboard/docs/usage/{page}', name: 'dashboard_usage_docs')]
     #[IsGrantedAccess]
-    public function docs(): Response
+    public function docs(string $page = 'readme'): Response
     {
-        return $this->render('dashboard/docs/index.html.twig');
+        return $this->render('dashboard/docs/usage.html.twig', [
+            'page' => $this->parseDocumentationFile('usage', $page),
+            'pageName' => $page,
+        ]);
     }
 
-    #[Route('/dashboard/docs/admin', name: 'dashboard_admin_docs')]
+    #[Route('/dashboard/docs/admin/{page}', name: 'dashboard_admin_docs')]
     #[IsGranted('ROLE_ADMIN')]
-    public function adminDocs(): Response
+    public function adminDocs(string $page = 'readme'): Response
     {
-        return $this->render('dashboard/docs/admin.html.twig');
+        return $this->render('dashboard/docs/admin.html.twig', [
+            'page' => $this->parseDocumentationFile('admin', $page),
+            'pageName' => $page,
+        ]);
     }
 
     #[Route('/dashboard/credits', name: 'dashboard_credits')]
     public function credits(): Response
     {
         return $this->render('dashboard/credits.html.twig');
+    }
+
+    private function parseDocumentationFile(string $directory, string $page): array
+    {
+        $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
+        $twig = $this->container->get('twig');
+
+        $template = "dashboard/docs/$directory/$page.md.twig";
+
+        if (!$twig->getLoader()->exists($template)) {
+            throw new NotFoundHttpException();
+        }
+
+        $markdownContents = $twig->render($template);
+
+        // Extract front matter
+        $frontMatterPattern = '/^---\s*\n(.*?)\n---\s*\n/s';
+
+        if (!preg_match($frontMatterPattern, $markdownContents, $matches)) {
+            throw new \LogicException("Template \"$template\" doesn't contain a front matter.");
+        }
+
+        $frontMatter = $matches[1];
+        $markdownContents = preg_replace($frontMatterPattern, '', $markdownContents);
+
+        // Parse front matter
+        $data = Yaml::parse($frontMatter);
+
+        // Fix relative URLs
+        $relativeLinkPattern = '/(\[.*?]\()([^\/)]+)(\))/';
+        $docsUrlPattern = $adminUrlGenerator->setRoute("dashboard_{$directory}_docs", ['page' => 'pagename'])->generateUrl();
+        $docsUrlPattern = str_replace('pagename', '$2', $docsUrlPattern);
+        $relativeLinkReplacementPattern = "\$1{$docsUrlPattern}\$3";
+
+        $markdownContents = preg_replace($relativeLinkPattern, $relativeLinkReplacementPattern, $markdownContents);
+
+        // Finish parsing
+        $data['contents'] = $markdownContents;
+
+        return $data;
     }
 }

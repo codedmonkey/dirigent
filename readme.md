@@ -22,7 +22,7 @@ The easiest way to install Conductor is through our Docker image.
 docker run -p "7015:7015" ghcr.io/codedmonkey/conductor:0.1
 ```
 
-Learn more about installing and configuring Conductor in our [installation documentation][docs-install].
+Learn more about installing and configuring Conductor in our [installation guide][docs-install].
 
 ## Sponsor
 
@@ -32,7 +32,16 @@ Help Conductor by [sponsoring][codedmonkey-sponsor] its development!
 
 The documentation is available [in our Git repository][docs].
 
+## License
+
+Conductor is licensed under the _Functional Source License, Version 1.1, MIT Future License_. It's free to use for
+internal and non-commercial purposes, but it's not allowed to use a release of the project for commercial
+purposes (competing use) until the second anniversary of the date the release is made available. See our
+[full license][license] for more details.
+
 ## Contributing
+
+Feel free to report issues and make suggestions on [GitHub][github-issues].
 
 ## About Me
 
@@ -41,7 +50,9 @@ Conductor is developed by [Coded Monkey][codedmonkey].
 [codedmonkey]: https://www.codedmonkey.com
 [codedmonkey-sponsor]: https://www.codedmonkey.com/sponsor?project=conductor
 [composer]: https://getcomposer.org
-[docs]: docs/index.md
+[docs]: docs/readme.md
 [docs-install]: docs/install.md
+[github-issues]: https://github.com/codedmonkey/conductor/issues
+[license]: license.md
 [packagist]: https://packagist.org
 [php]: https://php.net

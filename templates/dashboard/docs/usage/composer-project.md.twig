@@ -1,0 +1,49 @@
+---
+title: Using Conductor in a Composer project
+---
+
+If you haven't already, make sure to [set up authentication](composer-authentication) for your Composer installation.
+
+To start using your Conductor registry in a Composer project, you'll need to add some configuration to the
+`composer.json` file, or specify it as a command line option when creating new projects. The examples on this page
+also disable fetching from Packagist directly.
+
+**Note that projects using Composer 1 are not supported by Conductor.**
+
+## New projects
+
+### composer init
+
+```shell
+composer init --repository="{{ app.request.getSchemeAndHttpHost() }}" --repository='{"packagist.org": false}'
+```
+
+### composer create-project
+
+```shell
+composer create-project acme/website --add-repository --repository="{{ app.request.getSchemeAndHttpHost() }}" --repository='{"packagist.org": false}'
+```
+
+## Existing projects
+
+You can enable the Conductor registry on existing Composer projects by using the Composer CLI or by editing
+`composer.json` directly.
+
+### composer config
+
+```shell
+composer config repositories.{{ conductor.slug }} composer {{ app.request.getSchemeAndHttpHost() }}
+composer config repositories.packagist.org false
+```
+
+### Manually editing composer.json
+
+```json
+{
+    "repositories": [
+        {"type": "composer", "url": ""},
+        {"packagist.org": false}
+    ]
+}
+```
+
