@@ -11,7 +11,6 @@ while ! nc -z localhost 5432; do
 done;
 
 bin/console doctrine:database:create --if-not-exists --no-ansi --no-interaction
-bin/console doctrine:schema:update --complete --force --no-ansi --no-interaction
-bin/console messenger:setup-transports --no-ansi --no-interaction
+bin/console doctrine:migrations:migrate --allow-no-migration --no-ansi --no-interaction
 
 exec php-fpm
