@@ -71,7 +71,7 @@ ENV CONDUCTOR_IMAGE=1
 WORKDIR /srv/app
 
 COPY --chown=conductor:conductor --from=build /srv/app ./
-COPY --chown=conductor:conductor .env importmap.php readme.md license.md ./
+COPY --chown=conductor:conductor .env readme.md license.md ./
 COPY --chown=conductor:conductor assets assets/
 COPY --chown=conductor:conductor bin bin/
 COPY --chown=conductor:conductor config config/
