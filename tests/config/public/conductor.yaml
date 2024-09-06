@@ -1,0 +1,8 @@
+conductor:
+  title: 'Conductor Tests'
+  security:
+    public: true
+    registration: true
+  dist_mirroring:
+    enabled: false
+    preferred: false
