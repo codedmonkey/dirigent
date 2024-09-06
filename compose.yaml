@@ -5,10 +5,10 @@ services:
     ports:
       - "5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-conductor}
       # You should definitely change the password in production
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-conductor}
     healthcheck:
       test: ["CMD", "pg_isready"]
       timeout: 5s
