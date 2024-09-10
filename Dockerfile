@@ -72,7 +72,6 @@ WORKDIR /srv/app
 
 COPY --chown=conductor:conductor --from=build /srv/app ./
 COPY --chown=conductor:conductor .env readme.md license.md ./
-COPY --chown=conductor:conductor assets assets/
 COPY --chown=conductor:conductor bin bin/
 COPY --chown=conductor:conductor config config/
 COPY --chown=conductor:conductor migrations migrations/
