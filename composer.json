@@ -108,6 +108,9 @@
         "sort-packages": true
     },
     "extra": {
+        "runtime": {
+            "dotenv_path": ".env.conductor"
+        },
         "symfony": {
             "allow-contrib": false,
             "require": "7.1.*"

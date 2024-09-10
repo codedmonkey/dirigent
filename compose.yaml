@@ -1,3 +1,5 @@
+# This Docker Compose configuration is for development purposes only
+
 services:
 ###> doctrine/doctrine-bundle ###
   database:

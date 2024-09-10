@@ -1,3 +1,5 @@
+# This is an example override configuration for development purposes only
+
 services:
 ###> doctrine/doctrine-bundle ###
   database:

@@ -1,12 +1,13 @@
+/.env
 /compose.override.yaml
 /config/conductor.yaml
 /config/packages/conductor.yaml
 /storage/
 
 ###> symfony/framework-bundle ###
-/.env.local
-/.env.local.php
-/.env.*.local
+/.env.conductor.local
+/.env.conductor.local.php
+/.env.conductor.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
