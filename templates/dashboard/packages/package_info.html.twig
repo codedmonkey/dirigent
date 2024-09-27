@@ -76,6 +76,12 @@
     {{ _self.linkBlock("conflicts", version.conflict) }}
     {{ _self.linkBlock("replaces", version.replace) }}
   </div>
+
+  {% if version.readme %}
+    <div class="mb-3">
+      {{ version.readme|raw }}
+    </div>
+  {% endif %}
 {% endblock %}
 
 {% macro linkBlock(title, links) %}

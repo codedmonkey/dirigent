@@ -265,17 +265,17 @@ class Package
             $io = new NullIO();
             $config = Factory::createConfig();
 
-            if ($this->repositoryCredentials?->getType() === CredentialsType::GitlabOauth) {
-                $config->merge([
-                    'config' => [
-                        'gitlab-oauth' => [
-                            parse_url($this->repositoryUrl, PHP_URL_HOST) => [
-                                'token' => $this->repositoryCredentials->getPassword(),
-                            ],
-                        ],
-                    ],
-                ]);
-            }
+//            if ($this->repositoryCredentials?->getType() === CredentialsType::GitlabOauth) {
+//                $config->merge([
+//                    'config' => [
+//                        'gitlab-oauth' => [
+//                            parse_url($this->repositoryUrl, PHP_URL_HOST) => [
+//                                'token' => $this->repositoryCredentials->getPassword(),
+//                            ],
+//                        ],
+//                    ],
+//                ]);
+//            }
 
             $io->loadConfiguration($config);
             $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());

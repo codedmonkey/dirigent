@@ -3,6 +3,7 @@
     "description": "A free and open package registry for Composer",
     "type": "project",
     "license": "FSL-1.1-MIT",
+    "readme": "readme.md",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "repositories": [
@@ -13,6 +14,7 @@
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
+        "cebe/markdown": "^1.2",
         "composer/composer": "^2.7",
         "doctrine/doctrine-bundle": "^2.11",
         "doctrine/doctrine-migrations-bundle": "^3.3",

@@ -2,9 +2,9 @@
 
 namespace CodedMonkey\Conductor\Package;
 
+use cebe\markdown\GithubMarkdown;
 use CodedMonkey\Conductor\Composer\ConfigFactory;
 use CodedMonkey\Conductor\Composer\HttpDownloaderOptionsFactory;
-use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
@@ -15,9 +15,11 @@ use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Conductor\Message\DumpPackageProvider;
 use Composer\IO\NullIO;
 use Composer\Package\AliasPackage;
-use Composer\Package\CompletePackageInterface;
+use Composer\Package\PackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Repository\ComposerRepository;
+use Composer\Repository\RepositoryInterface;
+use Composer\Repository\Vcs\VcsDriverInterface;
 use Composer\Repository\VcsRepository;
 use Composer\Util\HttpDownloader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -58,19 +60,14 @@ class PackageMetadataResolver
 
     public function resolve(Package $package): void
     {
-        if (null !== $registry = $package->getMirrorRegistry()) {
-            $composerPackages = $this->resolveFromRegistry($package->getName(), $registry);
-        } elseif (null !== $repositoryUrl = $package->getRepositoryUrl()) {
-            $composerPackages = $this->resolveVcsRepository($repositoryUrl, $package->getRepositoryType(), $package->getRepositoryCredentials());
+        if (null !== $package->getMirrorRegistry()) {
+            $this->resolveRegistryPackage($package);
+        } elseif (null !== $package->getRepositoryUrl()) {
+            $this->resolveVcsPackage($package);
         } else {
             // todo resolve from other sources
             throw new \LogicException();
         }
-
-        $updatedAt = new \DateTime();
-        $package->setUpdatedAt($updatedAt);
-
-        $this->updatePackage($package, $composerPackages);
 
         $this->messenger->dispatch(new DumpPackageProvider($package->getId()));
     }
@@ -90,24 +87,42 @@ class PackageMetadataResolver
 
     public function provides(string $packageName, Registry $registry): bool
     {
-        $composerPackages = $this->resolveFromRegistry($packageName, $registry);
+        $repository = $this->getRegistryRepository($registry);
+        $composerPackages = $repository->findPackages($packageName);
 
         return count($composerPackages) > 0;
     }
 
-    private function resolveFromRegistry(string $packageName, Registry $registry): array
+    private function getRegistryRepository(Registry $registry): RepositoryInterface
     {
         $io = new NullIO();
         $config = ConfigFactory::createForRegistry($registry);
         $io->loadConfiguration($config);
         $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
 
-        $repository = new ComposerRepository(['url' => $registry->getUrl()], $io, $config, $httpDownloader);
-        return $repository->findPackages($packageName);
+        return new ComposerRepository(['url' => $registry->getUrl()], $io, $config, $httpDownloader);
     }
 
-    private function resolveVcsRepository(string $repositoryUrl, ?string $repositoryType, ?Credentials $repositoryCredentials): array
+    private function resolveRegistryPackage(Package $package, ?Registry $registry = null): void
     {
+        $packageName = $package->getName();
+        $registry ??= $package->getMirrorRegistry();
+
+        if (!$registry) {
+            throw new \LogicException("No registry provided for $packageName.");
+        }
+
+        $repository = $this->getRegistryRepository($registry);
+        $composerPackages = $repository->findPackages($packageName);
+
+        $this->updatePackage($package, $composerPackages);
+    }
+
+    private function resolveVcsPackage(Package $package): void
+    {
+        $repositoryUrl = $package->getRepositoryUrl();
+        $repositoryCredentials = $package->getRepositoryCredentials();
+
         $io = new NullIO();
         $config = ConfigFactory::createForVcsRepository($repositoryUrl, $repositoryCredentials);
         $io->loadConfiguration($config);
@@ -116,7 +131,7 @@ class PackageMetadataResolver
 
         $driver = $repository->getDriver();
         if (!$driver) {
-            throw new \LogicException();
+            throw new \LogicException("Unable to resolve VCS driver for repository: $repositoryUrl");
         }
         $information = $driver->getComposerInformation($driver->getRootIdentifier());
         if (!isset($information['name']) || !is_string($information['name'])) {
@@ -124,13 +139,15 @@ class PackageMetadataResolver
         }
         $packageName = trim($information['name']);
 
-        return $repository->findPackages($packageName);
+        $composerPackages = $repository->findPackages($packageName);
+
+        $this->updatePackage($package, $composerPackages, $driver);
     }
 
     /**
-     * @param CompletePackageInterface[] $composerPackages
+     * @param PackageInterface[] $composerPackages
      */
-    private function updatePackage(Package $package, array $composerPackages): void
+    private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
         $existingVersions = $this->versionRepository->getVersionMetadataForUpdate($package);
 
@@ -145,7 +162,7 @@ class PackageMetadataResolver
                 $package->getVersions()->add($version);
             }
 
-            $this->updateVersion($package, $version, $composerPackage);
+            $this->updateVersion($package, $version, $composerPackage, $driver);
 
             unset($existingVersions[$version->getNormalizedVersion()]);
         }
@@ -156,10 +173,13 @@ class PackageMetadataResolver
             $this->entityManager->remove($versionEntity);
         }
 
+        $updatedAt = new \DateTime();
+        $package->setUpdatedAt($updatedAt);
+
         $this->entityManager->persist($package);
     }
 
-    private function updateVersion(Package $package, Version $version, CompletePackageInterface $data): void
+    private function updateVersion(Package $package, Version $version, PackageInterface $data, ?VcsDriverInterface $driver = null): void
     {
         $em = $this->entityManager;
 
@@ -316,6 +336,10 @@ class PackageMetadataResolver
             $version->getSuggest()->clear();
         }
 
+        if ($driver) {
+            $this->updateReadme($version, $driver);
+        }
+
         $em->persist($version);
     }
 
@@ -329,5 +353,54 @@ class PackageMetadataResolver
         $str = Preg::replace("{\x1B(?:\[.)?}u", '', $str);
 
         return Preg::replace("{[\x01-\x1A]}u", '', $str);
+    }
+
+    private function updateReadme(Version $version, VcsDriverInterface $driver): void
+    {
+        try {
+            $composerInfo = $driver->getComposerInformation($driver->getRootIdentifier());
+            if (isset($composerInfo['readme']) && is_string($composerInfo['readme'])) {
+                $readmeFile = $composerInfo['readme'];
+            } else {
+                $readmeFile = 'README.md';
+            }
+
+            $ext = substr($readmeFile, (int) strrpos($readmeFile, '.'));
+            if ($ext === $readmeFile) {
+                $ext = '.txt';
+            }
+
+            switch ($ext) {
+                case '.txt':
+                    $source = $driver->getFileContent($readmeFile, $version->getSource()['reference']);
+                    if (!empty($source)) {
+                        $version->setReadme('<pre>' . htmlspecialchars($source) . '</pre>');
+                    }
+                    break;
+
+                case '.md':
+                    $source = $driver->getFileContent('readme.md', $version->getSource()['reference']);
+                    if (!empty($source)) {
+                        $parser = new GithubMarkdown();
+                        $readme = $parser->parse($source);
+
+                        if (!empty($readme)) {
+                            if (Preg::isMatch('{^(?:git://|git@|https?://)(gitlab.com|bitbucket.org)[:/]([^/]+)/(.+?)(?:\.git|/)?$}i', $version->getPackage()->getRepositoryUrl(), $match)) {
+                                $version->setReadme($this->prepareReadme($readme, $match[1], $match[2], $match[3]));
+                            } else {
+                                $version->setReadme($this->prepareReadme($readme));
+                            }
+                        }
+                    }
+                    break;
+            }
+        } catch (\Exception $e) {
+            throw $e; // todo handle politely
+        }
+    }
+
+    private function prepareReadme(string $readme): string
+    {
+        return $readme;
     }
 }
