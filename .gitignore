@@ -17,8 +17,3 @@
 /phpunit.xml
 .phpunit.result.cache
 ###< phpunit/phpunit ###
-
-###> symfony/asset-mapper ###
-/assets/vendor/
-/public/assets/
-###< symfony/asset-mapper ###

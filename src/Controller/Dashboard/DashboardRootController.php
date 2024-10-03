@@ -7,6 +7,7 @@ use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
 use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use CodedMonkey\Conductor\Doctrine\Entity\User;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
@@ -34,6 +35,12 @@ class DashboardRootController extends AbstractDashboardController
     {
         return Dashboard::new()
             ->setTitle($this->title);
+    }
+
+    public function configureAssets(): Assets
+    {
+        return Assets::new()
+            ->addCssFile('assets/conductor-theme.css');
     }
 
     public function configureMenuItems(): iterable
