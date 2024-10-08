@@ -1,9 +1,9 @@
 :root {
-  --color-primary: #A4133C;
+  --color-primary: #22181C;
 
-  --page-login-bg: #997080;
+  --page-login-bg: var(--color-primary);
 
-  --sidebar-bg: #22181C;
+  --sidebar-bg: var(--color-primary);
   --sidebar-logo-color: var(--true-gray-200);
   --sidebar-menu-color: var(--true-gray-200);
   --sidebar-menu-header-color: var(--gray-400);
@@ -12,4 +12,8 @@
   --sidebar-menu-active-item-color: #FFB3C1;
 
   --resize-handler-hover-bg: #835D6C;
+}
+
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--color-primary);
 }

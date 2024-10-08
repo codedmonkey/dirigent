@@ -45,10 +45,16 @@ class DashboardRootController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
+        $request = $this->container->get('request_stack')->getCurrentRequest();
         $user = $this->getUser();
 
+        $packagesItem = MenuItem::linkToRoute('Packages', 'fa fa-cubes', 'dashboard_packages');
+        if (str_starts_with($request->query->get('routeName'), 'dashboard_packages_')) {
+            $packagesItem->getAsDto()->setSelected(true);
+        }
+
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        yield MenuItem::linkToRoute('Packages', 'fa fa-cubes', 'dashboard_packages');
+        yield $packagesItem;
 
         yield MenuItem::section('Personal');
         if ($user) {
