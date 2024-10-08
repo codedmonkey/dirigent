@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Copyright Onlinq B.V.
- *
- * You're not permitted to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell this code.
- */
-
 namespace CodedMonkey\Conductor\EventListener;
 
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
