@@ -68,7 +68,7 @@
           {% if package.mirrorRegistry %}
             <p class="card-text mb-1 text-body-secondary">Mirrored from {{ package.mirrorRegistry.name }}</p>
           {% endif %}
-          <p class="card-text">{{ package.description }}</p>
+          <p class="card-text">{{ package.description ?? '<em>No description provided.</em>' }}</p>
         </div>
       </div>
     {% endfor %}
