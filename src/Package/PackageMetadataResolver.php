@@ -373,13 +373,16 @@ class PackageMetadataResolver
             switch ($ext) {
                 case '.txt':
                     $source = $driver->getFileContent($readmeFile, $version->getSource()['reference']);
+
                     if (!empty($source)) {
                         $version->setReadme('<pre>' . htmlspecialchars($source) . '</pre>');
                     }
+
                     break;
 
                 case '.md':
-                    $source = $driver->getFileContent('readme.md', $version->getSource()['reference']);
+                    $source = $driver->getFileContent($readmeFile, $version->getSource()['reference']);
+
                     if (!empty($source)) {
                         $parser = new GithubMarkdown();
                         $readme = $parser->parse($source);
@@ -392,6 +395,7 @@ class PackageMetadataResolver
                             }
                         }
                     }
+
                     break;
             }
         } catch (\Exception $e) {
