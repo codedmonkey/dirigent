@@ -25,6 +25,7 @@ Name: Name
 Package Mirroring: Package Mirroring
 Password: Password
 Repeat new password: Repeat new password
+Repository url: Repository URL
 Roles: Roles
 Token: Token
 Type: Type
@@ -34,6 +35,8 @@ Username: Username
 Impersonate: Impersonate
 Move Down: Move Down
 Move Up: Move Up
+
+No credentials: No credentials
 
 Admin: Admin
 Owner: Owner

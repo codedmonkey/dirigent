@@ -179,12 +179,8 @@ class DashboardPackagesController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-
-            $package = new Package();
-            $package->setRepositoryCredentials($formData['repositoryCredentials']);
-            $package->setRepositoryUrl($formData['repositoryUrl']);
-
+            /** @var Package $package */
+            $package = $form->getData();
             $this->packageRepository->save($package, true);
 
             $this->messenger->dispatch(new UpdatePackage($package->getId()));

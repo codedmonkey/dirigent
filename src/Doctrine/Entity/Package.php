@@ -2,15 +2,8 @@
 
 namespace CodedMonkey\Conductor\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Composer\HttpDownloaderOptionsFactory;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
-use Composer\Factory;
-use Composer\IO\NullIO;
 use Composer\Pcre\Preg;
-use Composer\Repository\Vcs\GitHubDriver;
-use Composer\Repository\Vcs\VcsDriverInterface;
-use Composer\Repository\VcsRepository;
-use Composer\Util\HttpDownloader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -84,17 +77,6 @@ class Package
 
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
-
-    /**
-     * @internal
-     * @var VcsDriverInterface|true|null
-     */
-    public VcsDriverInterface|bool|null $vcsDriver = true;
-
-    /**
-     * @internal
-     */
-    public ?string $vcsDriverError = null;
 
     /**
      * @var array<string, Version>|null lookup table for versions
@@ -220,87 +202,26 @@ class Package
 
     public function setRepositoryUrl(string $repoUrl): void
     {
-        $this->vcsDriver = null;
-
-        // prevent local filesystem URLs
-        if (Preg::isMatch('{^(\.|[a-z]:|/)}i', $repoUrl)) {
-            return;
-        }
-
+        // Force GitHub repos to use standardized format
         $repoUrl = Preg::replace('{^git@github.com:}i', 'https://github.com/', $repoUrl);
         $repoUrl = Preg::replace('{^git://github.com/}i', 'https://github.com/', $repoUrl);
         $repoUrl = Preg::replace('{^(https://github.com/.*?)\.git$}i', '$1', $repoUrl);
         $repoUrl = Preg::replace('{^(https://github.com/.*?)/$}i', '$1', $repoUrl);
 
+        // Force GitLab repos to use standardized format
         $repoUrl = Preg::replace('{^git@gitlab.com:}i', 'https://gitlab.com/', $repoUrl);
         $repoUrl = Preg::replace('{^https?://(?:www\.)?gitlab\.com/(.*?)\.git$}i', 'https://gitlab.com/$1', $repoUrl);
 
+        // Force Bitbucket repos to use standardized format
         $repoUrl = Preg::replace('{^git@+bitbucket.org:}i', 'https://bitbucket.org/', $repoUrl);
         $repoUrl = Preg::replace('{^bitbucket.org:}i', 'https://bitbucket.org/', $repoUrl);
         $repoUrl = Preg::replace('{^https://[a-z0-9_-]*@bitbucket.org/}i', 'https://bitbucket.org/', $repoUrl);
         $repoUrl = Preg::replace('{^(https://bitbucket.org/[^/]+/[^/]+)/src/[^.]+}i', '$1.git', $repoUrl);
 
-        // normalize protocol case
+        // Normalize protocol case
         $repoUrl = Preg::replaceCallbackStrictGroups('{^(https?|git|svn)://}i', static fn ($match) => strtolower($match[1]) . '://', $repoUrl);
 
         $this->repositoryUrl = $repoUrl;
-        $this->remoteId = null;
-
-        // avoid user@host URLs
-        if (Preg::isMatch('{https?://.+@}', $repoUrl)) {
-            return;
-        }
-
-        // validate that this is a somewhat valid URL
-        if (!Preg::isMatch('{^([a-z0-9][^@\s]+@[a-z0-9-_.]+:\S+ | [a-z0-9]+://\S+)$}Dx', $repoUrl)) {
-            return;
-        }
-
-        // block env vars & ~ prefixes
-        if (Preg::isMatch('{^[%$~]}', $repoUrl)) {
-            return;
-        }
-
-        try {
-            $io = new NullIO();
-            $config = Factory::createConfig();
-
-//            if ($this->repositoryCredentials?->getType() === CredentialsType::GitlabOauth) {
-//                $config->merge([
-//                    'config' => [
-//                        'gitlab-oauth' => [
-//                            parse_url($this->repositoryUrl, PHP_URL_HOST) => [
-//                                'token' => $this->repositoryCredentials->getPassword(),
-//                            ],
-//                        ],
-//                    ],
-//                ]);
-//            }
-
-            $io->loadConfiguration($config);
-            $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
-            $repository = new VcsRepository(['url' => $this->repositoryUrl], $io, $config, $httpDownloader);
-
-            $driver = $this->vcsDriver = $repository->getDriver();
-            if (!$driver) {
-                return;
-            }
-            $information = $driver->getComposerInformation($driver->getRootIdentifier());
-            if (!isset($information['name']) || !is_string($information['name'])) {
-                return;
-            }
-            if (!isset($this->name)) {
-                $this->setName(trim($information['name']));
-            }
-            if ($driver instanceof GitHubDriver) {
-                $this->repositoryUrl = $driver->getRepositoryUrl();
-                if ($repoData = $driver->getRepoData()) {
-                    $this->remoteId = parse_url($this->repositoryUrl, PHP_URL_HOST).'/'.$repoData['id'];
-                }
-            }
-        } catch (\Exception $e) {
-            $this->vcsDriverError = '['.get_class($e).'] '.$e->getMessage();
-        }
     }
 
     public function getRepositoryCredentials(): ?Credentials
