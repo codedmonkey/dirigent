@@ -3,38 +3,7 @@
 {% block page_title %}Packages{% endblock %}
 
 {% block search_wrapper %}
-  <div class="content-search">
-    <form class="form-action-search" method="get">
-      <div class="form-group">
-        <input type="hidden" name="routeName" value="dashboard_packages">
-        <input type="hidden" name="page" value="1">
-
-        <div class="form-widget">
-          <i class="fas fa-search content-search-icon"></i>
-
-          <label class="content-search-label" data-value="{{ app.request.get('query') }}">
-            <input
-              name="query"
-              class="form-control {{ app.request.get('query') is null ? 'is-blank' }}"
-              type="search"
-              value="{{ app.request.get('query') ?? '' }}"
-              placeholder="{{ t('action.search', ea.i18n.translationParameters, 'EasyAdminBundle')|trans }}"
-              spellcheck="false"
-              autocorrect="off"
-              autofocus="autofocus"
-              onInput="this.parentNode.dataset.value=this.value"
-            >
-          </label>
-
-          {% if app.request.get('query') %}
-            <a href="{{ ea_url().unset('query') }}" class="content-search-reset">
-              <i class="fas fa-fw fa-times"></i>
-            </a>
-          {% endif %}
-        </div>
-      </div>
-    </form>
-  </div>
+  {% include 'dashboard/packages/search_box.html.twig' %}
 {% endblock %}
 
 {% block page_actions %}

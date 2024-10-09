@@ -2,15 +2,19 @@
 
 {% block page_title %}{{ ea.dashboardTitle }}{% endblock %}
 
+{% block search_wrapper %}
+  {% include 'dashboard/packages/search_box.html.twig' %}
+{% endblock %}
+
 {% block page_content %}
-  <p>Welcome to <a href="#">Conductor</a>, a free and open package registry for <a href="https://getcomposer.org">Composer</a>.</p>
+  <p>Welcome to <a href="https://github.com/codedmonkey/conductor">Conductor</a>, a free and open package registry for <a href="https://getcomposer.org">Composer</a>.</p>
 
   <h2 class="h5">Add this registry to the composer.json</h2>
 
   <p>To use this registry in your project, run the following command in your terminal:</p>
 
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
-    <pre class="m-0"><code>composer config repositories.conductor composer {{ app.request.getSchemeAndHttpHost() }}</code></pre>
+    <pre class="m-0"><code>composer config repositories.{{ conductor.slug }} composer {{ app.request.getSchemeAndHttpHost() }}</code></pre>
   </div>
 
   <p>Or add it directly in your <code>composer.json</code>:</p>
@@ -18,7 +22,7 @@
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
 <pre class="m-0"><code>{
     "repositories": {
-        "conductor": { "type": "composer", "url": "{{ app.request.getSchemeAndHttpHost() }}" }
+        "{{ conductor.slug }}": { "type": "composer", "url": "{{ app.request.getSchemeAndHttpHost() }}" }
     }
 }</code></pre>
   </div>

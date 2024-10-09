@@ -2,6 +2,10 @@
 
 {% block page_title %}{{ package.name }}{% endblock %}
 
+{% block search_wrapper %}
+  {% include 'dashboard/packages/search_box.html.twig' with {searchAutofocus: false} %}
+{% endblock %}
+
 {% block page_content %}
   {% include 'dashboard/packages/package_header.html.twig' with {currentPage: 'versions'} %}
 
@@ -19,7 +23,6 @@
           </span>
           <span class="text-muted">{{ version.releasedAt|date }}</span>
         </div>
-
       </a>
     {% endfor %}
   </div>

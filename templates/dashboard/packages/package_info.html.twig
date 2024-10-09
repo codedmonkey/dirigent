@@ -12,6 +12,10 @@
   {%- endapply -%}
 {% endblock %}
 
+{% block search_wrapper %}
+  {% include 'dashboard/packages/search_box.html.twig' with {searchAutofocus: false} %}
+{% endblock %}
+
 {% block page_actions %}
   {% if is_granted('ROLE_ADMIN') %}
     <div class="global-actions">
