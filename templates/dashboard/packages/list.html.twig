@@ -71,12 +71,37 @@
           <p class="card-text">{{ package.description ?? '<em>No description provided.</em>' }}</p>
         </div>
       </div>
+    {% else %}
+      <table class="table datagrid datagrid-empty">
+        <tbody>
+          {% for i in 1..14 %}
+            <tr class="empty-row">
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+              <td><span></span></td>
+            </tr>
+
+            {% if 3 == loop.index %}
+              <tr class="no-results">
+                <td colspan="100">
+                  {{ t('datagrid.no_results', ea.i18n.translationParameters, 'EasyAdminBundle')|trans }}
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
     {% endfor %}
   </div>
 
-  <div class="content-panel-footer without-padding without-border">
-    {% block paginator %}
-      {{ include(ea.templatePath('crud/paginator')) }}
-    {% endblock paginator %}
-  </div>
+  {% if packages|length %}
+    <div class="content-panel-footer without-padding without-border">
+      {% block paginator %}
+        {{ include(ea.templatePath('crud/paginator')) }}
+      {% endblock paginator %}
+    </div>
+  {% endif %}
 {% endblock %}

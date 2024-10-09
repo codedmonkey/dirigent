@@ -5,7 +5,7 @@
 {% block page_content %}
   {% include 'dashboard/packages/package_header.html.twig' with {currentPage: 'versions'} %}
 
-  <div class="list-group mb-3">
+  <div class="list-group list-group-flush mb-3">
     {% for version in versions %}
       {% set packageVersionInfoUrl = ea_url()
         .setRoute('dashboard_packages_info', {packageName: package.name, packageVersion: version.version}) %}
