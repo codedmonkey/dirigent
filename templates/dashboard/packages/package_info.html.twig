@@ -40,15 +40,20 @@
 
       <p class="lead">{{ version.description }}</p>
 
-      <p class="mb-0">Last update: {{ package.updatedAt|date }}</p>
+      <p class="mb-0">Last updated at {{ package.updatedAt|date }}</p>
     </div>
     <div class="col-md-4">
       <div class="bg-body-secondary px-3 py-2 rounded">
-        <div>
-          <a href="{{ version.homepage ?? version.source.url }}">{{ version.homepage ?? version.source.url }}</a>
-        </div>
+        {% if version.publicUrl %}
+          <div>
+            <a href="{{ version.publicUrl }}">{{ version.prettyPublicUrl }}</a>
+          </div>
+        {% endif %}
         {% if package.mirrorRegistry %}
           <div>Mirrored from {{ package.mirrorRegistry.name }}</div>
+        {% endif %}
+        {% if version.publicUrl or package.mirrorRegistry %}
+          <hr class="my-1">
         {% endif %}
         {% if version.homepage %}
           <div><a href="{{ version.homepage }}">Homepage</a></div>

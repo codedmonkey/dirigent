@@ -14,6 +14,8 @@
   --sidebar-menu-active-item-color: #FFB3C1;
 
   --resize-handler-hover-bg: #835D6C;
+
+  --code-color: var(--text-color);
 }
 
 .ea-dark-scheme {
@@ -21,7 +23,7 @@
   --conductor-primary-heavy: #835D6C;
   --conductor-primary-subtle: #22181C;
   --conductor-secondary: #FFB3C1;
-  --conductor-secondary-heavy: #dc8494;
+  --conductor-secondary-subtle: #dc8494;
   --conductor-body-bg: #111517;
   --conductor-body-bg-subtle: rgb(25, 31, 34);
   --conductor-body-bg-subtle-rgb: 25, 31, 34;
@@ -41,12 +43,16 @@
   --sidebar-menu-active-item-bg: var(--conductor-primary);
   --sidebar-menu-active-item-color: var(--conductor-secondary);
 
-  --resize-handler-hover-bg: var(--conductor-primary-subtle);
+  --resize-handler-hover-bg: var(--conductor-primary);
+
+  --dropdown-settings-active-item-color: var(--conductor-secondary);
 
   --button-primary-bg: var(--conductor-primary);
 
-  --link-color: var(--conductor-secondary);
-  --link-hover-color: var(--conductor-secondary-heavy);
+  --link-color: var(--conductor-secondary-subtle);
+  --link-hover-color: var(--conductor-secondary);
+
+  --code-color: var(--text-color);
 
   --bs-border-color: var(--conductor-primary);
 }

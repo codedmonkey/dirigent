@@ -1,0 +1,30 @@
+---
+title: Mirroring packages
+---
+
+Conductor can mirror packages from other registries allowing it to serve as a proxy for packagist.org, a Satis
+installation or other third-party registries. You can manually add packages from an external registry or enable dynamic
+mirroring so new packages automatically get added to the registry when a developer adds a package to their project
+(through `composer update`).
+
+When developers use Composer to install new packages that aren't in the registry yet, it checks for external registries
+having automatic mirroring enabled and adds the package from the first registry that returns it. To change the order
+of registries, move the registries up and down in the **Registries** overview.
+
+## Add external registry
+To add an external registry, go to **Registries** in the sidebar and click **Add Registry**.
+
+### Package mirroring
+When adding an external registry, you have the following options regarding package mirroring:
+
+**Package mirroring disabled**<br>
+Package mirroring is disabled for this external registry so new packages can't be added. Existing packages already
+being mirrored will remain in the registry.
+
+**Only mirror specified packages**<br>
+Packages have to be manually added by an administrator from the registry. When developers request a new package the
+registry will not request the package from this external registry.
+
+**Automatically mirror packages on request**<br>
+Packages can be added manually or will be created automatically when requested by a developer installing packages
+(through `composer update`).
