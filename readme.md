@@ -35,9 +35,8 @@ The documentation is available [in our Git repository][docs].
 ## License
 
 Conductor is licensed under the _Functional Source License, Version 1.1, MIT Future License_. It's free to use for
-internal and non-commercial purposes, but it's not allowed to use a release of the project for commercial
-purposes (competing use) until the second anniversary of the date the release is made available. See our
-[full license][license] for more details.
+internal and non-commercial purposes, but it's not allowed to use a release for commercial purposes (competing use)
+until it's second anniversary. See our [full license][license] for more details.
 
 ## Contributing
 
