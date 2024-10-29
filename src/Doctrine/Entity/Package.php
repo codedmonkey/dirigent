@@ -199,13 +199,19 @@ class Package
         $this->repositoryType = $repositoryType;
     }
 
-    public function getRepositoryUrl(): string
+    public function getRepositoryUrl(): ?string
     {
         return $this->repositoryUrl;
     }
 
-    public function setRepositoryUrl(string $repoUrl): void
+    public function setRepositoryUrl(?string $repoUrl): void
     {
+        if (!$repoUrl) {
+            $this->repositoryUrl = null;
+
+            return;
+        }
+
         // Force GitHub repos to use standardized format
         $repoUrl = Preg::replace('{^git@github.com:}i', 'https://github.com/', $repoUrl);
         $repoUrl = Preg::replace('{^git://github.com/}i', 'https://github.com/', $repoUrl);
