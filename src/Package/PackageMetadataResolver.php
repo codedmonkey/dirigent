@@ -25,7 +25,7 @@ use Composer\Util\HttpDownloader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class PackageMetadataResolver
+readonly class PackageMetadataResolver
 {
     private const SUPPORTED_LINK_TYPES = [
         'require' => [
@@ -51,10 +51,10 @@ class PackageMetadataResolver
     ];
 
     public function __construct(
-        private readonly MessageBusInterface $messenger,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly RegistryRepository $registryRepository,
-        private readonly VersionRepository $versionRepository,
+        private MessageBusInterface $messenger,
+        private EntityManagerInterface $entityManager,
+        private RegistryRepository $registryRepository,
+        private VersionRepository $versionRepository,
     ) {
     }
 

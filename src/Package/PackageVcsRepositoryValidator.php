@@ -11,7 +11,7 @@ use Composer\Repository\Vcs\GitHubDriver;
 use Composer\Repository\VcsRepository;
 use Composer\Util\HttpDownloader;
 
-class PackageVcsRepositoryValidator
+readonly class PackageVcsRepositoryValidator
 {
     public function validate(Package $package): array
     {
