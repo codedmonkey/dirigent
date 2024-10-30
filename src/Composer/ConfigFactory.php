@@ -23,7 +23,7 @@ class ConfigFactory
 
         $credentials = $registry->getCredentials();
 
-        if ($credentials?->getType() === CredentialsType::HttpBasic) {
+        if (CredentialsType::HttpBasic === $credentials?->getType()) {
             $config->merge([
                 'config' => [
                     'http-basic' => [
@@ -34,7 +34,7 @@ class ConfigFactory
                     ],
                 ],
             ]);
-        } elseif ($credentials?->getType() === CredentialsType::GitlabDeployToken) {
+        } elseif (CredentialsType::GitlabDeployToken === $credentials?->getType()) {
             $config->merge([
                 'config' => [
                     'gitlab-token' => [
@@ -45,7 +45,7 @@ class ConfigFactory
                     ],
                 ],
             ]);
-        } elseif ($credentials?->getType() === CredentialsType::GitlabPersonalAccessToken) {
+        } elseif (CredentialsType::GitlabPersonalAccessToken === $credentials?->getType()) {
             $config->merge([
                 'config' => [
                     'gitlab-token' => [

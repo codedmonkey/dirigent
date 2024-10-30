@@ -19,7 +19,7 @@ class ApiControllerTest extends KernelTestCase
 
         $rootData = $this->requestJson('/packages.json', 'GET');
 
-        $this->assertEquals([
+        $this->assertSame([
             'packages' => [],
             'metadata-url' => '/p2/%package%.json',
             'notify-batch' => '/downloads',

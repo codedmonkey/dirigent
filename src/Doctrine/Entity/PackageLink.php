@@ -21,7 +21,7 @@ abstract class PackageLink
 
     /**
      * Base property holding the version - this must remain protected since it
-     * is redefined with an attribute in the child class
+     * is redefined with an attribute in the child class.
      */
     protected Version $version;
 

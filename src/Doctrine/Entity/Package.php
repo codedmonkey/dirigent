@@ -8,7 +8,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\ManyToOne;
 
 #[ORM\Entity(repositoryClass: PackageRepository::class)]
 class Package
@@ -19,7 +18,7 @@ class Package
     private ?int $id = null;
 
     /**
-     * Unique package name
+     * Unique package name.
      */
     #[ORM\Column(length: 191)]
     private string $name;
@@ -51,7 +50,7 @@ class Package
     #[ORM\Column(nullable: true)]
     private ?string $repositoryUrl = null;
 
-    #[ManyToOne]
+    #[ORM\ManyToOne]
     private ?Credentials $repositoryCredentials = null;
 
     #[ORM\Column(nullable: true)]
@@ -84,7 +83,7 @@ class Package
     /**
      * @var array<string, Version>|null lookup table for versions
      */
-    private array|null $cachedVersions = null;
+    private ?array $cachedVersions = null;
 
     public function __construct()
     {
@@ -110,7 +109,7 @@ class Package
     }
 
     /**
-     * Get vendor prefix
+     * Get vendor prefix.
      */
     public function getVendor(): string
     {
@@ -118,7 +117,7 @@ class Package
     }
 
     /**
-     * Get package name without vendor
+     * Get package name without vendor.
      */
     public function getPackageName(): string
     {
@@ -277,7 +276,7 @@ class Package
         return $this->versions;
     }
 
-    public function getVersion(string $normalizedVersion): Version|null
+    public function getVersion(string $normalizedVersion): ?Version
     {
         if (null === $this->cachedVersions) {
             $this->cachedVersions = [];
@@ -345,17 +344,17 @@ class Package
         $bVersion = Preg::replace('{^dev-.*}', '0.0.0-alpha', $bVersion);
 
         // sort default branch first if it is non numeric
-        if ($aVersion === '0.0.0-alpha' && $a->isDefaultBranch()) {
+        if ('0.0.0-alpha' === $aVersion && $a->isDefaultBranch()) {
             return -1;
         }
-        if ($bVersion === '0.0.0-alpha' && $b->isDefaultBranch()) {
+        if ('0.0.0-alpha' === $bVersion && $b->isDefaultBranch()) {
             return 1;
         }
 
         // equal versions are sorted by date
         if ($aVersion === $bVersion) {
             // make sure sort is stable
-            if ($a->getReleasedAt() == $b->getReleasedAt()) {
+            if ($a->getReleasedAt() === $b->getReleasedAt()) {
                 return $a->getNormalizedVersion() <=> $b->getNormalizedVersion();
             }
 

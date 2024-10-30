@@ -14,7 +14,7 @@ class PackageAddMirroringType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('packages', TextAreaType::class)
+            ->add('packages', TextareaType::class)
             ->add('registry', EntityType::class, [
                 'class' => Registry::class,
                 'query_builder' => function (RegistryRepository $repository) {

@@ -45,7 +45,7 @@ class DashboardPackagesController extends AbstractController
             $queryBuilder->setParameter('query', "%{$query}%");
         }
 
-        $paginatorDto = new PaginatorDto(20,3, 1, true, null);
+        $paginatorDto = new PaginatorDto(20, 3, 1, true, null);
         $paginatorDto->setPageNumber($request->query->getInt('page', 1));
         $paginator = (new PackagePaginator($this->adminUrlGenerator))->paginate($paginatorDto, $queryBuilder);
         $packages = $paginator->getResults();
@@ -64,7 +64,7 @@ class DashboardPackagesController extends AbstractController
 
         $versions = $package->getVersions()->toArray();
 
-        usort($versions, Package::class.'::sortVersions');
+        usort($versions, Package::class . '::sortVersions');
 
         // load the default branch version as it is used to display the latest available source.* and homepage info
         $latestVersion = reset($versions);
@@ -101,7 +101,7 @@ class DashboardPackagesController extends AbstractController
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
         $versions = $package->getVersions()->toArray();
 
-        usort($versions, Package::class.'::sortVersions');
+        usort($versions, Package::class . '::sortVersions');
 
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,

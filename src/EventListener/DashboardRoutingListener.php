@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 /**
- * Redirects requests to Symfony routes of dashboard to EasyAdmin routes
+ * Redirects requests to Symfony routes of dashboard to EasyAdmin routes.
  */
 readonly class DashboardRoutingListener
 {

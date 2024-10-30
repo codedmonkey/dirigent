@@ -120,9 +120,9 @@ abstract class AbstractDownloads
     public function increase(string $key): void
     {
         $this->recentData[$key] ??= 0;
-        $this->recentData[$key]++;
+        ++$this->recentData[$key];
 
-        $this->total++;
+        ++$this->total;
 
         $this->data = null;
         $this->updatedAt = new \DateTimeImmutable();

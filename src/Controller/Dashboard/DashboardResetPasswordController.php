@@ -59,7 +59,7 @@ class DashboardResetPasswordController extends AbstractController
     }
 
     #[Route('/reset-password/reset/{token}', name: 'dashboard_reset_password')]
-    public function passwordReset(Request $request, string $token = null): Response
+    public function passwordReset(Request $request, ?string $token = null): Response
     {
         if ($token) {
             $this->storeTokenInSession($token);

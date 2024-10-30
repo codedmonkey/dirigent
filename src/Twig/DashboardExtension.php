@@ -28,7 +28,7 @@ class DashboardExtension extends AbstractExtension implements GlobalsInterface
         return [
             'conductor' => [
                 'slug' => $this->parameterBag->get('conductor.slug'),
-            ]
+            ],
         ];
     }
 

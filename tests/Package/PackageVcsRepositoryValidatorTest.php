@@ -27,7 +27,7 @@ class PackageVcsRepositoryValidatorTest extends TestCase
         $validator = new PackageVcsRepositoryValidator();
         $result = $validator->validate($package);
 
-        $this->assertEquals(['error' => 'Local filesystem repositories are not allowed'], $result);
+        $this->assertSame(['error' => 'Local filesystem repositories are not allowed'], $result);
     }
 
     public static function invalidAuthUrlProvider(): array
@@ -47,6 +47,6 @@ class PackageVcsRepositoryValidatorTest extends TestCase
         $validator = new PackageVcsRepositoryValidator();
         $result = $validator->validate($package);
 
-        $this->assertEquals(['error' => 'Passing credentials in the repository URL is not allowed, create credentials first'], $result);
+        $this->assertSame(['error' => 'Passing credentials in the repository URL is not allowed, create credentials first'], $result);
     }
 }

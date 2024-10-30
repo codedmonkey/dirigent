@@ -237,7 +237,7 @@ readonly class PackageMetadataResolver
             $source['url'] = $data->getSourceUrl();
             // force public URLs even if the package somehow got downgraded to a GitDriver
             if (is_string($source['url']) && Preg::isMatch('{^git@github.com:(?P<repo>.*?)\.git$}', $source['url'], $match)) {
-                $source['url'] = 'https://github.com/'.$match['repo'];
+                $source['url'] = 'https://github.com/' . $match['repo'];
             }
             $source['reference'] = $data->getSourceReference();
             $version->setSource($source);
@@ -259,7 +259,7 @@ readonly class PackageMetadataResolver
             $package->setDescription($description);
             $package->setType($this->sanitize($data->getType()));
             if ($data->isAbandoned() && !$package->isAbandoned()) {
-                //$io->write('Marking package abandoned as per composer metadata from '.$version->getVersion());
+                // $io->write('Marking package abandoned as per composer metadata from '.$version->getVersion());
                 $package->setAbandoned(true);
                 if ($data->getReplacementPackage()) {
                     $package->setReplacementPackage($data->getReplacementPackage());
@@ -272,23 +272,23 @@ readonly class PackageMetadataResolver
             $links = [];
             foreach ($data->{$opts['method']}() as $link) {
                 $constraint = $link->getPrettyConstraint();
-                if (false !== strpos($constraint, ',') && false !== strpos($constraint, '@')) {
+                if (str_contains($constraint, ',') && str_contains($constraint, '@')) {
                     $constraint = Preg::replaceCallback('{([><]=?\s*[^@]+?)@([a-z]+)}i', static function ($matches) {
-                        if ($matches[2] === 'stable') {
+                        if ('stable' === $matches[2]) {
                             return $matches[1];
                         }
 
-                        return $matches[1].'-'.$matches[2];
+                        return $matches[1] . '-' . $matches[2];
                     }, $constraint);
                 }
 
                 $links[$link->getTarget()] = $constraint;
             }
 
-            foreach ($version->{'get'.$linkType}() as $link) {
+            foreach ($version->{'get' . $linkType}() as $link) {
                 // clear links that have changed/disappeared (for updates)
                 if (!isset($links[$link->getPackageName()]) || $links[$link->getPackageName()] !== $link->getPackageVersion()) {
-                    $version->{'get'.$linkType}()->removeElement($link);
+                    $version->{'get' . $linkType}()->removeElement($link);
                     $em->remove($link);
                 } else {
                     // clear those that are already set
@@ -297,11 +297,11 @@ readonly class PackageMetadataResolver
             }
 
             foreach ($links as $linkPackageName => $linkPackageVersion) {
-                $class = 'CodedMonkey\Conductor\Doctrine\Entity\\'.$opts['entity'];
+                $class = 'CodedMonkey\Conductor\Doctrine\Entity\\' . $opts['entity'];
                 $link = new $class();
                 $link->setPackageName((string) $linkPackageName);
                 $link->setPackageVersion($linkPackageVersion);
-                $version->{'add'.$linkType.'Link'}($link);
+                $version->{'add' . $linkType . 'Link'}($link);
                 $link->setVersion($version);
                 $em->persist($link);
             }

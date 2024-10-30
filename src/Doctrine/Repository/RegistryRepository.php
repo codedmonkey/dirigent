@@ -31,12 +31,12 @@ class RegistryRepository extends ServiceEntityRepository
             $packageMirroring = RegistryPackageMirroring::from($packageMirroring);
         }
 
-        if ($packageMirroring === RegistryPackageMirroring::Manual) {
+        if (RegistryPackageMirroring::Manual === $packageMirroring) {
             $builder->andWhere($builder->expr()->orX(
                 $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('manual')),
                 $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('auto')),
             ));
-        } elseif ($packageMirroring === RegistryPackageMirroring::Automatic) {
+        } elseif (RegistryPackageMirroring::Automatic === $packageMirroring) {
             $builder->andWhere($builder->expr()->orX(
                 $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('auto')),
             ));

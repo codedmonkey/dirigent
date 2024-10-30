@@ -11,7 +11,6 @@ use CodedMonkey\Conductor\Message\UpdatePackage;
 use CodedMonkey\Conductor\Package\PackageDistributionResolver;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
 use CodedMonkey\Conductor\Package\PackageProviderManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;

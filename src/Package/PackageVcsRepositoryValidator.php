@@ -62,13 +62,13 @@ readonly class PackageVcsRepositoryValidator
 
             if ($driver instanceof GitHubDriver) {
                 if ($repoData = $driver->getRepoData()) {
-                    $result['remoteId'] = parse_url($repoUrl, PHP_URL_HOST).'/'.$repoData['id'];
+                    $result['remoteId'] = parse_url($repoUrl, PHP_URL_HOST) . '/' . $repoData['id'];
                 }
             }
 
             return $result;
         } catch (\Exception $e) {
-            return ['error' => '[' . get_class($e) . '] ' . $e->getMessage()];
+            return ['error' => '[' . $e::class . '] ' . $e->getMessage()];
         }
     }
 

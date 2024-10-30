@@ -537,7 +537,7 @@ class Version
         $extra = $this->getExtra();
 
         if (isset($extra['branch-alias'][$this->getVersion()])) {
-            $parser = new VersionParser;
+            $parser = new VersionParser();
             $version = $parser->normalizeBranch(str_replace('-dev', '', $extra['branch-alias'][$this->getVersion()]));
 
             return Preg::replace('{(\.9{7})+}', '.x', $version);
@@ -547,12 +547,13 @@ class Version
     }
 
     /**
-     * Get funding, sorted to help the V2 metadata compression algo
+     * Get funding, sorted to help the V2 metadata compression algo.
+     *
      * @return array<array{type?: string, url?: string}>|null
      */
     public function getFundingSorted(): ?array
     {
-        if ($this->funding === null) {
+        if (null === $this->funding) {
             return null;
         }
 
@@ -619,11 +620,11 @@ class Version
         if ($this->getSupport()) {
             $data['support'] = $this->getSupport();
         }
-        if ($this->getPhpExt() !== null) {
+        if (null !== $this->getPhpExt()) {
             $data['php-ext'] = $this->getPhpExt();
         }
         $funding = $this->getFundingSorted();
-        if ($funding !== null) {
+        if (null !== $funding) {
             $data['funding'] = $funding;
         }
         if ($this->getReleasedAt()) {
@@ -666,7 +667,7 @@ class Version
                 continue;
             }
             /** @var PackageLink $link */
-            foreach ($this->{'get'.$method}() as $link) {
+            foreach ($this->{'get' . $method}() as $link) {
                 $link = $link->toArray();
                 $data[$linkType][key($link)] = current($link);
             }
