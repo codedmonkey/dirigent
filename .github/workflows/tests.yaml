@@ -1,4 +1,4 @@
-name: "Tests"
+name: Run tests
 
 on:
   pull_request:
@@ -23,46 +23,46 @@ jobs:
 
     strategy:
       matrix:
-        operating-system: ['ubuntu-latest']
-        php-version: ['8.2', '8.3']
+        operating-system: ["ubuntu-latest"]
+        php-version: ["8.2", "8.3"]
         include:
-          - operating-system: 'macos-latest'
-            php-version: '8.2'
-          - operating-system: 'windows-latest'
-            php-version: '8.2'
+          - operating-system: macos-latest
+            php-version: "8.2"
+          - operating-system: windows-latest
+            php-version: "8.2"
 
     steps:
-      - name: "Checkout code"
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: "Install PHP with extensions"
+      - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: "none"
-          extensions: "intl, mbstring, pdo_sqlite, zip"
+          coverage: none
+          extensions: intl, mbstring, zip
           php-version: ${{ matrix.php-version }}
           tools: composer:v2
 
-      - name: "Add PHPUnit matcher"
+      - name: Add PHPUnit matcher
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: "Set composer cache directory"
+      - name: Set composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: "Cache composer"
+      - name: Cache composer
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: "Install dependencies"
+      - name: Install dependencies
         run: composer install --ansi --no-interaction --no-progress
 
-      - name: "PHPUnit version"
+      - name: PHPUnit version
         run: bin/phpunit --version
 
-      - name: "Run tests"
+      - name: Run tests
         run: bin/phpunit ${{ env.PHPUNIT_FLAGS }}
