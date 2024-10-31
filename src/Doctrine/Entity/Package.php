@@ -59,7 +59,7 @@ class Package
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
 
-    #[ORM\OneToOne(mappedBy: 'package', cascade: ['persist'])]
+    #[ORM\OneToOne(mappedBy: 'package', cascade: ['persist', 'detach', 'remove'])]
     private PackageDownloads $downloads;
 
     /**

@@ -112,7 +112,7 @@ class Version
     #[ORM\ManyToOne(targetEntity: Package::class, inversedBy: 'versions')]
     private ?Package $package;
 
-    #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist'])]
+    #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
     private VersionDownloads $downloads;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
