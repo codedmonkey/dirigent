@@ -9,44 +9,48 @@ use PHPUnit\Framework\TestCase;
 
 class PackageVcsRepositoryValidatorTest extends TestCase
 {
-    public static function invalidLocalFilesystemUrlProvider(): array
+    public static function invalidUrlProvider(): array
     {
         return [
-            ['./foo'],
-            ['C:/bar'],
-            ['/acme'],
+            [
+                'Local filesystem repositories are not allowed',
+                [
+                    './foo',
+                    'C:/bar',
+                    '/baz',
+                ],
+            ],
+            [
+                'Passing credentials in the repository URL is not allowed, create credentials first',
+                [
+                    'http://foo@example.com',
+                    'https://foo:bar@example.com',
+                ],
+            ],
+            [
+                'Invalid repository URL',
+                [
+                    'foo bar',
+                    'baz',
+                    '%FOO',
+                    '$BAR',
+                ],
+            ]
         ];
     }
 
-    #[DataProvider('invalidLocalFilesystemUrlProvider')]
-    public function testInvalidLocalFilesystemUrls(string $url): void
+    #[DataProvider('invalidUrlProvider')]
+    public function testInvalidUrls(string $error, array $urls): void
     {
-        $package = new Package();
-        $package->setRepositoryUrl($url);
-
         $validator = new PackageVcsRepositoryValidator();
-        $result = $validator->validate($package);
 
-        $this->assertSame(['error' => 'Local filesystem repositories are not allowed'], $result);
-    }
+        foreach ($urls as $url) {
+            $package = new Package();
+            $package->setRepositoryUrl($url);
 
-    public static function invalidAuthUrlProvider(): array
-    {
-        return [
-            ['http://foo@example.com'],
-            ['https://foo:bar@example.com'],
-        ];
-    }
+            $result = $validator->validate($package);
 
-    #[DataProvider('invalidAuthUrlProvider')]
-    public function testInvalidAuthUrls(string $url): void
-    {
-        $package = new Package();
-        $package->setRepositoryUrl($url);
-
-        $validator = new PackageVcsRepositoryValidator();
-        $result = $validator->validate($package);
-
-        $this->assertSame(['error' => 'Passing credentials in the repository URL is not allowed, create credentials first'], $result);
+            $this->assertSame(['error' => $error], $result);
+        }
     }
 }
