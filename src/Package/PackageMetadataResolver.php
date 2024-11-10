@@ -3,8 +3,7 @@
 namespace CodedMonkey\Conductor\Package;
 
 use cebe\markdown\GithubMarkdown;
-use CodedMonkey\Conductor\Composer\ConfigFactory;
-use CodedMonkey\Conductor\Composer\HttpDownloaderOptionsFactory;
+use CodedMonkey\Conductor\Composer\ComposerClient;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Entity\Registry;
 use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
@@ -13,15 +12,10 @@ use CodedMonkey\Conductor\Doctrine\Entity\Version;
 use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Conductor\Message\DumpPackageProvider;
-use Composer\IO\NullIO;
 use Composer\Package\AliasPackage;
 use Composer\Package\PackageInterface;
 use Composer\Pcre\Preg;
-use Composer\Repository\ComposerRepository;
-use Composer\Repository\RepositoryInterface;
 use Composer\Repository\Vcs\VcsDriverInterface;
-use Composer\Repository\VcsRepository;
-use Composer\Util\HttpDownloader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -51,6 +45,7 @@ readonly class PackageMetadataResolver
     ];
 
     public function __construct(
+        private ComposerClient $composer,
         private MessageBusInterface $messenger,
         private EntityManagerInterface $entityManager,
         private RegistryRepository $registryRepository,
@@ -87,20 +82,10 @@ readonly class PackageMetadataResolver
 
     public function provides(string $packageName, Registry $registry): bool
     {
-        $repository = $this->getRegistryRepository($registry);
+        $repository = $this->composer->createComposerRepository($registry);
         $composerPackages = $repository->findPackages($packageName);
 
         return count($composerPackages) > 0;
-    }
-
-    private function getRegistryRepository(Registry $registry): RepositoryInterface
-    {
-        $io = new NullIO();
-        $config = ConfigFactory::createForRegistry($registry);
-        $io->loadConfiguration($config);
-        $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
-
-        return new ComposerRepository(['url' => $registry->getUrl()], $io, $config, $httpDownloader);
     }
 
     private function resolveRegistryPackage(Package $package, ?Registry $registry = null): void
@@ -112,7 +97,7 @@ readonly class PackageMetadataResolver
             throw new \LogicException("No registry provided for $packageName.");
         }
 
-        $repository = $this->getRegistryRepository($registry);
+        $repository = $this->composer->createComposerRepository($registry);
         $composerPackages = $repository->findPackages($packageName);
 
         $this->updatePackage($package, $composerPackages);
@@ -120,18 +105,11 @@ readonly class PackageMetadataResolver
 
     private function resolveVcsPackage(Package $package): void
     {
-        $repositoryUrl = $package->getRepositoryUrl();
-        $repositoryCredentials = $package->getRepositoryCredentials();
-
-        $io = new NullIO();
-        $config = ConfigFactory::createForVcsRepository($repositoryUrl, $repositoryCredentials);
-        $io->loadConfiguration($config);
-        $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
-        $repository = new VcsRepository(['url' => $repositoryUrl], $io, $config, $httpDownloader);
+        $repository = $this->composer->createVcsRepository($package);
 
         $driver = $repository->getDriver();
         if (!$driver) {
-            throw new \LogicException("Unable to resolve VCS driver for repository: $repositoryUrl");
+            throw new \LogicException("Unable to resolve VCS driver for repository: {$package->getRepositoryUrl()}");
         }
         $information = $driver->getComposerInformation($driver->getRootIdentifier());
         if (!isset($information['name']) || !is_string($information['name'])) {

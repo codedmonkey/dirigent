@@ -2,11 +2,8 @@
 
 namespace CodedMonkey\Conductor\Package;
 
-use CodedMonkey\Conductor\Composer\HttpDownloaderOptionsFactory;
+use CodedMonkey\Conductor\Composer\ComposerClient;
 use CodedMonkey\Conductor\Doctrine\Entity\Version;
-use Composer\Factory;
-use Composer\IO\NullIO;
-use Composer\Util\HttpDownloader;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -16,6 +13,7 @@ readonly class PackageDistributionResolver
     private string $storagePath;
 
     public function __construct(
+        private ComposerClient $composer,
         #[Autowire(param: 'conductor.storage.path')]
         string $storagePath,
     ) {
@@ -52,11 +50,7 @@ readonly class PackageDistributionResolver
 
         $this->filesystem->mkdir(dirname($path));
 
-        $io = new NullIO();
-        $config = Factory::createConfig();
-        $io->loadConfiguration($config);
-        $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
-
+        $httpDownloader = $this->composer->createHttpDownloader();
         $httpDownloader->copy($distUrl, $path);
 
         return true;

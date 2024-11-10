@@ -2,17 +2,18 @@
 
 namespace CodedMonkey\Conductor\Package;
 
-use CodedMonkey\Conductor\Composer\ConfigFactory;
-use CodedMonkey\Conductor\Composer\HttpDownloaderOptionsFactory;
+use CodedMonkey\Conductor\Composer\ComposerClient;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use Composer\IO\NullIO;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\GitHubDriver;
-use Composer\Repository\VcsRepository;
-use Composer\Util\HttpDownloader;
 
 readonly class PackageVcsRepositoryValidator
 {
+    public function __construct(
+        private ComposerClient $composer,
+    ) {
+    }
+
     public function validate(Package $package): array
     {
         $repoUrl = $package->getRepositoryUrl();
@@ -38,12 +39,7 @@ readonly class PackageVcsRepositoryValidator
         }
 
         try {
-            $io = new NullIO();
-            $config = ConfigFactory::createForVcsRepository($repoUrl);
-
-            $io->loadConfiguration($config);
-            $httpDownloader = new HttpDownloader($io, $config, HttpDownloaderOptionsFactory::getOptions());
-            $repository = new VcsRepository(['url' => $repoUrl], $io, $config, $httpDownloader);
+            $repository = $this->composer->createVcsRepository($package);
 
             $driver = $repository->getDriver();
             if (!$driver) {
