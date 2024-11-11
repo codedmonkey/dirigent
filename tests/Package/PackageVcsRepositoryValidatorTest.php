@@ -35,7 +35,7 @@ class PackageVcsRepositoryValidatorTest extends TestCase
                     '%FOO',
                     '$BAR',
                 ],
-            ]
+            ],
         ];
     }
 
