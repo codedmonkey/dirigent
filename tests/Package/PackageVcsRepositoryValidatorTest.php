@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Conductor\Tests\Package;
 
+use CodedMonkey\Conductor\Composer\ComposerClient;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Package\PackageVcsRepositoryValidator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -42,7 +43,8 @@ class PackageVcsRepositoryValidatorTest extends TestCase
     #[DataProvider('invalidUrlProvider')]
     public function testInvalidUrls(string $error, array $urls): void
     {
-        $validator = new PackageVcsRepositoryValidator();
+        $composer = new ComposerClient();
+        $validator = new PackageVcsRepositoryValidator($composer);
 
         foreach ($urls as $url) {
             $package = new Package();
