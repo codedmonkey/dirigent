@@ -4,35 +4,32 @@ namespace CodedMonkey\Conductor\Doctrine\Entity;
 
 use CodedMonkey\Conductor\Doctrine\Repository\CredentialsRepository;
 use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\GeneratedValue;
-use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping as ORM;
 
-#[Entity(repositoryClass: CredentialsRepository::class)]
+#[ORM\Entity(repositoryClass: CredentialsRepository::class)]
 class Credentials
 {
-    #[Column]
-    #[GeneratedValue]
-    #[Id]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
+    #[ORM\Id]
     private ?int $id = null;
 
-    #[Column]
+    #[ORM\Column]
     private ?string $name = null;
 
-    #[Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[Column(type: Types::STRING, enumType: CredentialsType::class)]
+    #[ORM\Column(type: Types::STRING, enumType: CredentialsType::class)]
     private CredentialsType|string $type = CredentialsType::HttpBasic;
 
-    #[Column(nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?string $username = null;
 
-    #[Column(nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?string $password = null;
 
-    #[Column(nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?string $token = null;
 
     public function getId(): ?int

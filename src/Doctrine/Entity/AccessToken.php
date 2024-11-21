@@ -3,40 +3,37 @@
 namespace CodedMonkey\Conductor\Doctrine\Entity;
 
 use CodedMonkey\Conductor\Doctrine\Repository\AccessTokenRepository;
-use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\GeneratedValue;
-use Doctrine\ORM\Mapping\Id;
-use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping as ORM;
 
-#[Entity(repositoryClass: AccessTokenRepository::class)]
+#[ORM\Entity(repositoryClass: AccessTokenRepository::class)]
 class AccessToken
 {
-    #[Column]
-    #[GeneratedValue]
-    #[Id]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
+    #[ORM\Id]
     private ?int $id = null;
 
-    #[ManyToOne(User::class)]
+    #[ORM\ManyToOne(User::class)]
     private ?User $user = null;
 
-    #[Column]
+    #[ORM\Column]
     private ?string $name = null;
 
-    #[Column]
-    private readonly string $token;
+    #[ORM\Column]
+    private ?string $token = null;
 
-    #[Column]
+    #[ORM\Column]
     private readonly \DateTimeImmutable $createdAt;
 
-    #[Column(nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $expiresAt = null;
+
+    private ?string $plainToken = null;
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        // todo generate proper hash
-        $this->token = uniqid('conductor-');
+        $this->plainToken = uniqid('conductor-');
     }
 
     public function getId(): ?int
@@ -64,7 +61,7 @@ class AccessToken
         $this->name = $name;
     }
 
-    public function getToken(): string
+    public function getToken(): ?string
     {
         return $this->token;
     }
@@ -84,9 +81,23 @@ class AccessToken
         $this->expiresAt = $expiresAt;
     }
 
+    public function getPlainToken(): ?string
+    {
+        return $this->plainToken;
+    }
+
     public function isValid(): bool
     {
-        // todo check if expired
-        return true;
+        return !$this->expiresAt || $this->expiresAt->getTimestamp() <= time();
+    }
+
+    public function hashCredentials(string $token): void
+    {
+        if (null === $this->plainToken) {
+            throw new \LogicException('Access token was already hashed.');
+        }
+
+        $this->token = $token;
+        $this->plainToken = null;
     }
 }
