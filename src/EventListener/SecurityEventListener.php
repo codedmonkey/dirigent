@@ -7,6 +7,7 @@ use CodedMonkey\Conductor\Doctrine\Repository\AccessTokenRepository;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
@@ -17,13 +18,15 @@ readonly class SecurityEventListener
     public function __construct(
         private AccessTokenRepository $accessTokenRepository,
         private AuthorizationCheckerInterface $authorizationChecker,
+        #[Autowire(service: 'access_token_hasher')]
+        private PasswordHasherInterface $accessTokenHasher,
         #[Autowire(param: 'conductor.security.public_access')]
         private bool $publicAccess,
     ) {
     }
 
     #[AsEventListener]
-    public function onKernelController(ControllerEvent $event): void
+    public function checkAccessIsGranted(ControllerEvent $event): void
     {
         if (null !== ($event->getAttributes(IsGrantedAccess::class)[0] ?? null)) {
             if (!$this->publicAccess && !$this->authorizationChecker->isGranted('ROLE_USER')) {
@@ -33,7 +36,7 @@ readonly class SecurityEventListener
     }
 
     #[AsEventListener]
-    public function onCheckPassport(CheckPassportEvent $event): void
+    public function checkAccessTokenIsValid(CheckPassportEvent $event): void
     {
         $passport = $event->getPassport();
 
@@ -45,16 +48,15 @@ readonly class SecurityEventListener
                 return;
             }
 
-            $accessToken = $this->accessTokenRepository->findOneBy([
+            $accessTokens = $this->accessTokenRepository->findBy([
                 'user' => $passport->getUser(),
-                'token' => $password,
             ]);
 
-            if (null === $accessToken || !$accessToken->isValid()) {
-                return;
+            foreach ($accessTokens as $accessToken) {
+                if ($accessToken->isValid() && $this->accessTokenHasher->verify($accessToken->getToken(), $password)) {
+                    $passwordBadge->markResolved();
+                }
             }
-
-            $passwordBadge->markResolved();
         }
     }
 }
