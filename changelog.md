@@ -1,5 +1,11 @@
 # Changelog
 
+* 0.2.1 (2024-11-23)
+  * Access tokens are now encrypted before being stored in the database
+  * Added expiry dates for access tokens
+  * Fixed removing existing packages and versions
+  * Fixed downloads tracking without public access enabled
+
 * 0.2.0 (2024-10-23)
   * Added custom theme
   * Added database migrations
