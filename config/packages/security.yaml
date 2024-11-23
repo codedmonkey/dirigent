@@ -17,7 +17,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         api:
-            pattern: ^/(packages.json|p2/|dist/)
+            pattern: ^/(packages.json|downloads|p2/|dist/)
             provider: database_users
             http_basic:
                 realm: api
