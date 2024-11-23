@@ -3,10 +3,6 @@ name: Run tests
 on:
   pull_request:
   push:
-    branches:
-      - main
-      - develop
-      - tests
 
 env:
   fail-fast: true
