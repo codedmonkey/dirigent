@@ -56,6 +56,6 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
     {
         $accessToken = $event->getEntityInstance();
 
-        $accessToken->user = $this->getUser();
+        $accessToken->setUser($this->getUser());
     }
 }
