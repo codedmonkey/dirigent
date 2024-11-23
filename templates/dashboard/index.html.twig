@@ -9,25 +9,40 @@
 {% block page_content %}
   <p>Welcome to <a href="https://github.com/codedmonkey/conductor">Conductor</a>, a free and open package registry for <a href="https://getcomposer.org">Composer</a>.</p>
 
-  <h2 class="h5">Add this registry to the composer.json</h2>
+  <h2 class="h5">Use this registry in a Composer project</h2>
 
-  <p>To use this registry in your project, run the following command in your terminal:</p>
+  <p>To use this registry in a project, run the following command in your terminal:</p>
 
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
     <pre class="m-0"><code>composer config repositories.{{ conductor.slug }} composer {{ app.request.getSchemeAndHttpHost() }}</code></pre>
   </div>
 
-  <p>Or add it directly in your <code>composer.json</code>:</p>
+  {% if app.request.scheme == 'http' %}
+    <p>Since this registry isn't using HTTPS, you need to disable TLS as well:</p>
+
+    <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
+      <pre class="m-0"><code>composer config disable-tls true</code></pre>
+    </div>
+  {% endif %}
+
+  <p>Or add it directly in the <code>composer.json</code> file:</p>
 
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
 <pre class="m-0"><code>{
     "repositories": {
         "{{ conductor.slug }}": { "type": "composer", "url": "{{ app.request.getSchemeAndHttpHost() }}" }
+{% if app.request.scheme != 'http' %}
     }
+{% else %}
+    },
+    "config": {
+        "disable-tls": true
+    }
+{% endif %}
 }</code></pre>
   </div>
 
   <h2 class="h5">Setup authentication</h2>
 
-  <p>Store the authentication credentials in your global Composer auth.json with the command below.</p>
+  <p>Store the authentication credentials in the global Composer `auth.json` with the command below.</p>
 {% endblock %}

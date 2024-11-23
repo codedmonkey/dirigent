@@ -71,3 +71,22 @@ composer config repositories.packagist.org false
     ]
 }
 ```
+
+## Disabling TLS
+
+By default Composer refuses to connect with registries over the `http` protocol, as its recommended to use `https` which
+provides better security using TLS. However, it is possible to remove this requirement.
+
+```shell
+composer config disable-tls true
+```
+
+```json
+{
+    "config": {
+        "disable-tls": true
+    }
+}
+```
+
+**Disabling TLS is dangerous and brings risks.**
