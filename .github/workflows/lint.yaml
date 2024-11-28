@@ -91,6 +91,10 @@ jobs:
         if: always() && steps.install.outcome == 'success'
         run: composer audit
 
+      - name: Check if any Symfony recipes are outdated
+        if: always() && steps.install.outcome == 'success'
+        run: composer recipes --outdated --no-interaction
+
       #- name: Run PHPStan
       #  if: always() && steps.install.outcome == 'success'
       #  run: ./vendor/bin/phpstan analyze
