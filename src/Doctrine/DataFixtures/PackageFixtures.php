@@ -28,6 +28,28 @@ class PackageFixtures extends Fixture
             // TODO resolve package metadata without fetching from remote
             $this->packageMetadataResolver->resolve($package);
 
+            $versions = $package->getVersions();
+
+            $date = new \DateTimeImmutable('-50 days');
+            $today = new \DateTimeImmutable();
+
+            while ($date->getTimestamp() <= $today->getTimestamp()) {
+                foreach ($versions as $version) {
+                    for ($number = rand(0, 100); $number > 0; --$number) {
+                        $version->getInstallations()->increase($date);
+                        $package->getInstallations()->increase($date);
+                    }
+                }
+
+                $date = $date->modify('+1 day');
+            }
+
+            foreach ($versions as $version) {
+                $version->getInstallations()->mergeData();
+            }
+
+            $package->getInstallations()->mergeData();
+
             $manager->flush();
         }
     }

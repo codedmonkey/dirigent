@@ -60,7 +60,7 @@ class Package
     private ?Registry $mirrorRegistry = null;
 
     #[ORM\OneToOne(mappedBy: 'package', cascade: ['persist', 'detach', 'remove'])]
-    private PackageDownloads $downloads;
+    private PackageInstallations $installations;
 
     /**
      * @var Collection<int, Version>
@@ -87,7 +87,7 @@ class Package
 
     public function __construct()
     {
-        $this->downloads = new PackageDownloads($this);
+        $this->installations = new PackageInstallations($this);
         $this->versions = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
@@ -263,9 +263,9 @@ class Package
         $this->mirrorRegistry = $mirrorRegistry;
     }
 
-    public function getDownloads(): PackageDownloads
+    public function getInstallations(): PackageInstallations
     {
-        return $this->downloads;
+        return $this->installations;
     }
 
     /**

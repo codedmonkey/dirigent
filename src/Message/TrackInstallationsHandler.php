@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-readonly class TrackDownloadsHandler
+readonly class TrackInstallationsHandler
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -17,12 +17,10 @@ readonly class TrackDownloadsHandler
     ) {
     }
 
-    public function __invoke(TrackDownloads $message): void
+    public function __invoke(TrackInstallations $message): void
     {
-        $dataKey = (new \DateTime())->format('Ymd');
-
-        foreach ($message->downloads as $download) {
-            $package = $this->packageRepository->findOneByName($download['name']);
+        foreach ($message->installations as $install) {
+            $package = $this->packageRepository->findOneByName($install['name']);
 
             if (!$package) {
                 continue;
@@ -30,15 +28,15 @@ readonly class TrackDownloadsHandler
 
             $version = $this->versionRepository->findOneBy([
                 'package' => $package,
-                'normalizedVersion' => $download['version'],
+                'normalizedVersion' => $install['version'],
             ]);
 
             if (!$version) {
                 continue;
             }
 
-            $package->getDownloads()->increase($dataKey);
-            $version->getDownloads()->increase($dataKey);
+            $package->getInstallations()->increase($message->installedAt);
+            $version->getInstallations()->increase($message->installedAt);
 
             $this->entityManager->persist($package);
             $this->entityManager->persist($version);

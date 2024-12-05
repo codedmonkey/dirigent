@@ -5,10 +5,10 @@ namespace CodedMonkey\Conductor\Doctrine\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-class PackageDownloads extends AbstractDownloads
+class PackageInstallations extends AbstractInstallations
 {
     #[ORM\Id]
-    #[ORM\OneToOne(inversedBy: 'downloads')]
+    #[ORM\OneToOne(inversedBy: 'installations')]
     private Package $package;
 
     public function __construct(Package $package)

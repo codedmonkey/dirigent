@@ -6,7 +6,7 @@ use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
 use CodedMonkey\Conductor\Doctrine\Entity\Package;
 use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
-use CodedMonkey\Conductor\Message\TrackDownloads;
+use CodedMonkey\Conductor\Message\TrackInstallations;
 use CodedMonkey\Conductor\Message\UpdatePackage;
 use CodedMonkey\Conductor\Package\PackageDistributionResolver;
 use CodedMonkey\Conductor\Package\PackageMetadataResolver;
@@ -47,7 +47,7 @@ class ApiController extends AbstractController
         $data = [
             'packages' => [],
             'metadata-url' => $metadataUrlPattern,
-            'notify-batch' => $router->generate('api_track_downloads'),
+            'notify-batch' => $router->generate('api_track_installations'),
         ];
 
         if ($this->getParameter('conductor.dist_mirroring.enabled')) {
@@ -132,9 +132,9 @@ class ApiController extends AbstractController
         return $this->file($path);
     }
 
-    #[Route('/downloads', name: 'api_track_downloads', methods: ['POST'])]
+    #[Route('/downloads', name: 'api_track_installations', methods: ['POST'])]
     #[IsGrantedAccess]
-    public function trackDownloads(Request $request): Response
+    public function trackInstallations(Request $request): Response
     {
         $contents = json_decode($request->getContent(), true);
         $invalidInputs = static function ($item) {
@@ -145,7 +145,7 @@ class ApiController extends AbstractController
             return new JsonResponse(['status' => 'error', 'message' => 'Invalid request format, must be a json object containing a downloads key filled with an array of name/version objects'], 200);
         }
 
-        $message = new TrackDownloads($contents['downloads'], new \DateTime());
+        $message = new TrackInstallations($contents['downloads'], new \DateTime());
         $envelope = new Envelope($message, [
             new TransportNamesStamp('async'),
         ]);

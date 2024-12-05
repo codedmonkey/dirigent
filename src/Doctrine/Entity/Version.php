@@ -113,7 +113,7 @@ class Version
     private ?Package $package;
 
     #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
-    private VersionDownloads $downloads;
+    private VersionInstallations $installations;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $createdAt;
@@ -133,7 +133,7 @@ class Version
         $this->replace = new ArrayCollection();
         $this->suggest = new ArrayCollection();
         $this->tags = new ArrayCollection();
-        $this->downloads = new VersionDownloads($this);
+        $this->installations = new VersionInstallations($this);
         $this->createdAt = new \DateTime();
     }
 
@@ -482,9 +482,9 @@ class Version
         $this->package = $package;
     }
 
-    public function getDownloads(): VersionDownloads
+    public function getInstallations(): VersionInstallations
     {
-        return $this->downloads;
+        return $this->installations;
     }
 
     public function getCreatedAt(): \DateTimeInterface

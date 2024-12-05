@@ -5,7 +5,7 @@ namespace CodedMonkey\Conductor\Doctrine\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-abstract class AbstractDownloads
+abstract class AbstractInstallations
 {
     private ?array $data = null;
 
@@ -31,29 +31,6 @@ abstract class AbstractDownloads
     protected ?\DateTimeImmutable $mergedAt = null;
 
     /**
-     * @param array<int|numeric-string, int> $data
-     */
-    public function setData(array $data): void
-    {
-        $this->historicalData = $data;
-        $this->recentData = [];
-
-        $this->mergedAt = new \DateTimeImmutable();
-
-        $this->data = null;
-    }
-
-    /**
-     * @param numeric-string $key
-     */
-    public function setDataPoint(string $key, int $value): void
-    {
-        $this->recentData[$key] = $value;
-
-        $this->data = null;
-    }
-
-    /**
      * @return array<int, int> Key is "YYYYMMDD" which means it always gets converted to an int by php
      */
     public function getData(): array
@@ -63,11 +40,6 @@ abstract class AbstractDownloads
         }
 
         return $this->data;
-    }
-
-    public function setTotal(int $total): void
-    {
-        $this->total = $total;
     }
 
     public function getTotal(): int
@@ -80,14 +52,22 @@ abstract class AbstractDownloads
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
-    }
-
     public function getMergedAt(): ?\DateTimeImmutable
     {
         return $this->mergedAt;
+    }
+
+    public function increase(\DateTimeInterface $date): void
+    {
+        $key = $date->format('Ymd');
+
+        $this->recentData[$key] ??= 0;
+        ++$this->recentData[$key];
+
+        ++$this->total;
+
+        $this->data = null;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function mergeData(): void
@@ -112,19 +92,5 @@ abstract class AbstractDownloads
         }
 
         return $data;
-    }
-
-    /**
-     * @param numeric-string $key
-     */
-    public function increase(string $key): void
-    {
-        $this->recentData[$key] ??= 0;
-        ++$this->recentData[$key];
-
-        ++$this->total;
-
-        $this->data = null;
-        $this->updatedAt = new \DateTimeImmutable();
     }
 }

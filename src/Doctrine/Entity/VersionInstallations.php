@@ -5,10 +5,10 @@ namespace CodedMonkey\Conductor\Doctrine\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-class VersionDownloads extends AbstractDownloads
+class VersionInstallations extends AbstractInstallations
 {
     #[ORM\Id]
-    #[ORM\OneToOne(inversedBy: 'downloads')]
+    #[ORM\OneToOne(inversedBy: 'installations')]
     private Version $version;
 
     public function __construct(Version $version)

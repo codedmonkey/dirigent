@@ -61,7 +61,7 @@
         {% if version.source %}
           <div><a href="{{ version.source.url }}">Source</a></div>
         {% endif %}
-        <div>Installs: {{ package.downloads.total }}</div>
+        <div>Installs: {{ package.installations.total }}</div>
         {% if version.license %}
           <div>License: {{ version.license|join(', ') }}</div>
         {% else %}
