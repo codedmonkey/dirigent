@@ -30,8 +30,8 @@ readonly class TrackDownloadsHandler
 
             $version = $this->versionRepository->findOneBy([
                 'package' => $package,
-                'normalizedVersion' => $download['version']]
-            );
+                'normalizedVersion' => $download['version'],
+            ]);
 
             if (!$version) {
                 continue;
