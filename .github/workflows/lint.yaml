@@ -18,10 +18,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: PHP-CS-Fixer
-        uses: docker://oskarstark/php-cs-fixer-ga
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
         with:
-          args: --diff --dry-run
+          coverage: none
+          extensions: intl
+          php-version: "8.2"
+          tools: composer:v2
+
+      - name: Set composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        id: install
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: PHP-CS-Fixer
+        run: ./vendor/bin/php-cs-fixer fix --diff --dry-run
 
   linters:
     name: Linters
