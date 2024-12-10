@@ -15,6 +15,8 @@
     <span class="nav-link disabled">Dependants</span>
   </li>
   <li class="nav-item">
-    <span class="nav-link disabled">Statistics</span>
+    {% set packageVersionsUrl = ea_url()
+      .setRoute('dashboard_packages_statistics', {packageName: package.name}) %}
+    <a {% if currentPage == 'statistics' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageVersionsUrl }}">Statistics</a>
   </li>
 </ul>

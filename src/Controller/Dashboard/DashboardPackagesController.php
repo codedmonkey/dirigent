@@ -96,6 +96,48 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard/packages/statistics/{packageName}', name: 'dashboard_packages_statistics', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function statistics(string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        $versionInstallationsData = [];
+
+        foreach ($package->getVersions() as $version) {
+            $majorVersion = $version->getMajorVersion();
+
+            $versionInstallationsData[$majorVersion] ??= [];
+
+            foreach ($version->getInstallations()->getData() as $key => $installations) {
+                $versionInstallationsData[$majorVersion][$key] ??= 0;
+                $versionInstallationsData[$majorVersion][$key] += $installations;
+            }
+        }
+
+        $today = new \DateTimeImmutable();
+        $todayKey = $today->format('Ymd');
+        $installationsToday = $package->getInstallations()->getData()[$todayKey] ?? 0;
+
+        $installationsLast30Days = 0;
+        $date = new \DateTimeImmutable('-30 days');
+
+        while ($date <= $today) {
+            $dateKey = $date->format('Ymd');
+            $installationsLast30Days += $package->getInstallations()->getData()[$dateKey] ?? 0;
+
+            $date = $date->modify('+1 day');
+        }
+
+        return $this->render('dashboard/packages/package_statistics.html.twig', [
+            'package' => $package,
+            'versionInstallationsData' => $versionInstallationsData,
+            'installationsTotal' => $package->getInstallations()->getTotal(),
+            'installationsLast30Days' => $installationsLast30Days,
+            'installationsToday' => $installationsToday,
+        ]);
+    }
+
     #[Route('/dashboard/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
     #[IsGranted('ROLE_ADMIN')]
     public function addMirror(Request $request): Response

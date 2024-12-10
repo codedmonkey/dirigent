@@ -590,6 +590,27 @@ class Version
         return $url;
     }
 
+    public function getMajorVersion(): int
+    {
+        $split = explode('.', $this->version);
+
+        return (int) $split[0];
+    }
+
+    public function getMinorVersion(): int
+    {
+        $split = explode('.', $this->version);
+
+        return (int) $split[1];
+    }
+
+    public function getPatchVersion(): int
+    {
+        $split = explode('.', $this->version);
+
+        return (int) $split[2];
+    }
+
     public function toComposerArray(): array
     {
         $tags = [];
