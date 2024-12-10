@@ -62,3 +62,50 @@ jobs:
 
       - name: Run tests
         run: bin/phpunit ${{ env.PHPUNIT_FLAGS }}
+
+  migrations:
+    name: Validate migrations
+    runs-on: ubuntu-latest
+
+    services:
+      database:
+        image: postgres:16-alpine
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: conductor
+          POSTGRES_PASSWORD: "!ChangeMe!"
+          POSTGRES_USER: conductor
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+          extensions: intl
+          php-version: 8.2
+          tools: composer:v2
+
+      - name: Set composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        id: install
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: Execute migrations
+        run: bin/console doctrine:migrations:migrate --no-interaction -v
+
+      - name: Validate schema
+        run: bin/console doctrine:schema:validate --skip-mapping --skip-property-types --no-interaction -vvv
