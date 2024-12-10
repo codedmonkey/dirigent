@@ -1,5 +1,9 @@
 # Changelog
 
+* 0.2.2 (2024-12-10)
+  * Changed internal names of downloads to installations 
+  * Fixed database migrations
+
 * 0.2.1 (2024-11-23)
   * Access tokens are now encrypted before being stored in the database
   * Added expiry dates for access tokens
