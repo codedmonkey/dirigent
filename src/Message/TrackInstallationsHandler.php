@@ -20,18 +20,11 @@ readonly class TrackInstallationsHandler
     public function __invoke(TrackInstallations $message): void
     {
         foreach ($message->installations as $install) {
-            $package = $this->packageRepository->findOneByName($install['name']);
-
-            if (!$package) {
+            if (!$package = $this->packageRepository->findOneByName($install['name'])) {
                 continue;
             }
 
-            $version = $this->versionRepository->findOneBy([
-                'package' => $package,
-                'normalizedVersion' => $install['version'],
-            ]);
-
-            if (!$version) {
+            if (!$version = $this->versionRepository->findOneByNormalizedVersion($package, $install['version'])) {
                 continue;
             }
 

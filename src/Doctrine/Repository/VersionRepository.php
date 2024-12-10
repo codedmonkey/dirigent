@@ -40,6 +40,11 @@ class VersionRepository extends ServiceEntityRepository
         }
     }
 
+    public function findOneByNormalizedVersion(Package $package, string $version): ?Version
+    {
+        return $this->findOneBy(['package' => $package, 'normalizedVersion' => $version]);
+    }
+
     public function getVersionMetadataForUpdate(Package $package): array
     {
         $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(

@@ -14,7 +14,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  * @method Package[]    findAll()
  * @method Package[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  * @method Package|null findOneBy(array $criteria, array $orderBy = null)
- * @method Package|null findOneByName(string $name)
  */
 class PackageRepository extends ServiceEntityRepository
 {
@@ -46,6 +45,11 @@ class PackageRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function findOneByName(string $name): ?Package
+    {
+        return $this->findOneBy(['name' => $name]);
     }
 
     /**
