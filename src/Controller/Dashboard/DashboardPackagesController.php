@@ -4,8 +4,8 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use CodedMonkey\Dirigent\Form\PackageAddMirroringFormType;
 use CodedMonkey\Dirigent\Form\PackageAddVcsFormType;
@@ -28,7 +28,6 @@ class DashboardPackagesController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly PackageRepository $packageRepository,
-        private readonly VersionRepository $versionRepository,
         private readonly PackageMetadataResolver $metadataResolver,
         private readonly MessageBusInterface $messenger,
         private readonly AdminUrlGenerator $adminUrlGenerator,
@@ -135,6 +134,7 @@ class DashboardPackagesController extends AbstractController
                 $package = new Package();
                 $package->setName($packageName);
                 $package->setMirrorRegistry($registry);
+                $package->setFetchStrategy(PackageFetchStrategy::Mirror);
 
                 $this->packageRepository->save($package, true);
 

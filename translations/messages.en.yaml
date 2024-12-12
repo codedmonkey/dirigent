@@ -48,6 +48,10 @@ credentials:
     http-basic: HTTP Basic credentials
     gitlab-dt: GitLab deploy token
     gitlab-pat: GitLab personal access token
+package:
+  fetch_strategy:
+    mirror: Fetch from mirror registry
+    vcs: Fetch directly from VCS
 registry:
   package_mirroring:
     none: Package mirroring disabled

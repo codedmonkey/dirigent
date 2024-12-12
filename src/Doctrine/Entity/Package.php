@@ -56,6 +56,9 @@ class Package
     #[ORM\Column(nullable: true)]
     private ?string $remoteId = null;
 
+    #[ORM\Column(type: Types::STRING, enumType: PackageFetchStrategy::class, nullable: true)]
+    private PackageFetchStrategy|string|null $fetchStrategy = null;
+
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
 
@@ -251,6 +254,20 @@ class Package
     public function setRemoteId(?string $remoteId): void
     {
         $this->remoteId = $remoteId;
+    }
+
+    public function getFetchStrategy(): PackageFetchStrategy|string
+    {
+        if (!$this->fetchStrategy) {
+            return $this->mirrorRegistry ? PackageFetchStrategy::Mirror : PackageFetchStrategy::Vcs;
+        }
+
+        return $this->fetchStrategy;
+    }
+
+    public function setFetchStrategy(PackageFetchStrategy|string $fetchStrategy): void
+    {
+        $this->fetchStrategy = $fetchStrategy;
     }
 
     public function getMirrorRegistry(): ?Registry

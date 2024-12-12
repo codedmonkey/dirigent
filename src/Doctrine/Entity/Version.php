@@ -187,12 +187,12 @@ class Version
         $this->description = $description;
     }
 
-    public function getReadme(): string
+    public function getReadme(): ?string
     {
-        return (string) $this->readme;
+        return $this->readme;
     }
 
-    public function setReadme(string $readme): void
+    public function setReadme(?string $readme): void
     {
         $this->readme = $readme;
     }

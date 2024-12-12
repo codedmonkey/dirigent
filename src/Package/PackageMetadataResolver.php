@@ -5,6 +5,7 @@ namespace CodedMonkey\Dirigent\Package;
 use cebe\markdown\GithubMarkdown;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Entity\SuggestLink;
@@ -55,14 +56,10 @@ readonly class PackageMetadataResolver
 
     public function resolve(Package $package): void
     {
-        if (null !== $package->getMirrorRegistry()) {
-            $this->resolveRegistryPackage($package);
-        } elseif (null !== $package->getRepositoryUrl()) {
-            $this->resolveVcsPackage($package);
-        } else {
-            // todo resolve from other sources
-            throw new \LogicException();
-        }
+        match ($package->getFetchStrategy()) {
+            PackageFetchStrategy::Mirror => $this->resolveRegistryPackage($package),
+            PackageFetchStrategy::Vcs => $this->resolveVcsPackage($package),
+        };
 
         $this->messenger->dispatch(new DumpPackageProvider($package->getId()));
     }
@@ -105,6 +102,22 @@ readonly class PackageMetadataResolver
 
     private function resolveVcsPackage(Package $package): void
     {
+        if ($package->getMirrorRegistry()) {
+            $this->resolveVcsRepository($package);
+        }
+
+        if (!$package->getRepositoryUrl()) {
+            if ($package->getMirrorRegistry()) {
+                // todo log fallback to mirror registry
+
+                $this->resolveRegistryPackage($package);
+
+                return;
+            }
+
+            throw new \LogicException("No repository URL provided for {$package->getName()}.");
+        }
+
         $repository = $this->composer->createVcsRepository($package);
 
         $driver = $repository->getDriver();
@@ -120,6 +133,18 @@ readonly class PackageMetadataResolver
         $composerPackages = $repository->findPackages($packageName);
 
         $this->updatePackage($package, $composerPackages, $driver);
+    }
+
+    private function resolveVcsRepository(Package $package): void
+    {
+        $repository = $this->composer->createComposerRepository($package->getMirrorRegistry());
+        $composerPackages = $repository->findPackages($package->getName());
+
+        foreach ($composerPackages as $composerPackage) {
+            if ($composerPackage->isDefaultBranch()) {
+                $package->setRepositoryUrl($composerPackage->getSourceUrl());
+            }
+        }
     }
 
     /**
@@ -234,6 +259,7 @@ readonly class PackageMetadataResolver
         }
 
         if ($data->isDefaultBranch()) {
+            $package->setRepositoryUrl($data->getSourceUrl());
             $package->setDescription($description);
             $package->setType($this->sanitize($data->getType()));
             if ($data->isAbandoned() && !$package->isAbandoned()) {
@@ -316,6 +342,8 @@ readonly class PackageMetadataResolver
 
         if ($driver) {
             $this->updateReadme($version, $driver);
+        } else {
+            $version->setReadme(null);
         }
 
         $em->persist($version);

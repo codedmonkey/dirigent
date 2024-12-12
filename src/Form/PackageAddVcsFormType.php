@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Form;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Package\PackageVcsRepositoryValidator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -16,6 +17,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class PackageAddVcsFormType extends AbstractType
 {
+    public function __construct(
+        private readonly PackageVcsRepositoryValidator $vcsRepositoryValidator,
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -35,11 +41,12 @@ class PackageAddVcsFormType extends AbstractType
         /** @var Package $package */
         $package = $event->getData();
 
-        $validator = new PackageVcsRepositoryValidator();
-        $validationResult = $validator->validate($package);
+        $package->setFetchStrategy(PackageFetchStrategy::Vcs);
+
+        $validationResult = $this->vcsRepositoryValidator->validate($package);
 
         if (null === $validationResult['error']) {
-            $validator->loadResult($package, $validationResult);
+            $this->vcsRepositoryValidator->loadResult($package, $validationResult);
         } else {
             $form->get('repositoryUrl')->addError(new FormError($validationResult['error']));
         }

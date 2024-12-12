@@ -13,6 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -58,6 +59,8 @@ class DashboardRegistryController extends AbstractCrudController
 
         yield AssociationField::new('credentials')
             ->onlyOnForms();
+
+        yield FormField::addPanel('Test');
 
         yield ChoiceField::new('packageMirroring')
             ->setSortable(false)

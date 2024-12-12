@@ -9,9 +9,50 @@
 {% block page_content %}
   {{ form_start(form) }}
     {{ form_row(form.name) }}
-    {{ form_row(form.repositoryUrl) }}
-    {{ form_row(form.repositoryCredentials) }}
-    {{ form_row(form.mirrorRegistry) }}
+
+    <div class="form-fieldset">
+      <fieldset>
+        <div class="form-fieldset-header">
+          <div class="form-fieldset-title">
+            <span class="form-fieldset-title-content">
+              Repository
+            </span>
+          </div>
+        </div>
+
+        <div class="form-fieldset-body">
+          <div class="row">
+            <div>
+              {{ form_row(form.repositoryUrl) }}
+              {{ form_row(form.repositoryCredentials) }}
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="form-fieldset">
+      <fieldset>
+        <div class="form-fieldset-header">
+          <div class="form-fieldset-title">
+            <span class="form-fieldset-title-content">
+              Mirroring
+            </span>
+          </div>
+        </div>
+
+        <div class="form-fieldset-body">
+          <div class="row">
+            <div>
+              {{ form_row(form.mirrorRegistry) }}
+              {% if form.fetchStrategy is defined %}
+                {{ form_row(form.fetchStrategy) }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </div>
 
     <button class="btn btn-primary">Save</button>
   {{ form_end(form) }}
