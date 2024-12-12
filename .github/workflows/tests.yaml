@@ -63,8 +63,8 @@ jobs:
       - name: Run tests
         run: bin/phpunit ${{ env.PHPUNIT_FLAGS }}
 
-  migrations:
-    name: Validate migrations
+  database:
+    name: Validate database components
     runs-on: ubuntu-latest
 
     services:
@@ -104,8 +104,14 @@ jobs:
         id: install
         run: composer install --ansi --no-interaction --no-progress
 
+      - name: Validate mapping
+        run: bin/console doctrine:schema:validate --skip-sync --no-interaction -vvv
+
       - name: Execute migrations
         run: bin/console doctrine:migrations:migrate --no-interaction -v
 
       - name: Validate schema
         run: bin/console doctrine:schema:validate --skip-mapping --skip-property-types --no-interaction -vvv
+
+      - name: Run fixtures
+        run: bin/console doctrine:fixtures:load --no-interaction -vvv

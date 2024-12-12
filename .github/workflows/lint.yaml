@@ -98,10 +98,6 @@ jobs:
         if: always() && steps.install.outcome == 'success'
         run: bin/console lint:container --no-debug
 
-      - name: Lint Doctrine entities
-        if: always() && steps.install.outcome == 'success'
-        run: bin/console doctrine:schema:validate --skip-sync --no-interaction -vvv
-
       - name: Lint Composer config
         if: always() && steps.install.outcome == 'success'
         run: composer validate
