@@ -1,0 +1,18 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Edit package{% endblock %}
+
+{% block search_wrapper %}
+  {% include 'dashboard/packages/search_box.html.twig' with {searchAutofocus: false} %}
+{% endblock %}
+
+{% block page_content %}
+  {{ form_start(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.repositoryUrl) }}
+    {{ form_row(form.repositoryCredentials) }}
+    {{ form_row(form.mirrorRegistry) }}
+
+    <button class="btn btn-primary">Save</button>
+  {{ form_end(form) }}
+{% endblock %}

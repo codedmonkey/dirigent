@@ -81,9 +81,9 @@ class Package
     private ?\DateTimeInterface $dumpedAt = null;
 
     /**
-     * @var array<string, Version>|null lookup table for versions
+     * @var array<string, Version> lookup table for versions
      */
-    private ?array $cachedVersions = null;
+    private array $cachedVersions;
 
     public function __construct()
     {
@@ -278,18 +278,14 @@ class Package
 
     public function getVersion(string $normalizedVersion): ?Version
     {
-        if (null === $this->cachedVersions) {
+        if (!isset($this->cachedVersions)) {
             $this->cachedVersions = [];
             foreach ($this->getVersions() as $version) {
                 $this->cachedVersions[strtolower($version->getNormalizedVersion())] = $version;
             }
         }
 
-        if (isset($this->cachedVersions[strtolower($normalizedVersion)])) {
-            return $this->cachedVersions[strtolower($normalizedVersion)];
-        }
-
-        return null;
+        return $this->cachedVersions[strtolower($normalizedVersion)] ?? null;
     }
 
     public function getCreatedAt(): \DateTimeInterface
@@ -325,6 +321,51 @@ class Package
     public function setDumpedAt(?\DateTimeInterface $dumpedAt): void
     {
         $this->dumpedAt = $dumpedAt;
+    }
+
+    /**
+     * Returns the default branch or latest version of the package.
+     */
+    public function getDefaultVersion(): ?Version
+    {
+        $versions = $this->versions->toArray();
+
+        if (!count($versions)) {
+            return null;
+        }
+
+        usort($versions, [static::class, 'sortVersions']);
+
+        $latestVersion = reset($versions);
+        foreach ($versions as $version) {
+            if ($version->isDefaultBranch()) {
+                return $version;
+            }
+        }
+
+        return $latestVersion;
+    }
+
+    /**
+     * Returns the latest (numbered) version of the package, or the default version if no versions were found.
+     */
+    public function getLatestVersion(): ?Version
+    {
+        $versions = $this->versions->toArray();
+
+        if (!count($versions)) {
+            return null;
+        }
+
+        usort($versions, [static::class, 'sortVersions']);
+
+        foreach ($versions as $version) {
+            if (!$version->isDevelopment()) {
+                return $version;
+            }
+        }
+
+        return $this->getDefaultVersion();
     }
 
     public static function sortVersions(Version $a, Version $b): int

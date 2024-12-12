@@ -14,7 +14,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class PackageAddVcsType extends AbstractType
+class PackageAddVcsFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

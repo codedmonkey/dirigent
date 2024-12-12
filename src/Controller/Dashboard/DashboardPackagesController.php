@@ -7,10 +7,12 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
-use CodedMonkey\Dirigent\Form\PackageAddMirroringType;
-use CodedMonkey\Dirigent\Form\PackageAddVcsType;
+use CodedMonkey\Dirigent\Form\PackageAddMirroringFormType;
+use CodedMonkey\Dirigent\Form\PackageAddVcsFormType;
+use CodedMonkey\Dirigent\Form\PackageFormType;
 use CodedMonkey\Dirigent\Message\UpdatePackage;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
+use Composer\Semver\VersionParser;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -63,28 +65,14 @@ class DashboardPackagesController extends AbstractController
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
 
         $versions = $package->getVersions()->toArray();
+        $latestVersion = $package->getDefaultVersion();
 
         usort($versions, Package::class . '::sortVersions');
 
-        // load the default branch version as it is used to display the latest available source.* and homepage info
-        $latestVersion = reset($versions);
-        foreach ($versions as $v) {
-            if ($v->isDefaultBranch()) {
-                $latestVersion = $v;
-                break;
-            }
-        }
-
         if (null !== $packageVersion) {
-            $version = $this->versionRepository->findOneBy(['package' => $package, 'version' => $packageVersion]);
+            $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
         } else {
-            $version = $latestVersion;
-            foreach ($versions as $candidate) {
-                if (!$candidate->isDevelopment()) {
-                    $version = $candidate;
-                    break;
-                }
-            }
+            $version = $package->getLatestVersion();
         }
 
         return $this->render('dashboard/packages/package_info.html.twig', [
@@ -113,7 +101,7 @@ class DashboardPackagesController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function addMirror(Request $request): Response
     {
-        $form = $this->createForm(PackageAddMirroringType::class);
+        $form = $this->createForm(PackageAddMirroringFormType::class);
 
         $form->handleRequest($request);
 
@@ -174,7 +162,7 @@ class DashboardPackagesController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function addVcsRepository(Request $request): Response
     {
-        $form = $this->createForm(PackageAddVcsType::class);
+        $form = $this->createForm(PackageAddVcsFormType::class);
 
         $form->handleRequest($request);
 
@@ -189,6 +177,32 @@ class DashboardPackagesController extends AbstractController
         }
 
         return $this->render('dashboard/packages/add_vcs.html.twig', [
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/edit/{packageName}', name: 'dashboard_packages_edit', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function edit(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneByName($packageName);
+
+        $form = $this->createForm(PackageFormType::class, $package);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var Package $package */
+            $package = $form->getData();
+            $this->packageRepository->save($package, true);
+
+            $this->messenger->dispatch(new UpdatePackage($package->getId()));
+
+            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
+        }
+
+        return $this->render('dashboard/packages/package_edit.html.twig', [
+            'package' => $package,
             'form' => $form,
         ]);
     }

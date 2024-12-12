@@ -4,39 +4,35 @@ namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping\Column;
-use Doctrine\ORM\Mapping\Entity;
-use Doctrine\ORM\Mapping\GeneratedValue;
-use Doctrine\ORM\Mapping\Id;
-use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping as ORM;
 
-#[Entity(repositoryClass: RegistryRepository::class)]
+#[ORM\Entity(repositoryClass: RegistryRepository::class)]
 class Registry
 {
-    #[Column]
-    #[GeneratedValue]
-    #[Id]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
+    #[ORM\Id]
     private ?int $id = null;
 
-    #[Column]
+    #[ORM\Column]
     private ?string $name = null;
 
-    #[Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[Column(length: 1024)]
+    #[ORM\Column(length: 1024)]
     private ?string $url = null;
 
-    #[ManyToOne]
+    #[ORM\ManyToOne]
     private ?Credentials $credentials = null;
 
-    #[Column(type: Types::STRING, enumType: RegistryPackageMirroring::class)]
+    #[ORM\Column(type: Types::STRING, enumType: RegistryPackageMirroring::class)]
     private RegistryPackageMirroring|string $packageMirroring = RegistryPackageMirroring::Automatic;
 
-    #[Column]
+    #[ORM\Column]
     private ?int $mirroringPriority = null;
 
-    #[Column(nullable: true)]
+    #[ORM\Column(nullable: true)]
     private ?\DateInterval $dynamicUpdateDelay = null;
 
     public function __toString(): string

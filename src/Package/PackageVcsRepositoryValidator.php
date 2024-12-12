@@ -18,6 +18,10 @@ readonly class PackageVcsRepositoryValidator
     {
         $repoUrl = $package->getRepositoryUrl();
 
+        if (!$repoUrl) {
+            return ['error' => 'The repository URL is required'];
+        }
+
         // prevent local filesystem URLs
         if (Preg::isMatch('{^(\.|[a-z]:|/)}i', $repoUrl)) {
             return ['error' => 'Local filesystem repositories are not allowed'];
