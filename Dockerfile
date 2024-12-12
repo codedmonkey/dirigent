@@ -1,4 +1,4 @@
-FROM composer:2 AS build
+FROM composer:2 AS composer_build
 
 WORKDIR /srv/app
 
@@ -12,6 +12,17 @@ RUN composer install \
         --no-progress \
         --no-scripts \
         --prefer-dist
+
+FROM node:latest AS node_build
+
+WORKDIR /srv/app
+
+COPY package.json package-lock.json tsconfig.json webpack.config.js ./
+COPY assets assets/
+
+RUN set -e; \
+    npm install; \
+    npm run production;
 
 FROM alpine:3.19
 
@@ -53,7 +64,7 @@ RUN set -e; \
     mkdir -p /run/postgresql /srv/config; \
     chown -R conductor:conductor /run /srv;
 
-COPY --from=build /usr/bin/composer /usr/bin/composer
+COPY --from=composer_build /usr/bin/composer /usr/bin/composer
 
 COPY docker/init.sh /
 COPY docker/Caddyfile /etc/caddy/
@@ -70,7 +81,8 @@ ENV CONDUCTOR_IMAGE=1
 
 WORKDIR /srv/app
 
-COPY --chown=conductor:conductor --from=build /srv/app ./
+COPY --chown=conductor:conductor --from=composer_build /srv/app ./
+COPY --chown=conductor:conductor --from=node_build /srv/app/public/build public/build/
 COPY --chown=conductor:conductor readme.md license.md ./
 COPY --chown=conductor:conductor .env.conductor ./
 COPY --chown=conductor:conductor bin bin/
