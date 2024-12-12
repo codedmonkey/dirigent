@@ -1,13 +1,19 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block page_title %}Edit package{% endblock %}
+{% block page_title %}Edit Package{% endblock %}
 
 {% block search_wrapper %}
   {% include 'dashboard/packages/search_box.html.twig' with {searchAutofocus: false} %}
 {% endblock %}
 
+{% block page_actions %}
+  <div class="global-actions">
+    <button class="btn btn-primary" form="package_form">{{ 'action.save'|trans({}, 'EasyAdminBundle') }}</button>
+  </div>
+{% endblock %}
+
 {% block page_content %}
-  {{ form_start(form) }}
+  {{ form_start(form, {'attr': {'id': 'package_form'}}) }}
     {{ form_row(form.name) }}
 
     <div class="form-fieldset">
@@ -53,7 +59,5 @@
         </div>
       </fieldset>
     </div>
-
-    <button class="btn btn-primary">Save</button>
   {{ form_end(form) }}
 {% endblock %}
