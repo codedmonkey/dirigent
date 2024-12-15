@@ -40,8 +40,7 @@ class DashboardRootController extends AbstractDashboardController
     public function configureAssets(): Assets
     {
         return Assets::new()
-            ->addWebpackEncoreEntry('dashboard')
-            ->addCssFile('assets/conductor-theme.css');
+            ->addWebpackEncoreEntry('dashboard');
     }
 
     public function configureMenuItems(): iterable

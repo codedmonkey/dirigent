@@ -7,3 +7,5 @@
  */
 
 import './bootstrap';
+
+import './stylesheets/conductor-theme.css';
