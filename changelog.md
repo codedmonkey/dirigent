@@ -1,5 +1,8 @@
 # Changelog
 
+* 0.2.3 (2024-12-15) 
+  * Fixed access token form events triggering in all forms
+
 * 0.2.2 (2024-12-10)
   * Changed internal names of downloads to installations 
   * Fixed database migrations
