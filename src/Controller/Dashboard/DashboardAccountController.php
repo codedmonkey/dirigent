@@ -1,11 +1,11 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Doctrine\Entity\User;
-use CodedMonkey\Conductor\Doctrine\Repository\UserRepository;
-use CodedMonkey\Conductor\Form\AccountFormType;
-use CodedMonkey\Conductor\Form\ChangePasswordFormType;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
+use CodedMonkey\Dirigent\Form\AccountFormType;
+use CodedMonkey\Dirigent\Form\ChangePasswordFormType;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;

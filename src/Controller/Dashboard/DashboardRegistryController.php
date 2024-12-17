@@ -1,11 +1,11 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Registry;
-use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
-use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
-use CodedMonkey\Conductor\EasyAdmin\DateIntervalField;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
+use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Dirigent\EasyAdmin\DateIntervalField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;

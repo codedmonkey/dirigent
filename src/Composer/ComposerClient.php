@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Composer;
+namespace CodedMonkey\Dirigent\Composer;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use Composer\Config;
 use Composer\Factory;
 use Composer\IO\IOInterface;
@@ -56,7 +56,7 @@ class ComposerClient
 
     public static function getHttpDownloaderOptions(): array
     {
-        $options['http']['header'][] = 'User-Agent: Conductor (https://github.com/codedmonkey/conductor)';
+        $options['http']['header'][] = 'User-Agent: Dirigent (https://github.com/codedmonkey/dirigent)';
         $options['max_file_size'] = 128_000_000;
 
         return $options;

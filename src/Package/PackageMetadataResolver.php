@@ -1,17 +1,17 @@
 <?php
 
-namespace CodedMonkey\Conductor\Package;
+namespace CodedMonkey\Dirigent\Package;
 
 use cebe\markdown\GithubMarkdown;
-use CodedMonkey\Conductor\Composer\ComposerClient;
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Entity\Registry;
-use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
-use CodedMonkey\Conductor\Doctrine\Entity\SuggestLink;
-use CodedMonkey\Conductor\Doctrine\Entity\Version;
-use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
-use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
-use CodedMonkey\Conductor\Message\DumpPackageProvider;
+use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
+use CodedMonkey\Dirigent\Doctrine\Entity\SuggestLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use Composer\Package\AliasPackage;
 use Composer\Package\PackageInterface;
 use Composer\Pcre\Preg;
@@ -275,7 +275,7 @@ readonly class PackageMetadataResolver
             }
 
             foreach ($links as $linkPackageName => $linkPackageVersion) {
-                $class = 'CodedMonkey\Conductor\Doctrine\Entity\\' . $opts['entity'];
+                $class = 'CodedMonkey\Dirigent\Doctrine\Entity\\' . $opts['entity'];
                 $link = new $class();
                 $link->setPackageName((string) $linkPackageName);
                 $link->setPackageVersion($linkPackageVersion);

@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

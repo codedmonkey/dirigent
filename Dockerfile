@@ -26,16 +26,16 @@ RUN set -e; \
 
 FROM alpine:3.19
 
-LABEL org.opencontainers.image.source=https://github.com/codedmonkey/conductor
-LABEL org.opencontainers.image.description="Conductor PHP Package Registry"
+LABEL org.opencontainers.image.source=https://github.com/codedmonkey/dirigent
+LABEL org.opencontainers.image.description="Dirigent PHP Package Registry"
 LABEL org.opencontainers.image.licenses=FSL-1.1-MIT
 
 ARG UID=1000
 ARG GID=1000
 
 RUN set -e; \
-    addgroup -g $GID -S conductor; \
-    adduser -u $UID -S -G conductor conductor; \
+    addgroup -g $GID -S dirigent; \
+    adduser -u $UID -S -G dirigent dirigent; \
     apk upgrade --no-cache; \
     apk add --no-cache --upgrade \
         caddy \
@@ -62,7 +62,7 @@ RUN set -e; \
         supervisor; \
     ln -s /usr/sbin/php-fpm82 /usr/sbin/php-fpm; \
     mkdir -p /run/postgresql /srv/config; \
-    chown -R conductor:conductor /run /srv;
+    chown -R dirigent:dirigent /run /srv;
 
 COPY --from=composer_build /usr/bin/composer /usr/bin/composer
 
@@ -73,27 +73,27 @@ COPY docker/php-fpm.conf /etc/php82/
 COPY docker/supervisord.conf /etc/
 COPY docker/process /srv/process/
 
-USER conductor
+USER dirigent
 
 ENV APP_ENV="prod"
-ENV DATABASE_URL="postgresql://conductor@127.0.0.1:5432/conductor?serverVersion=16&charset=utf8"
+ENV DATABASE_URL="postgresql://dirigent@127.0.0.1:5432/dirigent?serverVersion=16&charset=utf8"
 ENV CONDUCTOR_IMAGE=1
 
 WORKDIR /srv/app
 
-COPY --chown=conductor:conductor --from=composer_build /srv/app ./
-COPY --chown=conductor:conductor --from=node_build /srv/app/public/build public/build/
-COPY --chown=conductor:conductor readme.md license.md ./
-COPY --chown=conductor:conductor .env.conductor ./
-COPY --chown=conductor:conductor bin bin/
-COPY --chown=conductor:conductor config config/
-COPY --chown=conductor:conductor migrations migrations/
-COPY --chown=conductor:conductor public public/
-COPY --chown=conductor:conductor src src/
-COPY --chown=conductor:conductor translations translations/
-COPY --chown=conductor:conductor templates templates/
+COPY --chown=dirigent:dirigent --from=composer_build /srv/app ./
+COPY --chown=dirigent:dirigent --from=node_build /srv/app/public/build public/build/
+COPY --chown=dirigent:dirigent readme.md license.md ./
+COPY --chown=dirigent:dirigent .env.dirigent ./
+COPY --chown=dirigent:dirigent bin bin/
+COPY --chown=dirigent:dirigent config config/
+COPY --chown=dirigent:dirigent migrations migrations/
+COPY --chown=dirigent:dirigent public public/
+COPY --chown=dirigent:dirigent src src/
+COPY --chown=dirigent:dirigent translations translations/
+COPY --chown=dirigent:dirigent templates templates/
 
-COPY docker/conductor.yaml /srv/app/config/packages/
+COPY docker/dirigent.yaml /srv/app/config/packages/
 
 RUN set -e; \
     chmod +x bin/console; \

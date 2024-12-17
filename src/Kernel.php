@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor;
+namespace CodedMonkey\Dirigent;
 
-use CodedMonkey\Conductor\DependencyInjection\ConductorExtension;
+use CodedMonkey\Dirigent\DependencyInjection\DirigentExtension;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -16,7 +16,7 @@ class Kernel extends BaseKernel
     {
         $configDir = $this->getConfigDir();
 
-        $container->import($configDir . '/conductor.{json,php,yaml}');
+        $container->import($configDir . '/dirigent.{json,php,yaml}');
         $container->import($configDir . '/packages/*.yaml');
         $container->import($configDir . '/services.yaml');
 
@@ -29,12 +29,12 @@ class Kernel extends BaseKernel
     {
         parent::boot();
 
-        $_SERVER['COMPOSER_CACHE_DIR'] = $this->container->getParameter('conductor.storage.path') . '/composer-cache';
-        $_SERVER['COMPOSER_HOME'] = $this->container->getParameter('conductor.storage.path') . '/composer';
+        $_SERVER['COMPOSER_CACHE_DIR'] = $this->container->getParameter('dirigent.storage.path') . '/composer-cache';
+        $_SERVER['COMPOSER_HOME'] = $this->container->getParameter('dirigent.storage.path') . '/composer';
     }
 
     protected function build(ContainerBuilder $container): void
     {
-        $container->registerExtension(new ConductorExtension());
+        $container->registerExtension(new DirigentExtension());
     }
 }

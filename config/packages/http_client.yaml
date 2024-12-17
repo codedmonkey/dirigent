@@ -2,4 +2,4 @@ framework:
     http_client:
         default_options:
             headers:
-                'User-Agent': 'Conductor/0.1'
+                'User-Agent': 'Dirigent/0.1'

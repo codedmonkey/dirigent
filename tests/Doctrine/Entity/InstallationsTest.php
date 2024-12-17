@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Tests\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Tests\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Entity\AbstractInstallations;
+use CodedMonkey\Dirigent\Doctrine\Entity\AbstractInstallations;
 use PHPUnit\Framework\TestCase;
 
 class InstallationsTest extends TestCase

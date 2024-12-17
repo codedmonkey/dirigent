@@ -1,5 +1,5 @@
-conductor:
-  title: 'Conductor Tests'
+dirigent:
+  title: 'Dirigent Tests'
   security:
     public: true
     registration: true

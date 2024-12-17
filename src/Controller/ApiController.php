@@ -1,16 +1,16 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller;
+namespace CodedMonkey\Dirigent\Controller;
 
-use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
-use CodedMonkey\Conductor\Message\TrackInstallations;
-use CodedMonkey\Conductor\Message\UpdatePackage;
-use CodedMonkey\Conductor\Package\PackageDistributionResolver;
-use CodedMonkey\Conductor\Package\PackageMetadataResolver;
-use CodedMonkey\Conductor\Package\PackageProviderManager;
+use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\Message\TrackInstallations;
+use CodedMonkey\Dirigent\Message\UpdatePackage;
+use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
+use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
+use CodedMonkey\Dirigent\Package\PackageProviderManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -50,7 +50,7 @@ class ApiController extends AbstractController
             'notify-batch' => $router->generate('api_track_installations'),
         ];
 
-        if ($this->getParameter('conductor.dist_mirroring.enabled')) {
+        if ($this->getParameter('dirigent.dist_mirroring.enabled')) {
             $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
                 ->replace('{packageName}', '%package%')
                 ->replace('{packageVersion}', '%version%')
@@ -60,7 +60,7 @@ class ApiController extends AbstractController
 
             $data['mirrors'] = [[
                 'dist-url' => $distributionUrlPattern,
-                'preferred' => $this->getParameter('conductor.dist_mirroring.preferred'),
+                'preferred' => $this->getParameter('dirigent.dist_mirroring.preferred'),
             ]];
         }
 
@@ -103,7 +103,7 @@ class ApiController extends AbstractController
     #[IsGrantedAccess]
     public function packageDistribution(string $packageName, string $packageVersion, string $reference, string $type): Response
     {
-        if (!$this->getParameter('conductor.dist_mirroring.enabled')) {
+        if (!$this->getParameter('dirigent.dist_mirroring.enabled')) {
             throw new NotFoundHttpException();
         }
 
@@ -116,7 +116,7 @@ class ApiController extends AbstractController
                 throw new NotFoundHttpException();
             }
 
-            if ($version->isDevelopment() && !$this->getParameter('conductor.dist_mirroring.dev_packages')) {
+            if ($version->isDevelopment() && !$this->getParameter('dirigent.dist_mirroring.dev_packages')) {
                 throw new NotFoundHttpException();
             }
 

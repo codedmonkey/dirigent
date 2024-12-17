@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Tests;
+namespace CodedMonkey\Dirigent\Tests;
 
-use CodedMonkey\Conductor\Kernel;
+use CodedMonkey\Dirigent\Kernel;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 class PublicKernel extends Kernel

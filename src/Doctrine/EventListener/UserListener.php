@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\EventListener;
+namespace CodedMonkey\Dirigent\Doctrine\EventListener;
 
-use CodedMonkey\Conductor\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Events;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;

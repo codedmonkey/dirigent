@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Message;
+namespace CodedMonkey\Dirigent\Message;
 
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;

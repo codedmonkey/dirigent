@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Repository;
+namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

@@ -7,14 +7,14 @@
 {% endblock %}
 
 {% block page_content %}
-  <p>Welcome to <a href="https://github.com/codedmonkey/conductor">Conductor</a>, a free and open package registry for <a href="https://getcomposer.org">Composer</a>.</p>
+  <p>Welcome to <a href="https://github.com/codedmonkey/dirigent">Dirigent</a>, a free and open package registry for <a href="https://getcomposer.org">Composer</a>.</p>
 
   <h2 class="h5">Use this registry in a Composer project</h2>
 
   <p>To use this registry in a project, run the following command in your terminal:</p>
 
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
-    <pre class="m-0"><code>composer config repositories.{{ conductor.slug }} composer {{ app.request.getSchemeAndHttpHost() }}</code></pre>
+    <pre class="m-0"><code>composer config repositories.{{ dirigent.slug }} composer {{ app.request.getSchemeAndHttpHost() }}</code></pre>
   </div>
 
   {% if app.request.scheme == 'http' %}
@@ -30,7 +30,7 @@
   <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
 <pre class="m-0"><code>{
     "repositories": {
-        "{{ conductor.slug }}": { "type": "composer", "url": "{{ app.request.getSchemeAndHttpHost() }}" }
+        "{{ dirigent.slug }}": { "type": "composer", "url": "{{ app.request.getSchemeAndHttpHost() }}" }
 {% if app.request.scheme != 'http' %}
     }
 {% else %}

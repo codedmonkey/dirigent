@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Package;
+namespace CodedMonkey\Dirigent\Package;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use Composer\MetadataMinifier\MetadataMinifier;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -13,7 +13,7 @@ readonly class PackageProviderManager
     private string $storagePath;
 
     public function __construct(
-        #[Autowire(param: 'conductor.storage.path')]
+        #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
         $this->filesystem = new Filesystem();

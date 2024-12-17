@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\EventListener;
+namespace CodedMonkey\Dirigent\Doctrine\EventListener;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Event\PreRemoveEventArgs;

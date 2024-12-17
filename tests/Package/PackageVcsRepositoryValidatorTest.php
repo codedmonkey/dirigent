@@ -1,10 +1,10 @@
 <?php
 
-namespace CodedMonkey\Conductor\Tests\Package;
+namespace CodedMonkey\Dirigent\Tests\Package;
 
-use CodedMonkey\Conductor\Composer\ComposerClient;
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Package\PackageVcsRepositoryValidator;
+use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Package\PackageVcsRepositoryValidator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

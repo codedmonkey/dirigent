@@ -1,10 +1,10 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Doctrine\Entity\User;
-use CodedMonkey\Conductor\Form\ResetPasswordFormType;
-use CodedMonkey\Conductor\Form\ResetPasswordRequestFormType;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Form\ResetPasswordFormType;
+use CodedMonkey\Dirigent\Form\ResetPasswordRequestFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;

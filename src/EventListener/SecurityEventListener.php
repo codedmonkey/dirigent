@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\EventListener;
+namespace CodedMonkey\Dirigent\EventListener;
 
-use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
-use CodedMonkey\Conductor\Doctrine\Repository\AccessTokenRepository;
+use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Doctrine\Repository\AccessTokenRepository;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -20,7 +20,7 @@ readonly class SecurityEventListener
         private AuthorizationCheckerInterface $authorizationChecker,
         #[Autowire(service: 'access_token_hasher')]
         private PasswordHasherInterface $accessTokenHasher,
-        #[Autowire(param: 'conductor.security.public_access')]
+        #[Autowire(param: 'dirigent.security.public_access')]
         private bool $publicAccess,
     ) {
     }
@@ -44,7 +44,7 @@ readonly class SecurityEventListener
             $passwordBadge = $passport->getBadge(PasswordCredentials::class);
             $password = $passwordBadge->getPassword();
 
-            if (!str_starts_with($password, 'conductor-')) {
+            if (!str_starts_with($password, 'dirigent-')) {
                 return;
             }
 

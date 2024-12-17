@@ -1,6 +1,6 @@
 <?php
 
-use CodedMonkey\Conductor\Kernel;
+use CodedMonkey\Dirigent\Kernel;
 
 require_once dirname(__DIR__) . '/vendor/autoload_runtime.php';
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

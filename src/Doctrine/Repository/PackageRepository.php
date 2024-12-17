@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Repository;
+namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -21,7 +21,7 @@ class PackageRepository extends ServiceEntityRepository
 
     public function __construct(
         ManagerRegistry $registry,
-        #[Autowire(param: 'conductor.packages.periodic_update_interval')]
+        #[Autowire(param: 'dirigent.packages.periodic_update_interval')]
         string $updateInterval,
     ) {
         parent::__construct($registry, Package::class);

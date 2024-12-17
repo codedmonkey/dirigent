@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Message;
+namespace CodedMonkey\Dirigent\Message;
 
 use Symfony\Component\Console\Messenger\RunCommandMessage;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -13,7 +13,7 @@ use Symfony\Component\Scheduler\ScheduleProviderInterface;
 readonly class PackagesScheduleProvider implements ScheduleProviderInterface
 {
     public function __construct(
-        #[Autowire(param: 'conductor.packages.periodic_updates')]
+        #[Autowire(param: 'dirigent.packages.periodic_updates')]
         private bool $periodicUpdatesEnabled,
     ) {
     }

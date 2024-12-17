@@ -1,5 +1,5 @@
 {
-    "name": "@codedmonkey/conductor",
+    "name": "@codedmonkey/dirigent",
     "license": "FSL-1.1-MIT",
     "private": true,
     "devDependencies": {

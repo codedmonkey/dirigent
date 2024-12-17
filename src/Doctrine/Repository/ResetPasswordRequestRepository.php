@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Repository;
+namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
-use CodedMonkey\Conductor\Doctrine\Entity\ResetPasswordRequest;
-use CodedMonkey\Conductor\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Doctrine\Entity\ResetPasswordRequest;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestInterface;

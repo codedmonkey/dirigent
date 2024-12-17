@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Repository\ResetPasswordRequestRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\ResetPasswordRequestRepository;
 use Doctrine\ORM\Mapping as ORM;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestInterface;
 use SymfonyCasts\Bundle\ResetPassword\Model\ResetPasswordRequestTrait;

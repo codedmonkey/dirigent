@@ -6,7 +6,7 @@ security:
     providers:
         database_users:
             entity:
-                class: CodedMonkey\Conductor\Doctrine\Entity\User
+                class: CodedMonkey\Dirigent\Doctrine\Entity\User
                 property: username
     role_hierarchy:
         ROLE_ADMIN: ROLE_USER

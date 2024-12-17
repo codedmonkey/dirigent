@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Repository;
+namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
-use CodedMonkey\Conductor\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;

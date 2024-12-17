@@ -73,9 +73,9 @@ jobs:
         ports:
           - "5432:5432"
         env:
-          POSTGRES_DB: conductor
+          POSTGRES_DB: dirigent
           POSTGRES_PASSWORD: "!ChangeMe!"
-          POSTGRES_USER: conductor
+          POSTGRES_USER: dirigent
 
     steps:
       - name: Checkout code

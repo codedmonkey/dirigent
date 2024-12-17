@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Doctrine\Entity\User;
-use CodedMonkey\Conductor\Form\NewPasswordType;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Form\NewPasswordType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;

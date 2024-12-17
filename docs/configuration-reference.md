@@ -1,6 +1,6 @@
-# Conductor Configuration Reference
+# Dirigent Configuration Reference
 
-## conductor (root)
+## dirigent (root)
 
 ### title
 

@@ -1,5 +1,5 @@
 {
-    "name": "codedmonkey/conductor",
+    "name": "codedmonkey/dirigent",
     "description": "A free and open package registry for Composer",
     "type": "project",
     "license": "FSL-1.1-MIT",
@@ -83,12 +83,12 @@
     },
     "autoload": {
         "psr-4": {
-            "CodedMonkey\\Conductor\\": "src/"
+            "CodedMonkey\\Dirigent\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "CodedMonkey\\Conductor\\Tests\\": "tests/"
+            "CodedMonkey\\Dirigent\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -113,7 +113,7 @@
     },
     "extra": {
         "runtime": {
-            "dotenv_path": ".env.conductor"
+            "dotenv_path": ".env.dirigent"
         },
         "symfony": {
             "allow-contrib": false,

@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Command;
+namespace CodedMonkey\Dirigent\Command;
 
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Conductor\Message\SchedulePackageUpdate;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Message\SchedulePackageUpdate;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

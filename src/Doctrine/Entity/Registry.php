@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;

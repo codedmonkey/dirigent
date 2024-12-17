@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
+use CodedMonkey\Dirigent\Doctrine\Entity\AccessToken;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;

@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Repository\CredentialsRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\CredentialsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 

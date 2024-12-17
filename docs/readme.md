@@ -1,4 +1,4 @@
-# Conductor Documentation
+# Dirigent Documentation
 
 - [Installation](install.md)
 - [Getting Started](getting-started.md)

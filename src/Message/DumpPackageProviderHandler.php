@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Message;
+namespace CodedMonkey\Dirigent\Message;
 
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Conductor\Package\PackageProviderManager;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Package\PackageProviderManager;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]

@@ -1,10 +1,10 @@
 <?php
 
-namespace CodedMonkey\Conductor\Message;
+namespace CodedMonkey\Dirigent\Message;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Conductor\Package\PackageMetadataResolver;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -16,9 +16,9 @@ readonly class UpdatePackageHandler
     public function __construct(
         private PackageRepository $packageRepository,
         private PackageMetadataResolver $metadataResolver,
-        #[Autowire(param: 'conductor.packages.dynamic_updates')]
+        #[Autowire(param: 'dirigent.packages.dynamic_updates')]
         private bool $dynamicUpdatesEnabled,
-        #[Autowire(param: 'conductor.packages.dynamic_update_delay')]
+        #[Autowire(param: 'dirigent.packages.dynamic_update_delay')]
         string $updateDelay,
     ) {
         $this->updateDelay = new \DateInterval($updateDelay);

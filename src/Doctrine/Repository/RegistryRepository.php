@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Repository;
+namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Registry;
-use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;

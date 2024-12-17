@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-use CodedMonkey\Conductor\Kernel;
+use CodedMonkey\Dirigent\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 
 if (!is_dir(dirname(__DIR__) . '/vendor')) {

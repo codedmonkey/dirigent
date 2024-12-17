@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Package;
+namespace CodedMonkey\Dirigent\Package;
 
-use CodedMonkey\Conductor\Composer\ComposerClient;
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\GitHubDriver;
 

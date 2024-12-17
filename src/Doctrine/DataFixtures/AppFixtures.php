@@ -1,10 +1,10 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\DataFixtures;
+namespace CodedMonkey\Dirigent\Doctrine\DataFixtures;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Registry;
-use CodedMonkey\Conductor\Doctrine\Entity\RegistryPackageMirroring;
-use CodedMonkey\Conductor\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 

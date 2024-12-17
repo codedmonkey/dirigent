@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Repository\AccessTokenRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\AccessTokenRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AccessTokenRepository::class)]
@@ -33,7 +33,7 @@ class AccessToken
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->plainToken = uniqid('conductor-');
+        $this->plainToken = uniqid('dirigent-');
     }
 
     public function getId(): ?int

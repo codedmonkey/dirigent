@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Message;
+namespace CodedMonkey\Dirigent\Message;
 
 readonly class SchedulePackageUpdate
 {

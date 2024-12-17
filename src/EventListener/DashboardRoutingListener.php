@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\EventListener;
+namespace CodedMonkey\Dirigent\EventListener;
 
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;

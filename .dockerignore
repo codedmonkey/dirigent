@@ -1,5 +1,5 @@
-/config/conductor.yaml
-/config/packages/conductor.yaml
+/config/dirigent.yaml
+/config/packages/dirigent.yaml
 /storage/
 /var/
 /vendor/

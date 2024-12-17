@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Twig;
+namespace CodedMonkey\Dirigent\Twig;
 
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -26,8 +26,8 @@ class DashboardExtension extends AbstractExtension implements GlobalsInterface
     public function getGlobals(): array
     {
         return [
-            'conductor' => [
-                'slug' => $this->parameterBag->get('conductor.slug'),
+            'dirigent' => [
+                'slug' => $this->parameterBag->get('dirigent.slug'),
             ],
         ];
     }

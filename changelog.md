@@ -19,7 +19,7 @@
   * Added resolving of README files from VCS repositories
   * Added package download tracking
   * Improved validation of VCS repositories
-  * Fixed an issue where the API returned the output from external registries instead of Conductor
+  * Fixed an issue where the API returned the output from external registries instead of Dirigent
 
 * 0.1.0 (2024-08-03)
   * Initial release

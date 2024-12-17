@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Package;
+namespace CodedMonkey\Dirigent\Package;
 
-use CodedMonkey\Conductor\Composer\ComposerClient;
-use CodedMonkey\Conductor\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -14,7 +14,7 @@ readonly class PackageDistributionResolver
 
     public function __construct(
         private ComposerClient $composer,
-        #[Autowire(param: 'conductor.storage.path')]
+        #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
         $this->filesystem = new Filesystem();

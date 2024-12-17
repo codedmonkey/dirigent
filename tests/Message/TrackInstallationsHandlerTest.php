@@ -1,13 +1,13 @@
 <?php
 
-namespace CodedMonkey\Conductor\Tests\Message;
+namespace CodedMonkey\Dirigent\Tests\Message;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Entity\Version;
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
-use CodedMonkey\Conductor\Message\TrackInstallations;
-use CodedMonkey\Conductor\Message\TrackInstallationsHandler;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\Message\TrackInstallations;
+use CodedMonkey\Dirigent\Message\TrackInstallationsHandler;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 

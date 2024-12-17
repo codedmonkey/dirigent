@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\EasyAdmin;
+namespace CodedMonkey\Dirigent\EasyAdmin;
 
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;

@@ -8,4 +8,4 @@
 
 import './bootstrap';
 
-import './stylesheets/conductor-theme.css';
+import './stylesheets/dashboard-theme.css';

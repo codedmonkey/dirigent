@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\EventListener;
+namespace CodedMonkey\Dirigent\Doctrine\EventListener;
 
-use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
+use CodedMonkey\Dirigent\Doctrine\Entity\AccessToken;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Events;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;

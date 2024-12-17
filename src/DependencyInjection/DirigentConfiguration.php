@@ -1,19 +1,19 @@
 <?php
 
-namespace CodedMonkey\Conductor\DependencyInjection;
+namespace CodedMonkey\Dirigent\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class ConductorConfiguration implements ConfigurationInterface
+class DirigentConfiguration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('conductor');
+        $treeBuilder = new TreeBuilder('dirigent');
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode->children()
-            ->scalarNode('title')->defaultValue('My Conductor')->end()
+            ->scalarNode('title')->defaultValue('My Dirigent')->end()
             ->scalarNode('slug')->defaultNull()->end()
             ->arrayNode('security')
                 ->addDefaultsIfNotSet()

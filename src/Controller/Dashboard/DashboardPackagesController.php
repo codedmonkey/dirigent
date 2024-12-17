@@ -1,16 +1,16 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
-use CodedMonkey\Conductor\EasyAdmin\PackagePaginator;
-use CodedMonkey\Conductor\Form\PackageAddMirroringType;
-use CodedMonkey\Conductor\Form\PackageAddVcsType;
-use CodedMonkey\Conductor\Message\UpdatePackage;
-use CodedMonkey\Conductor\Package\PackageMetadataResolver;
+use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
+use CodedMonkey\Dirigent\Form\PackageAddMirroringType;
+use CodedMonkey\Dirigent\Form\PackageAddVcsType;
+use CodedMonkey\Dirigent\Message\UpdatePackage;
+use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;

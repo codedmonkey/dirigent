@@ -1,10 +1,10 @@
 <?php
 
-namespace CodedMonkey\Conductor\Composer;
+namespace CodedMonkey\Dirigent\Composer;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
-use CodedMonkey\Conductor\Doctrine\Entity\CredentialsType;
-use CodedMonkey\Conductor\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
+use CodedMonkey\Dirigent\Doctrine\Entity\CredentialsType;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use Composer\Config;
 use Composer\Factory;
 

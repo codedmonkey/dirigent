@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\EasyAdmin;
+namespace CodedMonkey\Dirigent\EasyAdmin;
 
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;

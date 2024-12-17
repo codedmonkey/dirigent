@@ -1,10 +1,10 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Doctrine\Entity\User;
-use CodedMonkey\Conductor\Doctrine\Repository\UserRepository;
-use CodedMonkey\Conductor\Form\RegistrationFormType;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
+use CodedMonkey\Dirigent\Form\RegistrationFormType;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,7 +41,7 @@ class DashboardSecurityController extends AbstractController
     #[Route('/register', name: 'dashboard_register')]
     public function register(Request $request, AdminUrlGenerator $adminUrlGenerator): Response
     {
-        $registrationEnabled = $this->getParameter('conductor.security.registration_enabled');
+        $registrationEnabled = $this->getParameter('dirigent.security.registration_enabled');
         $userCount = $this->userRepository->count([]);
 
         if (!$registrationEnabled && 0 !== $userCount) {

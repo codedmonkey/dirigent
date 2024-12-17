@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Tests\Controller;
+namespace CodedMonkey\Dirigent\Tests\Controller;
 
-use CodedMonkey\Conductor\Tests\PublicKernel;
+use CodedMonkey\Dirigent\Tests\PublicKernel;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 

@@ -1,12 +1,12 @@
 ---
-title: Using Conductor in a Composer project
+title: Using Dirigent in a Composer project
 ---
 
-To start using your Conductor registry in a Composer project, you'll need to add some configuration to the
+To start using your Dirigent registry in a Composer project, you'll need to add some configuration to the
 `composer.json` file, or specify it as a command line option when creating new projects. The examples on this page
 also disable fetching from Packagist directly.
 
-**Note that projects using Composer 1 are not supported by Conductor.**
+**Note that projects using Composer 1 are not supported by Dirigent.**
 
 ## New projects
 
@@ -46,7 +46,7 @@ composer create-project acme/website --add-repository --repository="{{ app.reque
 
 ## Existing projects
 
-You can enable the Conductor registry on existing Composer projects by using the Composer CLI or by editing
+You can enable the Dirigent registry on existing Composer projects by using the Composer CLI or by editing
 `composer.json` directly.
 
 ### composer config
@@ -54,7 +54,7 @@ You can enable the Conductor registry on existing Composer projects by using the
 Run the following command to enable this registry
 
 ```shell
-composer config repositories.{{ conductor.slug }} composer {{ app.request.getSchemeAndHttpHost() }}
+composer config repositories.{{ dirigent.slug }} composer {{ app.request.getSchemeAndHttpHost() }}
 ```
 
 ```shell

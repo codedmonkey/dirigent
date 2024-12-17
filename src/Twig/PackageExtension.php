@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Twig;
+namespace CodedMonkey\Dirigent\Twig;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use Composer\Pcre\Preg;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigTest;

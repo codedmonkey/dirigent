@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\EventListener;
+namespace CodedMonkey\Dirigent\Doctrine\EventListener;
 
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\Migrations\Metadata\Storage\TableMetadataStorageConfiguration;

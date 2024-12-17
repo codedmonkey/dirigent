@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\DataFixtures;
+namespace CodedMonkey\Dirigent\Doctrine\DataFixtures;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Package;
-use CodedMonkey\Conductor\Package\PackageMetadataResolver;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 

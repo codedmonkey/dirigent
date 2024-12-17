@@ -1,12 +1,12 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Attribute\IsGrantedAccess;
-use CodedMonkey\Conductor\Doctrine\Entity\AccessToken;
-use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
-use CodedMonkey\Conductor\Doctrine\Entity\Registry;
-use CodedMonkey\Conductor\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Doctrine\Entity\AccessToken;
+use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -24,9 +24,9 @@ use Symfony\Component\Yaml\Yaml;
 class DashboardRootController extends AbstractDashboardController
 {
     public function __construct(
-        #[Autowire(param: 'conductor.title')]
+        #[Autowire(param: 'dirigent.title')]
         private readonly string $title,
-        #[Autowire(param: 'conductor.security.registration_enabled')]
+        #[Autowire(param: 'dirigent.security.registration_enabled')]
         private readonly bool $registrationEnabled,
     ) {
     }

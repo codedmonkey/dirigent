@@ -1,9 +1,9 @@
 <?php
 
-namespace CodedMonkey\Conductor\Controller\Dashboard;
+namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
-use CodedMonkey\Conductor\Doctrine\Entity\Credentials;
-use CodedMonkey\Conductor\Doctrine\Entity\CredentialsType;
+use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
+use CodedMonkey\Dirigent\Doctrine\Entity\CredentialsType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;

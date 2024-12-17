@@ -1,8 +1,8 @@
 <?php
 
-namespace CodedMonkey\Conductor\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
-use CodedMonkey\Conductor\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use Composer\Package\Version\VersionParser;
 use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
