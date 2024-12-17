@@ -1,5 +1,0 @@
-framework:
-    http_client:
-        default_options:
-            headers:
-                'User-Agent': 'Dirigent/0.1'
