@@ -9,7 +9,7 @@ The easiest way to install Dirigent is by using one of our Docker images, which 
 #### Docker command
 
 ```bash
-docker container run -p "7015:7015" -v /path/to/config:/srv/config ghcr.io/codedmonkey/dirigent:0.1
+docker container run -p "7015:7015" -v /path/to/config:/srv/config ghcr.io/codedmonkey/dirigent:0.3
 ```
 
 #### Docker Compose configuration
