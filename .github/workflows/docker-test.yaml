@@ -1,0 +1,26 @@
+name: Test Docker build
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+      - develop
+
+jobs:
+  test-build:
+    name: Test Docker build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+      attestations: write
+    steps:
+      -
+        name: Check out repo
+        uses: actions/checkout@v4
+
+      -
+        name: Build Docker image
+        run: docker build .

@@ -9,8 +9,8 @@ on:
       - v*
 
 jobs:
-  publish-images:
-    name: Publish Docker Images
+  publish-image:
+    name: Publish Docker Image
     runs-on: ubuntu-latest
     permissions:
       id-token: write
