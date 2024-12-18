@@ -15,9 +15,9 @@ return (new PhpCsFixer\Config())
     ->setRules([
         '@Symfony' => true,
         '@Symfony:risky' => true,
-        'linebreak_after_opening_tag' => true,
         'blank_line_between_import_groups' => false,
         'concat_space' => ['spacing' => 'one'],
+        'linebreak_after_opening_tag' => true,
         'mb_str_functions' => false,
         'native_constant_invocation' => false,
         'native_function_invocation' => false,
