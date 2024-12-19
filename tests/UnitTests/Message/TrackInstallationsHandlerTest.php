@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests\Message;
+namespace CodedMonkey\Dirigent\Tests\UnitTests\Message;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;

@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests\Package;
+namespace CodedMonkey\Dirigent\Tests\UnitTests\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;

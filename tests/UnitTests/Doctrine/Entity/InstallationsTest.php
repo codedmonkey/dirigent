@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests\Doctrine\Entity;
+namespace CodedMonkey\Dirigent\Tests\UnitTests\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\AbstractInstallations;
 use PHPUnit\Framework\TestCase;

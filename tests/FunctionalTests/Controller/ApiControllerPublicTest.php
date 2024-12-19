@@ -1,12 +1,12 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests\Controller;
+namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller;
 
 use CodedMonkey\Dirigent\Tests\PublicKernel;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-class ApiControllerTest extends KernelTestCase
+class ApiControllerPublicTest extends KernelTestCase
 {
     protected static function getKernelClass(): string
     {
