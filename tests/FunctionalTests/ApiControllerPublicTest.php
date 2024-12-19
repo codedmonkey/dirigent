@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller;
+namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
 
 use CodedMonkey\Dirigent\Tests\PublicKernel;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

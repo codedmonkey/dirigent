@@ -30,7 +30,9 @@ class UniquePackageValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, Package::class);
         }
 
-        if ($this->packageRepository->findOneByName($value->getName())) {
+        $existingPackage = $this->packageRepository->findOneByName($value->getName());
+
+        if ($existingPackage && $existingPackage->getId() !== $value->getId()) {
             $this->context->buildViolation('A package with the name ' . $value->getName() . ' already exists.')
                 ->atPath('repositoryUrl')
                 ->addViolation();
