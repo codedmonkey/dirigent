@@ -26,11 +26,11 @@ jobs:
           php-version: "8.2"
           tools: composer:v2
 
-      - name: Set composer cache directory
+      - name: Set Composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: Cache composer
+      - name: Cache Composer output
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
@@ -63,11 +63,11 @@ jobs:
           php-version: ${{ matrix.php-version }}
           tools: composer:v2
 
-      - name: Set composer cache directory
+      - name: Set Composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: Cache composer
+      - name: Cache Composer output
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}

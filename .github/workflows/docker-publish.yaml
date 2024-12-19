@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish-image:
-    name: Publish Docker Image
+    name: Publish Docker image
     runs-on: ubuntu-latest
     permissions:
       id-token: write
