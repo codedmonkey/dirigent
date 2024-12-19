@@ -26,6 +26,15 @@ class ApiControllerTest extends KernelTestCase
         ], $rootData);
     }
 
+    public function testPackage(): void
+    {
+        self::bootKernel();
+
+        $packageData = $this->requestJson('/p2/psr/log.json', 'GET');
+
+        $this->assertNotSame([], $packageData);
+    }
+
     private function requestJson(...$requestArguments)
     {
         $request = Request::create(...$requestArguments);

@@ -224,10 +224,6 @@ class DashboardPackagesController extends AbstractController
     {
         $package = $this->packageRepository->findOneByName($packageName);
 
-        foreach ($package->getVersions() as $version) {
-            $this->entityManager->remove($version);
-        }
-
         $this->packageRepository->remove($package, true);
 
         return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());

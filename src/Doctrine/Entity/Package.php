@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Validator\UniquePackage;
 use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,6 +11,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PackageRepository::class)]
+#[ORM\UniqueConstraint(name: 'package_name_idx', columns: ['name'])]
+#[UniquePackage]
 class Package
 {
     #[ORM\Id]
@@ -68,7 +71,7 @@ class Package
     /**
      * @var Collection<int, Version>
      */
-    #[ORM\OneToMany(mappedBy: 'package', targetEntity: Version::class)]
+    #[ORM\OneToMany(targetEntity: Version::class, mappedBy: 'package', cascade: ['remove'])]
     private Collection $versions;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
