@@ -14,6 +14,18 @@ class ConfigFactory
     {
         $config = Factory::createConfig();
 
+        $domain = parse_url($url, PHP_URL_HOST);
+
+        if ('github.com' === $domain && !$credentials && $globalGithubToken = $_SERVER['GITHUB_TOKEN'] ?? null) {
+            $config->merge([
+                'config' => [
+                    'github-oauth' => [
+                        $domain => $globalGithubToken,
+                    ],
+                ],
+            ]);
+        }
+
         return $config;
     }
 

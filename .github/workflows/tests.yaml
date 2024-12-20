@@ -6,6 +6,7 @@ on:
 
 env:
   fail-fast: true
+  GITHUB_TOKEN: ${{ github.token }}
   PHPUNIT_FLAGS: ""
 
 permissions:
