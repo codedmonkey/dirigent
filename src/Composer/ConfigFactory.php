@@ -10,66 +10,71 @@ use Composer\Factory;
 
 class ConfigFactory
 {
+    public static function createForRegistry(Registry $registry): Config
+    {
+        $config = Factory::createConfig();
+
+        $config->merge([
+            'config' => static::buildCredentialsConfig($registry->getDomain(), $registry->getCredentials()),
+        ]);
+
+        return $config;
+    }
+
     public static function createForVcsRepository(string $url, ?Credentials $credentials = null): Config
     {
         $config = Factory::createConfig();
 
         $domain = parse_url($url, PHP_URL_HOST);
 
-        if ('github.com' === $domain && !$credentials && $globalGithubToken = $_SERVER['GITHUB_TOKEN'] ?? null) {
-            $config->merge([
-                'config' => [
-                    'github-oauth' => [
-                        $domain => $globalGithubToken,
-                    ],
-                ],
-            ]);
-        }
+        $config->merge([
+            'config' => static::buildCredentialsConfig($domain, $credentials),
+        ]);
 
         return $config;
     }
 
-    public static function createForRegistry(Registry $registry): Config
+    private static function buildCredentialsConfig(string $domain, ?Credentials $credentials): array
     {
-        $config = Factory::createConfig();
-
-        $credentials = $registry->getCredentials();
-
-        if (CredentialsType::HttpBasic === $credentials?->getType()) {
-            $config->merge([
-                'config' => [
-                    'http-basic' => [
-                        $registry->getDomain() => [
-                            'username' => $credentials->getUsername(),
-                            'password' => $credentials->getPassword(),
-                        ],
-                    ],
+        if (!$credentials && 'github.com' === $domain && $globalGithubToken = $_SERVER['GITHUB_TOKEN'] ?? null) {
+            return [
+                'github-oauth' => [
+                    $domain => $globalGithubToken,
                 ],
-            ]);
-        } elseif (CredentialsType::GitlabDeployToken === $credentials?->getType()) {
-            $config->merge([
-                'config' => [
-                    'gitlab-token' => [
-                        $registry->getDomain() => [
-                            'username' => $credentials->getUsername(),
-                            'token' => $credentials->getToken(),
-                        ],
-                    ],
-                ],
-            ]);
-        } elseif (CredentialsType::GitlabPersonalAccessToken === $credentials?->getType()) {
-            $config->merge([
-                'config' => [
-                    'gitlab-token' => [
-                        $registry->getDomain() => [
-                            'username' => $credentials->getToken(),
-                            'token' => 'private-token',
-                        ],
-                    ],
-                ],
-            ]);
+            ];
         }
 
-        return $config;
+        return match ($credentials?->getType()) {
+            CredentialsType::HttpBasic => [
+                'http-basic' => [
+                    $domain => [
+                        'username' => $credentials->getUsername(),
+                        'password' => $credentials->getPassword(),
+                    ],
+                ],
+            ],
+            CredentialsType::GithubOauthToken => [
+                'github-oauth' => [
+                    $domain => $credentials->getToken(),
+                ],
+            ],
+            CredentialsType::GitlabDeployToken => [
+                'gitlab-token' => [
+                    $domain => [
+                        'username' => $credentials->getUsername(),
+                        'token' => $credentials->getToken(),
+                    ],
+                ],
+            ],
+            CredentialsType::GitlabPersonalAccessToken => [
+                'gitlab-token' => [
+                    $domain => [
+                        'username' => $credentials->getToken(),
+                        'token' => 'private-token',
+                    ],
+                ],
+            ],
+            default => [],
+        };
     }
 }

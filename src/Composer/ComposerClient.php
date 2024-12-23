@@ -33,7 +33,7 @@ class ComposerClient
     {
         $repoUrl = $package->getRepositoryUrl();
 
-        $config ??= ConfigFactory::createForVcsRepository($repoUrl);
+        $config ??= ConfigFactory::createForVcsRepository($repoUrl, $package->getRepositoryCredentials());
         if (!$io) {
             $io = new NullIO();
             $io->loadConfiguration($config);

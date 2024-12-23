@@ -24,7 +24,7 @@ class Package
      * Unique package name.
      */
     #[ORM\Column(length: 191)]
-    private string $name;
+    private ?string $name = null;
 
     #[ORM\Column(length: 191)]
     private string $vendor;
@@ -103,7 +103,7 @@ class Package
         return $this->id;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }

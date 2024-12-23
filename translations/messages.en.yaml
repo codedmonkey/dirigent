@@ -46,6 +46,7 @@ Owner: Owner
 credentials:
   type:
     http-basic: HTTP Basic credentials
+    github-oauth: GitHub personal access token
     gitlab-dt: GitLab deploy token
     gitlab-pat: GitLab personal access token
 package:
