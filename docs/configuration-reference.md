@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Dirigent Configuration Reference
 
 ## dirigent (root)

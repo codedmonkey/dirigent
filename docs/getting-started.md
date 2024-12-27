@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Getting Started with Dirigent
 
 Make sure you've followed the [installation][docs-install] guide before continuing.
