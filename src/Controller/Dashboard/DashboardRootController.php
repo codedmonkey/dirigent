@@ -51,7 +51,7 @@ class DashboardRootController extends AbstractDashboardController
         $user = $this->getUser();
 
         $packagesItem = MenuItem::linkToRoute('Packages', 'fa fa-cubes', 'dashboard_packages');
-        if (str_starts_with($request->query->get('routeName'), 'dashboard_packages_')) {
+        if (str_starts_with($request->query->getString('routeName'), 'dashboard_packages_')) {
             $packagesItem->getAsDto()->setSelected(true);
         }
 
