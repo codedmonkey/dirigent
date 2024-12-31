@@ -14,6 +14,11 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
+
 ###> phpstan/phpstan ###
 phpstan.neon
 ###< phpstan/phpstan ###
@@ -22,11 +27,6 @@ phpstan.neon
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
-
-###> php-cs-fixer/shim ###
-/.php-cs-fixer.php
-/.php-cs-fixer.cache
-###< php-cs-fixer/shim ###
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/

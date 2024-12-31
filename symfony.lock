@@ -50,6 +50,18 @@
             "config/routes/easyadmin.yaml"
         ]
     },
+    "friendsofphp/php-cs-fixer": {
+        "version": "3.71",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "be2103eb4a20942e28a6dd87736669b757132435"
+        },
+        "files": [
+            ".php-cs-fixer.dist.php"
+        ]
+    },
     "nyholm/psr7": {
         "version": "1.8",
         "recipe": {
@@ -60,18 +72,6 @@
         },
         "files": [
             "config/packages/nyholm_psr7.yaml"
-        ]
-    },
-    "php-cs-fixer/shim": {
-        "version": "3.68",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "3.0",
-            "ref": "16422bf8eac6c3be42afe07d37e2abc89d2bdf6b"
-        },
-        "files": [
-            ".php-cs-fixer.dist.php"
         ]
     },
     "php-http/discovery": {
@@ -159,6 +159,18 @@
         "files": [
             ".env",
             ".env.dev"
+        ]
+    },
+    "symfony/form": {
+        "version": "7.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "7.2",
+            "ref": "7d86a6723f4a623f59e2bf966b6aad2fc461d36b"
+        },
+        "files": [
+            "config/packages/csrf.yaml"
         ]
     },
     "symfony/framework-bundle": {
@@ -371,10 +383,10 @@
             "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "2.0",
-            "ref": "35ee1edee91a1a7137095f53db7ed0c20884b745"
+            "ref": "20af60d17dc26c2f2b67f8ee1038cd2da1ca8fb3"
         },
         "files": [
-            "assets/dashboard.ts",
+            "assets/app.js",
             "assets/styles/app.css",
             "config/packages/webpack_encore.yaml",
             "package.json",
