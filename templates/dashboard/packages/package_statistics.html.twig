@@ -9,7 +9,7 @@
     <h2>{{ 'Installations'|trans }}</h2>
     <div class="row">
       <div class="col-md-4">
-        <div class="card mb-2">
+        <div id="total_all" class="card mb-2">
           <div class="card-body">
             <div>{{ 'Total'|trans }}:</div>
             <div class="display-6">{{ installationsTotal|number_format(thousandSep: ' ') }}</div>
@@ -17,7 +17,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card mb-2">
+        <div id="total_last_30_days" class="card mb-2">
           <div class="card-body">
             <div>{{ 'Last 30 days'|trans }}:</div>
             <div class="display-6">{{ installationsLast30Days|number_format(thousandSep: ' ') }}</div>
@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card mb-2">
+        <div id="total_today" class="card mb-2">
           <div class="card-body">
             <div>{{ 'Today'|trans }}:</div>
             <div class="display-6">{{ installationsToday|number_format(thousandSep: ' ') }}</div>

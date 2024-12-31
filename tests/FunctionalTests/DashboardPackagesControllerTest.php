@@ -9,6 +9,32 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DashboardPackagesControllerTest extends WebTestCase
 {
+    public function testStatistics(): void
+    {
+        $client = static::createClient();
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $client->getContainer()->get(UserRepository::class);
+
+        /** @var User $user */
+        $user = $userRepository->findOneByUsername('user');
+        $client->loginUser($user);
+
+        $client->request('GET', '/?routeName=dashboard_packages_statistics&routeParams[packageName]=psr/log');
+
+        $this->assertResponseStatusCodeSame(200);
+
+        /** @var PackageRepository $packageRepository */
+        $packageRepository = $client->getContainer()->get(PackageRepository::class);
+
+        $package = $packageRepository->findOneByName('psr/log');
+
+        $this->assertAnySelectorTextSame('#total_all .display-6', number_format($package->getInstallations()->getTotal(), thousands_separator: ' '));
+
+        $todayKey = (new \DateTimeImmutable())->format('Ymd');
+        $this->assertAnySelectorTextSame('#total_today .display-6', number_format($package->getInstallations()->getData()[$todayKey] ?? 0, thousands_separator: ' '));
+    }
+
     public function testAddVcsRepository(): void
     {
         $client = static::createClient();
