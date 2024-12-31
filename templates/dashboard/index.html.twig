@@ -7,7 +7,22 @@
 {% endblock %}
 
 {% block page_content %}
-  <p>Welcome to <a href="https://github.com/codedmonkey/dirigent">Dirigent</a>, a free and open package registry for <a href="https://getcomposer.org">Composer</a>.</p>
+  <p>Welcome to <a href="https://dirigent.dev">Dirigent</a>, a free and open package registry for <a href="https://getcomposer.org">Composer</a>.</p>
+
+  <div class="mb-3">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card mb-2">
+          <div class="card-body">
+            <div>{{ 'Packages'|trans }}</div>
+            <div class="display-6">{{ packageCount|number_format(thousandSep: ' ') }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
 
   <h2 class="h5">Use this registry in a Composer project</h2>
 
@@ -44,5 +59,9 @@
 
   <h2 class="h5">Setup authentication</h2>
 
-  <p>Store the authentication credentials in the global Composer `auth.json` with the command below.</p>
+  <p>Store the authentication credentials in the global Composer <code>auth.json</code> with the command below.</p>
+
+  <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
+    <pre class="m-0"><code>composer config --global http-basic.{{ app.request.getHost() }} {{ app.user.username }} &lt;access-token&gt;</code></pre>
+  </div>
 {% endblock %}

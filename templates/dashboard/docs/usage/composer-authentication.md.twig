@@ -2,6 +2,13 @@
 title: Authenticate with Composer
 ---
 
+Authenticating for this registry in your Composer installation is easy and can be achieved for all projects on your
+system by running the following command in your terminal:
+
 ```shell
  composer config --global --auth http-basic.{{ app.request.getHost() }} {{ app.user.username }} <access-token>
 ```
+
+To learn more about how Composer handles authentication, please read the [Composer documentation][composer-doc-auth].
+
+[composer-doc-auth]: https://getcomposer.org/doc/articles/authentication-for-private-packages.md

@@ -7,6 +7,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\AccessToken;
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -24,6 +25,7 @@ use Symfony\Component\Yaml\Yaml;
 class DashboardRootController extends AbstractDashboardController
 {
     public function __construct(
+        private readonly PackageRepository $packageRepository,
         #[Autowire(param: 'dirigent.title')]
         private readonly string $title,
         #[Autowire(param: 'dirigent.security.registration_enabled')]
@@ -102,7 +104,11 @@ class DashboardRootController extends AbstractDashboardController
     #[IsGrantedAccess]
     public function index(): Response
     {
-        return $this->render('dashboard/index.html.twig');
+        $packageCount = $this->packageRepository->count();
+
+        return $this->render('dashboard/index.html.twig', [
+            'packageCount' => $packageCount,
+        ]);
     }
 
     #[Route('/dashboard/docs/usage/{page}', name: 'dashboard_usage_docs')]
