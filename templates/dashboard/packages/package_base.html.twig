@@ -1,0 +1,23 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block search_wrapper %}
+  {% include 'dashboard/packages/search_box.html.twig' with {searchAutofocus: false} %}
+{% endblock %}
+
+{% block page_actions %}
+  {% if is_granted('ROLE_ADMIN') %}
+    <div class="global-actions">
+      <div class="dropdown">
+        <button class="btn btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="fa-solid fa-ellipsis-h" aria-hidden="true"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="{{ dashboard_path('dashboard_packages_update', {packageName: package.name}) }}">Update package</a></li>
+          <li><div class="dropdown-divider"></div></li>
+          <li><a class="dropdown-item" href="{{ dashboard_path('dashboard_packages_edit', {packageName: package.name}) }}">Edit package</a></li>
+          <li><a class="dropdown-item" href="{{ dashboard_path('dashboard_packages_delete', {packageName: package.name}) }}">Delete package</a></li>
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

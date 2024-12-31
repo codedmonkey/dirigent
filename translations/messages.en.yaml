@@ -2,10 +2,13 @@ Account: Account
 Administration: Administration
 Credits: Credits
 Dashboard: Dashboard
+Dependants: Dependants
 Documentation: Documentation
+Info: Info
 Packages: Packages
 Personal: Personal
 Sign out: Sign out
+Statistics: Statistics
 Usage: Usage
 
 Access token: Access token
@@ -15,6 +18,7 @@ Registry: Registry
 Registries: Registries
 User: User
 Users: Users
+Versions: Versions
 
 Current password: Current password
 Description: Description
