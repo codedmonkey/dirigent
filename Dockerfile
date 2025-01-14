@@ -103,4 +103,4 @@ VOLUME /srv/data
 
 EXPOSE 7015
 
-CMD sh /init.sh
+CMD ["sh", "/init.sh"]
