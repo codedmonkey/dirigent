@@ -1,5 +1,14 @@
 # Changelog
 
+* 0.3.0 (2025-01-14)
+  * Renamed project to Dirigent
+  * Added custom-built assets with Webpack
+  * Added Edit Package page
+  * Added Package Statistics page
+  * Added package fetch strategy field
+  * Added GitHub access tokens as a credential type
+  * Added GITHUB_TOKEN env var support
+
 * 0.2.3 (2024-12-15) 
   * Fixed access token form events triggering in all forms
 
