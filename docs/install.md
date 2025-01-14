@@ -21,7 +21,7 @@ docker container run -p "7015:7015" -v /path/to/config:/srv/config ghcr.io/coded
 ```yaml
 services:
   dirigent:
-    image: ghcr.io/codedmonkey/dirigent:0.1
+    image: ghcr.io/codedmonkey/dirigent:0.3
     ports:
       - "7015:7015"
     volumes:
