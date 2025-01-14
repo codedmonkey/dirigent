@@ -72,7 +72,6 @@ COPY docker/php.ini /etc/php82/conf.d/
 COPY docker/php-fpm.conf /etc/php82/
 COPY docker/supervisord.conf /etc/
 COPY docker/process /srv/process/
-COPY docker/scripts /srv/scripts/
 
 USER dirigent
 
