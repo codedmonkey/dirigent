@@ -77,7 +77,7 @@ USER dirigent
 
 ENV APP_ENV="prod"
 ENV DATABASE_URL="postgresql://dirigent@127.0.0.1:5432/dirigent?serverVersion=16&charset=utf8"
-ENV CONDUCTOR_IMAGE=1
+ENV DIRIGENT_IMAGE=1
 
 WORKDIR /srv/app
 

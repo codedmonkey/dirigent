@@ -20,7 +20,7 @@ class Kernel extends BaseKernel
         $container->import($configDir . '/packages/*.yaml');
         $container->import($configDir . '/services.yaml');
 
-        if (isset($_SERVER['CONDUCTOR_IMAGE'])) {
+        if (isset($_SERVER['DIRIGENT_IMAGE'])) {
             $container->import('/srv/config/*.{json,php,yaml}');
         }
     }
