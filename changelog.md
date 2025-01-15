@@ -1,5 +1,10 @@
 # Changelog
 
+* 0.3.1 (2025-01-15)
+  * Fix error on dashboard root when not logged in
+  * Fix permission error on `/srv/data` in Docker image
+  * Fix PostgreSQL sequences in database migrations
+
 * 0.3.0 (2025-01-14)
   * Renamed project to Dirigent
   * Added custom-built assets with Webpack
