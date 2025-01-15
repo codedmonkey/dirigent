@@ -57,11 +57,13 @@
 }</code></pre>
   </div>
 
-  <h2 class="h5">Setup authentication</h2>
+  {% if app.user %}
+    <h2 class="h5">Setup authentication</h2>
 
-  <p>Store the authentication credentials in the global Composer <code>auth.json</code> with the command below.</p>
+    <p>Store the authentication credentials in the global Composer <code>auth.json</code> with the command below.</p>
 
-  <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
-    <pre class="m-0"><code>composer config --global http-basic.{{ app.request.getHost() }} {{ app.user.username }} &lt;access-token&gt;</code></pre>
-  </div>
+    <div class="bg-body-secondary px-3 py-2 mb-3 rounded">
+      <pre class="m-0"><code>composer config --global http-basic.{{ app.request.getHost() }} {{ app.user.username }} &lt;access-token&gt;</code></pre>
+    </div>
+  {% endif %}
 {% endblock %}
