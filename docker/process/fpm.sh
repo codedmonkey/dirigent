@@ -5,7 +5,7 @@ set -e
 composer run-script --no-ansi --no-interaction auto-scripts
 
 # todo temporary timeout for database connection
-while ! nc -z localhost 5432; do
+while [ ! nc -z localhost 5432 ]; do
   echo "Waiting for database connection";
   sleep 3;
 done;
