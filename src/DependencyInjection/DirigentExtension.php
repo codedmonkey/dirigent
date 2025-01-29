@@ -22,7 +22,11 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.security.public_access', $mergedConfig['security']['public']);
         $container->setParameter('dirigent.security.registration_enabled', $mergedConfig['security']['registration']);
 
-        $container->setParameter('dirigent.storage.path', $mergedConfig['storage']['path']);
+        if (isset($_SERVER['DIRIGENT_IMAGE'])) {
+            $container->setParameter('dirigent.storage.path', '/srv/data');
+        } else {
+            $container->setParameter('dirigent.storage.path', $mergedConfig['storage']['path']);
+        }
 
         $container->setParameter('dirigent.packages.dynamic_updates', $mergedConfig['packages']['dynamic_updates']);
         $container->setParameter('dirigent.packages.dynamic_update_delay', $mergedConfig['packages']['dynamic_update_delay']);
