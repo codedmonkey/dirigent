@@ -66,12 +66,15 @@ RUN set -e; \
 
 COPY --from=composer_build /usr/bin/composer /usr/bin/composer
 
-COPY docker/init.sh /
+COPY docker/init.sh /srv/
 COPY docker/Caddyfile /etc/caddy/
 COPY docker/php.ini /etc/php82/conf.d/
 COPY docker/php-fpm.conf /etc/php82/
 COPY docker/supervisord.conf /etc/
 COPY docker/process /srv/process/
+COPY docker/scripts /srv/scripts/
+
+RUN chmod +x /srv/init.sh
 
 USER dirigent
 
@@ -93,12 +96,15 @@ COPY --chown=dirigent:dirigent src src/
 COPY --chown=dirigent:dirigent translations translations/
 COPY --chown=dirigent:dirigent templates templates/
 
+COPY docker/dirigent.yaml /srv/app/config/packages/
+
 RUN set -e; \
     chmod +x bin/console; \
-    composer dump-autoload --classmap-authoritative --no-ansi --no-interaction
+    composer dump-autoload --classmap-authoritative --no-ansi --no-interaction;
 
+VOLUME /srv/config
 VOLUME /srv/data
 
 EXPOSE 7015
 
-CMD ["sh", "/init.sh"]
+CMD ["sh", "/srv/init.sh"]
