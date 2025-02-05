@@ -47,13 +47,13 @@
             "ref": "b131e6cbfe1b898a508987851963fff485986285"
         }
     },
-    "friendsofphp/php-cs-fixer": {
-        "version": "3.65",
+    "php-cs-fixer/shim": {
+        "version": "3.68",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "3.0",
-            "ref": "be2103eb4a20942e28a6dd87736669b757132435"
+            "ref": "16422bf8eac6c3be42afe07d37e2abc89d2bdf6b"
         },
         "files": [
             ".php-cs-fixer.dist.php"
