@@ -96,10 +96,13 @@ COPY --chown=dirigent:dirigent src src/
 COPY --chown=dirigent:dirigent translations translations/
 COPY --chown=dirigent:dirigent templates templates/
 
+COPY docker/dirigent.yaml /srv/app/config/packages/
+
 RUN set -e; \
     chmod +x bin/console; \
     composer dump-autoload --classmap-authoritative --no-ansi --no-interaction;
 
+VOLUME /srv/config
 VOLUME /srv/data
 
 EXPOSE 7015
