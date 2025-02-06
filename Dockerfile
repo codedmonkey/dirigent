@@ -41,6 +41,7 @@ RUN set -e; \
         caddy \
         curl \
         git \
+        openssl \
         php82 \
         php82-ctype \
         php82-curl \
@@ -96,7 +97,7 @@ COPY --chown=dirigent:dirigent src src/
 COPY --chown=dirigent:dirigent translations translations/
 COPY --chown=dirigent:dirigent templates templates/
 
-COPY docker/dirigent.yaml /srv/app/config/packages/
+COPY docker/dirigent.yaml /srv/app/config/
 
 RUN set -e; \
     chmod +x bin/console; \

@@ -1,7 +1,5 @@
 parameters:
-  env(RUNTIME_SECRET_FILE): '/srv/config/secrets/runtime_secret'
+  env(KERNEL_SECRET_FILE): '/srv/config/secrets/kernel_secret'
 
 framework:
-  secret: '%env(file:RUNTIME_SECRET_FILE)%'
-  secrets:
-    vault_directory: '/srv/config/secrets'
+  secret: '%env(file:KERNEL_SECRET_FILE)%'

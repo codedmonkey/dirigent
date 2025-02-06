@@ -3,9 +3,10 @@
 set -e
 
 while [ ! "$(netstat -an | grep :9000)" ]; do
-  echo "Waiting for app";
-  sleep 5;
-done;
+  echo "Waiting for application to start worker"
+
+  sleep 5
+done
 
 function shutdown()
 {

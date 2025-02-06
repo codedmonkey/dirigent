@@ -10,8 +10,5 @@ do
     sh "$file"
 done
 
-echo "EOS"
-exit 0
-
 # Start Supervisor
 exec supervisord
