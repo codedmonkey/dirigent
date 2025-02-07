@@ -1,5 +1,7 @@
 parameters:
   env(KERNEL_SECRET_FILE): '/srv/config/secrets/kernel_secret'
+  env(ENCRYPTION_KEY_FILE): '/srv/config/secrets/encryption_key'
+  env(DECRYPTION_KEY_FILE): '/srv/config/secrets/decryption_key'
 
 framework:
   secret: '%env(file:KERNEL_SECRET_FILE)%'

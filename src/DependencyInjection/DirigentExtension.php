@@ -19,6 +19,10 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.title', $mergedConfig['title']);
         $container->setParameter('dirigent.slug', $slug);
 
+        $container->setParameter('dirigent.encryption.private_key', $mergedConfig['encryption']['private_key']);
+        $container->setParameter('dirigent.encryption.public_key', $mergedConfig['encryption']['public_key']);
+        $container->setParameter('dirigent.encryption.rotated_keys', $mergedConfig['encryption']['rotated_keys']);
+
         $container->setParameter('dirigent.security.public_access', $mergedConfig['security']['public']);
         $container->setParameter('dirigent.security.registration_enabled', $mergedConfig['security']['registration']);
 

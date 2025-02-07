@@ -10,6 +10,8 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
 class Kernel extends BaseKernel
 {
+    public const VERSION = '0.3.x-dev';
+
     use MicroKernelTrait;
 
     protected function configureContainer(ContainerConfigurator $container): void
