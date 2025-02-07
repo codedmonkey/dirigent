@@ -1,8 +1,14 @@
 ---
-sidebar_position: 5
+sidebar_position: 31
 ---
 
-# Dist Mirroring
+# Dist mirroring
+
+:::note
+
+This page is a stub.
+
+:::
 
 It's possible to mirror distributions of packages in Dirigent.
 

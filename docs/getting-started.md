@@ -1,8 +1,9 @@
 ---
-sidebar_position: 3
+sidebar_label: Getting started
+sidebar_position: 20
 ---
 
-# Getting Started with Dirigent
+# Getting started with Dirigent
 
 Make sure you've followed the [installation][docs-install] guide before continuing.
 
@@ -17,11 +18,11 @@ After installing Dirigent, the [Packagist registry][packagist] is added as an ex
 to mirror public packages. Dirigent is initially configured to only mirror packages explicitly added by an
 administrator.
 
-To enable mirroring of public packages on request, (as an administrator) open the "Registries" page, locate the
+To enable mirroring of public packages on request, open the "Registries" page (as an administrator), locate the
 Packagist registry, click the three dots and click "Edit". Find the "Package Mirroring" option and select "Automatically
 mirror packages on request". Save the registry for the changes to take effect.
 
 ## Add packages
 
-[docs-install]: install.md
+[docs-install]: installation/readme.md
 [packagist]: https://packagist.org
