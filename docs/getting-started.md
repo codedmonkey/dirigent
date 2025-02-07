@@ -1,4 +1,5 @@
 ---
+sidebar_label: Getting Started
 sidebar_position: 3
 ---
 
@@ -23,5 +24,5 @@ mirror packages on request". Save the registry for the changes to take effect.
 
 ## Add packages
 
-[docs-install]: install.md
+[docs-install]: installation/readme.md
 [packagist]: https://packagist.org

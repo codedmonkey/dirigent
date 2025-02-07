@@ -30,7 +30,7 @@ Help Dirigent by [sponsoring][codedmonkey-sponsor] its development!
 
 ## Documentation
 
-The documentation is available [in our Git repository][docs].
+The documentation is available [in our Git repository][docs] and on our website [dirigent.dev][dirigent].
 
 ## License
 
@@ -40,7 +40,7 @@ until it's second anniversary. See our [full license][license] for more details.
 
 ## Contributing
 
-Feel free to report issues and make suggestions on [GitHub][github-issues].
+Feel free to report issues and make suggestions on [GitHub][github-issues] or follow our [contribution guide](contributing.md).
 
 ## About Me
 
@@ -49,8 +49,9 @@ Dirigent is developed by [Coded Monkey][codedmonkey].
 [codedmonkey]: https://www.codedmonkey.com
 [codedmonkey-sponsor]: https://www.codedmonkey.com/sponsor?project=dirigent
 [composer]: https://getcomposer.org
+[dirigent]: https://dirigent.dev
 [docs]: docs/readme.md
-[docs-install]: docs/install.md
+[docs-install]: docs/installation/readme.md
 [github-issues]: https://github.com/codedmonkey/dirigent/issues
 [license]: license.md
 [packagist]: https://packagist.org

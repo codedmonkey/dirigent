@@ -4,6 +4,12 @@ sidebar_position: 4
 
 # Automatic Package Updates
 
+:::note
+
+This page is a stub.
+
+:::
+
 There are currently two ways to automatically update the packages in Dirigent:
 
 - **Periodic**  
