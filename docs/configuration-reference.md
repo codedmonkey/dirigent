@@ -4,6 +4,28 @@ sidebar_position: 99
 
 # Dirigent Configuration Reference
 
+## Example configuration
+
+```yaml
+dirigent:
+  title: 'My Dirigent'
+  slug: null
+  security:
+    public: false
+    registration: false
+  storage:
+    path: '%kernel.project_dir%/storage'
+  packages:
+    dynamic_updates: true
+    dynamic_update_delay: 'PT4H'
+    periodic_updates: true
+    periodic_update_interval: 'P1W'
+  dist_mirroring:
+    enabled: false
+    preferred: true
+    dev_packages: false
+```
+
 ## dirigent (root)
 
 ### title
@@ -87,27 +109,5 @@ Whether to enable or disable distribution mirroring
 ### preferred
 
 ### dev_packages
-
-## Example configuration
-
-```yaml
-dirigent:
-    title: My Dirigent
-    slug: my-dirigent
-    security:
-        public: false
-        registration: false
-    storage:
-        path: '%kernel.project_dir%/storage'
-    packages:
-        dynamic_updates: true
-        dynamic_update_delay: true
-        periodic_updates: true
-        periodic_update_interval: true
-    dist_mirroring:
-        enabled: true
-        preferred: true
-        dev_packages: false
-```
 
 [iso-8601-durations]: https://en.wikipedia.org/wiki/ISO_8601#Durations
