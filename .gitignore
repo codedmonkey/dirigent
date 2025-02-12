@@ -4,6 +4,7 @@
 /config/dirigent.php
 /config/dirigent.yaml
 /config/dirigent.yml
+/config/encryption/
 /config/packages/dirigent.yaml
 /storage/
 

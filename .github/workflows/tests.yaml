@@ -49,6 +49,9 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --ansi --no-interaction --no-progress
 
+      - name: Generate encryption keys
+        run: bin/console encryption:generate-keys
+
       - name: Validate mapping
         run: bin/console doctrine:schema:validate --skip-sync -vvv --ansi --no-interaction
 
@@ -112,6 +115,9 @@ jobs:
 
       - name: Build assets
         run: npm run build
+
+      - name: Generate encryption keys
+        run: bin/console encryption:generate-keys
 
       - name: Create database schema
         run: bin/console doctrine:schema:create --env=test
