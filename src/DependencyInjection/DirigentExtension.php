@@ -19,6 +19,8 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.title', $mergedConfig['title']);
         $container->setParameter('dirigent.slug', $slug);
 
+        $this->registerEncryptionConfiguration($mergedConfig['encryption'], $container);
+
         $container->setParameter('dirigent.security.public_access', $mergedConfig['security']['public']);
         $container->setParameter('dirigent.security.registration_enabled', $mergedConfig['security']['registration']);
 
@@ -41,5 +43,19 @@ class DirigentExtension extends ConfigurableExtension
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
     {
         return new DirigentConfiguration();
+    }
+
+    /**
+     * @param array{private_key: ?string, private_key_path: ?string, public_key: ?string, public_key_path: ?string, rotated_keys: array<string>, rotated_key_paths: array<string>} $config
+     */
+    private function registerEncryptionConfiguration(array $config, ContainerBuilder $container): void
+    {
+        $container->setParameter('dirigent.encryption.private_key', $config['private_key']);
+        $container->setParameter('dirigent.encryption.public_key', $config['public_key']);
+        $container->setParameter('dirigent.encryption.rotated_keys', $config['rotated_keys']);
+
+        $container->setParameter('dirigent.encryption.private_key_path', $config['private_key_path']);
+        $container->setParameter('dirigent.encryption.public_key_path', $config['public_key_path']);
+        $container->setParameter('dirigent.encryption.rotated_key_paths', $config['rotated_key_paths']);
     }
 }

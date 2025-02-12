@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Dirigent;
 
+use CodedMonkey\Dirigent\DependencyInjection\Compiler\EncryptionPass;
 use CodedMonkey\Dirigent\DependencyInjection\DirigentExtension;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -27,16 +28,20 @@ class Kernel extends BaseKernel
         }
     }
 
+    protected function build(ContainerBuilder $container): void
+    {
+        $container->registerExtension(new DirigentExtension());
+
+        // The encryption pass has to be the first pass to run as it removes sensitive data from the container
+        $container->addCompilerPass(new EncryptionPass(), priority: 2048);
+    }
+
     public function boot(): void
     {
         parent::boot();
 
+        // Set Composer env vars
         $_SERVER['COMPOSER_CACHE_DIR'] = $this->container->getParameter('dirigent.storage.path') . '/composer-cache';
         $_SERVER['COMPOSER_HOME'] = $this->container->getParameter('dirigent.storage.path') . '/composer';
-    }
-
-    protected function build(ContainerBuilder $container): void
-    {
-        $container->registerExtension(new DirigentExtension());
     }
 }

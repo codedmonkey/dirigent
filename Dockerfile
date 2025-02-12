@@ -61,6 +61,7 @@ RUN set -e; \
         php83-phar \
         php83-session \
         php83-simplexml \
+        php83-sodium \
         php83-tokenizer \
         php83-xml \
         postgresql \
