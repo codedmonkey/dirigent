@@ -17,7 +17,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
     name: 'packages:update',
     description: 'Schedules packages for update',
 )]
-class UpdatePackagesCommand extends Command
+class PackagesUpdateCommand extends Command
 {
     public function __construct(
         private readonly PackageRepository $packageRepository,

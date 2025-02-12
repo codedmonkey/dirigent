@@ -12,13 +12,15 @@ class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
 
+    public const VERSION = '0.3.x-dev';
+
     protected function configureContainer(ContainerConfigurator $container): void
     {
         $configDir = $this->getConfigDir();
 
-        $container->import($configDir . '/dirigent.{json,php,yaml}');
         $container->import($configDir . '/packages/*.yaml');
         $container->import($configDir . '/services.yaml');
+        $container->import($configDir . '/dirigent.{json,php,yaml}');
 
         if (isset($_SERVER['DIRIGENT_IMAGE'])) {
             $container->import('/srv/config/*.{json,php,yaml}');

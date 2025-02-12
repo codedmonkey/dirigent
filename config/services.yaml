@@ -25,3 +25,10 @@ services:
 
     access_token_hasher:
         class: Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher
+
+    dirigent_command_locator:
+        class: Symfony\Component\DependencyInjection\ServiceLocator
+        public: true
+        arguments:
+            -
+                'packages:update': '@CodedMonkey\Dirigent\Command\PackagesUpdateCommand'
