@@ -1,6 +1,7 @@
 /.env
 /compose.override.yaml
 /config/dirigent.yaml
+/config/encryption/
 /config/packages/dirigent.yaml
 /storage/
 

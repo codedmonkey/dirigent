@@ -61,6 +61,7 @@ RUN set -e; \
         php82-phar \
         php82-session \
         php82-simplexml \
+        php82-sodium \
         php82-tokenizer \
         php82-xml \
         postgresql \

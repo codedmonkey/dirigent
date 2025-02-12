@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\DependencyInjection;
 
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
@@ -18,6 +19,8 @@ class DirigentExtension extends ConfigurableExtension
 
         $container->setParameter('dirigent.title', $mergedConfig['title']);
         $container->setParameter('dirigent.slug', $slug);
+
+        $this->registerEncryptionConfiguration($mergedConfig['encryption'], $container);
 
         $container->setParameter('dirigent.security.public_access', $mergedConfig['security']['public']);
         $container->setParameter('dirigent.security.registration_enabled', $mergedConfig['security']['registration']);
@@ -41,5 +44,38 @@ class DirigentExtension extends ConfigurableExtension
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
     {
         return new DirigentConfiguration();
+    }
+
+    private function registerEncryptionConfiguration(array $config, ContainerBuilder $container): void
+    {
+        $privateKey = $config['private_key'];
+        $publicKey = $config['public_key'];
+        $rotatedKeys = $config['rotated_keys'];
+
+        $privateKeyPath = $config['private_key_path'];
+        $publicKeyPath = $config['public_key_path'];
+        $rotatedKeyPaths = $config['rotated_key_paths'];
+
+        // If the private or public key are not directly defined in the configuration (advisably
+        // through environment variables), use the path options instead.
+        $useFiles = !$privateKey && !$publicKey;
+
+        if ($useFiles) {
+            if ($privateKey || $publicKey || count($rotatedKeys)) {
+                throw new LogicException('Unable to load encryption from configuration, missing the private or public key.');
+            }
+
+            if (!$privateKeyPath || !$publicKeyPath) {
+                throw new LogicException('Unable to load encryption from paths, missing the private or public key path.');
+            }
+        }
+
+        $container->setParameter('dirigent.encryption.private_key', $privateKey);
+        $container->setParameter('dirigent.encryption.public_key', $publicKey);
+        $container->setParameter('dirigent.encryption.rotated_keys', $rotatedKeys);
+
+        $container->setParameter('dirigent.encryption.private_key_path', $privateKeyPath);
+        $container->setParameter('dirigent.encryption.public_key_path', $publicKeyPath);
+        $container->setParameter('dirigent.encryption.rotated_key_paths', $rotatedKeyPaths);
     }
 }
