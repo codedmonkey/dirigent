@@ -41,6 +41,7 @@ RUN set -e; \
         caddy \
         curl \
         git \
+        openssl \
         php82 \
         php82-ctype \
         php82-curl \
