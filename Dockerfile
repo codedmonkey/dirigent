@@ -45,6 +45,7 @@ RUN set -e; \
         caddy \
         curl \
         git \
+        openssl \
         php82 \
         php82-ctype \
         php82-curl \
@@ -80,17 +81,14 @@ COPY docker/scripts /srv/scripts/
 
 USER dirigent
 
-ENV APP_ENV="prod"
-ENV DATABASE_URL="postgresql://dirigent@127.0.0.1:5432/dirigent?serverVersion=16&charset=utf8"
-ENV DIRIGENT_IMAGE=1
-
 WORKDIR /srv/app
 
 COPY --chown=$UID:$GID --from=composer_build /srv/app ./
 COPY --chown=$UID:$GID --from=node_build /srv/app/public/build public/build/
 COPY --chown=$UID:$GID readme.md license.md ./
-COPY --chown=$UID:$GID .env.dirigent ./
 COPY --chown=$UID:$GID bin/console bin/dirigent bin/
+COPY --chown=$UID:$GID docker/dirigent.yaml /srv/app/config/
+COPY --chown=$UID:$GID docker/env.php ./.env.dirigent.local.php
 COPY --chown=$UID:$GID config config/
 COPY --chown=$UID:$GID docs docs/
 COPY --chown=$UID:$GID migrations migrations/
@@ -104,6 +102,7 @@ RUN set -e; \
     chmod +x bin/dirigent; \
     composer dump-autoload --classmap-authoritative --no-ansi --no-interaction;
 
+VOLUME /srv/config
 VOLUME /srv/data
 
 EXPOSE 7015
