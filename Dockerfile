@@ -78,16 +78,12 @@ RUN chmod +x /srv/init.sh
 
 USER dirigent
 
-ENV APP_ENV="prod"
-ENV DATABASE_URL="postgresql://dirigent@127.0.0.1:5432/dirigent?serverVersion=16&charset=utf8"
-ENV DIRIGENT_IMAGE=1
-
 WORKDIR /srv/app
 
 COPY --chown=dirigent:dirigent --from=composer_build /srv/app ./
 COPY --chown=dirigent:dirigent --from=node_build /srv/app/public/build public/build/
+COPY --chown=dirigent:dirigent docker/.env ./.env.dirigent
 COPY --chown=dirigent:dirigent readme.md license.md ./
-COPY --chown=dirigent:dirigent .env.dirigent ./
 COPY --chown=dirigent:dirigent bin bin/
 COPY --chown=dirigent:dirigent config config/
 COPY --chown=dirigent:dirigent migrations migrations/
