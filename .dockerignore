@@ -1,5 +1,7 @@
+/.github/
 /config/dirigent.yaml
 /config/packages/dirigent.yaml
+/node_modules/
 /storage/
 /var/
 /vendor/
