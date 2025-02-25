@@ -110,7 +110,7 @@ class Version
     private bool $defaultBranch = false;
 
     #[ORM\ManyToOne(targetEntity: Package::class, inversedBy: 'versions')]
-    private ?Package $package;
+    private ?Package $package = null;
 
     #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
     private VersionInstallations $installations;
@@ -472,7 +472,7 @@ class Version
         $this->defaultBranch = $defaultBranch;
     }
 
-    public function getPackage(): Package
+    public function getPackage(): ?Package
     {
         return $this->package;
     }
@@ -697,7 +697,7 @@ class Version
         }
 
         if (isset($data['php-ext']['configure-options'])) {
-            usort($data['php-ext']['configure-options'], fn ($a, $b) => $a['name'] ?? '' <=> $b['name'] ?? '');
+            usort($data['php-ext']['configure-options'], fn ($a, $b) => ($a['name'] ?? '') <=> ($b['name'] ?? ''));
         }
 
         return $data;
