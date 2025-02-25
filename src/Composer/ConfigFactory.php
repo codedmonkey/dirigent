@@ -8,7 +8,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use Composer\Config;
 use Composer\Factory;
 
-class ConfigFactory
+final class ConfigFactory
 {
     public static function createForRegistry(Registry $registry): Config
     {

@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\AccessToken;
+use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
@@ -55,9 +56,12 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
 
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
         $builder = $this->container->get(EntityRepository::class)->createQueryBuilder($searchDto, $entityDto, $fields, $filters);
 
-        $builder->andWhere($builder->expr()->eq('entity.user', $this->getUser()->getId()));
+        $builder->andWhere($builder->expr()->eq('entity.user', $user->getId()));
 
         return $builder;
     }

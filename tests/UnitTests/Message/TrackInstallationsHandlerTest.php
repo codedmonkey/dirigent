@@ -9,13 +9,17 @@ use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\TrackInstallations;
 use CodedMonkey\Dirigent\Message\TrackInstallationsHandler;
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class TrackInstallationsHandlerTest extends TestCase
 {
     private TrackInstallationsHandler $handler;
+    /** @var EntityManager&MockObject */
     private EntityManager $entityManager;
+    /** @var PackageRepository&MockObject */
     private PackageRepository $packageRepository;
+    /** @var VersionRepository&MockObject */
     private VersionRepository $versionRepository;
 
     protected function setUp(): void

@@ -95,12 +95,12 @@ class Registry
         $this->packageMirroring = $packageMirroring;
     }
 
-    public function getMirroringPriority(): ?string
+    public function getMirroringPriority(): ?int
     {
         return $this->mirroringPriority;
     }
 
-    public function setMirroringPriority(?string $mirroringPriority): void
+    public function setMirroringPriority(?int $mirroringPriority): void
     {
         $this->mirroringPriority = $mirroringPriority;
     }

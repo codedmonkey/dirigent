@@ -48,6 +48,7 @@ class DashboardRootController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         $request = $this->container->get('request_stack')->getCurrentRequest();
+        /** @var User $user */
         $user = $this->getUser();
 
         $packagesItem = MenuItem::linkToRoute('Packages', 'fa fa-cubes', 'dashboard_packages');
@@ -85,6 +86,9 @@ class DashboardRootController extends AbstractDashboardController
         yield MenuItem::linkToRoute('Credits', 'fa fa-file', 'dashboard_credits');
     }
 
+    /**
+     * @param User $user
+     */
     public function configureUserMenu(UserInterface $user): UserMenu
     {
         $menu = parent::configureUserMenu($user)
