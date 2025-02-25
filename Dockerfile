@@ -13,7 +13,7 @@ RUN composer install \
         --no-scripts \
         --prefer-dist
 
-FROM node:latest AS node_build
+FROM node:23 AS node_build
 
 WORKDIR /srv/app
 
@@ -81,17 +81,17 @@ ENV DIRIGENT_IMAGE=1
 
 WORKDIR /srv/app
 
-COPY --chown=dirigent:dirigent --from=composer_build /srv/app ./
-COPY --chown=dirigent:dirigent --from=node_build /srv/app/public/build public/build/
-COPY --chown=dirigent:dirigent readme.md license.md ./
-COPY --chown=dirigent:dirigent .env.dirigent ./
-COPY --chown=dirigent:dirigent bin bin/
-COPY --chown=dirigent:dirigent config config/
-COPY --chown=dirigent:dirigent migrations migrations/
-COPY --chown=dirigent:dirigent public public/
-COPY --chown=dirigent:dirigent src src/
-COPY --chown=dirigent:dirigent translations translations/
-COPY --chown=dirigent:dirigent templates templates/
+COPY --from=composer_build /srv/app ./
+COPY --from=node_build /srv/app/public/build public/build/
+COPY readme.md license.md ./
+COPY .env.dirigent ./
+COPY bin/console bin/dirigent bin/
+COPY config config/
+COPY migrations migrations/
+COPY public public/
+COPY src src/
+COPY translations translations/
+COPY templates templates/
 
 RUN set -e; \
     chmod +x bin/console; \
