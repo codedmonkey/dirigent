@@ -95,6 +95,7 @@ COPY --chown=dirigent:dirigent templates templates/
 
 RUN set -e; \
     chmod +x bin/console; \
+    chmod +x bin/dirigent; \
     composer dump-autoload --classmap-authoritative --no-ansi --no-interaction
 
 VOLUME /srv/data
