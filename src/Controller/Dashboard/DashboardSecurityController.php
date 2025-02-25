@@ -61,7 +61,7 @@ class DashboardSecurityController extends AbstractController
 
             $this->userRepository->save($user, true);
 
-            return $this->redirect($adminUrlGenerator->setRoute('dashboard_login'));
+            return $this->redirect($adminUrlGenerator->setRoute('dashboard_login')->generateUrl());
         }
 
         return $this->render('dashboard/security/register.html.twig', [

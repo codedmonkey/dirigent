@@ -15,7 +15,6 @@ use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
-use Composer\Package\PackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -97,6 +96,7 @@ readonly class PackageMetadataResolver
         }
 
         $repository = $this->composer->createComposerRepository($registry);
+        /** @var CompletePackageInterface[] $composerPackages */
         $composerPackages = $repository->findPackages($packageName);
 
         $this->updatePackage($package, $composerPackages);
@@ -132,6 +132,7 @@ readonly class PackageMetadataResolver
         }
         $packageName = trim($information['name']);
 
+        /** @var CompletePackageInterface[] $composerPackages */
         $composerPackages = $repository->findPackages($packageName);
 
         $this->updatePackage($package, $composerPackages, $driver);
@@ -150,7 +151,7 @@ readonly class PackageMetadataResolver
     }
 
     /**
-     * @param PackageInterface[] $composerPackages
+     * @param CompletePackageInterface[] $composerPackages
      */
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {

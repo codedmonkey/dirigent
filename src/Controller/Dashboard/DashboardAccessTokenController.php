@@ -69,12 +69,14 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
     public function beforeEntityPersisted(BeforeEntityPersistedEvent $event): void
     {
         $accessToken = $event->getEntityInstance();
+        /** @var User $user */
+        $user = $this->getUser();
 
         if (!$accessToken instanceof AccessToken) {
             return;
         }
 
-        $accessToken->setUser($this->getUser());
+        $accessToken->setUser($user);
         $this->addFlash('access-token', $accessToken->getPlainToken());
     }
 }
