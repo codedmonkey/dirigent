@@ -394,11 +394,7 @@ readonly class PackageMetadataResolver
                         $readme = $parser->parse($source);
 
                         if (!empty($readme)) {
-                            if (Preg::isMatch('{^(?:git://|git@|https?://)(gitlab.com|bitbucket.org)[:/]([^/]+)/(.+?)(?:\.git|/)?$}i', $version->getPackage()->getRepositoryUrl(), $match)) {
-                                $version->setReadme($this->prepareReadme($readme, $match[1], $match[2], $match[3]));
-                            } else {
-                                $version->setReadme($this->prepareReadme($readme));
-                            }
+                            $version->setReadme($this->prepareReadme($readme));
                         }
                     }
 

@@ -681,12 +681,6 @@ class Version
         }
 
         foreach ($supportedLinkTypes as $method => $linkType) {
-            if (isset($versionData[$this->id][$method])) {
-                foreach ($versionData[$this->id][$method] as $link) {
-                    $data[$linkType][$link['name']] = $link['version'];
-                }
-                continue;
-            }
             /** @var PackageLink $link */
             foreach ($this->{'get' . $method}() as $link) {
                 $link = $link->toArray();

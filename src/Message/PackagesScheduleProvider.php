@@ -10,19 +10,19 @@ use Symfony\Component\Scheduler\Schedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
 
 #[AsSchedule('packages')]
-readonly class PackagesScheduleProvider implements ScheduleProviderInterface
+class PackagesScheduleProvider implements ScheduleProviderInterface
 {
     public function __construct(
         #[Autowire(param: 'dirigent.packages.periodic_updates')]
-        private bool $periodicUpdatesEnabled,
+        private readonly bool $periodicUpdatesEnabled,
     ) {
     }
 
-    private Schedule $schedule;
+    private ?Schedule $schedule = null;
 
     public function getSchedule(): Schedule
     {
-        if (!isset($this->schedule)) {
+        if (!$this->schedule) {
             $schedule = new Schedule();
 
             if ($this->periodicUpdatesEnabled) {
