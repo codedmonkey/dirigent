@@ -41,4 +41,18 @@ class EntrypointTest extends TestCase
 
         $this->assertStringStartsWith('Dirigent', $result, 'Running the container with any other command (than `-init`) must be passed to the Dirigent binary.');
     }
+
+    public function testPassthrough(): void
+    {
+        $container = (new GenericContainer('dirigent-standalone'))
+            ->withCommand(['--', 'bin/console', 'list'])
+            ->withWait(new WaitForLog('Symfony'))
+            ->start();
+
+        $result = $container->logs();
+
+        $container->stop();
+
+        $this->assertStringStartsWith(')Symfony', $result, 'Running the container with an `--` argument must have its remaining arguments be interpreted as a command.');
+    }
 }

@@ -2,13 +2,18 @@
 
 set -e
 
-# If the first argument is `-init`, execute supervisor to run the
-# application, which is the default command, or pass the argument
-# to the Dirigent binary
+# If the first argument is `-init`, run the application. This is
+# also the default command.
 if [ "$1" = "-init" ]; then
   set -- /srv/init.sh
 else
-  set -- bin/dirigent "$@"
+  # If the first argument is `--`, execute the remaining arguments as a
+  # new command, otherwise pass the arguments to the Dirigent binary.
+  if [ "$1" = "--" ]; then
+    set -- ${@:2}
+  else
+    set -- bin/dirigent "$@"
+  fi
 fi
 
 exec "$@"
