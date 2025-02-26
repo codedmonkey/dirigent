@@ -2,6 +2,8 @@
 /config/dirigent.yaml
 /config/packages/dirigent.yaml
 /node_modules/
+/public/build/
+/public/bundles/
 /storage/
 /var/
 /vendor/
