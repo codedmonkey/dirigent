@@ -15,7 +15,7 @@ RUN composer install \
         --no-scripts \
         --prefer-dist
 
-FROM node:latest AS node_build
+FROM node:23 AS node_build
 
 WORKDIR /srv/app
 
