@@ -1,11 +1,11 @@
-name: Test Docker build
+name: Build image
 
 on:
   pull_request:
   push:
 
 jobs:
-  test-build:
+  build-image:
     name: Test Docker build
     runs-on: ubuntu-latest
     steps:

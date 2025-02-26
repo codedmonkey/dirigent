@@ -1,0 +1,64 @@
+name: Run image tests
+
+on:
+  pull_request:
+  push:
+
+env:
+  fail-fast: true
+  GITHUB_TOKEN: ${{ github.token }}
+  PHPUNIT_FLAGS: ""
+
+permissions:
+  contents: read
+
+jobs:
+  phpunit:
+    name: "Testcontainers"
+    runs-on: ubuntu-latest
+    continue-on-error: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: dirigent-standalone
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+          extensions: intl, mbstring, zip
+          php-version: 8.2
+          tools: composer:v2
+
+      - name: Add PHPUnit matcher
+        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: PHPUnit version
+        run: bin/phpunit --version
+
+      - name: Run tests
+        run: bin/phpunit --configuration phpunit.docker.xml ${{ env.PHPUNIT_FLAGS }}
