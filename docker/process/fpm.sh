@@ -1,16 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 set -e
 
-composer run-script --no-ansi --no-interaction auto-scripts
+while [ ! $(pg_isready) ]; do
+  echo "Application is waiting for the database"
 
-# todo temporary timeout for database connection
-while ! nc -z localhost 5432; do
-  echo "Waiting for database connection";
-  sleep 3;
-done;
-
-bin/console doctrine:database:create --if-not-exists --no-ansi --no-interaction
-bin/console doctrine:migrations:migrate --allow-no-migration --no-ansi --no-interaction
+  sleep 3
+done
 
 exec php-fpm

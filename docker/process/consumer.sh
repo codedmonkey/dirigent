@@ -1,10 +1,17 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 set -e
 
-while [ -z "$(netstat -an | grep :9000)" ]; do
-  echo "Waiting for app";
-  sleep 5;
-done;
+while [ ! "$(netstat -an | grep :9000)" ]; do
+  echo "Worker is waiting for application"
 
-exec /srv/app/bin/console messenger:consume async scheduler_packages --sleep 10
+  sleep 5
+done
+
+function shutdown() {
+    bin/console messenger:stop-workers
+}
+
+trap shutdown HUP INT QUIT ABRT KILL ALRM TERM TSTP
+
+exec bin/console messenger:consume async scheduler_packages --sleep 10
