@@ -14,6 +14,7 @@ use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use Composer\Package\AliasPackage;
+use Composer\Package\CompletePackageInterface;
 use Composer\Package\PackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
@@ -182,7 +183,7 @@ readonly class PackageMetadataResolver
         $this->entityManager->persist($package);
     }
 
-    private function updateVersion(Package $package, Version $version, PackageInterface $data, ?VcsDriverInterface $driver = null): void
+    private function updateVersion(Package $package, Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
     {
         $em = $this->entityManager;
 

@@ -1,8 +1,10 @@
 parameters:
-    level: 1
+    level: 2
     paths:
         - bin/
         - config/
         - public/
         - src/
         - tests/
+    ignoreErrors:
+        - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition::children\(\).#'
