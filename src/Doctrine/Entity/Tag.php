@@ -12,7 +12,7 @@ abstract class Tag
     #[ORM\Id]
     #[ORM\Column]
     #[ORM\GeneratedValue]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\Column(length: 191)]
     private string $name;
@@ -25,7 +25,7 @@ abstract class Tag
         $this->versions = new ArrayCollection();
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

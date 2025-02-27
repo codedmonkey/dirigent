@@ -1,10 +1,13 @@
 parameters:
-    level: 2
+    level: 4
     paths:
         - bin/
         - config/
         - public/
         - src/
         - tests/
+    excludePaths:
+        - tests/bootstrap.php
     ignoreErrors:
         - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition::children\(\).#'
+        - '#Property CodedMonkey\\Dirigent\\Doctrine\\Entity\\[a-zA-Z]+::\$id \(int\|null\) is never assigned int so it can be removed from the property type.#'
