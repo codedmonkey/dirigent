@@ -2,10 +2,11 @@
 
 namespace CodedMonkey\Dirigent\Package;
 
-use CodedMonkey\Dirigent\Doctrine\Entity\Package;
-use Composer\MetadataMinifier\MetadataMinifier;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Composer\Package\CompletePackageInterface;
+use Composer\MetadataMinifier\MetadataMinifier;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 readonly class PackageProviderManager
 {

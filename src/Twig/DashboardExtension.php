@@ -32,6 +32,9 @@ class DashboardExtension extends AbstractExtension implements GlobalsInterface
         ];
     }
 
+    /**
+     * @param array<string, string> $routeParams
+     */
     public function path(string $route, array $routeParams = []): string
     {
         return $this->adminUrlGenerator->setRoute($route, $routeParams)->generateUrl();

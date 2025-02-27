@@ -35,7 +35,7 @@ class ApiControllerPublicTest extends KernelTestCase
         $this->assertNotSame([], $packageData);
     }
 
-    private function requestJson(...$requestArguments)
+    private function requestJson(mixed ...$requestArguments): mixed
     {
         $request = Request::create(...$requestArguments);
         $response = self::$kernel->handle($request);

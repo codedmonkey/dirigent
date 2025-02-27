@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 
 class PackageVcsRepositoryValidatorTest extends TestCase
 {
+    /**
+     * @return array<array{string, array<string>}>
+     */
     public static function invalidUrlProvider(): array
     {
         return [
@@ -40,6 +43,9 @@ class PackageVcsRepositoryValidatorTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<string> $urls
+     */
     #[DataProvider('invalidUrlProvider')]
     public function testInvalidUrls(string $error, array $urls): void
     {

@@ -14,6 +14,9 @@ readonly class PackageVcsRepositoryValidator
     ) {
     }
 
+    /**
+     * @return array{error: string}|array{error: null, name: string, remoteId: string|null}
+     */
     public function validate(Package $package): array
     {
         $repoUrl = $package->getRepositoryUrl();
@@ -72,6 +75,9 @@ readonly class PackageVcsRepositoryValidator
         }
     }
 
+    /**
+     * @param array{error: null, name: string, remoteId: string|null} $result
+     */
     public function loadResult(Package $package, array $result): void
     {
         $package->setName($result['name']);
