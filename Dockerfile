@@ -5,8 +5,10 @@ WORKDIR /srv/app
 COPY composer.json composer.lock ./
 
 RUN composer install \
+        --ignore-platform-reqs \
         --no-ansi \
         --no-autoloader \
+        --no-dev \
         --no-interaction \
         --no-plugins \
         --no-progress \
@@ -95,6 +97,7 @@ COPY --chown=dirigent:dirigent templates templates/
 
 RUN set -e; \
     chmod +x bin/console; \
+    chmod +x bin/dirigent; \
     composer dump-autoload --classmap-authoritative --no-ansi --no-interaction
 
 VOLUME /srv/data
