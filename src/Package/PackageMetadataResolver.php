@@ -14,7 +14,7 @@ use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use Composer\Package\AliasPackage;
-use Composer\Package\PackageInterface;
+use Composer\Package\CompletePackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -59,6 +59,7 @@ readonly class PackageMetadataResolver
         match ($package->getFetchStrategy()) {
             PackageFetchStrategy::Mirror => $this->resolveRegistryPackage($package),
             PackageFetchStrategy::Vcs => $this->resolveVcsPackage($package),
+            default => throw new \LogicException(),
         };
 
         $this->messenger->dispatch(new DumpPackageProvider($package->getId()));
@@ -95,6 +96,7 @@ readonly class PackageMetadataResolver
         }
 
         $repository = $this->composer->createComposerRepository($registry);
+        /** @var CompletePackageInterface[] $composerPackages */
         $composerPackages = $repository->findPackages($packageName);
 
         $this->updatePackage($package, $composerPackages);
@@ -130,6 +132,7 @@ readonly class PackageMetadataResolver
         }
         $packageName = trim($information['name']);
 
+        /** @var CompletePackageInterface[] $composerPackages */
         $composerPackages = $repository->findPackages($packageName);
 
         $this->updatePackage($package, $composerPackages, $driver);
@@ -148,7 +151,7 @@ readonly class PackageMetadataResolver
     }
 
     /**
-     * @param PackageInterface[] $composerPackages
+     * @param CompletePackageInterface[] $composerPackages
      */
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
@@ -182,7 +185,7 @@ readonly class PackageMetadataResolver
         $this->entityManager->persist($package);
     }
 
-    private function updateVersion(Package $package, Version $version, PackageInterface $data, ?VcsDriverInterface $driver = null): void
+    private function updateVersion(Package $package, Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
     {
         $em = $this->entityManager;
 
@@ -394,11 +397,7 @@ readonly class PackageMetadataResolver
                         $readme = $parser->parse($source);
 
                         if (!empty($readme)) {
-                            if (Preg::isMatch('{^(?:git://|git@|https?://)(gitlab.com|bitbucket.org)[:/]([^/]+)/(.+?)(?:\.git|/)?$}i', $version->getPackage()->getRepositoryUrl(), $match)) {
-                                $version->setReadme($this->prepareReadme($readme, $match[1], $match[2], $match[3]));
-                            } else {
-                                $version->setReadme($this->prepareReadme($readme));
-                            }
+                            $version->setReadme($this->prepareReadme($readme));
                         }
                     }
 

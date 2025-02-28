@@ -9,13 +9,12 @@ use Composer\Factory;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Composer\Repository\ComposerRepository;
-use Composer\Repository\RepositoryInterface;
 use Composer\Repository\VcsRepository;
 use Composer\Util\HttpDownloader;
 
 class ComposerClient
 {
-    public function createComposerRepository(Package|Registry $registry, ?IOInterface $io = null, ?Config $config = null): RepositoryInterface
+    public function createComposerRepository(Package|Registry $registry, ?IOInterface $io = null, ?Config $config = null): ComposerRepository
     {
         $registry = $registry instanceof Package ? $registry->getMirrorRegistry() : $registry;
 
@@ -29,7 +28,7 @@ class ComposerClient
         return new ComposerRepository(['url' => $registry->getUrl()], $io, $config, $httpDownloader);
     }
 
-    public function createVcsRepository(Package $package, ?IOInterface $io = null, ?Config $config = null): RepositoryInterface
+    public function createVcsRepository(Package $package, ?IOInterface $io = null, ?Config $config = null): VcsRepository
     {
         $repoUrl = $package->getRepositoryUrl();
 
