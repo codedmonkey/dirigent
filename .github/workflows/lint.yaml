@@ -11,45 +11,9 @@ permissions:
   contents: read
 
 jobs:
-  php-cs-fixer:
-    name: PHP-CS-Fixer
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install PHP with extensions
-        uses: shivammathur/setup-php@v2
-        with:
-          coverage: none
-          extensions: intl
-          php-version: "8.2"
-          tools: composer:v2
-
-      - name: Set Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer output
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        id: install
-        run: composer install --ansi --no-interaction --no-progress
-
-      - name: PHP-CS-Fixer
-        run: ./vendor/bin/php-cs-fixer fix --diff --dry-run
-
   linters:
     name: Linters
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-version: ["8.2"]
 
     steps:
       - name: Checkout code
@@ -60,7 +24,7 @@ jobs:
         with:
           coverage: none
           extensions: intl
-          php-version: ${{ matrix.php-version }}
+          php-version: 8.2
           tools: composer:v2
 
       - name: Set Composer cache directory
@@ -111,6 +75,70 @@ jobs:
       - name: Check if any Symfony recipes are outdated
         if: always() && steps.install.outcome == 'success'
         run: composer recipes --outdated --no-interaction
+
+  php-cs-fixer:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+          extensions: intl
+          php-version: 8.2
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        id: install
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: PHP-CS-Fixer
+        run: ./vendor/bin/php-cs-fixer fix --diff --dry-run
+
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+          extensions: intl
+          php-version: 8.2
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        id: install
+        run: composer install --ansi --no-interaction --no-progress
 
       - name: Run PHPStan
         if: always() && steps.install.outcome == 'success'
