@@ -35,6 +35,9 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.packages.periodic_updates', $mergedConfig['packages']['periodic_updates']);
         $container->setParameter('dirigent.packages.periodic_update_interval', $mergedConfig['packages']['periodic_update_interval']);
 
+        $container->setParameter('dirigent.dist_builder.enabled', $mergedConfig['dist_builder']['enabled']);
+        $container->setParameter('dirigent.dist_builder.dev_packages', $mergedConfig['dist_builder']['dev_packages']);
+
         $container->setParameter('dirigent.dist_mirroring.enabled', $mergedConfig['dist_mirroring']['enabled']);
         $container->setParameter('dirigent.dist_mirroring.preferred', $mergedConfig['dist_mirroring']['preferred']);
         $container->setParameter('dirigent.dist_mirroring.dev_packages', $mergedConfig['dist_mirroring']['dev_packages']);
