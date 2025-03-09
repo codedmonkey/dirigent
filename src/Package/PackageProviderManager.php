@@ -6,6 +6,8 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use Composer\MetadataMinifier\MetadataMinifier;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 readonly class PackageProviderManager
 {
@@ -13,6 +15,11 @@ readonly class PackageProviderManager
     private string $storagePath;
 
     public function __construct(
+        private RouterInterface $router,
+        #[Autowire(param: 'dirigent.dist_builder.enabled')]
+        private bool $buildDistributions,
+        #[Autowire(param: 'dirigent.dist_builder.dev_packages')]
+        private bool $buildDevDistributions,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
@@ -30,6 +37,26 @@ readonly class PackageProviderManager
 
         foreach ($versions as $version) {
             $versionData = $version->toComposerArray();
+
+            if (
+                null === $version->getDist()
+                && $this->buildDistributions
+                && (!$version->isDevelopment() || $this->buildDevDistributions)
+            ) {
+                $distributionUrl = $this->router->generate('api_package_distribution', [
+                    'packageName' => $package->getName(),
+                    'packageVersion' => $version->getNormalizedVersion(),
+                    'reference' => $version->getSourceReference(),
+                    'type' => 'zip',
+                ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                $versionData['dist'] = [
+                    'type' => 'zip',
+                    'url' => $distributionUrl,
+                    'reference' => $version->getSourceReference(),
+                    'shasum' => '',
+                ];
+            }
 
             if (!$version->isDevelopment()) {
                 $releasePackages[] = $versionData;
