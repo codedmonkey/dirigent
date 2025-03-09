@@ -3,6 +3,8 @@
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use Composer\Package\Package as ComposerPackage;
+use Composer\Package\PackageInterface;
 use Composer\Package\Version\VersionParser;
 use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -512,6 +514,21 @@ class Version
         $this->releasedAt = $releasedAt;
     }
 
+    public function getSourceReference(): ?string
+    {
+        return $this->source['reference'] ?? null;
+    }
+
+    public function getSourceType(): ?string
+    {
+        return $this->source['type'] ?? null;
+    }
+
+    public function getSourceUrl(): ?string
+    {
+        return $this->source['url'] ?? null;
+    }
+
     public function getDistReference(): ?string
     {
         return $this->dist['reference'] ?? null;
@@ -701,6 +718,16 @@ class Version
         }
 
         return $data;
+    }
+
+    public function toComposerPackage(): PackageInterface
+    {
+        $cp = new ComposerPackage($this->getName(), $this->getNormalizedVersion(), $this->getVersion());
+
+        $cp->setSourceReference($this->getSourceReference());
+        $cp->setSourceUrl($this->getSourceUrl());
+
+        return $cp;
     }
 
     private function sortAuthorKeys(string $a, string $b): int
