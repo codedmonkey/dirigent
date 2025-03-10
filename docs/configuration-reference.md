@@ -1,8 +1,39 @@
 ---
+sidebar_label: Configuration reference
 sidebar_position: 99
 ---
 
-# Dirigent Configuration Reference
+# Dirigent configuration reference
+
+Dirigent uses the [Symfony][symfony] framework under the hood. Refer to the [Symfony documentation][symfony-docs-config]
+to learn how the configuration system works.
+
+When using the standalone image, any JSON or YAML file located directly in the `/srv/config` directory will be loaded
+as a Symfony configuration file.
+
+## Example configuration
+
+```yaml
+# dirigent.yaml
+dirigent:
+  title: 'My Dirigent'
+  slug: null
+  security:
+    public: false
+    registration: false
+  # not supported by the standalone image
+  #storage:
+  #  path: '%kernel.project_dir%/storage'
+  packages:
+    dynamic_updates: true
+    dynamic_update_delay: 'PT4H'
+    periodic_updates: true
+    periodic_update_interval: 'P1W'
+  dist_mirroring:
+    enabled: false
+    preferred: true
+    dev_packages: false
+```
 
 ## dirigent (root)
 
@@ -88,26 +119,6 @@ Whether to enable or disable distribution mirroring
 
 ### dev_packages
 
-## Example configuration
-
-```yaml
-dirigent:
-    title: My Dirigent
-    slug: my-dirigent
-    security:
-        public: false
-        registration: false
-    storage:
-        path: '%kernel.project_dir%/storage'
-    packages:
-        dynamic_updates: true
-        dynamic_update_delay: true
-        periodic_updates: true
-        periodic_update_interval: true
-    dist_mirroring:
-        enabled: true
-        preferred: true
-        dev_packages: false
-```
-
 [iso-8601-durations]: https://en.wikipedia.org/wiki/ISO_8601#Durations
+[symfony]: https://symfony.com
+[symfony-docs-config]: https://symfony.com/doc/current/configuration.html
