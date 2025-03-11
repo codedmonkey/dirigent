@@ -14,7 +14,7 @@
         "cebe/markdown": "^1.2",
         "composer/composer": "^2.7",
         "doctrine/doctrine-bundle": "^2.11",
-        "doctrine/doctrine-fixtures-bundle": "^3.6",
+        "doctrine/doctrine-fixtures-bundle": "^4.0",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^3.3",
         "easycorp/easyadmin-bundle": "^4.8",
