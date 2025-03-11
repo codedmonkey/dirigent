@@ -1,6 +1,9 @@
 /.github/
 /.idea/
+/config/dirigent.json
+/config/dirigent.php
 /config/dirigent.yaml
+/config/dirigent.yml
 /config/packages/dirigent.yaml
 /node_modules/
 /public/build/

@@ -1,6 +1,9 @@
 /.env
 /compose.override.yaml
+/config/dirigent.json
+/config/dirigent.php
 /config/dirigent.yaml
+/config/dirigent.yml
 /config/packages/dirigent.yaml
 /storage/
 
