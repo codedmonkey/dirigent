@@ -46,26 +46,27 @@ RUN set -e; \
         curl \
         git \
         openssl \
-        php82 \
-        php82-ctype \
-        php82-curl \
-        php82-dom \
-        php82-fileinfo \
-        php82-fpm \
-        php82-iconv \
-        php82-intl \
-        php82-mbstring \
-        php82-openssl \
-        php82-pdo \
-        php82-pdo_pgsql \
-        php82-phar \
-        php82-session \
-        php82-simplexml \
-        php82-tokenizer \
-        php82-xml \
+        php83 \
+        php83-ctype \
+        php83-curl \
+        php83-dom \
+        php83-fileinfo \
+        php83-fpm \
+        php83-iconv \
+        php83-intl \
+        php83-mbstring \
+        php83-openssl \
+        php83-pdo \
+        php83-pdo_pgsql \
+        php83-phar \
+        php83-session \
+        php83-simplexml \
+        php83-tokenizer \
+        php83-xml \
         postgresql \
         supervisor; \
-    ln -s /usr/sbin/php-fpm82 /usr/sbin/php-fpm; \
+    ln -s /usr/bin/php83 /usr/bin/php; \
+    ln -s /usr/sbin/php-fpm83 /usr/sbin/php-fpm; \
     mkdir -p /run/postgresql /srv/config /srv/data; \
     chown -R dirigent:dirigent /run /srv; \
     chmod +x /srv/entrypoint.sh /srv/init.sh;
@@ -73,8 +74,8 @@ RUN set -e; \
 COPY --from=composer_build /usr/bin/composer /usr/bin/composer
 
 COPY docker/Caddyfile /etc/caddy/
-COPY docker/php.ini /etc/php82/conf.d/
-COPY docker/php-fpm.conf /etc/php82/
+COPY docker/php.ini /etc/php83/conf.d/
+COPY docker/php-fpm.conf /etc/php83/
 COPY docker/supervisord.conf /etc/
 COPY docker/process /srv/process/
 COPY docker/scripts /srv/scripts/
