@@ -27,16 +27,17 @@ class Kernel extends BaseKernel
         }
     }
 
+    protected function build(ContainerBuilder $container): void
+    {
+        $container->registerExtension(new DirigentExtension());
+    }
+
     public function boot(): void
     {
         parent::boot();
 
+        // Set Composer env vars
         $_SERVER['COMPOSER_CACHE_DIR'] = $this->container->getParameter('dirigent.storage.path') . '/composer-cache';
         $_SERVER['COMPOSER_HOME'] = $this->container->getParameter('dirigent.storage.path') . '/composer';
-    }
-
-    protected function build(ContainerBuilder $container): void
-    {
-        $container->registerExtension(new DirigentExtension());
     }
 }

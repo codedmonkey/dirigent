@@ -11,6 +11,11 @@ class PublicKernel extends Kernel
     {
         parent::configureContainer($container);
 
-        $container->import(__DIR__ . '/config/public/*.yaml');
+        $container->extension('dirigent', [
+            'security' => [
+                'public' => true,
+                'registration' => true,
+            ],
+        ]);
     }
 }

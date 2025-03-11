@@ -403,8 +403,8 @@ readonly class PackageMetadataResolver
 
                     break;
             }
-        } catch (\Exception $e) {
-            throw $e; // todo handle politely
+        } catch (\Exception $exception) {
+            throw $exception; // todo handle politely
         }
     }
 

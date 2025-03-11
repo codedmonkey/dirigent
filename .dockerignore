@@ -1,5 +1,6 @@
 /.github/
 /.idea/
+/.phpunit.cache/
 /config/dirigent.json
 /config/dirigent.php
 /config/dirigent.yaml
