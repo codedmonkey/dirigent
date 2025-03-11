@@ -7,20 +7,20 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
         "cebe/markdown": "^1.2",
         "composer/composer": "^2.7",
         "doctrine/doctrine-bundle": "^2.11",
-        "doctrine/doctrine-fixtures-bundle": "^3.6",
+        "doctrine/doctrine-fixtures-bundle": "^4.0",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^3.3",
         "easycorp/easyadmin-bundle": "^4.8",
         "league/commonmark": "^2.5",
         "phpdocumentor/reflection-docblock": "^5.3",
-        "phpstan/phpdoc-parser": "^1.24",
+        "phpstan/phpdoc-parser": "^2.1",
         "sentry/sentry-symfony": "^5.0",
         "symfony/asset": "^7.0",
         "symfony/console": "^7.0",
@@ -78,7 +78,8 @@
         "symfony/polyfill-php74": "*",
         "symfony/polyfill-php80": "*",
         "symfony/polyfill-php81": "*",
-        "symfony/polyfill-php82": "*"
+        "symfony/polyfill-php82": "*",
+        "symfony/polyfill-php83": "*"
     },
     "autoload": {
         "psr-4": {
@@ -108,6 +109,9 @@
             "symfony/flex": true,
             "symfony/runtime": true
         },
+        "platform": {
+            "php": "8.3.0"
+        },
         "sort-packages": true
     },
     "extra": {
@@ -116,7 +120,7 @@
         },
         "symfony": {
             "allow-contrib": false,
-            "require": "7.1.*"
+            "require": "7.2.*"
         }
     }
 }

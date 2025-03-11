@@ -45,14 +45,14 @@ class EntrypointTest extends TestCase
     public function testPassthrough(): void
     {
         $container = (new GenericContainer('dirigent-standalone'))
-            ->withCommand(['--', 'bin/console', 'list'])
-            ->withWait(new WaitForLog('Symfony'))
+            ->withCommand(['--', 'echo', 'i have a dream'])
+            ->withWait(new WaitForLog('dream'))
             ->start();
 
         $result = $container->logs();
 
         $container->stop();
 
-        $this->assertStringStartsWith(')Symfony', $result, 'Running the container with an `--` argument must have its remaining arguments be interpreted as a command.');
+        $this->assertSame('i have a dream', $result, 'Running the container with an `--` argument must have its remaining arguments be interpreted as a command.');
     }
 }

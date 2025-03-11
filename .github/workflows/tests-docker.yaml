@@ -36,7 +36,7 @@ jobs:
         with:
           coverage: none
           extensions: intl, mbstring, zip
-          php-version: 8.2
+          php-version: 8.3
           tools: composer:v2
 
       - name: Add PHPUnit matcher
