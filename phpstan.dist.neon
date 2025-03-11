@@ -3,11 +3,16 @@ parameters:
     paths:
         - bin/
         - config/
+        - migrations/
         - public/
         - src/
         - tests/
     excludePaths:
         - tests/bootstrap.php
     ignoreErrors:
-        - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition::children\(\).#'
-        - '#Property CodedMonkey\\Dirigent\\Doctrine\\Entity\\[a-zA-Z]+::\$id \(int\|null\) is never assigned int so it can be removed from the property type.#'
+        - '#^Property CodedMonkey\\Dirigent\\Doctrine\\Entity\\[a-zA-Z]+\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+        -
+            message: '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'
+            identifier: method.notFound
+            count: 1
+            path: src/DependencyInjection/DirigentConfiguration.php

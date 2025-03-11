@@ -45,7 +45,7 @@ class DashboardPackagesControllerTest extends WebTestCase
         $packageRepository = $client->getContainer()->get(PackageRepository::class);
 
         $package = $packageRepository->findOneByName('psr/container');
-        self::assertNotNull($package, 'A package was created');
+        self::assertNotNull($package, 'A package was created.');
 
         $packageRepository->remove($package, true);
     }

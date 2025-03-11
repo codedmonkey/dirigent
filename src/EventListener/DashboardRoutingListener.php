@@ -19,7 +19,7 @@ readonly class DashboardRoutingListener
     }
 
     #[AsEventListener]
-    public function onKernelRequest(RequestEvent $event): void
+    public function redirectPrettyDashboardUrls(RequestEvent $event): void
     {
         $request = $event->getRequest();
 

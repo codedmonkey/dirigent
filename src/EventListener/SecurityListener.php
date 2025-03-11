@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Event\CheckPassportEvent;
 
-readonly class SecurityEventListener
+readonly class SecurityListener
 {
     public function __construct(
         private AccessTokenRepository $accessTokenRepository,
