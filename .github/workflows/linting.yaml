@@ -1,8 +1,6 @@
 name: Lint code & configuration
 
-on:
-  pull_request:
-  push:
+on: [pull_request, push]
 
 env:
   fail-fast: true
@@ -22,8 +20,6 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl
           php-version: 8.3
           tools: composer:v2
 
@@ -48,7 +44,7 @@ jobs:
 
       - name: Lint Twig templates
         if: always() && steps.install.outcome == 'success'
-        run: bin/console lint:twig templates --env=prod
+        run: bin/console lint:twig templates
 
       #- name: Lint XLIFF translation files
       #  if: always() && steps.install.outcome == 'success'
@@ -58,17 +54,17 @@ jobs:
       #  if: always() && steps.install.outcome == 'success'
       #  run: bin/console lint:translations
 
-      - name: Lint Parameters and Services
+      - name: Lint service container # todo
         if: always() && steps.install.outcome == 'success'
         run: bin/console lint:container --no-debug
 
-      - name: Lint Composer config
+      - name: Lint Composer configuration
         if: always() && steps.install.outcome == 'success'
         run: composer validate
         # todo enable strict mode, currently license is invalid
         # run: composer validate --strict
 
-      - name: Check if any dependencies are compromised
+      - name: Check if any Composer dependencies are compromised
         if: always() && steps.install.outcome == 'success'
         run: composer audit
 
@@ -86,8 +82,6 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl
           php-version: 8.3
           tools: composer:v2
 
@@ -107,7 +101,7 @@ jobs:
         run: composer install --ansi --no-interaction --no-progress
 
       - name: PHP-CS-Fixer
-        run: ./vendor/bin/php-cs-fixer fix --diff --dry-run
+        run: vendor/bin/php-cs-fixer fix --diff --dry-run
 
   phpstan:
     name: PHPStan
@@ -120,8 +114,6 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl
           php-version: 8.3
           tools: composer:v2
 
@@ -142,4 +134,4 @@ jobs:
 
       - name: Run PHPStan
         if: always() && steps.install.outcome == 'success'
-        run: ./vendor/bin/phpstan analyze
+        run: vendor/bin/phpstan analyze

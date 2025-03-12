@@ -1,8 +1,6 @@
 name: Run image tests
 
-on:
-  pull_request:
-  push:
+on: [pull_request, push]
 
 env:
   fail-fast: true
@@ -13,8 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  phpunit:
-    name: Testcontainers
+  testcontainers:
+    name: Testcontainers (Standalone)
     runs-on: ubuntu-latest
     continue-on-error: false
 
@@ -34,8 +32,6 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl, mbstring, zip
           php-version: 8.3
           tools: composer:v2
 
