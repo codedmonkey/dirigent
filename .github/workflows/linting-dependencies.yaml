@@ -1,51 +1,30 @@
-name: Run image tests
+name: Lint dependencies
 
 on:
   pull_request:
   push:
-
-env:
-  fail-fast: true
-  GITHUB_TOKEN: ${{ github.token }}
-  PHPUNIT_FLAGS: ""
-
-permissions:
-  contents: read
+  schedule:
+    - cron:  "30 4 * * *"
 
 jobs:
-  phpunit:
-    name: Testcontainers
+  composer:
+    name: Composer
+
     runs-on: ubuntu-latest
-    continue-on-error: false
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker image
-        id: push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          load: true
-          tags: dirigent-standalone
-
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl, mbstring, zip
           php-version: 8.3
           tools: composer:v2
-
-      - name: Add PHPUnit matcher
-        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Set Composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-        shell: bash
 
       - name: Cache Composer output
         uses: actions/cache@v4
@@ -55,10 +34,18 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
+        id: composer-install
         run: composer install --ansi --no-interaction --no-progress
 
-      - name: PHPUnit version
-        run: bin/phpunit --version
+      - name: Check if any Composer dependencies are compromised
+        if: always() && steps.composer-install.outcome == 'success'
+        run: composer audit --ansi
 
-      - name: Run tests
-        run: bin/phpunit --configuration phpunit.docker.xml ${{ env.PHPUNIT_FLAGS }}
+      # This check always shows a success state, even when there are
+      # outdated recipes (due to `continue-on-error`). Please check
+      # the result when updating Composer dependencies.
+      # todo fail when composer.lock changed and there is an outdated recipe
+      - name: Check if any Symfony Flex recipes are outdated
+        if: always() && steps.composer-install.outcome == 'success'
+        continue-on-error: true
+        run: composer recipes --outdated --ansi

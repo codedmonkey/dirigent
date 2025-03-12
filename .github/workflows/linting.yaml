@@ -1,18 +1,11 @@
 name: Lint code & configuration
 
-on:
-  pull_request:
-  push:
-
-env:
-  fail-fast: true
-
-permissions:
-  contents: read
+on: [pull_request, push]
 
 jobs:
   linters:
     name: Linters
+
     runs-on: ubuntu-latest
 
     steps:
@@ -22,8 +15,6 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl
           php-version: 8.3
           tools: composer:v2
 
@@ -38,47 +29,41 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install dependencies
-        id: install
+      - name: Install Composer dependencies
+        id: composer-install
         run: composer install --ansi --no-interaction --no-progress
 
-      - name: Lint YAML files
-        if: always() && steps.install.outcome == 'success'
-        run: bin/console lint:yaml .github config translations --parse-tags
+      - name: Lint Composer configuration
+        if: always() && steps.composer-install.outcome == 'success'
+        run: composer validate --ansi
+        # todo enable strict mode, currently license is invalid
+        # run: composer validate --strict --ansi
+
+      - name: Lint Symfony service container
+        if: always() && steps.composer-install.outcome == 'success'
+        run: bin/console lint:container --ansi
+
+      - name: Lint translation files
+        if: always() && steps.composer-install.outcome == 'success'
+        run: bin/console lint:translations --ansi
 
       - name: Lint Twig templates
-        if: always() && steps.install.outcome == 'success'
-        run: bin/console lint:twig templates --env=prod
+        if: always() && steps.composer-install.outcome == 'success'
+        run: bin/console lint:twig templates --ansi
+
+      - name: Lint YAML files
+        if: always() && steps.composer-install.outcome == 'success'
+        run: bin/console lint:yaml .github config translations --parse-tags --ansi
 
       #- name: Lint XLIFF translation files
-      #  if: always() && steps.install.outcome == 'success'
-      #  run: bin/console lint:xliff translations
-
-      #- name: Lint translation contents
-      #  if: always() && steps.install.outcome == 'success'
-      #  run: bin/console lint:translations
-
-      - name: Lint Parameters and Services
-        if: always() && steps.install.outcome == 'success'
-        run: bin/console lint:container --no-debug
-
-      - name: Lint Composer config
-        if: always() && steps.install.outcome == 'success'
-        run: composer validate
-        # todo enable strict mode, currently license is invalid
-        # run: composer validate --strict
-
-      - name: Check if any dependencies are compromised
-        if: always() && steps.install.outcome == 'success'
-        run: composer audit
-
-      - name: Check if any Symfony recipes are outdated
-        if: always() && steps.install.outcome == 'success'
-        run: composer recipes --outdated --no-interaction
+      #  if: always() && steps.composer-install.outcome == 'success'
+      #  run: bin/console lint:xliff translations --ansi
 
   php-cs-fixer:
     name: PHP-CS-Fixer
+
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -86,8 +71,6 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl
           php-version: 8.3
           tools: composer:v2
 
@@ -102,15 +85,15 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install dependencies
-        id: install
+      - name: Install Composer dependencies
         run: composer install --ansi --no-interaction --no-progress
 
-      - name: PHP-CS-Fixer
-        run: ./vendor/bin/php-cs-fixer fix --diff --dry-run
+      - name: Run PHP-CS-Fixer
+        run: vendor/bin/php-cs-fixer fix --diff --dry-run --ansi --show-progress none
 
   phpstan:
     name: PHPStan
+
     runs-on: ubuntu-latest
 
     steps:
@@ -120,8 +103,6 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl
           php-version: 8.3
           tools: composer:v2
 
@@ -136,10 +117,8 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install dependencies
-        id: install
+      - name: Install Composer dependencies
         run: composer install --ansi --no-interaction --no-progress
 
       - name: Run PHPStan
-        if: always() && steps.install.outcome == 'success'
-        run: ./vendor/bin/phpstan analyze
+        run: vendor/bin/phpstan analyze --ansi --no-progress
