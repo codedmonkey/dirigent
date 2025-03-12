@@ -1,0 +1,52 @@
+name: Run image tests
+
+on: [pull_request, push]
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  PHPUNIT_FLAGS: ""
+
+jobs:
+  testcontainers:
+    name: Testcontainers (Standalone)
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: dirigent-standalone
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: PHPUnit version
+        run: bin/phpunit --version
+
+      - name: Run PHPUnit
+        run: bin/phpunit --configuration phpunit.docker.xml ${{ env.PHPUNIT_FLAGS }}
