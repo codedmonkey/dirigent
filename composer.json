@@ -11,6 +11,7 @@
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
+        "ext-sodium": "*",
         "cebe/markdown": "^1.2",
         "composer/composer": "^2.7",
         "doctrine/doctrine-bundle": "^2.11",

@@ -31,4 +31,5 @@ services:
         public: true
         arguments:
             -
+                'encryption:generate-keys': '@CodedMonkey\Dirigent\Command\EncryptionGenerateKeysCommand'
                 'packages:update': '@CodedMonkey\Dirigent\Command\PackagesUpdateCommand'
