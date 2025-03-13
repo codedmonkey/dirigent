@@ -47,5 +47,8 @@ class DashboardCredentialsController extends AbstractCrudController
         yield TextField::new('token')
             ->setFormTypeOption('row_attr', ['data-credentials-field' => 'token'])
             ->onlyOnForms();
+        yield TextareaField::new('key')
+            ->setFormTypeOption('row_attr', ['data-credentials-field' => 'key'])
+            ->onlyOnForms();
     }
 }

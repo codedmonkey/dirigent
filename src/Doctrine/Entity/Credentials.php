@@ -32,6 +32,9 @@ class Credentials
     #[ORM\Column(nullable: true)]
     private ?string $token = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $key = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -100,5 +103,15 @@ class Credentials
     public function setToken(?string $token): void
     {
         $this->token = $token;
+    }
+
+    public function getKey(): ?string
+    {
+        return $this->key;
+    }
+
+    public function setKey(?string $key): void
+    {
+        $this->key = $key;
     }
 }

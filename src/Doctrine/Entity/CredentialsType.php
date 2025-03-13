@@ -8,4 +8,5 @@ enum CredentialsType: string
     case GithubOauthToken = 'github-oauth';
     case GitlabDeployToken = 'gitlab-dt';
     case GitlabPersonalAccessToken = 'gitlab-pat';
+    case SshKey = 'ssh-key';
 }

@@ -43,7 +43,8 @@ class PackageVcsRepositoryValidatorTest extends TestCase
     #[DataProvider('invalidUrlProvider')]
     public function testInvalidUrls(string $error, array $urls): void
     {
-        $composer = new ComposerClient();
+        $projectDir = dirname(__FILE__, 3);
+        $composer = new ComposerClient("$projectDir/storage/composer-cache/");
         $validator = new PackageVcsRepositoryValidator($composer);
 
         foreach ($urls as $url) {
