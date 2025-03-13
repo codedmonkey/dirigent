@@ -68,6 +68,7 @@ readonly class PackageVcsRepositoryValidator
 
             return $result;
         } catch (\Exception $e) {
+            throw $e;
             return ['error' => '[' . $e::class . '] ' . $e->getMessage()];
         }
     }
