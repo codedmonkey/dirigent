@@ -3,11 +3,30 @@
 {% block page_title %}Mirror packages from registry{% endblock %}
 
 {% block page_content %}
-  {{ form_start(form) }}
-    {{ form_row(form.packages, {attr: {rows: 10}}) }}
+  <div {{ stimulus_controller('packages-mirror', {packageUrl: dashboard_path('dashboard_packages_info', {packageName: 'place/holder'})}) }}>
+    <div
+      class="border-top border-bottom my-3"
+      {{ stimulus_target('packages-mirror', 'packageList') }}
+    >
+    </div>
 
-    {{ form_row(form.registry) }}
+    {{ form_start(form, {
+      attr: {
+        'action': dashboard_path('dashboard_packages_add_mirroring'),
+        'data-action': 'packages-mirror#submitForm',
+        'data-packages-mirror-target': 'form',
+      },
+    }) }}
+      <div class="row">
+        <div class="col-lg-8">
+          {{ form_row(form.packages, {attr: {rows: 5}}) }}
+        </div>
+        <div class="col-lg-4">
+          {{ form_row(form.registry) }}
+        </div>
+      </div>
 
-    <button class="btn btn-primary">Add packages</button>
-  {{ form_end(form) }}
+      <button class="btn btn-primary">Add packages</button>
+    {{ form_end(form) }}
+  </div>
 {% endblock %}

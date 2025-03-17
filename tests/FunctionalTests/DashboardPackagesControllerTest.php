@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -58,6 +59,42 @@ class DashboardPackagesControllerTest extends WebTestCase
 
         $package = $packageRepository->findOneByName('psr/container');
         self::assertNotNull($package, 'A package was created');
+
+        $packageRepository->remove($package, true);
+    }
+
+    public function testAddMirror(): void
+    {
+        $client = static::createClient();
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $client->getContainer()->get(UserRepository::class);
+
+        /** @var User $user */
+        $user = $userRepository->findOneByUsername('owner');
+        $client->loginUser($user);
+
+        $registry = $client->getContainer()->get(RegistryRepository::class)->findOneBy(['name' => 'Packagist']);
+
+        $client->request('GET', '/?routeName=dashboard_packages_add_mirroring');
+        $client->submitForm('Add packages', [
+            'package_add_mirroring_form[packages]' => 'psr/cache',
+            'package_add_mirroring_form[registry]' => $registry->getId(),
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+
+        // $this->assertAnySelectorTextSame(
+        //     '.text-success',
+        //     'The package psr/cache was created successfully.',
+        //     'A message showing the package was created must be shown.',
+        // );
+
+        /** @var PackageRepository $packageRepository */
+        $packageRepository = $client->getContainer()->get(PackageRepository::class);
+
+        $package = $packageRepository->findOneByName('psr/cache');
+        self::assertNotNull($package, 'A package was created.');
 
         $packageRepository->remove($package, true);
     }
