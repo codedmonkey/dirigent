@@ -140,7 +140,7 @@ class DashboardPackagesController extends AbstractController
 
     #[Route('/dashboard/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
     #[IsGranted('ROLE_ADMIN')]
-    public function addMirror(Request $request): Response
+    public function addMirroring(Request $request): Response
     {
         $form = $this->createForm(PackageAddMirroringFormType::class);
 
@@ -149,16 +149,31 @@ class DashboardPackagesController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $registry = $form->get('registry')->getData();
 
-            $packageNames = explode(PHP_EOL, $form->get('packages')->getData());
-            $packageNames = array_map('trim', $packageNames);
+            $packageNamesInput = $form->get('packages')->getData();
+            $packageNames = preg_split('#(\s|,)+#', $packageNamesInput);
 
             $results = [];
 
             foreach ($packageNames as $packageName) {
+                if (!preg_match('#[a-z0-9_.-]+/[a-z0-9_.-]+#', $packageName)) {
+                    $results[] = [
+                        'packageName' => $packageName,
+                        'registryName' => null,
+                        'created' => false,
+                        'error' => true,
+                        'message' => "The package name $packageName is invalid.",
+                    ];
+
+                    continue;
+                }
+
                 if (null !== $this->packageRepository->findOneBy(['name' => $packageName])) {
                     $results[] = [
-                        'error' => true,
-                        'message' => "The package $packageName already exists and was skipped",
+                        'packageName' => $packageName,
+                        'registryName' => null,
+                        'created' => false,
+                        'error' => false,
+                        'message' => "The package $packageName already exists and was skipped.",
                     ];
 
                     continue;
@@ -166,8 +181,11 @@ class DashboardPackagesController extends AbstractController
 
                 if (!$this->metadataResolver->provides($packageName, $registry)) {
                     $results[] = [
+                        'packageName' => $packageName,
+                        'registryName' => $registry->getName(),
+                        'created' => false,
                         'error' => true,
-                        'message' => "The package $packageName could not be found and was skipped",
+                        'message' => "The package $packageName could not be found and was skipped.",
                     ];
 
                     continue;
@@ -183,14 +201,17 @@ class DashboardPackagesController extends AbstractController
                 $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
                 $results[] = [
+                    'packageName' => $packageName,
+                    'registryName' => $registry->getName(),
+                    'created' => true,
                     'error' => false,
-                    'message' => "The package $packageName was created successfully",
+                    'message' => "The package $packageName was created successfully.",
                 ];
 
                 $this->entityManager->flush();
             }
 
-            return $this->render('dashboard/packages/add_mirroring_results.html.twig', [
+            return $this->json([
                 'results' => $results,
             ]);
         }
