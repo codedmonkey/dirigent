@@ -3,18 +3,54 @@
 {% block page_title %}Credits{% endblock %}
 
 {% block page_content %}
-  <h2 class="h5">Administrators</h2>
+  <h3 class="h5">Administrators</h3>
 
-  <h2 class="h5">Developer</h2>
+  <h3 class="h5">Developer</h3>
   <p>Dirigent was developed by <a href="https://www.codedmonkey.com">Coded Monkey</a>.</p>
   <div class="mb-3">
     <a href="https://www.codedmonkey.com" title="Coded Monkey">
       <img src="https://www.gravatar.com/avatar/c23d082464fd39da2bca3936abc9372e" alt="Coded Monkey" class="img-thumbnail">
     </a>
   </div>
-  <h3 class="h6">Sponsors</h3>
+
+  <h4 class="h6">Sponsors</h4>
   <p>
     Dirigent is looking for sponsors. <a href="https://www.codedmonkey.com/sponsor?project=dirigent">Click here</a>
     to sponsor development of Dirigent.
   </p>
+
+  <h2 class="h4">Components</h2>
+  <div class="row">
+    <div class="col-md-5 col-lg-4">
+      <div class="list-group">
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div><a href="https://dirigent.dev" target="_blank" rel="noreferrer">Dirigent</a></div>
+            <div>v{{ dirigentVersion }}</div>
+          </div>
+        </div>
+
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div><a href="https://getcomposer.org" target="_blank" rel="noreferrer">Composer</a></div>
+            <div>v{{ composerVersion }}</div>
+          </div>
+        </div>
+
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div><a href="https://symfony.com" target="_blank" rel="noreferrer">Symfony</a></div>
+            <div>v{{ symfonyVersion }}</div>
+          </div>
+        </div>
+
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div><a href="https://www.php.net" target="_blank" rel="noreferrer">PHP</a></div>
+            <div>v{{ phpVersion }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
