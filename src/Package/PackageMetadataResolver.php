@@ -16,6 +16,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\VersionProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionReplaceLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionSuggestLink;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
@@ -56,6 +57,7 @@ readonly class PackageMetadataResolver
         private MessageBusInterface $messenger,
         private EntityManagerInterface $entityManager,
         private RegistryRepository $registryRepository,
+        private PackageRepository $packageRepository,
         private VersionRepository $versionRepository,
     ) {
     }
@@ -162,6 +164,9 @@ readonly class PackageMetadataResolver
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
         $existingVersions = $this->versionRepository->getVersionMetadataForUpdate($package);
+        $processedVersions = [];
+        /** @var ?string $primaryVersionName Version name to use as package link source */
+        $primaryVersionName = null;
 
         foreach ($composerPackages as $composerPackage) {
             if ($composerPackage instanceof AliasPackage) {
@@ -175,10 +180,28 @@ readonly class PackageMetadataResolver
             }
 
             $this->updateVersion($package, $version, $composerPackage, $driver);
+            $versionName = $version->getNormalizedVersion();
 
-            unset($existingVersions[$version->getNormalizedVersion()]);
+            // Use the first version which should be the highest stable version by default
+            if (null === $primaryVersionName) {
+                $primaryVersionName = $versionName;
+            }
+            // If default branch is present however we prefer that as the canonical package link source
+            if ($version->isDefaultBranch()) {
+                $primaryVersionName = $versionName;
+            }
+
+            $processedVersions[$versionName] = $version;
+            unset($existingVersions[$versionName]);
         }
 
+        if ($primaryVersionName) {
+            $primaryVersion = $processedVersions[$primaryVersionName];
+
+            $this->packageRepository->updatePackageLinks($package->getId(), $primaryVersion->getId());
+        }
+
+        // Remove outdated versions
         foreach ($existingVersions as $version) {
             $versionEntity = $this->versionRepository->find($version['id']);
 
