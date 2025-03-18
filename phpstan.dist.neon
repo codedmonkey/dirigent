@@ -31,3 +31,8 @@ parameters:
             identifier: property.onlyWritten
             count: 1
             path: src/EventListener/EncryptionListener.php
+        -
+            message: '#^PHPDoc tag @var with type CodedMonkey\\Dirigent\\Doctrine\\Entity\\PackageLink is not subtype of native type#'
+            identifier: varTag.nativeType
+            count: 1
+            path: src/Package/PackageMetadataResolver.php

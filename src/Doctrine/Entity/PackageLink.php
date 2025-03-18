@@ -13,44 +13,20 @@ abstract class PackageLink
     #[ORM\GeneratedValue]
     private ?int $id = null;
 
+    protected Version $version;
+
     #[ORM\Column(length: 191)]
-    private string $packageName;
+    private string $linkedPackageName;
 
     #[ORM\Column(type: Types::TEXT)]
-    private string $packageVersion;
-
-    /**
-     * Base property holding the version - this must remain protected since it
-     * is redefined with an attribute in the child class.
-     */
-    protected Version $version;
+    private string $linkedVersionConstraint;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getPackageName(): string
-    {
-        return $this->packageName;
-    }
-
-    public function setPackageName(string $packageName): void
-    {
-        $this->packageName = $packageName;
-    }
-
-    public function getPackageVersion(): string
-    {
-        return $this->packageVersion;
-    }
-
-    public function setPackageVersion(string $packageVersion): void
-    {
-        $this->packageVersion = $packageVersion;
-    }
-
-    public function getVersion(): ?Version
+    public function getVersion(): Version
     {
         return $this->version;
     }
@@ -60,11 +36,23 @@ abstract class PackageLink
         $this->version = $version;
     }
 
-    /**
-     * @return non-empty-array<string, string>
-     */
-    public function toArray(): array
+    public function getLinkedPackageName(): string
     {
-        return [$this->getPackageName() => $this->getPackageVersion()];
+        return $this->linkedPackageName;
+    }
+
+    public function setLinkedPackageName(string $packageName): void
+    {
+        $this->linkedPackageName = $packageName;
+    }
+
+    public function getLinkedVersionConstraint(): string
+    {
+        return $this->linkedVersionConstraint;
+    }
+
+    public function setLinkedVersionConstraint(string $packageVersion): void
+    {
+        $this->linkedVersionConstraint = $packageVersion;
     }
 }
