@@ -4,12 +4,14 @@ namespace CodedMonkey\Dirigent\Package;
 
 use cebe\markdown\GithubMarkdown;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\AbstractPackageLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Entity\SuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
@@ -50,6 +52,7 @@ readonly class PackageMetadataResolver
         private MessageBusInterface $messenger,
         private EntityManagerInterface $entityManager,
         private RegistryRepository $registryRepository,
+        private PackageRepository $packageRepository,
         private VersionRepository $versionRepository,
     ) {
     }
@@ -156,6 +159,9 @@ readonly class PackageMetadataResolver
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
         $existingVersions = $this->versionRepository->getVersionMetadataForUpdate($package);
+        $processedVersions = [];
+        /** @var ?string $primaryVersionName Version name to use as package link source */
+        $primaryVersionName = null;
 
         foreach ($composerPackages as $composerPackage) {
             if ($composerPackage instanceof AliasPackage) {
@@ -169,10 +175,28 @@ readonly class PackageMetadataResolver
             }
 
             $this->updateVersion($package, $version, $composerPackage, $driver);
+            $versionName = $version->getNormalizedVersion();
 
-            unset($existingVersions[$version->getNormalizedVersion()]);
+            // Use the first version which should be the highest stable version by default
+            if (null === $primaryVersionName) {
+                $primaryVersionName = $versionName;
+            }
+            // If default branch is present however we prefer that as the canonical package link source
+            if ($version->isDefaultBranch()) {
+                $primaryVersionName = $versionName;
+            }
+
+            $processedVersions[$versionName] = $version;
+            unset($existingVersions[$versionName]);
         }
 
+        if ($primaryVersionName) {
+            $primaryVersion = $processedVersions[$primaryVersionName];
+
+            $this->packageRepository->updatePackageLinks($package->getId(), $primaryVersion->getId());
+        }
+
+        // Remove outdated versions
         foreach ($existingVersions as $version) {
             $versionEntity = $this->versionRepository->find($version['id']);
 
@@ -292,22 +316,26 @@ readonly class PackageMetadataResolver
                 $links[$link->getTarget()] = $constraint;
             }
 
+            /** @var AbstractPackageLink $link */
             foreach ($version->{'get' . $linkType}() as $link) {
-                // clear links that have changed/disappeared (for updates)
-                if (!isset($links[$link->getPackageName()]) || $links[$link->getPackageName()] !== $link->getPackageVersion()) {
+                $linkPackageName = $link->getLinkedPackageName();
+
+                // Clear links that have changed/disappeared (for updates)
+                if (!isset($links[$linkPackageName]) || $links[$linkPackageName] !== $link->getLinkedVersionConstraint()) {
                     $version->{'get' . $linkType}()->removeElement($link);
                     $em->remove($link);
                 } else {
-                    // clear those that are already set
-                    unset($links[$link->getPackageName()]);
+                    // Clear those that are already set
+                    unset($links[$linkPackageName]);
                 }
             }
 
-            foreach ($links as $linkPackageName => $linkPackageVersion) {
-                $class = 'CodedMonkey\Dirigent\Doctrine\Entity\\' . $opts['entity'];
+            foreach ($links as $linkPackageName => $linkVersionConstraint) {
+                $class = "CodedMonkey\Dirigent\Doctrine\Entity\\{$opts['entity']}";
+                /** @var AbstractPackageLink $link */
                 $link = new $class();
-                $link->setPackageName((string) $linkPackageName);
-                $link->setPackageVersion($linkPackageVersion);
+                $link->setLinkedPackageName($linkPackageName);
+                $link->setLinkedVersionConstraint($linkVersionConstraint);
                 $version->{'add' . $linkType . 'Link'}($link);
                 $link->setVersion($version);
                 $em->persist($link);
@@ -317,20 +345,21 @@ readonly class PackageMetadataResolver
         // handle suggests
         if ($suggests = $data->getSuggests()) {
             foreach ($version->getSuggest() as $link) {
+                $linkPackageName = $link->getLinkedPackageName();
                 // clear links that have changed/disappeared (for updates)
-                if (!isset($suggests[$link->getPackageName()]) || $suggests[$link->getPackageName()] !== $link->getPackageVersion()) {
+                if (!isset($suggests[$linkPackageName]) || $suggests[$linkPackageName] !== $link->getLinkedVersionConstraint()) {
                     $version->getSuggest()->removeElement($link);
                     $em->remove($link);
                 } else {
                     // clear those that are already set
-                    unset($suggests[$link->getPackageName()]);
+                    unset($suggests[$linkPackageName]);
                 }
             }
 
-            foreach ($suggests as $linkPackageName => $linkPackageVersion) {
+            foreach ($suggests as $linkPackageName => $linkVersionConstraint) {
                 $link = new SuggestLink();
-                $link->setPackageName($linkPackageName);
-                $link->setPackageVersion($linkPackageVersion);
+                $link->setLinkedPackageName($linkPackageName);
+                $link->setLinkedVersionConstraint($linkVersionConstraint);
                 $version->addSuggestLink($link);
                 $link->setVersion($version);
                 $em->persist($link);
@@ -349,7 +378,7 @@ readonly class PackageMetadataResolver
             $version->setReadme(null);
         }
 
-        $em->persist($version);
+        $this->versionRepository->save($version, true);
     }
 
     private function sanitize(?string $str): ?string

@@ -40,6 +40,8 @@ class PackageRepository extends ServiceEntityRepository
 
     public function remove(Package $entity, bool $flush = false): void
     {
+        $this->deletePackageLinks($entity->getId());
+
         $this->getEntityManager()->remove($entity);
 
         if ($flush) {
@@ -81,5 +83,57 @@ class PackageRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         return $connection->fetchAllAssociative('SELECT id FROM package ORDER BY id');
+    }
+
+    public function updatePackageLinks(int $packageId, int $versionId): void
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $connection->beginTransaction();
+
+        try {
+            $this->deletePackageLinks($packageId);
+
+            $connection->executeStatement(
+                'INSERT INTO dependent (package_id, dependent_package_name, dev_dependency) SELECT :id, linked_package_name, :dev FROM require_link WHERE version_id = :version',
+                ['id' => $packageId, 'version' => $versionId, 'dev' => 0],
+            );
+            $connection->executeStatement(
+                'INSERT INTO dependent (package_id, dependent_package_name, dev_dependency) SELECT :id, linked_package_name, :dev FROM dev_require_link WHERE version_id = :version',
+                ['id' => $packageId, 'version' => $versionId, 'dev' => 1],
+            );
+            $connection->executeStatement(
+                'INSERT INTO suggester (package_id, suggested_package_name) SELECT :id, linked_package_name FROM suggest_link WHERE version_id = :version',
+                ['id' => $packageId, 'version' => $versionId],
+            );
+            $connection->executeStatement(<<<'SQL'
+                INSERT INTO provider (package_id, provided_package_name, implementation)
+                    SELECT :id, linked_package_name, FALSE
+                    FROM provide_link
+                    WHERE version_id = :version AND linked_package_name NOT LIKE '%-implementation'
+                SQL,
+                ['id' => $packageId, 'version' => $versionId],
+            );
+            $connection->executeStatement(<<<'SQL'
+                INSERT INTO provider (package_id, provided_package_name, implementation)
+                    SELECT :id, SUBSTRING(linked_package_name, 1, LENGTH(linked_package_name) - 15), TRUE
+                    FROM provide_link
+                    WHERE version_id = :version AND linked_package_name LIKE '%-implementation'
+                SQL,
+                ['id' => $packageId, 'version' => $versionId],
+            );
+        } catch (\Throwable $exception) {
+            $connection->rollBack();
+            throw $exception;
+        }
+
+        $connection->commit();
+    }
+
+    public function deletePackageLinks(int $packageId): void
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $connection->executeStatement('DELETE FROM dependent WHERE package_id = :id', ['id' => $packageId]);
+        $connection->executeStatement('DELETE FROM provider WHERE package_id = :id', ['id' => $packageId]);
+        $connection->executeStatement('DELETE FROM suggester WHERE package_id = :id', ['id' => $packageId]);
     }
 }

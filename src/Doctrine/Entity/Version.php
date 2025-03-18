@@ -683,8 +683,7 @@ class Version
         foreach ($supportedLinkTypes as $method => $linkType) {
             /** @var AbstractPackageLink $link */
             foreach ($this->{'get' . $method}() as $link) {
-                $link = $link->toArray();
-                $data[$linkType][key($link)] = current($link);
+                $data[$linkType][$link->getLinkedPackageName()] = $link->getLinkedVersionConstraint();
             }
         }
 
