@@ -11,3 +11,18 @@ parameters:
     ignoreErrors:
         - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition::children\(\).#'
         - '#Property CodedMonkey\\Dirigent\\Doctrine\\Entity\\[a-zA-Z]+::\$id \(int\|null\) is never assigned int so it can be removed from the property type.#'
+        -
+            message: '#^Left side of \|\| is always false\.$#'
+            identifier: booleanOr.leftAlwaysFalse
+            count: 1
+            path: src/Encryption/Encryption.php
+        -
+            message: '#^Right side of \|\| is always false\.$#'
+            identifier: booleanOr.rightAlwaysFalse
+            count: 1
+            path: src/Encryption/Encryption.php
+        -
+            message: '#^Property CodedMonkey\\Dirigent\\EventListener\\EncryptionListener\:\:\$connection is never read, only written\.$#'
+            identifier: property.onlyWritten
+            count: 1
+            path: src/EventListener/EncryptionListener.php
