@@ -38,7 +38,7 @@
   {% endfor %}
 </div>
 
-{% if packages|length or paginator.currentPage > 1 %}
+{% if packages|length > 0 or paginator.currentPage > 1 %}
   <div class="content-panel-footer without-padding without-border">
     {% block paginator %}
       {{ include(ea.templatePath('crud/paginator')) }}

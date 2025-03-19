@@ -10,10 +10,11 @@
     <a {% if currentPage == 'versions' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageVersionsUrl }}">{{ 'Versions'|trans }}</a>
   </li>
   <li class="nav-item">
-    <span class="nav-link disabled">{{ 'Dependants'|trans }}</span>
+    {% set packageDependentsUrl = path('dashboard_packages_dependents', {packageName: package.name}) %}
+    <a {% if currentPage == 'dependents' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a>
   </li>
   <li class="nav-item">
-    {% set packageVersionsUrl = path('dashboard_packages_statistics', {packageName: package.name}) %}
-    <a {% if currentPage == 'statistics' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageVersionsUrl }}">{{ 'Statistics'|trans }}</a>
+    {% set packageStatisticsUrl = path('dashboard_packages_statistics', {packageName: package.name}) %}
+    <a {% if currentPage == 'statistics' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageStatisticsUrl }}">{{ 'Statistics'|trans }}</a>
   </li>
 </ul>

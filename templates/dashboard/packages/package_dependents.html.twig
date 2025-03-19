@@ -1,0 +1,9 @@
+{% extends 'dashboard/packages/package_base.html.twig' %}
+
+{% block page_title %}{{ package.name }} <small>{{ 'Dependents'|trans }}</small>{% endblock %}
+
+{% block page_content %}
+  {% include 'dashboard/packages/_package_header.html.twig' with {currentPage: 'dependents'} %}
+
+  {{ include('dashboard/packages/_package_list.html.twig', {packages: dependents|map(dependent => dependent.package), paginator: paginator}, with_context: false) }}
+{% endblock %}
