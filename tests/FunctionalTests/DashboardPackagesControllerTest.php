@@ -9,6 +9,42 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DashboardPackagesControllerTest extends WebTestCase
 {
+    public function testDependents(): void
+    {
+        $client = static::createClient();
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $client->getContainer()->get(UserRepository::class);
+
+        /** @var User $user */
+        $user = $userRepository->findOneByUsername('user');
+        $client->loginUser($user);
+
+        $client->request('GET', '/?routeName=dashboard_packages_dependents&routeParams[packageName]=psr/log');
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertAnySelectorTextSame('h1 small', 'Dependents');
+    }
+
+    public function testSuggesters(): void
+    {
+        $client = static::createClient();
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $client->getContainer()->get(UserRepository::class);
+
+        /** @var User $user */
+        $user = $userRepository->findOneByUsername('user');
+        $client->loginUser($user);
+
+        $client->request('GET', '/?routeName=dashboard_packages_suggesters&routeParams[packageName]=psr/log');
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertAnySelectorTextSame('h1 small', 'Suggesters');
+    }
+
     public function testStatistics(): void
     {
         $client = static::createClient();

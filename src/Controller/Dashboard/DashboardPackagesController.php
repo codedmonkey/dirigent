@@ -3,8 +3,10 @@
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Doctrine\Entity\Dependent;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Doctrine\Entity\Suggester;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use CodedMonkey\Dirigent\Form\PackageAddMirroringFormType;
@@ -74,10 +76,16 @@ class DashboardPackagesController extends AbstractController
             $version = $package->getLatestVersion();
         }
 
+        $dependentCount = $this->entityManager->getRepository(Dependent::class)->count(['dependentPackageName' => $package->getName()]);
+        $suggesterCount = $this->entityManager->getRepository(Suggester::class)->count(['suggestedPackageName' => $package->getName()]);
+
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'latestVersion' => $latestVersion,
             'version' => $version,
+
+            'dependentCount' => $dependentCount,
+            'suggesterCount' => $suggesterCount,
         ]);
     }
 
@@ -93,6 +101,32 @@ class DashboardPackagesController extends AbstractController
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
             'versions' => $versions,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/dependents/{packageName}', name: 'dashboard_packages_dependents', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function dependents(string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $dependents = $this->entityManager->getRepository(Dependent::class)->findBy(['dependentPackageName' => $package->getName()]);
+
+        return $this->render('dashboard/packages/package_dependents.html.twig', [
+            'package' => $package,
+            'dependents' => $dependents,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/suggesters/{packageName}', name: 'dashboard_packages_suggesters', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function suggesters(string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $suggesters = $this->entityManager->getRepository(Suggester::class)->findBy(['suggestedPackageName' => $package->getName()]);
+
+        return $this->render('dashboard/packages/package_suggesters.html.twig', [
+            'package' => $package,
+            'suggesters' => $suggesters,
         ]);
     }
 
