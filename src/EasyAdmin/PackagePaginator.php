@@ -40,7 +40,7 @@ class PackagePaginator implements EntityPaginatorInterface
             ->setMaxResults($this->pageSize)
             ->getQuery();
 
-        $paginator = new Paginator($query, $paginatorDto->fetchJoinCollection());
+        $paginator = new Paginator($query, false);
 
         $this->results = $paginator->getIterator();
         $this->numResults = $paginator->count();

@@ -3,8 +3,10 @@
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Doctrine\Entity\Dependent;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Doctrine\Entity\Suggester;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use CodedMonkey\Dirigent\Form\PackageAddMirroringFormType;
@@ -74,10 +76,16 @@ class DashboardPackagesController extends AbstractController
             $version = $package->getLatestVersion();
         }
 
+        $dependentCount = $this->entityManager->getRepository(Dependent::class)->count(['dependentPackageName' => $package->getName()]);
+        $suggesterCount = $this->entityManager->getRepository(Suggester::class)->count(['suggestedPackageName' => $package->getName()]);
+
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'latestVersion' => $latestVersion,
             'version' => $version,
+
+            'dependentCount' => $dependentCount,
+            'suggesterCount' => $suggesterCount,
         ]);
     }
 
@@ -93,6 +101,58 @@ class DashboardPackagesController extends AbstractController
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
             'versions' => $versions,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/dependents/{packageName}', name: 'dashboard_packages_dependents', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function dependents(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        $dependentRepository = $this->entityManager->getRepository(Dependent::class);
+        $queryBuilder = $dependentRepository->createQueryBuilder('dependent');
+        $queryBuilder
+            ->leftJoin('dependent.package', 'package')
+            ->andWhere('dependent.dependentPackageName = :packageName')
+            ->setParameter('packageName', $package->getName())
+            ->addOrderBy('package.name', 'ASC');
+
+        $paginatorDto = new PaginatorDto(20, 3, 1, true, null);
+        $paginatorDto->setPageNumber($request->query->getInt('page', 1));
+        $paginator = (new PackagePaginator($this->adminUrlGenerator))->paginate($paginatorDto, $queryBuilder);
+        $dependents = $paginator->getResults();
+
+        return $this->render('dashboard/packages/package_dependents.html.twig', [
+            'package' => $package,
+            'dependents' => $dependents,
+            'paginator' => $paginator,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/suggesters/{packageName}', name: 'dashboard_packages_suggesters', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function suggesters(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        $suggesterRepository = $this->entityManager->getRepository(Suggester::class);
+        $queryBuilder = $suggesterRepository->createQueryBuilder('suggester');
+        $queryBuilder
+            ->leftJoin('suggester.package', 'package')
+            ->andWhere('suggester.suggestedPackageName = :packageName')
+            ->setParameter('packageName', $package->getName())
+            ->addOrderBy('package.name', 'ASC');
+
+        $paginatorDto = new PaginatorDto(20, 3, 1, true, null);
+        $paginatorDto->setPageNumber($request->query->getInt('page', 1));
+        $paginator = (new PackagePaginator($this->adminUrlGenerator))->paginate($paginatorDto, $queryBuilder);
+        $suggesters = $paginator->getResults();
+
+        return $this->render('dashboard/packages/package_suggesters.html.twig', [
+            'package' => $package,
+            'suggesters' => $suggesters,
+            'paginator' => $paginator,
         ]);
     }
 

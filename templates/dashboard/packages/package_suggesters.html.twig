@@ -1,0 +1,9 @@
+{% extends 'dashboard/packages/package_base.html.twig' %}
+
+{% block page_title %}{{ package.name }} <small>{{ 'Suggesters'|trans }}</small>{% endblock %}
+
+{% block page_content %}
+  {% include 'dashboard/packages/package_header.html.twig' %}
+
+  {% include 'dashboard/packages/_package_list.html.twig' with {packages: suggesters|map(suggester => suggester.package)} %}
+{% endblock %}
