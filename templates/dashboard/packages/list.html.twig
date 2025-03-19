@@ -14,11 +14,9 @@
           Add Package
         </button>
         <ul class="dropdown-menu">
-          {% set addVcsUrl = ea_url()
-            .setRoute('dashboard_packages_add_vcs') %}
+          {% set addVcsUrl = dashboard_path('dashboard_packages_add_vcs') %}
           <li><a class="dropdown-item" href="{{ addVcsUrl }}">Add VCS repository</a></li>
-          {% set addMirroringUrl = ea_url()
-            .setRoute('dashboard_packages_add_mirroring') %}
+          {% set addMirroringUrl = dashboard_path('dashboard_packages_add_mirroring') %}
           <li><a class="dropdown-item" href="{{ addMirroringUrl }}">Mirror from registry</a></li>
         </ul>
       </div>
@@ -29,10 +27,9 @@
 {% block page_content %}
   <div class="d-grid gap-3">
     {% for package in packages %}
-      {% set packageInfoUrl = ea_url()
-        .setRoute('dashboard_packages_info', {packageName: package.name}) %}
       <div class="card">
         <div class="card-body py-2">
+          {% set packageInfoUrl = dashboard_path('dashboard_packages_info', {packageName: package.name}) %}
           <a href="{{ packageInfoUrl }}"><h5 class="card-title">{{ package.name }}</h5></a>
           {% if package.mirrorRegistry %}
             <p class="card-text mb-1 text-body-secondary">Mirrored from {{ package.mirrorRegistry.name }}</p>
