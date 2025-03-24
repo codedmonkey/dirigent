@@ -1,5 +1,12 @@
 name: Publish images
 
+# Builds and publishes the images to the GitHub registry. There are 2 triggers
+# for this workflow, a scheduled trigger to publish the latest development
+# version (the default branch) every night, and a trigger for tags formatted
+# as a semver version to publish releases. For any other image, it's
+# recommended to download the source code and build it locally as explained in
+# the documentation.
+
 on:
   push:
     tags: ["v*.*.*"]

@@ -1,5 +1,9 @@
 name: Lint code & configuration
 
+# Runs tools to lint and validate the code and configuration. Only triggered by
+# creating new commits. If any of the jobs fail for new commits they're not
+# allowed to be merged into the default branch.
+
 on: [pull_request, push]
 
 jobs:

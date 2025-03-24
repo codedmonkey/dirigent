@@ -1,5 +1,11 @@
 name: Lint dependencies
 
+# Runs tools to validate dependencies. This workflow is triggered for new
+# commits and every night for the default branch. If any of the jobs fail for
+# new commits they're not allowed to be merged into the default branch. If it
+# starts failing because of vulnerabilities, they must be fixed before new
+# features are merged and a security release must be made.
+
 on:
   pull_request:
   push:

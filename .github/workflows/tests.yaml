@@ -1,5 +1,9 @@
 name: Run tests
 
+# Runs tests to validate and ensure code quality. It's only triggered for new
+# commits. If any of the jobs fail for new commits they're not allowed to be
+# merged into the default branch.
+
 on: [pull_request, push]
 
 env:
