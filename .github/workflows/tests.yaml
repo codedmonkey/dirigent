@@ -123,4 +123,4 @@ jobs:
         run: bin/phpunit --version
 
       - name: Run PHPUnit
-        run: bin/phpunit ${{ env.PHPUNIT_FLAGS }}
+        run: bin/phpunit --coverage-text ${{ env.PHPUNIT_FLAGS }}
