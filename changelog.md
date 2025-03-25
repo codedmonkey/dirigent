@@ -1,9 +1,20 @@
 # Changelog
 
+* 0.4.0 (2025-03-xx)
+  * Added `bin/dirigent` binary with only app-related commands
+  * Added automated random kernel secret in standalone image, stored in `/srv/config/secrets/kernel_secret`
+  * Improved initialization process of standalone image
+  * Improved code quality with:
+    * Testing of images with [Testcontainers](https://github.com/testcontainers/testcontainers-php/)
+    * Static analysis with [PHPStan](https://phpstan.org)
+    * Various improvements to GitHub Actions workflows
+  * Bumped minimum PHP version to 8.3
+  * Updated Symfony dependencies to version 7.2
+
 * 0.3.1 (2025-01-15)
-  * Fix error on dashboard root when not logged in
-  * Fix permission error on `/srv/data` in Docker image
-  * Fix PostgreSQL sequences in database migrations
+  * Fixed error on dashboard root when not logged in
+  * Fixed permission error on `/srv/data` in Docker image
+  * Fixed PostgreSQL sequences in database migrations
 
 * 0.3.0 (2025-01-14)
   * Renamed project to Dirigent
@@ -18,7 +29,7 @@
   * Fixed access token form events triggering in all forms
 
 * 0.2.2 (2024-12-10)
-  * Changed internal names of downloads to installations 
+  * Changed internal names of downloads to installations
   * Fixed database migrations
 
 * 0.2.1 (2024-11-23)
