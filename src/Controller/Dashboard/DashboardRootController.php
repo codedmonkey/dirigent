@@ -8,6 +8,8 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Kernel;
+use Composer\Composer;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -17,6 +19,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Kernel as HttpKernel;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -138,7 +141,12 @@ class DashboardRootController extends AbstractDashboardController
     #[Route('/dashboard/credits', name: 'dashboard_credits')]
     public function credits(): Response
     {
-        return $this->render('dashboard/credits.html.twig');
+        return $this->render('dashboard/credits.html.twig', [
+            'composerVersion' => Composer::VERSION,
+            'dirigentVersion' => Kernel::VERSION,
+            'phpVersion' => PHP_VERSION,
+            'symfonyVersion' => HttpKernel::VERSION,
+        ]);
     }
 
     private function parseDocumentationFile(string $directory, string $page): array
