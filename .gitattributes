@@ -1,6 +1,6 @@
 # Documentation files
 docs/** linguist-documentation
-changelogd.md linguist-documentation
+changelog.md linguist-documentation
 license.md linguist-documentation
 readme.md linguist-documentation
 

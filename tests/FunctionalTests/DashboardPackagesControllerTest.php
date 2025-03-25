@@ -2,23 +2,17 @@
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
 
-use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DashboardPackagesControllerTest extends WebTestCase
 {
+    use WebTestCaseTrait;
+
     public function testStatistics(): void
     {
         $client = static::createClient();
-
-        /** @var UserRepository $userRepository */
-        $userRepository = $client->getContainer()->get(UserRepository::class);
-
-        /** @var User $user */
-        $user = $userRepository->findOneByUsername('user');
-        $client->loginUser($user);
+        $this->loginUser();
 
         $client->request('GET', '/?routeName=dashboard_packages_statistics&routeParams[packageName]=psr/log');
 
@@ -38,13 +32,7 @@ class DashboardPackagesControllerTest extends WebTestCase
     public function testAddVcsRepository(): void
     {
         $client = static::createClient();
-
-        /** @var UserRepository $userRepository */
-        $userRepository = $client->getContainer()->get(UserRepository::class);
-
-        /** @var User $user */
-        $user = $userRepository->findOneByUsername('owner');
-        $client->loginUser($user);
+        $this->loginUser('admin');
 
         $client->request('GET', '/?routeName=dashboard_packages_add_vcs');
         $client->submitForm('Add VCS repository', [
@@ -57,7 +45,7 @@ class DashboardPackagesControllerTest extends WebTestCase
         $packageRepository = $client->getContainer()->get(PackageRepository::class);
 
         $package = $packageRepository->findOneByName('psr/container');
-        self::assertNotNull($package, 'A package was created');
+        self::assertNotNull($package, 'A package was created.');
 
         $packageRepository->remove($package, true);
     }
@@ -65,13 +53,7 @@ class DashboardPackagesControllerTest extends WebTestCase
     public function testEdit(): void
     {
         $client = static::createClient();
-
-        /** @var UserRepository $userRepository */
-        $userRepository = $client->getContainer()->get(UserRepository::class);
-
-        /** @var User $user */
-        $user = $userRepository->findOneByUsername('owner');
-        $client->loginUser($user);
+        $this->loginUser('admin');
 
         $client->request('GET', '/?routeName=dashboard_packages_edit&routeParams[packageName]=psr/log');
         $client->submitForm('Save changes');

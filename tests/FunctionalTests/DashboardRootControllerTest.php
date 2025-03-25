@@ -2,22 +2,16 @@
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
 
-use CodedMonkey\Dirigent\Doctrine\Entity\User;
-use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DashboardRootControllerTest extends WebTestCase
 {
+    use WebTestCaseTrait;
+
     public function testIndex(): void
     {
         $client = static::createClient();
-
-        /** @var UserRepository $userRepository */
-        $userRepository = $client->getContainer()->get(UserRepository::class);
-
-        /** @var User $user */
-        $user = $userRepository->findOneByUsername('user');
-        $client->loginUser($user);
+        $this->loginUser();
 
         $client->request('GET', '/');
 

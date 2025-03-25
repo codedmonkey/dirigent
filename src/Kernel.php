@@ -20,23 +20,24 @@ class Kernel extends BaseKernel
 
         $container->import($configDir . '/packages/*.yaml');
         $container->import($configDir . '/services.yaml');
-        $container->import($configDir . '/dirigent.{json,php,yaml}');
+        $container->import($configDir . '/dirigent.{json,php,yml,yaml}');
 
         if (isset($_SERVER['DIRIGENT_IMAGE'])) {
-            $container->import('/srv/config/*.{json,php,yaml}');
+            $container->import('/srv/config/*.{json,php,yml,yaml}');
         }
+    }
+
+    protected function build(ContainerBuilder $container): void
+    {
+        $container->registerExtension(new DirigentExtension());
     }
 
     public function boot(): void
     {
         parent::boot();
 
+        // Set Composer env vars
         $_SERVER['COMPOSER_CACHE_DIR'] = $this->container->getParameter('dirigent.storage.path') . '/composer-cache';
         $_SERVER['COMPOSER_HOME'] = $this->container->getParameter('dirigent.storage.path') . '/composer';
-    }
-
-    protected function build(ContainerBuilder $container): void
-    {
-        $container->registerExtension(new DirigentExtension());
     }
 }
