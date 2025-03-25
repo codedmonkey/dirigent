@@ -9,7 +9,7 @@ use Testcontainers\Wait\WaitForLog;
 
 abstract class DockerStandaloneTestCase extends TestCase
 {
-    protected StartedGenericContainer $container;
+    protected ?StartedGenericContainer $container = null;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ abstract class DockerStandaloneTestCase extends TestCase
 
     protected function tearDown(): void
     {
-        $this->container->stop();
+        $this->container?->stop();
     }
 
     protected function assertCommandSuccessful(array $command, ?string $message = null): void
@@ -51,5 +51,12 @@ abstract class DockerStandaloneTestCase extends TestCase
 
             $this->fail($message);
         }
+    }
+
+    protected function assertContainerLogsContain(string $needle, string $message = ''): void
+    {
+        $logs = $this->container->logs();
+
+        $this->assertStringContainsString($needle, $logs, $message);
     }
 }
