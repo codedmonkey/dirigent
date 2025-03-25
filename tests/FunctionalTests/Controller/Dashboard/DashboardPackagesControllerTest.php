@@ -1,8 +1,9 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
+namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Tests\FunctionalTests\WebTestCaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DashboardPackagesControllerTest extends WebTestCase
