@@ -1,92 +1,20 @@
 name: Run tests
 
-on:
-  pull_request:
-  push:
+# Runs tests to validate and ensure code quality. It's only triggered for new
+# commits. If any of the jobs fail for new commits they're not allowed to be
+# merged into the default branch.
+
+on: [pull_request, push]
 
 env:
-  fail-fast: true
   GITHUB_TOKEN: ${{ github.token }}
   PHPUNIT_FLAGS: ""
 
-permissions:
-  contents: read
-
 jobs:
-  phpunit:
-    name: "PHPUnit (PHP ${{ matrix.php-version }})"
-    runs-on: ubuntu-latest
-    continue-on-error: false
-
-    services:
-      database:
-        image: postgres:16-alpine
-        ports:
-          - "5432:5432"
-        env:
-          POSTGRES_DB: dirigent_test
-          POSTGRES_PASSWORD: "!ChangeMe!"
-          POSTGRES_USER: dirigent
-
-    strategy:
-      matrix:
-        php-version: ["8.3", "8.4"]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install PHP with extensions
-        uses: shivammathur/setup-php@v2
-        with:
-          coverage: none
-          extensions: intl, mbstring, zip
-          php-version: ${{ matrix.php-version }}
-          tools: composer:v2
-
-      - name: Add PHPUnit matcher
-        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-
-      - name: Set Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Cache Composer output
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        run: composer install --ansi --no-interaction --no-progress
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-
-      - name: Install Node dependencies
-        run: npm ci
-
-      - name: Build assets
-        run: npm run build
-
-      - name: Create database schema
-        run: bin/console --env=test doctrine:schema:create
-
-      - name: Load database fixtures
-        run: bin/console --env=test doctrine:fixtures:load --no-interaction
-
-      - name: PHPUnit version
-        run: bin/phpunit --version
-
-      - name: Run tests
-        run: bin/phpunit ${{ env.PHPUNIT_FLAGS }}
-
   database:
     name: Validate database components
-    runs-on: ubuntu-latest
 
+    runs-on: ubuntu-latest
     services:
       database:
         image: postgres:16-alpine
@@ -104,8 +32,6 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl
           php-version: 8.3
           tools: composer:v2
 
@@ -120,18 +46,81 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install dependencies
-        id: install
+      - name: Install Composer dependencies
         run: composer install --ansi --no-interaction --no-progress
 
       - name: Validate mapping
-        run: bin/console doctrine:schema:validate --skip-sync --no-interaction -vvv
+        run: bin/console doctrine:schema:validate --skip-sync -vvv --ansi --no-interaction
 
       - name: Execute migrations
-        run: bin/console doctrine:migrations:migrate --no-interaction -v
+        run: bin/console doctrine:migrations:migrate -vvv --ansi --no-interaction
 
       - name: Validate schema
-        run: bin/console doctrine:schema:validate --skip-mapping --skip-property-types --no-interaction -vvv
+        run: bin/console doctrine:schema:validate --skip-mapping --skip-property-types -vvv --ansi --no-interaction
 
       - name: Load fixtures
-        run: bin/console doctrine:fixtures:load --no-interaction -vvv
+        run: bin/console doctrine:fixtures:load -vvv --ansi --no-interaction
+
+  phpunit:
+    name: "PHPUnit (PHP ${{ matrix.php-version }})"
+
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: postgres:16-alpine
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: dirigent_test
+          POSTGRES_PASSWORD: "!ChangeMe!"
+          POSTGRES_USER: dirigent
+    strategy:
+      matrix:
+        php-version: ["8.3", "8.4"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23.x
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Create database schema
+        run: bin/console doctrine:schema:create --env=test
+
+      - name: Load database fixtures
+        run: bin/console doctrine:fixtures:load --env=test --no-interaction
+
+      - name: PHPUnit version
+        run: bin/phpunit --version
+
+      - name: Run PHPUnit
+        run: bin/phpunit --coverage-text ${{ env.PHPUNIT_FLAGS }}

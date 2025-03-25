@@ -1,0 +1,31 @@
+name: Build images
+
+# Verifies whether the build of the images is valid. It does not publish the
+# image to a registry. It's triggered by new commits and a daily schedule for
+# the default branch. If any of the jobs fail for new commits they're not
+# allowed to be merged into the default branch. If it starts failing because of
+# changes to dependencies of the build process, it must be fixed before new
+# features are merged to ensure integrity.
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: "30 4 * * *"
+
+jobs:
+  build-standalone:
+    name: Standalone images
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - name: Build images
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64

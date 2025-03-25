@@ -1,0 +1,57 @@
+name: Lint dependencies
+
+# Runs tools to validate dependencies. This workflow is triggered for new
+# commits and every night for the default branch. If any of the jobs fail for
+# new commits they're not allowed to be merged into the default branch. If it
+# starts failing because of vulnerabilities, they must be fixed before new
+# features are merged and a security release must be made.
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron:  "30 4 * * *"
+
+jobs:
+  composer:
+    name: Composer
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        id: composer-install
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: Check if any Composer dependencies are compromised
+        if: always() && steps.composer-install.outcome == 'success'
+        run: composer audit --ansi
+
+      # This check always shows a success state, even when there are
+      # outdated recipes (due to `continue-on-error`). Please check
+      # the result when updating Composer dependencies.
+      # todo fail when composer.lock changed and there is an outdated recipe
+      - name: Check if any Symfony Flex recipes are outdated
+        if: always() && steps.composer-install.outcome == 'success'
+        continue-on-error: true
+        run: composer recipes --outdated --ansi

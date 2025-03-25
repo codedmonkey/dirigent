@@ -1,22 +1,20 @@
 name: Run image tests
 
-on:
-  pull_request:
-  push:
+# Runs tests to validate and ensure code quality of the images. It's only
+# triggered for new commits. If any of the jobs fail for new commits they're
+# not allowed to be merged into the default branch.
+
+on: [pull_request, push]
 
 env:
-  fail-fast: true
   GITHUB_TOKEN: ${{ github.token }}
   PHPUNIT_FLAGS: ""
 
-permissions:
-  contents: read
-
 jobs:
-  phpunit:
-    name: Testcontainers
+  testcontainers:
+    name: Testcontainers (Standalone)
+
     runs-on: ubuntu-latest
-    continue-on-error: false
 
     steps:
       - name: Checkout code
@@ -34,18 +32,12 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          coverage: none
-          extensions: intl, mbstring, zip
           php-version: 8.3
           tools: composer:v2
-
-      - name: Add PHPUnit matcher
-        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Set Composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-        shell: bash
 
       - name: Cache Composer output
         uses: actions/cache@v4
@@ -60,5 +52,5 @@ jobs:
       - name: PHPUnit version
         run: bin/phpunit --version
 
-      - name: Run tests
+      - name: Run PHPUnit
         run: bin/phpunit --configuration phpunit.docker.xml ${{ env.PHPUNIT_FLAGS }}
