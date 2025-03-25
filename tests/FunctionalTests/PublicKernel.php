@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests;
+namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
 
 use CodedMonkey\Dirigent\Kernel;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
