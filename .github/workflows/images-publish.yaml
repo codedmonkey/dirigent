@@ -13,6 +13,11 @@ on:
   schedule:
     - cron:  "30 4 * * *"
 
+permissions:
+  attestations: write
+  id-token: write
+  packages: write
+
 jobs:
   publish-standalone:
     name: Standalone images
