@@ -1,2 +1,6 @@
+parameters:
+  kernel_secret: '%env(default:kernel_secret_file:KERNEL_SECRET)%'
+  kernel_secret_file: '%env(default::file:KERNEL_SECRET_FILE)%'
+
 framework:
-  secret: '%env(file:KERNEL_SECRET_FILE)%'
+  secret: '%kernel_secret%'
