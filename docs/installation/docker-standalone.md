@@ -65,6 +65,16 @@ dirigent:
 
 For a complete list of configuration options, see the [Configuration Reference][docs-configuration-reference].
 
+### Environment variables
+
+- `DECRYPTION_KEY` / `DECRYPTION_KEY_FILE`
+- `ENCRYPTION_KEY` / `ENCRYPTION_KEY_FILE`
+- `GITHUB_TOKEN`
+- `KERNEL_SECRET` / `KERNEL_SECRET_FILE`
+- `MAILER_DSN`
+- `SENTRY_DSN`
+- `TRUSTED_PROXIES`
+
 ## Running the image
 
 After following the steps above you're ready to boot the image, so run the Docker command to start your
