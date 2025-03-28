@@ -16,3 +16,18 @@ parameters:
             identifier: method.notFound
             count: 1
             path: src/DependencyInjection/DirigentConfiguration.php
+        -
+            message: '#^Left side of \|\| is always false\.$#'
+            identifier: booleanOr.leftAlwaysFalse
+            count: 1
+            path: src/Encryption/Encryption.php
+        -
+            message: '#^Right side of \|\| is always false\.$#'
+            identifier: booleanOr.rightAlwaysFalse
+            count: 1
+            path: src/Encryption/Encryption.php
+        -
+            message: '#^Property CodedMonkey\\Dirigent\\EventListener\\EncryptionListener\:\:\$connection is never read, only written\.$#'
+            identifier: property.onlyWritten
+            count: 1
+            path: src/EventListener/EncryptionListener.php

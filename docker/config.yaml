@@ -2,6 +2,13 @@ parameters:
   kernel_secret: '%env(default:kernel_secret_file:KERNEL_SECRET)%'
   kernel_secret_file: '%env(default::file:KERNEL_SECRET_FILE)%'
 
+dirigent:
+  encryption:
+    private_key: '%env(DECRYPTION_KEY)%'
+    private_key_path: '%env(DECRYPTION_KEY_FILE)%'
+    public_key: '%env(ENCRYPTION_KEY)%'
+    public_key_path: '%env(ENCRYPTION_KEY_FILE)%'
+
 framework:
   secret: '%kernel_secret%'
 
