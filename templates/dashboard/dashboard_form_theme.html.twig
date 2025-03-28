@@ -1,0 +1,12 @@
+{% extends 'bootstrap_5_layout.html.twig' %}
+
+{%- block form_errors -%}
+  {%- if errors|length > 0 -%}
+    {%- for error in errors -%}
+      <div class="{% if form is not rootform %}invalid-feedback{% else %}invalid-feedback mb-3{% endif %} d-block">
+        <span class="fa-regular fa-circle-xmark me-1" aria-hidden="true"></span>
+        {{ error.message }}
+      </div>
+    {%- endfor -%}
+  {%- endif -%}
+{%- endblock form_errors -%}
