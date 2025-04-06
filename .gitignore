@@ -1,3 +1,6 @@
+/.idea/
+/.vscode/
+
 /.env
 /compose.override.yaml
 /config/dirigent.json
