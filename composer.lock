@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "49279781d9bb199b229164c2d4952d3a",
+    "content-hash": "9773aeda67f23c17c6fde7494405b11b",
     "packages": [
         {
             "name": "cebe/markdown",
@@ -3757,6 +3757,74 @@
                 }
             ],
             "time": "2024-05-24T10:39:05+00:00"
+        },
+        {
+            "name": "scheb/2fa-bundle",
+            "version": "v7.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/scheb/2fa-bundle.git",
+                "reference": "9b241074d140c54e0f81742bc089edd8a0efd62b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/scheb/2fa-bundle/zipball/9b241074d140c54e0f81742bc089edd8a0efd62b",
+                "reference": "9b241074d140c54e0f81742bc089edd8a0efd62b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
+                "symfony/config": "^6.4 || ^7.0",
+                "symfony/dependency-injection": "^6.4 || ^7.0",
+                "symfony/event-dispatcher": "^6.4 || ^7.0",
+                "symfony/framework-bundle": "^6.4 || ^7.0",
+                "symfony/http-foundation": "^6.4 || ^7.0",
+                "symfony/http-kernel": "^6.4 || ^7.0",
+                "symfony/property-access": "^6.4 || ^7.0",
+                "symfony/security-bundle": "^6.4 || ^7.0",
+                "symfony/service-contracts": "^2.5|^3",
+                "symfony/twig-bundle": "^6.4 || ^7.0"
+            },
+            "conflict": {
+                "scheb/two-factor-bundle": "*"
+            },
+            "suggest": {
+                "scheb/2fa-backup-code": "Emergency codes when you have no access to other methods",
+                "scheb/2fa-email": "Send codes by email",
+                "scheb/2fa-google-authenticator": "Google Authenticator support",
+                "scheb/2fa-totp": "Temporary one-time password (TOTP) support (Google Authenticator compatible)",
+                "scheb/2fa-trusted-device": "Trusted devices support"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Scheb\\TwoFactorBundle\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christian Scheb",
+                    "email": "me@christianscheb.de"
+                }
+            ],
+            "description": "A generic interface to implement two-factor authentication in Symfony applications",
+            "homepage": "https://github.com/scheb/2fa",
+            "keywords": [
+                "2fa",
+                "Authentication",
+                "symfony",
+                "two-factor",
+                "two-step"
+            ],
+            "support": {
+                "source": "https://github.com/scheb/2fa-bundle/tree/v7.7.1"
+            },
+            "time": "2025-03-24T10:50:27+00:00"
         },
         {
             "name": "seld/jsonlint",
