@@ -1,4 +1,3 @@
-# EasyAdmin route loader for pretty URLs, not used by Dirigent yet
-#easyadmin:
-#    resource: .
-#    type: easyadmin.routes
+easyadmin:
+    resource: .
+    type: easyadmin.routes

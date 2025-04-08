@@ -27,7 +27,7 @@ class DashboardRootControllerTest extends WebTestCase
         $client = static::createClient();
         $this->loginUser();
 
-        $client->request('GET', '/?routeName=dashboard_credits');
+        $client->request('GET', '/credits');
 
         $this->assertResponseStatusCodeSame(200);
 

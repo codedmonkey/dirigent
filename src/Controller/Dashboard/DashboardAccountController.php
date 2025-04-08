@@ -31,7 +31,7 @@ class DashboardAccountController extends AbstractController
     ) {
     }
 
-    #[Route('/dashboard/account', name: 'dashboard_account')]
+    #[Route('/account', name: 'dashboard_account')]
     #[IsGranted('ROLE_USER')]
     public function account(Request $request, #[CurrentUser] User $user): Response
     {

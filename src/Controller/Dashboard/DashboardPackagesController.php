@@ -34,7 +34,7 @@ class DashboardPackagesController extends AbstractController
     ) {
     }
 
-    #[Route('/dashboard/packages', name: 'dashboard_packages')]
+    #[Route('/packages', name: 'dashboard_packages')]
     #[IsGrantedAccess]
     public function list(Request $request): Response
     {
@@ -57,7 +57,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/info/{packageName}/{packageVersion}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/{packageVersion}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGrantedAccess]
     public function info(string $packageName, ?string $packageVersion = null): Response
     {
@@ -81,7 +81,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/versions/{packageName}', name: 'dashboard_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/versions', name: 'dashboard_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGrantedAccess]
     public function versions(string $packageName): Response
     {
@@ -96,7 +96,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/statistics/{packageName}', name: 'dashboard_packages_statistics', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/statistics', name: 'dashboard_packages_statistics', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGrantedAccess]
     public function statistics(string $packageName): Response
     {
@@ -138,7 +138,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
+    #[Route('/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
     #[IsGranted('ROLE_ADMIN')]
     public function addMirroring(Request $request): Response
     {
@@ -221,7 +221,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/add-vcs', name: 'dashboard_packages_add_vcs')]
+    #[Route('/packages/add-vcs', name: 'dashboard_packages_add_vcs')]
     #[IsGranted('ROLE_ADMIN')]
     public function addVcsRepository(Request $request): Response
     {
@@ -244,7 +244,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/edit/{packageName}', name: 'dashboard_packages_edit', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/edit', name: 'dashboard_packages_edit', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, string $packageName): Response
     {
@@ -270,7 +270,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/update/{packageName}', name: 'dashboard_packages_update', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/update', name: 'dashboard_packages_update', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function update(string $packageName): Response
     {
@@ -281,7 +281,7 @@ class DashboardPackagesController extends AbstractController
         return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
     }
 
-    #[Route('/dashboard/packages/delete/{packageName}', name: 'dashboard_packages_delete', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/delete', name: 'dashboard_packages_delete', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(string $packageName): Response
     {
