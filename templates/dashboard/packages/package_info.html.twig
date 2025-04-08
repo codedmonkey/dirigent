@@ -49,6 +49,8 @@
         <div><a href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a>: {{ dependentCount }}</div>
         {% set packageSuggestersUrl = dashboard_path('dashboard_packages_suggesters', {packageName: package.name}) %}
         <div><a href="{{ packageSuggestersUrl }}">{{ 'Suggesters'|trans }}</a>: {{ suggesterCount }}</div>
+        <div>{{ 'Providers'|trans }}: {{ providerCount }}</div>
+        <div>{{ 'Implementations'|trans }}: {{ implementationCount }}</div>
         {% if version.license %}
           <div>License: {{ version.license|join(', ') }}</div>
         {% else %}
