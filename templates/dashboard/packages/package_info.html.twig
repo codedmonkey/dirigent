@@ -84,7 +84,7 @@
     <ul>
       {% for link in links %}
         {% if link.packageName is existing_package %}
-          <li><a href="{{ dashboard_path('dashboard_packages_info', {packageName: link.packageName}) }}">{{ link.packageName }}</a>: {{ link.packageVersion }}</li>
+          <li><a href="{{ path('dashboard_packages_info', {packageName: link.packageName}) }}">{{ link.packageName }}</a>: {{ link.packageVersion }}</li>
         {% else %}
           <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
         {% endif %}
@@ -102,7 +102,7 @@
     <ul>
       {% for link in links %}
         {% if link.packageName is existing_package %}
-          <li><a href="{{ dashboard_path('dashboard_packages_info', {packageName: link.packageName}) }}">{{ link.packageName }}</a>: {{ link.packageVersion }}</li>
+          <li><a href="{{ path('dashboard_packages_info', {packageName: link.packageName}) }}">{{ link.packageName }}</a>: {{ link.packageVersion }}</li>
         {% else %}
           <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
         {% endif %}

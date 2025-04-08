@@ -2,18 +2,18 @@
 
 <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 pb-3 mb-3 border-bottom">
   <li class="nav-item">
-    {% set packageInfoUrl = dashboard_path('dashboard_packages_info', {packageName: package.name}) %}
+    {% set packageInfoUrl = path('dashboard_packages_info', {packageName: package.name}) %}
     <a {% if currentPage == 'info' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageInfoUrl }}">{{ 'Info'|trans }}</a>
   </li>
   <li class="nav-item">
-    {% set packageVersionsUrl = dashboard_path('dashboard_packages_versions', {packageName: package.name}) %}
+    {% set packageVersionsUrl = path('dashboard_packages_versions', {packageName: package.name}) %}
     <a {% if currentPage == 'versions' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageVersionsUrl }}">{{ 'Versions'|trans }}</a>
   </li>
   <li class="nav-item">
     <span class="nav-link disabled">{{ 'Dependants'|trans }}</span>
   </li>
   <li class="nav-item">
-    {% set packageVersionsUrl = dashboard_path('dashboard_packages_statistics', {packageName: package.name}) %}
+    {% set packageVersionsUrl = path('dashboard_packages_statistics', {packageName: package.name}) %}
     <a {% if currentPage == 'statistics' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageVersionsUrl }}">{{ 'Statistics'|trans }}</a>
   </li>
 </ul>

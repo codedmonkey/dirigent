@@ -12,10 +12,10 @@
           <span class="fa-solid fa-ellipsis-h" aria-hidden="true"></span>
         </button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="{{ dashboard_path('dashboard_packages_update', {packageName: package.name}) }}">Update package</a></li>
+          <li><a class="dropdown-item" href="{{ path('dashboard_packages_update', {packageName: package.name}) }}">Update package</a></li>
           <li><div class="dropdown-divider"></div></li>
-          <li><a class="dropdown-item" href="{{ dashboard_path('dashboard_packages_edit', {packageName: package.name}) }}">Edit package</a></li>
-          <li><a class="dropdown-item" href="{{ dashboard_path('dashboard_packages_delete', {packageName: package.name}) }}">Delete package</a></li>
+          <li><a class="dropdown-item" href="{{ path('dashboard_packages_edit', {packageName: package.name}) }}">Edit package</a></li>
+          <li><a class="dropdown-item" href="{{ path('dashboard_packages_delete', {packageName: package.name}) }}">Delete package</a></li>
         </ul>
       </div>
     </div>
