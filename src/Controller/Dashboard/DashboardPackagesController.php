@@ -5,6 +5,7 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use CodedMonkey\Dirigent\Form\PackageAddMirroringFormType;
@@ -46,14 +47,24 @@ class DashboardPackagesController extends AbstractController
             $queryBuilder->setParameter('query', "%{$query}%");
         }
 
+        if (null !== $registryId = $request->query->get('registry')) {
+            $registry = $this->entityManager->getRepository(Registry::class)->find($registryId);
+
+            $queryBuilder->andWhere($queryBuilder->expr()->eq('package.registry', ':registry'));
+            $queryBuilder->setParameter('registry', $registry);
+        }
+
         $paginatorDto = new PaginatorDto(20, 3, 1, true, null);
         $paginatorDto->setPageNumber($request->query->getInt('page', 1));
         $paginator = (new PackagePaginator($this->adminUrlGenerator))->paginate($paginatorDto, $queryBuilder);
         $packages = $paginator->getResults();
 
+        $registries = $this->entityManager->getRepository(Registry::class)->findAll();
+
         return $this->render('dashboard/packages/list.html.twig', [
             'packages' => $packages,
             'paginator' => $paginator,
+            'registries' => $registries,
         ]);
     }
 

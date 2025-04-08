@@ -25,6 +25,24 @@
 {% endblock %}
 
 {% block page_content %}
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <div>{{ 'Filter by'|trans }}</div>
+    <div>
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ 'Registry'|trans }}
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">{{ 'Local'|trans }}</a></li>
+          {% for registry in registries %}
+            {% set filterUrl = dashboard_path('dashboard_packages', {registry: registry.id}) %}
+            <li><a class="dropdown-item" href="{{ filterUrl }}">{{ registry.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <div class="d-grid gap-3">
     {% for package in packages %}
       <div class="card">
