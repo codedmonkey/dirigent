@@ -4,7 +4,7 @@
 
 {% block page_content %}
   {% if pageName != 'readme' %}
-    {% set rootPath = dashboard_path('dashboard_usage_docs') %}
+    {% set rootPath = path('dashboard_usage_docs') %}
     <a href="{{ rootPath }}">
       <span class="fa-solid fa-chevron-left fa-fw" aria-hidden="true"></span>
       <span>Back to index</span>
