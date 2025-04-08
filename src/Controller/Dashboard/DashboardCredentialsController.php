@@ -4,12 +4,14 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
 use CodedMonkey\Dirigent\Doctrine\Entity\CredentialsType;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminCrud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
+#[AdminCrud(routePath: '/credentials', routeName: 'credentials')]
 class DashboardCredentialsController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
