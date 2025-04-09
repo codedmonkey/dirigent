@@ -57,26 +57,28 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{packageName}/{packageVersion}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGrantedAccess]
-    public function info(string $packageName, ?string $packageVersion = null): Response
+    public function info(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-
-        $versions = $package->getVersions()->toArray();
-        $latestVersion = $package->getDefaultVersion();
-
-        usort($versions, Package::class . '::sortVersions');
-
-        if (null !== $packageVersion) {
-            $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
-        } else {
-            $version = $package->getLatestVersion();
-        }
+        $version = $package->getLatestVersion();
 
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
-            'latestVersion' => $latestVersion,
+            'version' => $version,
+        ]);
+    }
+
+    #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function versionInfo(string $packageName, string $packageVersion): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
+
+        return $this->render('dashboard/packages/package_info.html.twig', [
+            'package' => $package,
             'version' => $version,
         ]);
     }
