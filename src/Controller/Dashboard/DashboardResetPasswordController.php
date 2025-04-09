@@ -6,7 +6,6 @@ use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Form\ResetPasswordFormType;
 use CodedMonkey\Dirigent\Form\ResetPasswordRequestFormType;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -27,7 +26,6 @@ class DashboardResetPasswordController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MailerInterface $mailer,
         private readonly ResetPasswordHelperInterface $resetPasswordHelper,
-        private readonly AdminUrlGenerator $adminUrlGenerator,
     ) {
     }
 
@@ -64,7 +62,7 @@ class DashboardResetPasswordController extends AbstractController
         if ($token) {
             $this->storeTokenInSession($token);
 
-            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_reset_password')->generateUrl());
+            return $this->redirectToRoute('dashboard_reset_password');
         }
 
         $token = $this->getTokenFromSession();
@@ -82,7 +80,7 @@ class DashboardResetPasswordController extends AbstractController
                 $exception->getReason()
             ));
 
-            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_reset_password_request')->generateUrl());
+            return $this->redirectToRoute('dashboard_reset_password_request');
         }
 
         $form = $this->createForm(ResetPasswordFormType::class);
@@ -96,7 +94,7 @@ class DashboardResetPasswordController extends AbstractController
 
             $this->cleanSessionAfterReset();
 
-            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_login')->generateUrl());
+            return $this->redirectToRoute('dashboard_login');
         }
 
         return $this->render('dashboard/reset_password/reset.html.twig', [
@@ -130,6 +128,6 @@ class DashboardResetPasswordController extends AbstractController
             }
         }
 
-        return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_reset_password_sent')->generateUrl());
+        return $this->redirectToRoute('dashboard_reset_password_sent');
     }
 }

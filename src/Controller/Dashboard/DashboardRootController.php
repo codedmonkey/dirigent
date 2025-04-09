@@ -16,7 +16,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -152,7 +151,6 @@ class DashboardRootController extends AbstractDashboardController
 
     private function parseDocumentationFile(string $directory, string $page): array
     {
-        $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
         $twig = $this->container->get('twig');
 
         $template = "dashboard/docs/$directory/$page.md.twig";
@@ -178,7 +176,7 @@ class DashboardRootController extends AbstractDashboardController
 
         // Fix relative URLs
         $relativeLinkPattern = '/(\[.*?]\()([^\/)]+)(\))/';
-        $docsUrlPattern = $adminUrlGenerator->setRoute("dashboard_{$directory}_docs", ['page' => 'pagename'])->generateUrl();
+        $docsUrlPattern = $this->generateUrl("dashboard_{$directory}_docs", ['page' => 'pagename']);
         $docsUrlPattern = str_replace('pagename', '$2', $docsUrlPattern);
         $relativeLinkReplacementPattern = "\$1{$docsUrlPattern}\$3";
 

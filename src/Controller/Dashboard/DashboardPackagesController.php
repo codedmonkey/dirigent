@@ -236,7 +236,7 @@ class DashboardPackagesController extends AbstractController
 
             $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
-            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());
+            return $this->redirectToRoute('dashboard_packages');
         }
 
         return $this->render('dashboard/packages/add_vcs.html.twig', [
@@ -261,7 +261,7 @@ class DashboardPackagesController extends AbstractController
 
             $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
-            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
+            return $this->redirectToRoute('dashboard_packages_info', ['packageName' => $package->getName()]);
         }
 
         return $this->render('dashboard/packages/package_edit.html.twig', [
@@ -278,7 +278,7 @@ class DashboardPackagesController extends AbstractController
 
         $this->messenger->dispatch(new UpdatePackage($package->getId(), forceRefresh: true));
 
-        return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
+        return $this->redirectToRoute('dashboard_packages_info', ['packageName' => $package->getName()]);
     }
 
     #[Route('/packages/{packageName}/delete', name: 'dashboard_packages_delete', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
@@ -289,6 +289,6 @@ class DashboardPackagesController extends AbstractController
 
         $this->packageRepository->remove($package, true);
 
-        return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());
+        return $this->redirectToRoute('dashboard_packages');
     }
 }
