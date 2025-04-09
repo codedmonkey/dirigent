@@ -1,7 +1,11 @@
-Enter an email address: Enter an email address
+# Email
+Enter an email address: Enter an email address.
 
-Please enter a password: Please enter a password
-The password fields must match: The password fields must match
-Your password should be at least {{ limit }} characters: Your password should be at least {{ limit }} characters
+# Password
+Enter a password: Enter a password.
+The password fields must match: The password fields must match.
+The password is incorrect: The password is incorrect.
+Your password must be at least {{ limit }} characters: Your password must be at least {{ limit }} characters.
 
-This username is already taken: This username is already taken
+# Username
+This username is already taken: This username is already taken.

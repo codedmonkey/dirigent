@@ -1,0 +1,38 @@
+{% extends 'dashboard/security/security_layout.html.twig' %}
+
+{% block main %}
+  <p class="lead">{{ 'Multi-factor authentication'|trans }}</p>
+
+  {% if authenticationError %}
+    <div class="w-100 alert alert-danger rounded mb-3">
+      {{ authenticationError|trans(authenticationErrorData, 'SchebTwoFactorBundle') }}
+    </div>
+  {% endif %}
+
+  <form class="form" action="{{ checkPathUrl ? checkPathUrl : path(checkPathRoute) }}" method="post">
+    <div class="form-group">
+      <label class="form-control-label required" for="_auth_code">{{ 'auth_code'|trans({}, 'SchebTwoFactorBundle') }}</label>
+      <div class="form-widget">
+        <input
+          id="_auth_code"
+          name="{{ authCodeParameterName }}"
+          type="text"
+          autocomplete="one-time-code"
+          autofocus
+          inputmode="numeric"
+          pattern="[0-9]*"
+          class="form-control"
+        />
+      </div>
+    </div>
+
+    {% if isCsrfProtectionEnabled %}
+      <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+    {% endif %}
+
+    <div class="btn-toolbar gap-2">
+      <button class="btn btn-primary">{{ 'Sign in'|trans }}</button>
+      <a href="{{ logoutPath }}" class="btn btn-secondary">{{ 'Cancel'|trans }}</a>
+    </div>
+  </form>
+{% endblock main %}

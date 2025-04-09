@@ -51,7 +51,7 @@ class NewPasswordType extends AbstractType
         $constraints = [
             new Length([
                 'min' => 8,
-                'minMessage' => 'Your password should be at least {{ limit }} characters',
+                'minMessage' => 'Your password must be at least {{ limit }} characters',
                 'max' => 4096, // max length allowed by Symfony for security reasons
             ]),
             new PasswordStrength(minScore: PasswordStrength::STRENGTH_WEAK),
@@ -60,7 +60,7 @@ class NewPasswordType extends AbstractType
 
         if (!$nullable) {
             $constraints[] = new NotBlank([
-                'message' => 'Please enter a password',
+                'message' => 'Enter a password',
             ]);
         }
 

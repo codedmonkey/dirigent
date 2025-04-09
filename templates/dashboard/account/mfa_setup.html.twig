@@ -1,0 +1,22 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}{{ 'Multi-factor authentication'|trans }}{% endblock %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-6 col-xxl-5">
+      <div class="mb-3">
+        <label for="totp_secret" class="form-label">{{ 'MFA secret' }}</label>
+        <input id="totp_secret" type="text" value="{{ totpContent }}" readonly class="form-control">
+      </div>
+
+      {{ form_start(form) }}
+        {{ form_rest(form) }}
+
+        <div class="form-group">
+          <button class="btn btn-primary">{{ 'account.mfa.enable'|trans }}</button>
+        </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+{% endblock %}

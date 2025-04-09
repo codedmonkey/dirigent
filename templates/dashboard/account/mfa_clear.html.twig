@@ -1,0 +1,17 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}{{ 'Multi-factor authentication'|trans }}{% endblock %}
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-md-6 col-xxl-5">
+      {{ form_start(form) }}
+        {{ form_rest(form) }}
+
+        <div class="form-group">
+          <button class="btn btn-primary">{{ 'account.mfa.disable'|trans }}</button>
+        </div>
+      {{ form_end(form) }}
+    </div>
+  </div>
+{% endblock %}

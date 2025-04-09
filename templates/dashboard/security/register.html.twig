@@ -1,33 +1,15 @@
-{% extends ea.templatePath('layout') %}
+{% extends 'dashboard/security/security_layout.html.twig' %}
 
-{% block page_title ea.dashboardTitle|raw %}
+{% block main %}
+  <p class="lead">Create an account</p>
 
-{% block body_class 'page-login' %}
+  {{ form_start(form) }}
+    {{ form_row(form.username) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.plainPassword) }}
 
-{% block wrapper_wrapper %}
-  <div class="login-wrapper">
-    <header class="main-header">
-      <div id="header-logo">
-        <a href="{{ path('dashboard') }}" class="logo logo-long">
-          {{ block('page_title') }}
-        </a>
-      </div>
-    </header>
-
-    <section class="content">
-      <p class="lead">Create an account</p>
-
-      {{ form_start(form) }}
-        {{ form_row(form.username) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.plainPassword) }}
-
-        <div class="form-group">
-          <button class="btn btn-primary">Create account</button>
-        </div>
-      {{ form_end(form) }}
-    </section>
-  </div>
-
-  <script src="{{ asset('login.js', constant('EasyCorp\\Bundle\\EasyAdminBundle\\Asset\\AssetPackage::PACKAGE_NAME')) }}"></script>
-{% endblock wrapper_wrapper %}
+    <div class="form-group">
+      <button class="btn btn-primary">Create account</button>
+    </div>
+  {{ form_end(form) }}
+{% endblock main %}

@@ -5,3 +5,4 @@ scheb_two_factor:
         - Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken
     totp:
         enabled: true
+        template: dashboard/security/mfa.html.twig
