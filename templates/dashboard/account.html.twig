@@ -41,18 +41,17 @@
   <div class="form-fieldset field-form_fieldset">
     <div class="form-fieldset-header with-help">
       <div class="form-fieldset-title">
-        <span class="not-collapsible form-fieldset-title-content">Multi-Factor Authentication</span>
-        <div class="form-fieldset-help">Add an extra layer of security</div>
+        <span class="not-collapsible form-fieldset-title-content">{{ 'Multi-Factor Authentication'|trans }}</span>
+        <div class="form-fieldset-help">{{ 'account.mfa.help'|trans }}</div>
       </div>
     </div>
 
     <div class="form-fieldset-body show">
       <div class="row">
         <div class="col-md-6 col-xxl-5">
-          todo
+          <a href="{{ path('dashboard_account_mfa') }}" class="btn btn-primary">{{ 'account.mfa.enable'|trans }}</a>
         </div>
       </div>
     </div>
   </div>
-
 {% endblock %}

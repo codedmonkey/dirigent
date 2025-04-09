@@ -25,6 +25,7 @@ Description: Description
 Dynamic Update Delay: Dynamic Update Delay
 Email: Email
 Expires At: Expires at
+Multi-Factor Authentication: Multi-Factor Authentication
 New password: New password
 Name: Name
 Package Mirroring: Package Mirroring
@@ -69,3 +70,8 @@ registry:
     none: Package mirroring disabled
     manual: Only mirror specified packages
     auto: Automatically mirror packages on request
+
+account:
+  mfa:
+    enable: Enable MFA authentication
+    help: Secure your account with a time-based code from an authenticator app.
