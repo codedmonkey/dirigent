@@ -6,7 +6,6 @@ use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use CodedMonkey\Dirigent\Form\AccountFormType;
 use CodedMonkey\Dirigent\Form\ChangePasswordFormType;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,13 +17,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class DashboardAccountController extends AbstractController
 {
-    public static function getSubscribedServices(): array
-    {
-        return array_merge(parent::getSubscribedServices(), [
-            AdminUrlGenerator::class => AdminUrlGenerator::class,
-        ]);
-    }
-
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
@@ -45,9 +37,7 @@ class DashboardAccountController extends AbstractController
 
             $this->addFlash('success', 'Your account was successfully updated.');
 
-            $url = $this->container->get(AdminUrlGenerator::class)->setRoute('dashboard_account')->generateUrl();
-
-            return $this->redirect($url);
+            return $this->redirectToRoute('dashboard_account');
         }
 
         $passwordForm->handleRequest($request);
@@ -66,9 +56,7 @@ class DashboardAccountController extends AbstractController
 
                 $this->addFlash('success', 'Your password was successfully updated.');
 
-                $url = $this->container->get(AdminUrlGenerator::class)->setRoute('dashboard_account')->generateUrl();
-
-                return $this->redirect($url);
+                return $this->redirectToRoute('dashboard_account');
             }
         }
 
