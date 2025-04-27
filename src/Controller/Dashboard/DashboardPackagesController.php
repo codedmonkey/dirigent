@@ -7,6 +7,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
+use CodedMonkey\Dirigent\Form\PackageAddComposerFormType;
 use CodedMonkey\Dirigent\Form\PackageAddMirroringFormType;
 use CodedMonkey\Dirigent\Form\PackageAddVcsFormType;
 use CodedMonkey\Dirigent\Form\PackageFormType;
@@ -240,6 +241,29 @@ class DashboardPackagesController extends AbstractController
         }
 
         return $this->render('dashboard/packages/add_vcs.html.twig', [
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/add-composer', name: 'dashboard_packages_add_composer')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function importComposerFile(Request $request): Response
+    {
+        $form = $this->createForm(PackageAddComposerFormType::class);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $rawContents = $form->get('contents')->getData();
+            $contents = json_decode($rawContents, true);
+
+            $importType = $form->get('type')->getData();
+
+            dump($importType);
+            dd($contents);
+        }
+
+        return $this->render('dashboard/packages/add_composer.html.twig', [
             'form' => $form,
         ]);
     }

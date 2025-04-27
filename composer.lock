@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8db87b087200e9f709b90224045f7712",
+    "content-hash": "b22105f61b5d03edf233801f0d445ed8",
     "packages": [
         {
             "name": "cebe/markdown",
@@ -480,6 +480,93 @@
                 }
             ],
             "time": "2024-11-12T16:29:46+00:00"
+        },
+        {
+            "name": "composer/satis",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/satis.git",
+                "reference": "2d0d7bf08bed6b5f57dae0f7b93d7c585112ab65"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/satis/zipball/2d0d7bf08bed6b5f57dae0f7b93d7c585112ab65",
+                "reference": "2d0d7bf08bed6b5f57dae0f7b93d7c585112ab65",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.3.0",
+                "composer/composer": "^2.8.9",
+                "ext-zip": "*",
+                "symfony/console": "^7.3.0",
+                "twig/html-extra": "^3.21.0",
+                "twig/twig": "^3.21.1"
+            },
+            "require-dev": {
+                "ext-json": "*",
+                "mikey179/vfsstream": "^1.6.12",
+                "phpunit/phpunit": "^9.6.22"
+            },
+            "default-branch": true,
+            "bin": [
+                "bin/satis"
+            ],
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Composer\\Satis\\Plugin\\SatisPlugin",
+                "branch-alias": {
+                    "dev-main": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Composer\\Satis\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "https://seld.be"
+                },
+                {
+                    "name": "Nils Adermann",
+                    "email": "naderman@naderman.de",
+                    "homepage": "https://www.naderman.de"
+                },
+                {
+                    "name": "Rob Bast",
+                    "email": "rob.bast@gmail.com",
+                    "homepage": "https://robbast.nl"
+                }
+            ],
+            "description": "Simple Repository Generator",
+            "homepage": "https://github.com/composer/satis",
+            "keywords": [
+                "composer",
+                "generator",
+                "package",
+                "repository",
+                "static"
+            ],
+            "support": {
+                "forum": "https://gitter.com/composer/satis",
+                "irc": "irc://freenode.net/composer",
+                "issues": "https://github.com/composer/satis",
+                "source": "https://github.com/composer/satis"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                }
+            ],
+            "time": "2025-06-02T11:53:49+00:00"
         },
         {
             "name": "composer/semver",
@@ -14400,7 +14487,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "composer/satis": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

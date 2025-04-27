@@ -1,0 +1,11 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Import Composer/Satis file{% endblock %}
+
+{% block page_content %}
+  {{ form_start(form) }}
+    {{ form_row(form.contents, {attr: {rows: 12}}) }}
+
+    <button class="btn btn-primary">Import file</button>
+  {{ form_end(form) }}
+{% endblock %}

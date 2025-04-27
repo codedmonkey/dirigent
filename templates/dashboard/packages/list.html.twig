@@ -18,6 +18,8 @@
           <li><a class="dropdown-item" href="{{ addVcsUrl }}">Add VCS repository</a></li>
           {% set addMirroringUrl = dashboard_path('dashboard_packages_add_mirroring') %}
           <li><a class="dropdown-item" href="{{ addMirroringUrl }}">Mirror from registry</a></li>
+          {% set addMirroringUrl = dashboard_path('dashboard_packages_add_composer') %}
+          <li><a class="dropdown-item" href="{{ addMirroringUrl }}">{{ 'Import Composer/Satis file'|trans }}</a></li>
         </ul>
       </div>
     </div>
