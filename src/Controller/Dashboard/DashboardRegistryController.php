@@ -6,6 +6,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\EasyAdmin\DateIntervalField;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminAction;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminCrud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -86,6 +87,7 @@ class DashboardRegistryController extends AbstractCrudController
             ->onlyOnForms();
     }
 
+    #[AdminAction(routePath: '/{entityId}/move-up', routeName: 'moveUp')]
     public function moveUp(AdminContext $context, RegistryRepository $registryRepository): RedirectResponse
     {
         $registry = $context->getEntity()->getInstance();
@@ -97,6 +99,7 @@ class DashboardRegistryController extends AbstractCrudController
         return $this->redirect($url);
     }
 
+    #[AdminAction(routePath: '/{entityId}/move-down', routeName: 'moveDown')]
     public function moveDown(AdminContext $context, RegistryRepository $registryRepository): RedirectResponse
     {
         $registry = $context->getEntity()->getInstance();
