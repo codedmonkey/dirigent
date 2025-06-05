@@ -1,1 +1,3 @@
-{{ "registry.package_mirroring.#{field.value.value}"|trans }}
+{# Since it is a translatable enum the following should work but it doesn't #}
+{# {{ field.value|trans }} #}
+{{ "registry.package-mirroring.#{field.value.value}"|trans }}

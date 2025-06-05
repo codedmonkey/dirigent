@@ -73,8 +73,9 @@ class PackageFormType extends AbstractType
                     'class' => PackageFetchStrategy::class,
                     'expanded' => true,
                     'disabled' => !$package->getRepositoryUrl(),
+                    // This shouldn't be necessary because it's a translatable enum but it is
                     'choice_label' => function (PackageFetchStrategy $choice): string {
-                        return "package.fetch_strategy.{$choice->value}";
+                        return "package.fetch-strategy.{$choice->value}";
                     },
                 ]);
         }

@@ -67,8 +67,9 @@ class DashboardRegistryController extends AbstractCrudController
             ->setTemplatePath('dashboard/fields/registry_package_mirroring.html.twig')
             ->setRequired(true)
             ->setChoices(RegistryPackageMirroring::cases())
+            // This shouldn't be necessary because it's a translatable enum but it is
             ->setFormTypeOption('choice_label', function (RegistryPackageMirroring $choice): string {
-                return "registry.package_mirroring.{$choice->value}";
+                return "registry.package-mirroring.{$choice->value}";
             })
             ->renderExpanded();
 
