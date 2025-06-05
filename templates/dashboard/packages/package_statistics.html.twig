@@ -3,7 +3,7 @@
 {% block page_title %}{{ package.name }} <small>{{ 'Statistics'|trans }}</small>{% endblock %}
 
 {% block page_content %}
-  {% include 'dashboard/packages/package_header.html.twig' with {currentPage: 'statistics'} %}
+  {% include 'dashboard/packages/_package_header.html.twig' with {currentPage: 'statistics'} %}
 
   <div class="mb-3">
     <h2>{{ 'Installations'|trans }}</h2>
