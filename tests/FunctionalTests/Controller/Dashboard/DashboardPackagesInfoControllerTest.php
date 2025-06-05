@@ -30,6 +30,42 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
         $this->assertAnySelectorTextSame('h1 small', 'Dependents');
     }
 
+    public function testImplementations(): void
+    {
+        $client = static::createClient();
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $client->getContainer()->get(UserRepository::class);
+
+        /** @var User $user */
+        $user = $userRepository->findOneByUsername('user');
+        $client->loginUser($user);
+
+        $client->request('GET', '/?routeName=dashboard_packages_implementations&routeParams[packageName]=psr/log');
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertAnySelectorTextSame('h1 small', 'Implementations');
+    }
+
+    public function testProviders(): void
+    {
+        $client = static::createClient();
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $client->getContainer()->get(UserRepository::class);
+
+        /** @var User $user */
+        $user = $userRepository->findOneByUsername('user');
+        $client->loginUser($user);
+
+        $client->request('GET', '/?routeName=dashboard_packages_providers&routeParams[packageName]=psr/log');
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertAnySelectorTextSame('h1 small', 'Providers');
+    }
+
     public function testSuggesters(): void
     {
         $client = static::createClient();

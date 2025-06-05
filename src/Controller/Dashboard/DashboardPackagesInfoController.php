@@ -5,6 +5,7 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Doctrine\Entity\Dependent;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Provider;
 use CodedMonkey\Dirigent\Doctrine\Entity\Suggester;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
@@ -41,6 +42,8 @@ class DashboardPackagesInfoController extends AbstractController
         }
 
         $dependentCount = $this->entityManager->getRepository(Dependent::class)->count(['dependentPackageName' => $package->getName()]);
+        $implementationCount = $this->entityManager->getRepository(Provider::class)->count(['providedPackageName' => $package->getName(), 'implementation' => true]);
+        $providerCount = $this->entityManager->getRepository(Provider::class)->count(['providedPackageName' => $package->getName(), 'implementation' => false]);
         $suggesterCount = $this->entityManager->getRepository(Suggester::class)->count(['suggestedPackageName' => $package->getName()]);
 
         return $this->render('dashboard/packages/package_info.html.twig', [
@@ -49,6 +52,8 @@ class DashboardPackagesInfoController extends AbstractController
             'version' => $version,
 
             'dependentCount' => $dependentCount,
+            'implementationCount' => $implementationCount,
+            'providerCount' => $providerCount,
             'suggesterCount' => $suggesterCount,
         ]);
     }
@@ -88,6 +93,56 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->render('dashboard/packages/package_dependents.html.twig', [
             'package' => $package,
             'dependents' => $dependents,
+            'paginator' => $paginator,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/implementations/{packageName}', name: 'dashboard_packages_implementations', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function implementations(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        $providerRepository = $this->entityManager->getRepository(Provider::class);
+        $queryBuilder = $providerRepository->createQueryBuilder('provider');
+        $queryBuilder
+            ->leftJoin('provider.package', 'package')
+            ->andWhere('provider.providedPackageName = :packageName')
+            ->andWhere('provider.implementation = true')
+            ->setParameter('packageName', $package->getName())
+            ->addOrderBy('package.name', 'ASC');
+
+        $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
+        $providers = $paginator->getResults();
+
+        return $this->render('dashboard/packages/package_implementations.html.twig', [
+            'package' => $package,
+            'providers' => $providers,
+            'paginator' => $paginator,
+        ]);
+    }
+
+    #[Route('/dashboard/packages/providers/{packageName}', name: 'dashboard_packages_providers', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function providers(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        $providerRepository = $this->entityManager->getRepository(Provider::class);
+        $queryBuilder = $providerRepository->createQueryBuilder('provider');
+        $queryBuilder
+            ->leftJoin('provider.package', 'package')
+            ->andWhere('provider.providedPackageName = :packageName')
+            ->andWhere('provider.implementation = false')
+            ->setParameter('packageName', $package->getName())
+            ->addOrderBy('package.name', 'ASC');
+
+        $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
+        $providers = $paginator->getResults();
+
+        return $this->render('dashboard/packages/package_providers.html.twig', [
+            'package' => $package,
+            'providers' => $providers,
             'paginator' => $paginator,
         ]);
     }
