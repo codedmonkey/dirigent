@@ -16,7 +16,7 @@ class DashboardPackagesControllerTest extends WebTestCase
         $client = static::createClient();
         $this->loginUser();
 
-        $client->request('GET', '/?routeName=dashboard_packages_statistics&routeParams[packageName]=psr/log');
+        $client->request('GET', '/packages/psr/log/statistics');
 
         $this->assertResponseStatusCodeSame(200);
 
@@ -38,7 +38,7 @@ class DashboardPackagesControllerTest extends WebTestCase
 
         $registry = $client->getContainer()->get(RegistryRepository::class)->findOneBy(['name' => 'Packagist']);
 
-        $client->request('GET', '/?routeName=dashboard_packages_add_mirroring');
+        $client->request('GET', '/packages/add-mirroring');
         $client->submitForm('Add packages', [
             'package_add_mirroring_form[packages]' => 'psr/cache',
             'package_add_mirroring_form[registry]' => $registry->getId(),
@@ -68,7 +68,7 @@ class DashboardPackagesControllerTest extends WebTestCase
         $client = static::createClient();
         $this->loginUser('admin');
 
-        $client->request('GET', '/?routeName=dashboard_packages_add_vcs');
+        $client->request('GET', '/packages/add-vcs');
         $client->submitForm('Add VCS repository', [
             'package_add_vcs_form[repositoryUrl]' => 'https://github.com/php-fig/container',
         ]);
@@ -89,7 +89,7 @@ class DashboardPackagesControllerTest extends WebTestCase
         $client = static::createClient();
         $this->loginUser('admin');
 
-        $client->request('GET', '/?routeName=dashboard_packages_edit&routeParams[packageName]=psr/log');
+        $client->request('GET', '/packages/psr/log/edit');
         $client->submitForm('Save changes');
 
         $this->assertResponseStatusCodeSame(302);

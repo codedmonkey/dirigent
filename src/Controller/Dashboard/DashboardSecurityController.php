@@ -5,7 +5,6 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use CodedMonkey\Dirigent\Form\RegistrationFormType;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,12 +19,12 @@ class DashboardSecurityController extends AbstractController
     }
 
     #[Route('/login', name: 'dashboard_login')]
-    public function login(AuthenticationUtils $authenticationUtils, AdminUrlGenerator $adminUrlGenerator): Response
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
         $userCount = $this->userRepository->count([]);
 
         if (0 === $userCount) {
-            return $this->redirect($adminUrlGenerator->setRoute('dashboard_register')->generateUrl());
+            return $this->redirectToRoute('dashboard_register');
         }
 
         return $this->render('@EasyAdmin/page/login.html.twig', [
@@ -33,13 +32,13 @@ class DashboardSecurityController extends AbstractController
             'error' => $authenticationUtils->getLastAuthenticationError(),
             'last_username' => $authenticationUtils->getLastUsername(),
             'forgot_password_enabled' => true,
-            'forgot_password_path' => $adminUrlGenerator->setRoute('dashboard_reset_password_request')->generateUrl(),
+            'forgot_password_path' => $this->generateUrl('dashboard_reset_password_request'),
             'remember_me_enabled' => true,
         ]);
     }
 
     #[Route('/register', name: 'dashboard_register')]
-    public function register(Request $request, AdminUrlGenerator $adminUrlGenerator): Response
+    public function register(Request $request): Response
     {
         $registrationEnabled = $this->getParameter('dirigent.security.registration_enabled');
         $userCount = $this->userRepository->count([]);
@@ -61,7 +60,7 @@ class DashboardSecurityController extends AbstractController
 
             $this->userRepository->save($user, true);
 
-            return $this->redirect($adminUrlGenerator->setRoute('dashboard_login')->generateUrl());
+            return $this->redirectToRoute('dashboard_login');
         }
 
         return $this->render('dashboard/security/register.html.twig', [

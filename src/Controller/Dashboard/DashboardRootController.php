@@ -10,12 +10,12 @@ use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Kernel;
 use Composer\Composer;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -25,6 +25,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
 
+#[AdminDashboard(routePath: '/', routeName: 'dashboard')]
 class DashboardRootController extends AbstractDashboardController
 {
     public function __construct(
@@ -54,7 +55,7 @@ class DashboardRootController extends AbstractDashboardController
         /** @var User|null $user */
         $user = $this->getUser();
 
-        $packagesItem = MenuItem::linkToRoute('Packages', 'fa fa-cubes', 'dashboard_packages');
+        $packagesItem = MenuItem::linkToUrl('Packages', 'fa fa-cubes', $this->generateUrl('dashboard_packages'));
         if (str_starts_with($request->query->getString('routeName'), 'dashboard_packages_')) {
             $packagesItem->getAsDto()->setSelected(true);
         }
@@ -65,13 +66,13 @@ class DashboardRootController extends AbstractDashboardController
         yield MenuItem::section('Personal');
         if ($user) {
             yield MenuItem::linkToCrud('Access tokens', 'fa fa-key', AccessToken::class);
-            yield MenuItem::linkToRoute('Account', 'fa fa-id-card', 'dashboard_account');
+            yield MenuItem::linkToUrl('Account', 'fa fa-id-card', $this->generateUrl('dashboard_account'));
             yield MenuItem::linkToLogout('Sign out', 'fa fa-user-xmark');
         } else {
-            yield MenuItem::linkToRoute('Sign in', 'fa fa-user', 'dashboard_login');
+            yield MenuItem::linkToUrl('Sign in', 'fa fa-user', $this->generateUrl('dashboard_login'));
 
             if ($this->registrationEnabled) {
-                yield MenuItem::linkToRoute('Register', 'fa fa-user-plus', 'dashboard_register');
+                yield MenuItem::linkToUrl('Register', 'fa fa-user-plus', $this->generateUrl('dashboard_register'));
             }
         }
 
@@ -83,10 +84,10 @@ class DashboardRootController extends AbstractDashboardController
         }
 
         yield MenuItem::section('Documentation');
-        yield MenuItem::linkToRoute('Usage', 'fa fa-file', 'dashboard_usage_docs');
-        yield MenuItem::linkToRoute('Administration', 'fa fa-file', 'dashboard_admin_docs')
+        yield MenuItem::linkToUrl('Usage', 'fa fa-file', $this->generateUrl('dashboard_usage_docs'));
+        yield MenuItem::linkToUrl('Administration', 'fa fa-file', $this->generateUrl('dashboard_admin_docs'))
             ->setPermission('ROLE_ADMIN');
-        yield MenuItem::linkToRoute('Credits', 'fa fa-file', 'dashboard_credits');
+        yield MenuItem::linkToUrl('Credits', 'fa fa-file', $this->generateUrl('dashboard_credits'));
     }
 
     /**
@@ -97,7 +98,7 @@ class DashboardRootController extends AbstractDashboardController
         $menu = parent::configureUserMenu($user)
             ->setName($user->getUserIdentifier())
             ->addMenuItems([
-                MenuItem::linkToRoute('Account', 'fa fa-id-card', 'dashboard_account'),
+                MenuItem::linkToUrl('Account', 'fa fa-id-card', $this->generateUrl('dashboard_account')),
             ]);
 
         if ($email = $user->getEmail()) {
@@ -107,7 +108,6 @@ class DashboardRootController extends AbstractDashboardController
         return $menu;
     }
 
-    #[Route('/', name: 'dashboard')]
     #[IsGrantedAccess]
     public function index(): Response
     {
@@ -118,7 +118,7 @@ class DashboardRootController extends AbstractDashboardController
         ]);
     }
 
-    #[Route('/dashboard/docs/usage/{page}', name: 'dashboard_usage_docs')]
+    #[Route('/docs/usage/{page}', name: 'dashboard_usage_docs')]
     #[IsGrantedAccess]
     public function docs(string $page = 'readme'): Response
     {
@@ -128,7 +128,7 @@ class DashboardRootController extends AbstractDashboardController
         ]);
     }
 
-    #[Route('/dashboard/docs/admin/{page}', name: 'dashboard_admin_docs')]
+    #[Route('/docs/admin/{page}', name: 'dashboard_admin_docs')]
     #[IsGranted('ROLE_ADMIN')]
     public function adminDocs(string $page = 'readme'): Response
     {
@@ -138,7 +138,7 @@ class DashboardRootController extends AbstractDashboardController
         ]);
     }
 
-    #[Route('/dashboard/credits', name: 'dashboard_credits')]
+    #[Route('/credits', name: 'dashboard_credits')]
     public function credits(): Response
     {
         return $this->render('dashboard/credits.html.twig', [
@@ -151,7 +151,6 @@ class DashboardRootController extends AbstractDashboardController
 
     private function parseDocumentationFile(string $directory, string $page): array
     {
-        $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
         $twig = $this->container->get('twig');
 
         $template = "dashboard/docs/$directory/$page.md.twig";
@@ -177,7 +176,7 @@ class DashboardRootController extends AbstractDashboardController
 
         // Fix relative URLs
         $relativeLinkPattern = '/(\[.*?]\()([^\/)]+)(\))/';
-        $docsUrlPattern = $adminUrlGenerator->setRoute("dashboard_{$directory}_docs", ['page' => 'pagename'])->generateUrl();
+        $docsUrlPattern = $this->generateUrl("dashboard_{$directory}_docs", ['page' => 'pagename']);
         $docsUrlPattern = str_replace('pagename', '$2', $docsUrlPattern);
         $relativeLinkReplacementPattern = "\$1{$docsUrlPattern}\$3";
 

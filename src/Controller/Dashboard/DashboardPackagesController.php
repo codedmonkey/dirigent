@@ -34,7 +34,7 @@ class DashboardPackagesController extends AbstractController
     ) {
     }
 
-    #[Route('/dashboard/packages', name: 'dashboard_packages')]
+    #[Route('/packages', name: 'dashboard_packages')]
     #[IsGrantedAccess]
     public function list(Request $request): Response
     {
@@ -57,31 +57,33 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/info/{packageName}/{packageVersion}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGrantedAccess]
-    public function info(string $packageName, ?string $packageVersion = null): Response
+    public function info(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-
-        $versions = $package->getVersions()->toArray();
-        $latestVersion = $package->getDefaultVersion();
-
-        usort($versions, Package::class . '::sortVersions');
-
-        if (null !== $packageVersion) {
-            $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
-        } else {
-            $version = $package->getLatestVersion();
-        }
+        $version = $package->getLatestVersion();
 
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
-            'latestVersion' => $latestVersion,
             'version' => $version,
         ]);
     }
 
-    #[Route('/dashboard/packages/versions/{packageName}', name: 'dashboard_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function versionInfo(string $packageName, string $packageVersion): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
+
+        return $this->render('dashboard/packages/package_info.html.twig', [
+            'package' => $package,
+            'version' => $version,
+        ]);
+    }
+
+    #[Route('/packages/{packageName}/versions', name: 'dashboard_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGrantedAccess]
     public function versions(string $packageName): Response
     {
@@ -96,7 +98,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/statistics/{packageName}', name: 'dashboard_packages_statistics', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/statistics', name: 'dashboard_packages_statistics', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGrantedAccess]
     public function statistics(string $packageName): Response
     {
@@ -138,7 +140,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
+    #[Route('/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
     #[IsGranted('ROLE_ADMIN')]
     public function addMirroring(Request $request): Response
     {
@@ -221,7 +223,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/add-vcs', name: 'dashboard_packages_add_vcs')]
+    #[Route('/packages/add-vcs', name: 'dashboard_packages_add_vcs')]
     #[IsGranted('ROLE_ADMIN')]
     public function addVcsRepository(Request $request): Response
     {
@@ -236,7 +238,7 @@ class DashboardPackagesController extends AbstractController
 
             $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
-            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());
+            return $this->redirectToRoute('dashboard_packages');
         }
 
         return $this->render('dashboard/packages/add_vcs.html.twig', [
@@ -244,7 +246,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/edit/{packageName}', name: 'dashboard_packages_edit', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/edit', name: 'dashboard_packages_edit', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, string $packageName): Response
     {
@@ -261,7 +263,7 @@ class DashboardPackagesController extends AbstractController
 
             $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
-            return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
+            return $this->redirectToRoute('dashboard_packages_info', ['packageName' => $package->getName()]);
         }
 
         return $this->render('dashboard/packages/package_edit.html.twig', [
@@ -270,7 +272,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/packages/update/{packageName}', name: 'dashboard_packages_update', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/update', name: 'dashboard_packages_update', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function update(string $packageName): Response
     {
@@ -278,10 +280,10 @@ class DashboardPackagesController extends AbstractController
 
         $this->messenger->dispatch(new UpdatePackage($package->getId(), forceRefresh: true));
 
-        return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages_info', ['packageName' => $package->getName()])->generateUrl());
+        return $this->redirectToRoute('dashboard_packages_info', ['packageName' => $package->getName()]);
     }
 
-    #[Route('/dashboard/packages/delete/{packageName}', name: 'dashboard_packages_delete', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/delete', name: 'dashboard_packages_delete', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(string $packageName): Response
     {
@@ -289,6 +291,6 @@ class DashboardPackagesController extends AbstractController
 
         $this->packageRepository->remove($package, true);
 
-        return $this->redirect($this->adminUrlGenerator->setRoute('dashboard_packages')->generateUrl());
+        return $this->redirectToRoute('dashboard_packages');
     }
 }

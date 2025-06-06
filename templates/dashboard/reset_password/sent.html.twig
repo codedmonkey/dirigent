@@ -21,7 +21,7 @@
         If an account matching your email exists, then an email was just sent that contains a link that you can use to reset your password.
         This link will expire in {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
       </p>
-      {% set requestUrl = dashboard_path('dashboard_reset_password_request') %}
+      {% set requestUrl = path('dashboard_reset_password_request') %}
       <p>If you don't receive an email please check your spam folder or <a href="{{ requestUrl }}">try again</a>.</p>
     </section>
   </div>
