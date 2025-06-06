@@ -35,7 +35,6 @@ class DashboardPackagesController extends AbstractController
     public function list(Request $request): Response
     {
         $queryBuilder = $this->packageRepository->createQueryBuilder('package');
-        $queryBuilder->addOrderBy('package.name', 'ASC');
 
         if (null !== $query = $request->query->get('query')) {
             $queryBuilder->andWhere($queryBuilder->expr()->like('package.name', ':query'));

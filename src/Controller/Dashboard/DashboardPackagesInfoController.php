@@ -84,8 +84,7 @@ class DashboardPackagesInfoController extends AbstractController
         $queryBuilder
             ->leftJoin('dependent.package', 'package')
             ->andWhere('dependent.dependentPackageName = :packageName')
-            ->setParameter('packageName', $package->getName())
-            ->addOrderBy('package.name', 'ASC');
+            ->setParameter('packageName', $package->getName());
 
         $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
         $dependents = $paginator->getResults();
@@ -109,8 +108,7 @@ class DashboardPackagesInfoController extends AbstractController
             ->leftJoin('provider.package', 'package')
             ->andWhere('provider.providedPackageName = :packageName')
             ->andWhere('provider.implementation = true')
-            ->setParameter('packageName', $package->getName())
-            ->addOrderBy('package.name', 'ASC');
+            ->setParameter('packageName', $package->getName());
 
         $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
         $providers = $paginator->getResults();
@@ -134,8 +132,7 @@ class DashboardPackagesInfoController extends AbstractController
             ->leftJoin('provider.package', 'package')
             ->andWhere('provider.providedPackageName = :packageName')
             ->andWhere('provider.implementation = false')
-            ->setParameter('packageName', $package->getName())
-            ->addOrderBy('package.name', 'ASC');
+            ->setParameter('packageName', $package->getName());
 
         $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
         $providers = $paginator->getResults();
@@ -158,8 +155,7 @@ class DashboardPackagesInfoController extends AbstractController
         $queryBuilder
             ->leftJoin('suggester.package', 'package')
             ->andWhere('suggester.suggestedPackageName = :packageName')
-            ->setParameter('packageName', $package->getName())
-            ->addOrderBy('package.name', 'ASC');
+            ->setParameter('packageName', $package->getName());
 
         $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
         $suggesters = $paginator->getResults();
