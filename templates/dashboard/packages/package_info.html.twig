@@ -62,12 +62,12 @@
   </div>
 
   <div class="row border-bottom pb-3 mb-3">
-    {{ _self.linkBlock("requires", version.require) }}
-    {{ _self.linkBlock("requires (dev)", version.devRequire) }}
-    {{ _self.linkBlock("provides", version.provide) }}
-    {{ _self.suggestBlock("suggests", version.suggest) }}
-    {{ _self.linkBlock("conflicts", version.conflict) }}
-    {{ _self.linkBlock("replaces", version.replace) }}
+    {{ _self.linkBlock('requires', version.require) }}
+    {{ _self.linkBlock('requires (dev)', version.devRequire) }}
+    {{ _self.linkBlock('provides', version.provide) }}
+    {{ _self.linkBlock('suggests', version.suggest) }}
+    {{ _self.linkBlock('conflicts', version.conflict) }}
+    {{ _self.linkBlock('replaces', version.replace) }}
   </div>
 
   {% if version.readme %}
@@ -83,28 +83,10 @@
 
     <ul>
       {% for link in links %}
-        {% if link.packageName is existing_package %}
-          <li><a href="{{ path('dashboard_packages_info', {packageName: link.packageName}) }}">{{ link.packageName }}</a>: {{ link.packageVersion }}</li>
+        {% if link.linkedPackageName is existing_package %}
+          <li><a href="{{ path('dashboard_packages_info', {packageName: link.linkedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
         {% else %}
-          <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
-        {% endif %}
-      {% else %}
-        <li>None</li>
-      {% endfor %}
-    </ul>
-  </div>
-{% endmacro %}
-
-{% macro suggestBlock(title, links) %}
-  <div class="col-md-6 col-lg-4">
-    <div class="h5">{{ title }}</div>
-
-    <ul>
-      {% for link in links %}
-        {% if link.packageName is existing_package %}
-          <li><a href="{{ path('dashboard_packages_info', {packageName: link.packageName}) }}">{{ link.packageName }}</a>: {{ link.packageVersion }}</li>
-        {% else %}
-          <li>{{ link.packageName }}: {{ link.packageVersion }}</li>
+          <li>{{ link.linkedPackageName }}: {{ link.linkedVersionConstraint }}</li>
         {% endif %}
       {% else %}
         <li>None</li>
