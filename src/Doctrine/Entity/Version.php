@@ -681,7 +681,7 @@ class Version
         }
 
         foreach ($supportedLinkTypes as $method => $linkType) {
-            /** @var PackageLink $link */
+            /** @var AbstractPackageLink $link */
             foreach ($this->{'get' . $method}() as $link) {
                 $link = $link->toArray();
                 $data[$linkType][key($link)] = current($link);

@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\MappedSuperclass]
-abstract class PackageLink
+abstract class AbstractPackageLink
 {
     #[ORM\Id]
     #[ORM\Column]
