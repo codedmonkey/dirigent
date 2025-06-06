@@ -4,10 +4,9 @@ namespace CodedMonkey\Dirigent\EasyAdmin;
 
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityPaginatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGeneratorInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class PackagePaginator implements EntityPaginatorInterface
 {
@@ -21,7 +20,9 @@ class PackagePaginator implements EntityPaginatorInterface
     private ?int $rangeLastResultNumber = null;
 
     public function __construct(
-        private readonly AdminUrlGeneratorInterface $adminUrlGenerator,
+        private readonly UrlGeneratorInterface $router,
+        private readonly string $routeName,
+        private readonly array $routeParameters = [],
     ) {
     }
 
@@ -53,7 +54,7 @@ class PackagePaginator implements EntityPaginatorInterface
 
     public function generateUrlForPage(int $page): string
     {
-        return $this->adminUrlGenerator->set(EA::PAGE, $page)->generateUrl();
+        return $this->router->generate($this->routeName, [...$this->routeParameters, 'page' => $page]);
     }
 
     public function getCurrentPage(): int

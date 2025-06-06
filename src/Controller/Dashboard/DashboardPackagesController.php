@@ -14,8 +14,9 @@ use CodedMonkey\Dirigent\Message\UpdatePackage;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use Composer\Semver\VersionParser;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityPaginatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +31,6 @@ class DashboardPackagesController extends AbstractController
         private readonly PackageRepository $packageRepository,
         private readonly PackageMetadataResolver $metadataResolver,
         private readonly MessageBusInterface $messenger,
-        private readonly AdminUrlGenerator $adminUrlGenerator,
     ) {
     }
 
@@ -46,9 +46,7 @@ class DashboardPackagesController extends AbstractController
             $queryBuilder->setParameter('query', "%{$query}%");
         }
 
-        $paginatorDto = new PaginatorDto(20, 3, 1, true, null);
-        $paginatorDto->setPageNumber($request->query->getInt('page', 1));
-        $paginator = (new PackagePaginator($this->adminUrlGenerator))->paginate($paginatorDto, $queryBuilder);
+        $paginator = $this->createPackagePaginator($request, $queryBuilder);
         $packages = $paginator->getResults();
 
         return $this->render('dashboard/packages/list.html.twig', [
@@ -292,5 +290,19 @@ class DashboardPackagesController extends AbstractController
         $this->packageRepository->remove($package, true);
 
         return $this->redirectToRoute('dashboard_packages');
+    }
+
+    private function createPackagePaginator(Request $request, QueryBuilder $queryBuilder): EntityPaginatorInterface
+    {
+        $paginatorDto = new PaginatorDto(20, 3, 1, true, null);
+        $paginatorDto->setPageNumber($request->query->getInt('page', 1));
+
+        $paginator = new PackagePaginator(
+            $this->container->get('router'),
+            $request->attributes->get('_route'),
+            $request->attributes->get('_route_params'),
+        );
+
+        return $paginator->paginate($paginatorDto, $queryBuilder);
     }
 }
