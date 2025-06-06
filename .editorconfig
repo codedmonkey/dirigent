@@ -10,8 +10,15 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[{compose.yaml,compose.*.yaml}]
-indent_size = 2
-
 [*.md]
 trim_trailing_whitespace = false
+
+[*.twig]
+indent_size = 2
+
+[*.yaml]
+indent_size = 2
+
+# Override indent size for YAML files that are managed with Symfony Flex recipes
+[config/**.yaml]
+indent_size = 4
