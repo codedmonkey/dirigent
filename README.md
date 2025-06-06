@@ -53,6 +53,6 @@ Dirigent is developed by [Coded Monkey][codedmonkey].
 [docs]: docs/readme.md
 [docs-install]: docs/installation/readme.md
 [github-issues]: https://github.com/codedmonkey/dirigent/issues
-[license]: license.md
+[license]: LICENSE.md
 [packagist]: https://packagist.org
 [php]: https://php.net

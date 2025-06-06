@@ -3,7 +3,6 @@
     "description": "A free and open package registry for Composer",
     "type": "project",
     "license": "FSL-1.1-MIT",
-    "readme": "readme.md",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {

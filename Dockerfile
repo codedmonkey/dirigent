@@ -87,7 +87,7 @@ WORKDIR /srv/app
 
 COPY --chown=$UID:$GID --from=composer_build /srv/app ./
 COPY --chown=$UID:$GID --from=node_build /srv/app/public/build public/build/
-COPY --chown=$UID:$GID readme.md license.md ./
+COPY --chown=$UID:$GID README.md LICENSE.md CHANGELOG.md ./
 COPY --chown=$UID:$GID bin/console bin/dirigent bin/
 COPY --chown=$UID:$GID docker/config.yaml config/dirigent.yaml
 COPY --chown=$UID:$GID docker/env.php ./.env.dirigent.local.php
