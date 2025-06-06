@@ -6,6 +6,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityPaginatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class PackagePaginator implements EntityPaginatorInterface
@@ -50,6 +51,20 @@ class PackagePaginator implements EntityPaginatorInterface
         }
 
         return $this;
+    }
+
+    public static function fromRequest(Request $request, QueryBuilder $queryBuilder, UrlGeneratorInterface $router): EntityPaginatorInterface
+    {
+        $paginatorDto = new PaginatorDto(20, 3, 1, true, null);
+        $paginatorDto->setPageNumber($request->query->getInt('page', 1));
+
+        $paginator = new self(
+            $router,
+            $request->attributes->get('_route'),
+            $request->attributes->get('_route_params'),
+        );
+
+        return $paginator->paginate($paginatorDto, $queryBuilder);
     }
 
     public function generateUrlForPage(int $page): string
