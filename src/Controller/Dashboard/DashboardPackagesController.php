@@ -43,10 +43,8 @@ class DashboardPackagesController extends AbstractController
         }
 
         $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
-        $packages = $paginator->getResults();
 
         return $this->render('dashboard/packages/list.html.twig', [
-            'packages' => $packages,
             'paginator' => $paginator,
         ]);
     }
