@@ -4,15 +4,23 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageProvideLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageRequireLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageSuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use Composer\Semver\VersionParser;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class DashboardPackagesInfoController extends AbstractController
 {
     public function __construct(
+        private readonly EntityManagerInterface $entityManager,
         private readonly PackageRepository $packageRepository,
     ) {
     }
@@ -24,10 +32,7 @@ class DashboardPackagesInfoController extends AbstractController
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
         $version = $package->getLatestVersion();
 
-        return $this->render('dashboard/packages/package_info.html.twig', [
-            'package' => $package,
-            'version' => $version,
-        ]);
+        return $this->versionInfo($packageName, $version->getNormalizedVersion());
     }
 
     #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
@@ -37,9 +42,19 @@ class DashboardPackagesInfoController extends AbstractController
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
         $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
 
+        $dependentCount = $this->entityManager->getRepository(PackageRequireLink::class)->count(['linkedPackageName' => $package->getName()]);
+        $implementationCount = $this->entityManager->getRepository(PackageProvideLink::class)->count(['linkedPackageName' => $package->getName(), 'implementation' => true]);
+        $providerCount = $this->entityManager->getRepository(PackageProvideLink::class)->count(['linkedPackageName' => $package->getName(), 'implementation' => false]);
+        $suggesterCount = $this->entityManager->getRepository(PackageSuggestLink::class)->count(['linkedPackageName' => $package->getName()]);
+
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'version' => $version,
+
+            'dependentCount' => $dependentCount,
+            'implementationCount' => $implementationCount,
+            'providerCount' => $providerCount,
+            'suggesterCount' => $suggesterCount,
         ]);
     }
 
@@ -55,6 +70,80 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
             'versions' => $versions,
+        ]);
+    }
+
+    #[Route('/packages/{packageName}/dependents', name: 'dashboard_packages_dependents', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function dependents(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        return $this->packageLinks($request, $package, PackageRequireLink::class, 'Dependents');
+    }
+
+    #[Route('/packages/{packageName}/implementations', name: 'dashboard_packages_implementations', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function implementations(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        $providerRepository = $this->entityManager->getRepository(PackageProvideLink::class);
+        $queryBuilder = $providerRepository->createQueryBuilder('provider');
+        $queryBuilder
+            ->leftJoin('provider.package', 'package')
+            ->andWhere('provider.linkedPackageName = :packageName')
+            ->andWhere('provider.implementation = true')
+            ->setParameter('packageName', $package->getName());
+
+        return $this->packageLinks($request, $package, PackageProvideLink::class, 'Implementations', queryBuilder: $queryBuilder);
+    }
+
+    #[Route('/packages/{packageName}/providers', name: 'dashboard_packages_providers', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function providers(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        $providerRepository = $this->entityManager->getRepository(PackageProvideLink::class);
+        $queryBuilder = $providerRepository->createQueryBuilder('provider');
+        $queryBuilder
+            ->leftJoin('provider.package', 'package')
+            ->andWhere('provider.linkedPackageName = :packageName')
+            ->andWhere('provider.implementation = false')
+            ->setParameter('packageName', $package->getName());
+
+        return $this->packageLinks($request, $package, PackageProvideLink::class, 'Providers', queryBuilder: $queryBuilder);
+    }
+
+    #[Route('/packages/{packageName}/suggesters', name: 'dashboard_packages_suggesters', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function suggesters(Request $request, string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        return $this->packageLinks($request, $package, PackageSuggestLink::class, 'Suggesters');
+    }
+
+    private function packageLinks(Request $request, Package $package, string $linkClass, string $title, ?QueryBuilder $queryBuilder = null): Response
+    {
+        if (!$queryBuilder) {
+            $dependentRepository = $this->entityManager->getRepository($linkClass);
+            $queryBuilder = $dependentRepository->createQueryBuilder('link');
+            $queryBuilder
+                ->leftJoin('link.package', 'package')
+                ->andWhere('link.linkedPackageName = :packageName')
+                ->setParameter('packageName', $package->getName());
+        }
+
+        $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
+        $packageLinks = $paginator->getResults();
+
+        return $this->render('dashboard/packages/package_links.html.twig', [
+            'package' => $package,
+            'packageLinks' => $packageLinks,
+            'paginator' => $paginator,
+            'title' => $title,
         ]);
     }
 

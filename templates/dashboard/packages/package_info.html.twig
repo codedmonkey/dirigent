@@ -45,6 +45,14 @@
           <div><a href="{{ version.source.url }}">Source</a></div>
         {% endif %}
         <div>Installs: {{ package.installations.total }}</div>
+        {% set packageDependentsUrl = path('dashboard_packages_dependents', {packageName: package.name}) %}
+        <div><a href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a>: {{ dependentCount }}</div>
+        {% set packageSuggestersUrl = path('dashboard_packages_suggesters', {packageName: package.name}) %}
+        <div><a href="{{ packageSuggestersUrl }}">{{ 'Suggesters'|trans }}</a>: {{ suggesterCount }}</div>
+        {% set packageImplementationsUrl = path('dashboard_packages_implementations', {packageName: package.name}) %}
+        <div><a href="{{ packageImplementationsUrl }}">{{ 'Implementations'|trans }}</a>: {{ implementationCount }}</div>
+        {% set packageProvidersUrl = path('dashboard_packages_providers', {packageName: package.name}) %}
+        <div><a href="{{ packageProvidersUrl }}">{{ 'Providers'|trans }}</a>: {{ providerCount }}</div>
         {% if version.license %}
           <div>License: {{ version.license|join(', ') }}</div>
         {% else %}
@@ -64,7 +72,7 @@
   <div class="row border-bottom pb-3 mb-3">
     {{ _self.linkBlock('requires', version.require) }}
     {{ _self.linkBlock('requires (dev)', version.devRequire) }}
-    {{ _self.linkBlock('provides', version.provide) }}
+    {{ _self.provideBlock(version.provide) }}
     {{ _self.linkBlock('suggests', version.suggest) }}
     {{ _self.linkBlock('conflicts', version.conflict) }}
     {{ _self.linkBlock('replaces', version.replace) }}
@@ -85,6 +93,26 @@
       {% for link in links %}
         {% if link.linkedPackageName is existing_package %}
           <li><a href="{{ path('dashboard_packages_info', {packageName: link.linkedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
+        {% else %}
+          <li>{{ link.linkedPackageName }}: {{ link.linkedVersionConstraint }}</li>
+        {% endif %}
+      {% else %}
+        <li>None</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
+
+{% macro provideBlock(links) %}
+  <div class="col-md-6 col-lg-4">
+    <div class="h5">provides</div>
+
+    <ul>
+      {% for link in links %}
+        {% if link.linkedPackageName is existing_package %}
+          <li><a href="{{ path('dashboard_packages_info', {packageName: link.linkedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
+        {% elseif link.implementation and link.implementedPackageName is existing_package %}
+          <li><a href="{{ path('dashboard_packages_info', {packageName: link.implementedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
         {% else %}
           <li>{{ link.linkedPackageName }}: {{ link.linkedVersionConstraint }}</li>
         {% endif %}

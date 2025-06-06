@@ -2,13 +2,16 @@ Account: Account
 Administration: Administration
 Credits: Credits
 Dashboard: Dashboard
-Dependants: Dependants
+Dependents: Dependents
 Documentation: Documentation
+Implementations: Implementations
 Info: Info
 Packages: Packages
 Personal: Personal
+Providers: Providers
 Sign out: Sign out
 Statistics: Statistics
+Suggesters: Suggesters
 Usage: Usage
 
 Access token: Access token
