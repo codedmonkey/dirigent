@@ -130,3 +130,67 @@ jobs:
 
       - name: Run PHPUnit
         run: bin/phpunit --coverage-text ${{ env.PHPUNIT_FLAGS }}
+
+  phpunit-lowest:
+    name: "PHPUnit (Lowest dependencies)"
+
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: postgres:16-alpine
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: dirigent_test
+          POSTGRES_PASSWORD: "!ChangeMe!"
+          POSTGRES_USER: dirigent
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer.lowest-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer.lowest-
+
+      - name: Install Composer dependencies (Lowest dependencies)
+        run: composer update --ansi --no-interaction --no-progress --prefer-lowest
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23.x
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Generate encryption keys
+        run: bin/console encryption:generate-keys
+
+      - name: Create database schema
+        run: bin/console doctrine:schema:create --env=test
+
+      - name: Load database fixtures
+        run: bin/console doctrine:fixtures:load --env=test --no-interaction
+
+      - name: PHPUnit version
+        run: bin/phpunit --version
+
+      - name: Run PHPUnit
+        run: bin/phpunit --coverage-text ${{ env.PHPUNIT_FLAGS }}
