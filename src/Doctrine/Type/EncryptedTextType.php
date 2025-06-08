@@ -12,6 +12,14 @@ class EncryptedTextType extends Type
 
     private ?Encryption $encryption = null;
 
+    /**
+     * @override removed in doctrine/dbal 4.0
+     */
+    public function getName(): string
+    {
+        return self::TYPE;
+    }
+
     public function setEncryptionUtility(Encryption $encryption): void
     {
         $this->encryption = $encryption;
