@@ -57,7 +57,17 @@ class PackageRepository extends ServiceEntityRepository
     /**
      * @return list<array{id: int}>
      */
-    public function getStalePackages(): array
+    public function getAllPackageIds(): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        return $connection->fetchAllAssociative('SELECT id FROM package ORDER BY id');
+    }
+
+    /**
+     * @return list<array{id: int}>
+     */
+    public function getStalePackageIds(): array
     {
         $connection = $this->getEntityManager()->getConnection();
 
@@ -73,16 +83,6 @@ class PackageRepository extends ServiceEntityRepository
                 'crawled' => $before->format('Y-m-d H:i:s'),
             ]
         );
-    }
-
-    /**
-     * @return list<array{id: int}>
-     */
-    public function getAllPackageIds(): array
-    {
-        $connection = $this->getEntityManager()->getConnection();
-
-        return $connection->fetchAllAssociative('SELECT id FROM package ORDER BY id');
     }
 
     public function updatePackageLinks(int $packageId, int $versionId): void
