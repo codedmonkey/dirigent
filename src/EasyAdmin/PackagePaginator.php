@@ -10,14 +10,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class PackagePaginator implements EntityPaginatorInterface
 {
-    private ?int $currentPage = null;
-    private ?int $pageSize = null;
-    private ?int $rangeSize = null;
-    private ?int $rangeEdgeSize = null;
-    private $results;
-    private $numResults;
-    private ?int $rangeFirstResultNumber = null;
-    private ?int $rangeLastResultNumber = null;
+    private int $currentPage;
+    private int $pageSize;
+    private int $rangeSize;
+    private int $rangeEdgeSize;
+    private array $results;
+    private int $numResults;
 
     public function __construct(
         private readonly UrlGeneratorInterface $router,
@@ -33,8 +31,7 @@ class PackagePaginator implements EntityPaginatorInterface
         $this->rangeEdgeSize = $paginatorDto->getRangeEdgeSize();
         $this->currentPage = max(1, $paginatorDto->getPageNumber());
         $firstResult = ($this->currentPage - 1) * $this->pageSize;
-        $this->rangeFirstResultNumber = $this->pageSize * ($this->currentPage - 1) + 1;
-        $this->rangeLastResultNumber = $this->rangeFirstResultNumber + $this->pageSize - 1;
+        $rangeFirstResultNumber = $this->pageSize * ($this->currentPage - 1) + 1;
 
         $countQueryBuilder = clone $queryBuilder;
         $this->numResults = $countQueryBuilder
@@ -42,9 +39,8 @@ class PackagePaginator implements EntityPaginatorInterface
             ->getQuery()
             ->getSingleScalarResult();
 
-        if ($this->rangeFirstResultNumber > $this->numResults) {
+        if ($rangeFirstResultNumber > $this->numResults) {
             $this->results = [];
-            $this->rangeLastResultNumber = $this->numResults;
 
             return $this;
         }
@@ -57,9 +53,6 @@ class PackagePaginator implements EntityPaginatorInterface
             ->getResult();
 
         $this->results = $results;
-        if ($this->rangeLastResultNumber > $this->numResults) {
-            $this->rangeLastResultNumber = $this->numResults;
-        }
 
         return $this;
     }

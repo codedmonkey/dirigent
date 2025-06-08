@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
@@ -79,13 +78,13 @@ class ApiController extends AbstractController
         $basePackageName = u($packageName)->trimSuffix('~dev')->toString();
 
         if (null === $package = $this->findPackage($basePackageName)) {
-            throw new NotFoundHttpException();
+            throw $this->createNotFoundException();
         }
 
         $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
         if (!$this->providerManager->exists($packageName)) {
-            throw new NotFoundHttpException();
+            throw $this->createNotFoundException();
         }
 
         return new BinaryFileResponse($this->providerManager->path($packageName), headers: ['Content-Type' => 'application/json']);
@@ -105,26 +104,26 @@ class ApiController extends AbstractController
     public function packageDistribution(string $packageName, string $packageVersion, string $reference, string $type): Response
     {
         if (!$this->getParameter('dirigent.dist_mirroring.enabled')) {
-            throw new NotFoundHttpException();
+            throw $this->createNotFoundException();
         }
 
         if (!$this->distributionResolver->exists($packageName, $packageVersion, $reference, $type)) {
             if (null === $package = $this->packageRepository->findOneBy(['name' => $packageName])) {
-                throw new NotFoundHttpException();
+                throw $this->createNotFoundException();
             }
 
             if (null === $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $packageVersion])) {
-                throw new NotFoundHttpException();
+                throw $this->createNotFoundException();
             }
 
             if ($version->isDevelopment() && !$this->getParameter('dirigent.dist_mirroring.dev_packages')) {
-                throw new NotFoundHttpException();
+                throw $this->createNotFoundException();
             }
 
             $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
             if (!$this->distributionResolver->resolve($version, $reference, $type)) {
-                throw new NotFoundHttpException();
+                throw $this->createNotFoundException();
             }
         }
 
