@@ -55,22 +55,22 @@ class Version
     #[ORM\Column(nullable: true)]
     private ?array $dist = null;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: RequireLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionRequireLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $require;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: DevRequireLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionDevRequireLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $devRequire;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ConflictLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionConflictLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $conflict;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ProvideLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionProvideLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $provide;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: ReplaceLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionReplaceLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $replace;
 
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: SuggestLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionSuggestLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $suggest;
 
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'versions', cascade: ['persist', 'detach', 'remove'])]
@@ -274,79 +274,79 @@ class Version
     }
 
     /**
-     * @return Collection<int, RequireLink>
+     * @return Collection<int, VersionRequireLink>
      */
     public function getRequire(): Collection
     {
         return $this->require;
     }
 
-    public function addRequireLink(RequireLink $require): void
+    public function addRequireLink(VersionRequireLink $require): void
     {
         $this->require[] = $require;
     }
 
     /**
-     * @return Collection<int, DevRequireLink>
+     * @return Collection<int, VersionDevRequireLink>
      */
     public function getDevRequire(): Collection
     {
         return $this->devRequire;
     }
 
-    public function addDevRequireLink(DevRequireLink $devRequire): void
+    public function addDevRequireLink(VersionDevRequireLink $devRequire): void
     {
         $this->devRequire[] = $devRequire;
     }
 
     /**
-     * @return Collection<int, ConflictLink>
+     * @return Collection<int, VersionConflictLink>
      */
     public function getConflict(): Collection
     {
         return $this->conflict;
     }
 
-    public function addConflictLink(ConflictLink $conflict): void
+    public function addConflictLink(VersionConflictLink $conflict): void
     {
         $this->conflict[] = $conflict;
     }
 
     /**
-     * @return Collection<int, ProvideLink>
+     * @return Collection<int, VersionProvideLink>
      */
     public function getProvide(): Collection
     {
         return $this->provide;
     }
 
-    public function addProvideLink(ProvideLink $provide): void
+    public function addProvideLink(VersionProvideLink $provide): void
     {
         $this->provide[] = $provide;
     }
 
     /**
-     * @return Collection<int, ReplaceLink>
+     * @return Collection<int, VersionReplaceLink>
      */
     public function getReplace(): Collection
     {
         return $this->replace;
     }
 
-    public function addReplaceLink(ReplaceLink $replace): void
+    public function addReplaceLink(VersionReplaceLink $replace): void
     {
         $this->replace[] = $replace;
     }
 
     /**
-     * @return Collection<int, SuggestLink>
+     * @return Collection<int, VersionSuggestLink>
      */
     public function getSuggest(): Collection
     {
         return $this->suggest;
     }
 
-    public function addSuggestLink(SuggestLink $suggest): void
+    public function addSuggestLink(VersionSuggestLink $suggest): void
     {
         $this->suggest[] = $suggest;
     }
@@ -681,10 +681,9 @@ class Version
         }
 
         foreach ($supportedLinkTypes as $method => $linkType) {
-            /** @var AbstractPackageLink $link */
+            /** @var AbstractVersionLink $link */
             foreach ($this->{'get' . $method}() as $link) {
-                $link = $link->toArray();
-                $data[$linkType][key($link)] = current($link);
+                $data[$linkType][$link->getLinkedPackageName()] = $link->getLinkedVersionConstraint();
             }
         }
 

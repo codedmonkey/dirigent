@@ -10,6 +10,8 @@ parameters:
     excludePaths:
         - tests/bootstrap.php
     ignoreErrors:
+        - '#CodedMonkey\\Dirigent\\Doctrine\\Entity\\AbstractVersionLink given\.#'
+        - '#^PHPDoc tag @var with type CodedMonkey\\Dirigent\\Doctrine\\Entity\\AbstractVersionLink is not subtype of native type#'
         - '#^Property CodedMonkey\\Dirigent\\Doctrine\\Entity\\[a-zA-Z]+\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
         -
             message: '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'

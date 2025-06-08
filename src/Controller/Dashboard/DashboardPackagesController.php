@@ -12,11 +12,7 @@ use CodedMonkey\Dirigent\Form\PackageAddVcsFormType;
 use CodedMonkey\Dirigent\Form\PackageFormType;
 use CodedMonkey\Dirigent\Message\UpdatePackage;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
-use Composer\Semver\VersionParser;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\QueryBuilder;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityPaginatorInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,102 +35,16 @@ class DashboardPackagesController extends AbstractController
     public function list(Request $request): Response
     {
         $queryBuilder = $this->packageRepository->createQueryBuilder('package');
-        $queryBuilder->addOrderBy('package.name', 'ASC');
 
         if (null !== $query = $request->query->get('query')) {
             $queryBuilder->andWhere($queryBuilder->expr()->like('package.name', ':query'));
             $queryBuilder->setParameter('query', "%{$query}%");
         }
 
-        $paginator = $this->createPackagePaginator($request, $queryBuilder);
-        $packages = $paginator->getResults();
+        $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
 
         return $this->render('dashboard/packages/list.html.twig', [
-            'packages' => $packages,
             'paginator' => $paginator,
-        ]);
-    }
-
-    #[Route('/packages/{packageName}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
-    #[IsGrantedAccess]
-    public function info(string $packageName): Response
-    {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-        $version = $package->getLatestVersion();
-
-        return $this->render('dashboard/packages/package_info.html.twig', [
-            'package' => $package,
-            'version' => $version,
-        ]);
-    }
-
-    #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
-    #[IsGrantedAccess]
-    public function versionInfo(string $packageName, string $packageVersion): Response
-    {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-        $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
-
-        return $this->render('dashboard/packages/package_info.html.twig', [
-            'package' => $package,
-            'version' => $version,
-        ]);
-    }
-
-    #[Route('/packages/{packageName}/versions', name: 'dashboard_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
-    #[IsGrantedAccess]
-    public function versions(string $packageName): Response
-    {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-        $versions = $package->getVersions()->toArray();
-
-        usort($versions, Package::class . '::sortVersions');
-
-        return $this->render('dashboard/packages/package_versions.html.twig', [
-            'package' => $package,
-            'versions' => $versions,
-        ]);
-    }
-
-    #[Route('/packages/{packageName}/statistics', name: 'dashboard_packages_statistics', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
-    #[IsGrantedAccess]
-    public function statistics(string $packageName): Response
-    {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-
-        $versionInstallationsData = [];
-
-        foreach ($package->getVersions() as $version) {
-            $majorVersion = $version->getMajorVersion();
-
-            $versionInstallationsData[$majorVersion] ??= [];
-
-            foreach ($version->getInstallations()->getData() as $key => $installations) {
-                $versionInstallationsData[$majorVersion][$key] ??= 0;
-                $versionInstallationsData[$majorVersion][$key] += $installations;
-            }
-        }
-
-        $today = new \DateTimeImmutable();
-        $todayKey = $today->format('Ymd');
-        $installationsToday = $package->getInstallations()->getData()[$todayKey] ?? 0;
-
-        $installationsLast30Days = 0;
-        $date = new \DateTimeImmutable('-30 days');
-
-        while ($date <= $today) {
-            $dateKey = $date->format('Ymd');
-            $installationsLast30Days += $package->getInstallations()->getData()[$dateKey] ?? 0;
-
-            $date = $date->modify('+1 day');
-        }
-
-        return $this->render('dashboard/packages/package_statistics.html.twig', [
-            'package' => $package,
-            'versionInstallationsData' => $versionInstallationsData,
-            'installationsTotal' => $package->getInstallations()->getTotal(),
-            'installationsLast30Days' => $installationsLast30Days,
-            'installationsToday' => $installationsToday,
         ]);
     }
 
@@ -290,19 +200,5 @@ class DashboardPackagesController extends AbstractController
         $this->packageRepository->remove($package, true);
 
         return $this->redirectToRoute('dashboard_packages');
-    }
-
-    private function createPackagePaginator(Request $request, QueryBuilder $queryBuilder): EntityPaginatorInterface
-    {
-        $paginatorDto = new PaginatorDto(20, 3, 1, true, null);
-        $paginatorDto->setPageNumber($request->query->getInt('page', 1));
-
-        $paginator = new PackagePaginator(
-            $this->container->get('router'),
-            $request->attributes->get('_route'),
-            $request->attributes->get('_route_params'),
-        );
-
-        return $paginator->paginate($paginatorDto, $queryBuilder);
     }
 }

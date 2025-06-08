@@ -2,69 +2,33 @@
 
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\MappedSuperclass]
 abstract class AbstractPackageLink
 {
-    #[ORM\Id]
-    #[ORM\Column]
-    #[ORM\GeneratedValue]
-    private ?int $id = null;
+    protected Package $package;
 
-    #[ORM\Column(length: 191)]
-    private string $packageName;
+    #[ORM\Id, ORM\Column(length: 191)]
+    private string $linkedPackageName;
 
-    #[ORM\Column(type: Types::TEXT)]
-    private string $packageVersion;
-
-    /**
-     * Base property holding the version - this must remain protected since it
-     * is redefined with an attribute in the child class.
-     */
-    protected Version $version;
-
-    public function getId(): ?int
+    public function getPackage(): Package
     {
-        return $this->id;
+        return $this->package;
     }
 
-    public function getPackageName(): string
+    public function setPackage(Package $package): void
     {
-        return $this->packageName;
+        $this->package = $package;
     }
 
-    public function setPackageName(string $packageName): void
+    public function getLinkedPackageName(): string
     {
-        $this->packageName = $packageName;
+        return $this->linkedPackageName;
     }
 
-    public function getPackageVersion(): string
+    public function setLinkedPackageName(string $packageName): void
     {
-        return $this->packageVersion;
-    }
-
-    public function setPackageVersion(string $packageVersion): void
-    {
-        $this->packageVersion = $packageVersion;
-    }
-
-    public function getVersion(): ?Version
-    {
-        return $this->version;
-    }
-
-    public function setVersion(Version $version): void
-    {
-        $this->version = $version;
-    }
-
-    /**
-     * @return non-empty-array<string, string>
-     */
-    public function toArray(): array
-    {
-        return [$this->getPackageName() => $this->getPackageVersion()];
+        $this->linkedPackageName = $packageName;
     }
 }
