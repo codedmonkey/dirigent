@@ -174,7 +174,7 @@ class DashboardPackagesController extends AbstractController
             return $this->redirectToRoute('dashboard_packages_info', ['packageName' => $package->getName()]);
         }
 
-        return $this->render('dashboard/packages/package_edit.html.twig', [
+        return $this->render('dashboard/packages/edit.html.twig', [
             'package' => $package,
             'form' => $form,
         ]);

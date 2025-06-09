@@ -3,7 +3,7 @@
 {% block page_title %}{{ package.name }} <small>{{ 'Versions'|trans }}</small>{% endblock %}
 
 {% block page_content %}
-  {% include 'dashboard/packages/_package_header.html.twig' with {currentPage: 'versions'} %}
+  {{ include('dashboard/packages/_package_header.html.twig', {currentPage: 'versions'}) }}
 
   <div class="list-group list-group-flush mb-3">
     {% for version in versions %}
