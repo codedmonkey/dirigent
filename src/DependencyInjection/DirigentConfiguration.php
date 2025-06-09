@@ -68,25 +68,28 @@ class DirigentConfiguration implements ConfigurationInterface
                 ->children()
                     ->scalarNode('path')->defaultValue('%kernel.project_dir%/storage')->end()
                 ->end()
-            ->end()
-            ->arrayNode('dist_builder')
-                ->canBeEnabled()
-                ->children()
-                    ->booleanNode('dev_packages')->defaultFalse()->end()
-                ->end()
-            ->end()
-            ->arrayNode('dist_mirroring')
-                ->canBeEnabled()
-                ->children()
-                    ->booleanNode('preferred')->defaultTrue()->end()
-                    ->booleanNode('dev_packages')->defaultFalse()->end()
-                ->end()
             ->end();
 
+        $this->addDistributionsSection($rootNode);
         $this->addMetadataSection($rootNode);
         $this->addPackagesSection($rootNode);
 
         return $treeBuilder;
+    }
+
+    private function addDistributionsSection(ArrayNodeDefinition|NodeDefinition $rootNode): void
+    {
+        $rootNode->children()
+            ->arrayNode('distributions')
+                ->canBeEnabled('Host the distributions of packages')
+                ->children()
+                    ->booleanNode('build')->defaultTrue()->info('Build distributions from the source code (if not already provided)')->end()
+                    ->booleanNode('mirror')->defaultFalse()->info('Mirror distributions from the original source (if provided)')->end()
+                    ->booleanNode('async_api_requests')->defaultFalse()->info('Fetch distributions asynchronously instead of during execution (from the API)')->end()
+                    ->booleanNode('dev_versions')->defaultFalse()->info('Include distributions of development versions')->end()
+                    ->booleanNode('preferred_mirror')->defaultFalse()->info('Force Composer to download distributions from this registry first')->end()
+                ->end()
+            ->end();
     }
 
     private function addMetadataSection(ArrayNodeDefinition|NodeDefinition $rootNode): void
