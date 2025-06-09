@@ -3,10 +3,12 @@
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageSuggestLink;
+use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use Composer\Semver\VersionParser;
@@ -35,7 +37,7 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->versionInfo($packageName, $version->getNormalizedVersion());
     }
 
-    #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+', 'packageVersion' => '.*'])]
     #[IsGrantedAccess]
     public function versionInfo(string $packageName, string $packageVersion): Response
     {
@@ -70,6 +72,22 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
             'versions' => $versions,
+        ]);
+    }
+
+    #[Route('/packages/{packageName}/distributions', name: 'dashboard_packages_distributions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[IsGrantedAccess]
+    public function distributions(string $packageName): Response
+    {
+        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+
+        /** @var DistributionRepository $distributionRepository */
+        $distributionRepository = $this->entityManager->getRepository(Distribution::class);
+        $distributions = $distributionRepository->findByPackage($package);
+
+        return $this->render('dashboard/packages/package_distributions.html.twig', [
+            'package' => $package,
+            'distributions' => $distributions,
         ]);
     }
 

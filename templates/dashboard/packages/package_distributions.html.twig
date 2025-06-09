@@ -1,0 +1,20 @@
+{% extends 'dashboard/packages/package_base.html.twig' %}
+
+{% block page_title %}{{ package.name }} <small>{{ 'Distributions'|trans }}</small>{% endblock %}
+
+{% block page_content %}
+  {{ include('dashboard/packages/_package_header.html.twig', {currentPage: 'distributions', package: package}) }}
+
+  <div class="list-group list-group-flush mb-3">
+    {% for distribution in distributions %}
+      {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {packageName: package.name, packageVersion: distribution.version.version}) %}
+      <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <span>
+            {{ distribution.version.version }} ({{ distribution.reference }})
+          </span>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% endblock %}

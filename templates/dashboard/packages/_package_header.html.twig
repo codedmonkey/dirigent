@@ -10,8 +10,8 @@
     <a {% if currentPage == 'versions' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageVersionsUrl }}">{{ 'Versions'|trans }}</a>
   </li>
   <li class="nav-item">
-    {% set packageDependentsUrl = path('dashboard_packages_dependents', {packageName: package.name}) %}
-    <a {% if currentPage == 'dependents' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a>
+    {% set packageDistributionsUrl = path('dashboard_packages_distributions', {packageName: package.name}) %}
+    <a {% if currentPage == 'distributions' %}class="nav-link active" aria-current="page"{% else %}class="nav-link text-primary"{% endif%} href="{{ packageDistributionsUrl }}">{{ 'Distributions'|trans }}</a>
   </li>
   <li class="nav-item">
     {% set packageStatisticsUrl = path('dashboard_packages_statistics', {packageName: package.name}) %}
