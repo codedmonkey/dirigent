@@ -2,13 +2,18 @@
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Tests\FunctionalTests\WebTestCaseTrait;
+use CodedMonkey\Dirigent\Tests\Helper\TestEntityFactoryTrait;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 class DashboardPackagesControllerTest extends WebTestCase
 {
+    use TestEntityFactoryTrait;
     use WebTestCaseTrait;
 
     public function testAddMirroring(): void
@@ -73,5 +78,30 @@ class DashboardPackagesControllerTest extends WebTestCase
         $client->submitForm('Save changes');
 
         $this->assertResponseStatusCodeSame(302);
+    }
+
+    public function testDelete(): void
+    {
+        $client = static::createClient();
+        $this->loginUser('admin');
+
+        $entityManager = $this->getService(EntityManagerInterface::class);
+
+        $package = $this->createPackageEntity();
+
+        $entityManager->persist($package);
+        $entityManager->flush();
+
+        $packageId = $package->getId();
+
+        $client->request('GET', "/packages/{$package->getName()}/delete");
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
+
+        $entityManager->clear();
+
+        $savedPackage = $entityManager->find(Package::class, $packageId);
+
+        $this->assertNull($savedPackage, 'The package was deleted.');
     }
 }
