@@ -3,7 +3,8 @@ http:
   port: 7015
   use_gzip: true
 
-workers:
-  messenger_consume:
-    cmd: ['symfony', 'console', 'messenger:consume', 'async', 'scheduler_packages', '--sleep', '10']
-    watch: ['config', 'src', 'templates']
+# todo the worker isn't doing anything for me at the moment
+#workers:
+#  messenger_consume:
+#    cmd: ['symfony', 'console', 'messenger:consume', '--all', '--sleep', '10']
+#    watch: ['config', 'src', 'templates']
