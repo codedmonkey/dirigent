@@ -10,4 +10,9 @@ readonly class UpdatePackage
         public bool $forceRefresh = false,
     ) {
     }
+
+    public function isDynamicRequest(): bool
+    {
+        return !$this->scheduled && !$this->forceRefresh;
+    }
 }
