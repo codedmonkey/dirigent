@@ -3,7 +3,9 @@
 namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -14,6 +16,7 @@ readonly class PackageDistributionResolver
 
     public function __construct(
         private ComposerClient $composer,
+        private DistributionRepository $distributionRepository,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
@@ -52,6 +55,12 @@ readonly class PackageDistributionResolver
 
         $httpDownloader = $this->composer->createHttpDownloader();
         $httpDownloader->copy($distUrl, $path);
+
+        $distribution = new Distribution();
+        $distribution->setVersion($version);
+        $distribution->setReference($reference);
+
+        $this->distributionRepository->save($distribution, true);
 
         return true;
     }
