@@ -4,7 +4,10 @@ namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Composer\ConfigFactory;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Composer\IO\NullIO;
 use Composer\Pcre\Preg;
@@ -14,7 +17,6 @@ use Composer\Util\ProcessExecutor;
 use Composer\Util\Url;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
@@ -26,12 +28,13 @@ readonly class PackageDistributionResolver
     public function __construct(
         private MessageBusInterface $messenger,
         private ComposerClient $composer,
+        private DistributionRepository $distributionRepository,
         #[Autowire(param: 'dirigent.distributions.build')]
         private bool $buildDistributions,
         #[Autowire(param: 'dirigent.distributions.mirror')]
         private bool $mirrorDistributions,
         #[Autowire(param: 'dirigent.distributions.dev_versions')]
-        private bool $includeDevVersions,
+        private bool $resolveDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
@@ -49,6 +52,22 @@ readonly class PackageDistributionResolver
         return "$this->distributionStoragePath/$packageName/$versionName-$reference.$type";
     }
 
+    public function schedule(Version $version, bool $onlyAutomatic = true): void
+    {
+        $package = $version->getPackage();
+
+        if (
+            ($onlyAutomatic && !$package->getDistributionStrategy()->isAutomatic())
+            || null === $this->getFetchStrategy($version)
+        ) {
+            return;
+        }
+
+        $this->messenger->dispatch(new ResolveDistribution($version->getId()), [
+            new TransportNamesStamp('async'),
+        ]);
+    }
+
     public function resolve(Version $version, ?string $reference, ?string $type, bool $async): bool
     {
         $package = $version->getPackage();
@@ -59,58 +78,107 @@ readonly class PackageDistributionResolver
             return true;
         }
 
-        if ($version->isDevelopment() && !$this->includeDevVersions) {
+        $strategy = $this->getFetchStrategy($version);
+
+        if (null === $strategy) {
+            return false;
+        }
+
+        $currentReference = $strategy->isMirror() ? $version->getDistReference() : $version->getSourceReference();
+        $currentType = $strategy->isMirror() ? $version->getDistType() : 'zip';
+
+        if (null === $reference || null === $type) {
+            // Fall back to the current reference and type if not provided
+            $reference = $currentReference;
+            $type = $currentType;
+
+            if (null === $reference || null === $type) {
+                return false;
+            }
+        }
+
+        // Only support the current references for now
+        if ($reference !== $currentReference || $type !== $currentType) {
             return false;
         }
 
         if ($async) {
             // Resolve the distribution asynchronously so it's available in the future now that we know it was requested
-            $message = Envelope::wrap(new ResolveDistribution($version->getId(), $reference, $type))
-                ->with(new TransportNamesStamp('async'));
-            $this->messenger->dispatch($message);
+            $this->schedule($version, onlyAutomatic: false);
 
             // Still return false so the service resolving the distribution doesn't try to fetch it anyway
             return false;
         }
 
+        $distribution = $this->distributionRepository->findOneBy(['version' => $version, 'reference' => $reference, 'type' => $type]);
+        if (null === $distribution) {
+            $distribution = new Distribution();
+            $distribution->setVersion($version);
+            $distribution->setReference($reference);
+            $distribution->setType($type);
+            $distribution->setReleasedAt($version->getReleasedAt());
+        }
+
         $result = false;
 
         // Build the distribution from source
-        if (
-            $this->buildDistributions
-            && $version->getPackage()->getFetchStrategy()->isVcs()
-        ) {
-            $result = $this->build($version, $reference ?? $version->getSourceReference(), $type ?? $version->getSourceType());
+        if ($strategy->isVcs()) {
+            $result = $this->build($distribution);
+
+            if (
+                !$result
+                && $this->mirrorDistributions
+                && null !== $version->getDist()
+                && $version->getDistReference() === $reference
+                && $version->getDistType() === $type
+            ) {
+                // Mirror the distribution if it failed to build from source
+                // todo log fallback
+                $strategy = PackageFetchStrategy::Mirror;
+            }
         }
 
-        // Mirror the distribution from a remote source if it can't be built from source
-        $distributionAvailable = null !== $version->getDist();
-        if (
-            !$result
-            && $this->mirrorDistributions
-            && $distributionAvailable
-        ) {
-            $result = $this->mirror($version, $reference ?? $version->getDistReference(), $type ?? $version->getDistType());
+        if ($strategy->isMirror()) {
+            $result = $this->mirror($distribution);
+        }
+
+        if ($result) {
+            $distribution->setResolvedAt();
+            $this->distributionRepository->save($distribution, true);
         }
 
         return $result;
     }
 
-    private function build(Version $version, ?string $reference, ?string $type): bool
+    private function getFetchStrategy(Version $version): ?PackageFetchStrategy
     {
-        // Skip building of outdated references for now
-        if ($reference !== $version->getSourceReference()) {
-            return false;
+        $package = $version->getPackage();
+
+        if ($version->isDevelopment() && !$this->resolveDevVersions) {
+            return null;
+        } elseif ($package->getFetchStrategy()->isVcs() && $this->buildDistributions) {
+            return PackageFetchStrategy::Vcs;
+        } elseif (
+            $this->mirrorDistributions
+            && (
+                $package->getFetchStrategy()->isMirror()
+                || null !== $version->getDist()
+            )
+        ) {
+            return PackageFetchStrategy::Mirror;
         }
 
-        // Only provide .zip support for now
-        if ('zip' !== $type) {
-            return false;
-        }
+        return null;
+    }
+
+    private function build(Distribution $distribution): bool
+    {
+        $version = $distribution->getVersion();
+        $reference = $distribution->getReference();
 
         $package = $version->getPackage();
         $repositoryUrl = $package->getRepositoryUrl();
-        $distributionPath = $this->path($package->getName(), $version->getNormalizedVersion(), $reference, $type);
+        $distributionPath = $this->path($package->getName(), $version->getNormalizedVersion(), $reference, 'zip');
 
         $composerConfig = ConfigFactory::createForVcsRepository($repositoryUrl, $package->getRepositoryCredentials());
 
@@ -130,29 +198,30 @@ readonly class PackageDistributionResolver
             ['git', 'archive', '--format=zip', "--output=$distributionPath", $reference],
         ], $repositoryUrl, $cachePath);
 
+        $distribution->setSource(null);
+
         return true;
     }
 
-    private function mirror(Version $version, ?string $reference, ?string $type): bool
+    private function mirror(Distribution $distribution): bool
     {
-        // Skip mirroring of outdated references for now
-        if ($reference !== $version->getDistReference()) {
-            return false;
-        }
-
-        // The distribution type must match the origin format
-        if ($type !== $version->getDistType()) {
-            return false;
-        }
-
+        $version = $distribution->getVersion();
         $package = $version->getPackage();
+
         $distributionUrl = $version->getDistUrl();
-        $distributionPath = $this->path($package->getName(), $version->getNormalizedVersion(), $reference, $type);
+        $distributionPath = $this->path(
+            $package->getName(),
+            $version->getNormalizedVersion(),
+            $distribution->getReference(),
+            $distribution->getType(),
+        );
 
         $this->filesystem->mkdir(dirname($distributionPath));
 
         $httpDownloader = $this->composer->createHttpDownloader();
         $httpDownloader->copy($distributionUrl, $distributionPath);
+
+        $distribution->setSource($distributionUrl);
 
         return true;
     }

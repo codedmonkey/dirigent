@@ -114,6 +114,9 @@ class Version extends TrackedEntity
     #[ORM\ManyToOne(targetEntity: Package::class, inversedBy: 'versions')]
     private ?Package $package = null;
 
+    #[ORM\OneToMany(targetEntity: Distribution::class, mappedBy: 'version')]
+    private Collection $distributions;
+
     #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
     private VersionInstallations $installations;
 
@@ -132,6 +135,7 @@ class Version extends TrackedEntity
         $this->replace = new ArrayCollection();
         $this->suggest = new ArrayCollection();
         $this->keywords = new ArrayCollection();
+        $this->distributions = new ArrayCollection();
         $this->installations = new VersionInstallations($this);
     }
 
@@ -478,6 +482,14 @@ class Version extends TrackedEntity
     public function setPackage(Package $package): void
     {
         $this->package = $package;
+    }
+
+    /**
+     * @return Collection<int, Distribution>
+     */
+    public function getDistributions(): Collection
+    {
+        return $this->distributions;
     }
 
     public function getInstallations(): VersionInstallations
