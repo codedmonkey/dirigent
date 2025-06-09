@@ -3,7 +3,7 @@
 {% block page_title %}Edit Package{% endblock %}
 
 {% block search_wrapper %}
-  {% include 'dashboard/packages/_search_box.html.twig' with {searchAutofocus: false} %}
+  {{ include('dashboard/packages/_search_box.html.twig', {autofocus: false}, with_context: false) }}
 {% endblock %}
 
 {% block page_actions %}
