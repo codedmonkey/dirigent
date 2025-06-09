@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
+namespace CodedMonkey\Dirigent\Tests\Helper;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
