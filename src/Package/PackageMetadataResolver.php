@@ -16,16 +16,19 @@ use CodedMonkey\Dirigent\Doctrine\Entity\VersionProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionReplaceLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionSuggestLink;
-use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
+use CodedMonkey\Dirigent\Message\UpdatePackageLinks;
 use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
+use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 readonly class PackageMetadataResolver
 {
@@ -57,7 +60,6 @@ readonly class PackageMetadataResolver
         private MessageBusInterface $messenger,
         private EntityManagerInterface $entityManager,
         private RegistryRepository $registryRepository,
-        private PackageRepository $packageRepository,
         private VersionRepository $versionRepository,
     ) {
     }
@@ -164,8 +166,7 @@ readonly class PackageMetadataResolver
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
         $existingVersions = $this->versionRepository->getVersionMetadataForUpdate($package);
-        $processedVersions = [];
-        /** @var ?string $primaryVersionName Version name to use as package link source */
+        /** @var ?string $primaryVersionName Version name to use as the package link source */
         $primaryVersionName = null;
 
         foreach ($composerPackages as $composerPackage) {
@@ -191,14 +192,15 @@ readonly class PackageMetadataResolver
                 $primaryVersionName = $versionName;
             }
 
-            $processedVersions[$versionName] = $version;
             unset($existingVersions[$versionName]);
         }
 
         if ($primaryVersionName) {
-            $primaryVersion = $processedVersions[$primaryVersionName];
-
-            $this->packageRepository->updatePackageLinks($package->getId(), $primaryVersion->getId());
+            $message = new Envelope(new UpdatePackageLinks($package->getId(), $primaryVersionName), [
+                new DispatchAfterCurrentBusStamp(),
+                new TransportNamesStamp('async'),
+            ]);
+            $this->messenger->dispatch($message);
         }
 
         // Remove outdated versions
@@ -382,7 +384,7 @@ readonly class PackageMetadataResolver
             $version->setReadme(null);
         }
 
-        $this->versionRepository->save($version, true);
+        $em->persist($version);
     }
 
     private function sanitize(?string $str): ?string
