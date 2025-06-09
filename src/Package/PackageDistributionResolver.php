@@ -4,7 +4,9 @@ namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Composer\ConfigFactory;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Composer\IO\NullIO;
 use Composer\Pcre\Preg;
@@ -26,6 +28,7 @@ readonly class PackageDistributionResolver
     public function __construct(
         private MessageBusInterface $messenger,
         private ComposerClient $composer,
+        private DistributionRepository $distributionRepository,
         #[Autowire(param: 'dirigent.distributions.build')]
         private bool $buildDistributions,
         #[Autowire(param: 'dirigent.distributions.mirror')]
@@ -73,6 +76,23 @@ readonly class PackageDistributionResolver
             return false;
         }
 
+        $distributionAvailable = null !== $version->getDist();
+        $reference ??= $distributionAvailable ? $version->getDistReference() : $version->getSourceReference();
+        $type ??= $distributionAvailable ? $version->getDistType() : $version->getSourceType();
+
+        if (!$type || !$reference) {
+            return false;
+        }
+
+        $distribution = $this->distributionRepository->findOneBy(['version' => $version, 'reference' => $reference, 'type' => $type]);
+        if (null === $distribution) {
+            $distribution = new Distribution();
+            $distribution->setVersion($version);
+            $distribution->setReference($reference);
+            $distribution->setType($type);
+            $distribution->setReleasedAt($version->getReleasedAt());
+        }
+
         $result = false;
 
         // Build the distribution from source
@@ -80,7 +100,7 @@ readonly class PackageDistributionResolver
             $this->buildDistributions
             && $version->getPackage()->getFetchStrategy()->isVcs()
         ) {
-            $result = $this->build($version, $reference ?? $version->getSourceReference(), $type ?? $version->getSourceType());
+            $result = $this->build($distribution);
         }
 
         // Mirror the distribution from a remote source if it can't be built from source
@@ -90,14 +110,23 @@ readonly class PackageDistributionResolver
             && $this->mirrorDistributions
             && $distributionAvailable
         ) {
-            $result = $this->mirror($version, $reference ?? $version->getDistReference(), $type ?? $version->getDistType());
+            $result = $this->mirror($distribution);
+        }
+
+        if ($result) {
+            $distribution->setResolvedAt();
+            $this->distributionRepository->save($distribution, true);
         }
 
         return $result;
     }
 
-    private function build(Version $version, ?string $reference, ?string $type): bool
+    private function build(Distribution $distribution): bool
     {
+        $version = $distribution->getVersion();
+        $reference = $distribution->getReference();
+        $type = $distribution->getType();
+
         // Skip building of outdated references for now
         if ($reference !== $version->getSourceReference()) {
             return false;
@@ -130,11 +159,17 @@ readonly class PackageDistributionResolver
             ['git', 'archive', '--format=zip', "--output=$distributionPath", $reference],
         ], $repositoryUrl, $cachePath);
 
+        $distribution->setSource(null);
+
         return true;
     }
 
-    private function mirror(Version $version, ?string $reference, ?string $type): bool
+    private function mirror(Distribution $distribution): bool
     {
+        $version = $distribution->getVersion();
+        $reference = $distribution->getReference();
+        $type = $distribution->getType();
+
         // Skip mirroring of outdated references for now
         if ($reference !== $version->getDistReference()) {
             return false;
@@ -153,6 +188,8 @@ readonly class PackageDistributionResolver
 
         $httpDownloader = $this->composer->createHttpDownloader();
         $httpDownloader->copy($distributionUrl, $distributionPath);
+
+        $distribution->setSource($distributionUrl);
 
         return true;
     }
