@@ -62,7 +62,10 @@ class Package extends TrackedEntity
     private ?string $remoteId = null;
 
     #[ORM\Column(nullable: true, enumType: PackageFetchStrategy::class)]
-    private PackageFetchStrategy|string|null $fetchStrategy = null;
+    private ?PackageFetchStrategy $fetchStrategy = null;
+
+    #[ORM\Column(enumType: PackageDistributionStrategy::class)]
+    private PackageDistributionStrategy $distributionStrategy = PackageDistributionStrategy::Dynamic;
 
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
@@ -234,18 +237,28 @@ class Package extends TrackedEntity
         $this->remoteId = $remoteId;
     }
 
-    public function getFetchStrategy(): PackageFetchStrategy|string
+    public function getFetchStrategy(): PackageFetchStrategy
     {
-        if (!$this->fetchStrategy) {
+        if (null === $this->fetchStrategy) {
             return $this->mirrorRegistry ? PackageFetchStrategy::Mirror : PackageFetchStrategy::Vcs;
         }
 
         return $this->fetchStrategy;
     }
 
-    public function setFetchStrategy(PackageFetchStrategy|string $fetchStrategy): void
+    public function setFetchStrategy(?PackageFetchStrategy $fetchStrategy): void
     {
         $this->fetchStrategy = $fetchStrategy;
+    }
+
+    public function getDistributionStrategy(): PackageDistributionStrategy
+    {
+        return $this->distributionStrategy;
+    }
+
+    public function setDistributionStrategy(PackageDistributionStrategy $distributionStrategy): void
+    {
+        $this->distributionStrategy = $distributionStrategy;
     }
 
     public function getMirrorRegistry(): ?Registry

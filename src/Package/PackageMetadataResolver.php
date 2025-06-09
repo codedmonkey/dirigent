@@ -79,7 +79,6 @@ readonly class PackageMetadataResolver
         match ($package->getFetchStrategy()) {
             PackageFetchStrategy::Mirror => $this->resolveRegistryPackage($package),
             PackageFetchStrategy::Vcs => $this->resolveVcsPackage($package),
-            default => throw new \LogicException(),
         };
 
         $this->messenger->dispatch(new DumpPackageProvider($package->getId()));
