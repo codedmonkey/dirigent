@@ -71,7 +71,7 @@ class DashboardRegistryController extends AbstractCrudController
             ->setRequired(true)
             ->setChoices(RegistryPackageMirroring::cases())
             ->setFormTypeOption('choice_label', function (RegistryPackageMirroring $choice): string {
-                return "registry.package_mirroring.{$choice->value}";
+                return "registry.package-mirroring.{$choice->value}";
             })
             ->renderExpanded();
 
