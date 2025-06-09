@@ -50,7 +50,7 @@ class ApiController extends AbstractController
             'notify-batch' => $router->generate('api_track_installations'),
         ];
 
-        if ($this->getParameter('dirigent.dist_mirroring.enabled')) {
+        if ($this->getParameter('dirigent.distributions.mirror')) {
             $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
                 ->replace('{packageName}', '%package%')
                 ->replace('{packageVersion}', '%version%')
@@ -60,7 +60,7 @@ class ApiController extends AbstractController
 
             $data['mirrors'] = [[
                 'dist-url' => $distributionUrlPattern,
-                'preferred' => $this->getParameter('dirigent.dist_mirroring.preferred'),
+                'preferred' => $this->getParameter('dirigent.distributions.preferred_mirror'),
             ]];
         }
 
@@ -103,7 +103,7 @@ class ApiController extends AbstractController
     #[IsGrantedAccess]
     public function packageDistribution(string $packageName, string $packageVersion, string $reference, string $type): Response
     {
-        if (!$this->getParameter('dirigent.dist_mirroring.enabled')) {
+        if (!$this->getParameter('dirigent.distributions.enabled')) {
             throw $this->createNotFoundException();
         }
 
@@ -112,17 +112,13 @@ class ApiController extends AbstractController
                 throw $this->createNotFoundException();
             }
 
+            $this->messenger->dispatch(new UpdatePackage($package->getId()));
+
             if (null === $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $packageVersion])) {
                 throw $this->createNotFoundException();
             }
 
-            if ($version->isDevelopment() && !$this->getParameter('dirigent.dist_mirroring.dev_packages')) {
-                throw $this->createNotFoundException();
-            }
-
-            $this->messenger->dispatch(new UpdatePackage($package->getId()));
-
-            if (!$this->distributionResolver->resolve($version, $reference, $type)) {
+            if (!$this->distributionResolver->resolve($version, $reference, $type, async: $this->getParameter('dirigent.distributions.async_api_requests'))) {
                 throw $this->createNotFoundException();
             }
         }

@@ -26,7 +26,7 @@ readonly class UpdatePackageHandler
 
     public function __invoke(UpdatePackage $message): void
     {
-        if (!$message->scheduled && !$message->forceRefresh && !$this->dynamicUpdatesEnabled) {
+        if ($message->isDynamicRequest() && !$this->dynamicUpdatesEnabled) {
             // Dynamic updates are disabled
             return;
         }
