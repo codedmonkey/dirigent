@@ -5,6 +5,7 @@ namespace CodedMonkey\Dirigent\Package;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Composer\ConfigFactory;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Composer\IO\NullIO;
 use Composer\Pcre\Preg;
 use Composer\Util\Filesystem as ComposerFilesystem;
@@ -13,6 +14,9 @@ use Composer\Util\ProcessExecutor;
 use Composer\Util\Url;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 readonly class PackageDistributionResolver
 {
@@ -20,11 +24,14 @@ readonly class PackageDistributionResolver
     private string $distributionStoragePath;
 
     public function __construct(
+        private MessageBusInterface $messenger,
         private ComposerClient $composer,
-        #[Autowire(param: 'dirigent.dist_builder.enabled')]
+        #[Autowire(param: 'dirigent.distributions.build')]
         private bool $buildDistributions,
-        #[Autowire(param: 'dirigent.dist_builder.dev_packages')]
-        private bool $buildDevDistributions,
+        #[Autowire(param: 'dirigent.distributions.mirror')]
+        private bool $mirrorDistributions,
+        #[Autowire(param: 'dirigent.distributions.dev_versions')]
+        private bool $includeDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
@@ -42,7 +49,7 @@ readonly class PackageDistributionResolver
         return "$this->distributionStoragePath/$packageName/$versionName-$reference.$type";
     }
 
-    public function resolve(Version $version, string $reference, string $type): bool
+    public function resolve(Version $version, string $reference, string $type, bool $async): bool
     {
         $package = $version->getPackage();
         $packageName = $package->getName();
@@ -52,17 +59,27 @@ readonly class PackageDistributionResolver
             return true;
         }
 
-        if (
-            null === $version->getDist()
-            && $this->buildDistributions
-            && (!$version->isDevelopment() || $this->buildDevDistributions)
-        ) {
-            return $this->build($version, $reference, $type);
-        } elseif (null !== $version->getDist()) {
-            return $this->mirror($version, $reference, $type);
+        if ($version->isDevelopment() && !$this->includeDevVersions) {
+            return false;
         }
 
-        return false;
+        if ($async) {
+            // Resolve the distribution asynchronously so it's available in the future now that we know it was requested
+            $message = Envelope::wrap(new ResolveDistribution($version->getId(), $reference, $type))
+                ->with(new TransportNamesStamp('async'));
+            $this->messenger->dispatch($message);
+
+            // Still return false so the service resolving the distribution doesn't try to fetch it anyway
+            return false;
+        }
+
+        $hasDistribution = null !== $version->getDist();
+
+        return match (true) {
+            $this->buildDistributions && !$hasDistribution => $this->build($version, $reference, $type),
+            $this->mirrorDistributions && $hasDistribution => $this->mirror($version, $reference, $type),
+            default => false,
+        };
     }
 
     private function build(Version $version, string $reference, string $type): bool
