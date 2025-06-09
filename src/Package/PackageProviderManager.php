@@ -16,10 +16,10 @@ readonly class PackageProviderManager
 
     public function __construct(
         private RouterInterface $router,
-        #[Autowire(param: 'dirigent.dist_builder.enabled')]
+        #[Autowire(param: 'dirigent.distributions.build')]
         private bool $buildDistributions,
-        #[Autowire(param: 'dirigent.dist_builder.dev_packages')]
-        private bool $buildDevDistributions,
+        #[Autowire(param: 'dirigent.distributions.dev_versions')]
+        private bool $buildDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
@@ -41,7 +41,7 @@ readonly class PackageProviderManager
             if (
                 null === $version->getDist()
                 && $this->buildDistributions
-                && (!$version->isDevelopment() || $this->buildDevDistributions)
+                && (!$version->isDevelopment() || $this->buildDevVersions)
             ) {
                 $distributionUrl = $this->router->generate('api_package_distribution', [
                     'packageName' => $package->getName(),

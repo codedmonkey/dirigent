@@ -2,6 +2,8 @@
 
 namespace CodedMonkey\Dirigent\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use function Symfony\Component\String\u;
@@ -75,21 +77,25 @@ class DirigentConfiguration implements ConfigurationInterface
                     ->booleanNode('periodic_updates')->defaultTrue()->end()
                     ->scalarNode('periodic_update_interval')->defaultValue('P1W')->end()
                 ->end()
-            ->end()
-            ->arrayNode('dist_builder')
-                ->canBeEnabled()
-                ->children()
-                    ->booleanNode('dev_packages')->defaultFalse()->end()
-                ->end()
-            ->end()
-            ->arrayNode('dist_mirroring')
-                ->canBeEnabled()
-                ->children()
-                    ->booleanNode('preferred')->defaultTrue()->end()
-                    ->booleanNode('dev_packages')->defaultFalse()->end()
-                ->end()
             ->end();
 
+        $this->addDistributionsSection($rootNode);
+
         return $treeBuilder;
+    }
+
+    private function addDistributionsSection(ArrayNodeDefinition|NodeDefinition $rootNode): void
+    {
+        $rootNode->children()
+            ->arrayNode('distributions')
+                ->canBeEnabled('Host the distributions of packages')
+                ->children()
+                    ->booleanNode('build')->defaultTrue()->info('Build distributions from the source code (if not already provided)')->end()
+                    ->booleanNode('mirror')->defaultFalse()->info('Mirror distributions from the original source (if provided)')->end()
+                    ->booleanNode('async_api_requests')->defaultFalse()->info('Fetch distributions asynchronously instead of during execution (from the API)')->end()
+                    ->booleanNode('dev_versions')->defaultFalse()->info('Include distributions of development versions')->end()
+                    ->booleanNode('preferred_mirror')->defaultFalse()->info('Force Composer to download distributions from this registry first')->end()
+                ->end()
+            ->end();
     }
 }

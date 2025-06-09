@@ -29,10 +29,13 @@ dirigent:
     dynamic_update_delay: 'PT4H'
     periodic_updates: true
     periodic_update_interval: 'P1W'
-  dist_mirroring:
+  distributions:
     enabled: false
-    preferred: true
+    build: true
+    mirror: false
+    async_api_requests: false
     dev_packages: false
+    preferred_mirror: true
 ```
 
 ## dirigent (root)
@@ -107,17 +110,27 @@ The time between periodic updates being scheduled, defaults to once a week.
 
 The time must be defined in the [ISO 8601 durations][iso-8601-durations] format.
 
-## dist_mirroring
+## distributions
 
 ### enabled
 
 Type: `boolean` | Default: `false`
 
-Whether to enable or disable distribution mirroring
+Enable hosting of package distributions.
 
-### preferred
+### build
+
+Type: `boolean` | Default: `true`
+
+Enable building distribution from the source.
+
+### mirror
+
+### async_api_requests
 
 ### dev_packages
+
+### preferred_mirror
 
 [iso-8601-durations]: https://en.wikipedia.org/wiki/ISO_8601#Durations
 [symfony]: https://symfony.com
