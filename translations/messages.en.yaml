@@ -3,12 +3,15 @@ Administration: Administration
 Credits: Credits
 Dashboard: Dashboard
 Dependents: Dependents
+Distributions: Distributions
 Documentation: Documentation
 Implementations: Implementations
 Info: Info
+Mirroring: Mirroring
 Packages: Packages
 Personal: Personal
 Providers: Providers
+Repository: Repository
 Sign out: Sign out
 Statistics: Statistics
 Suggesters: Suggesters
@@ -28,12 +31,15 @@ Description: Description
 Dynamic Update Delay: Dynamic Update Delay
 Email: Email
 Expires At: Expires at
+Fetch strategy: Fetch strategy
+Mirror registry: Mirror registry
 New password: New password
 Name: Name
 Package Mirroring: Package Mirroring
 Password: Password
 Repeat new password: Repeat new password
 Repository url: Repository URL
+Resolve distributions: Resolve distributions
 Roles: Roles
 Token: Token
 Type: Type
@@ -64,6 +70,10 @@ credentials:
     gitlab-dt: GitLab deploy token
     gitlab-pat: GitLab personal access token
 package:
+  distribution-strategy:
+    auto: Resolve all distributions
+    dynamic: Resolve distributions on request
+    none: Never resolve distributions
   fetch_strategy:
     mirror: Fetch from mirror registry
     vcs: Fetch directly from VCS

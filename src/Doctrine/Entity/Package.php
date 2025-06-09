@@ -59,8 +59,11 @@ class Package
     #[ORM\Column(nullable: true)]
     private ?string $remoteId = null;
 
-    #[ORM\Column(type: Types::STRING, enumType: PackageFetchStrategy::class, nullable: true)]
+    #[ORM\Column(nullable: true, enumType: PackageFetchStrategy::class)]
     private PackageFetchStrategy|string|null $fetchStrategy = null;
+
+    #[ORM\Column(enumType: PackageDistributionStrategy::class)]
+    private PackageDistributionStrategy $distributionStrategy = PackageDistributionStrategy::Dynamic;
 
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
@@ -271,6 +274,16 @@ class Package
     public function setFetchStrategy(PackageFetchStrategy|string $fetchStrategy): void
     {
         $this->fetchStrategy = $fetchStrategy;
+    }
+
+    public function getDistributionStrategy(): PackageDistributionStrategy
+    {
+        return $this->distributionStrategy;
+    }
+
+    public function setDistributionStrategy(PackageDistributionStrategy $distributionStrategy): void
+    {
+        $this->distributionStrategy = $distributionStrategy;
     }
 
     public function getMirrorRegistry(): ?Registry

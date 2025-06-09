@@ -4,11 +4,13 @@ namespace CodedMonkey\Dirigent\Form;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageDistributionStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Package\PackageVcsRepositoryValidator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\PostSetDataEvent;
 use Symfony\Component\Form\Event\SubmitEvent;
@@ -23,6 +25,8 @@ class PackageFormType extends AbstractType
 {
     public function __construct(
         private readonly PackageVcsRepositoryValidator $vcsRepositoryValidator,
+        #[Autowire(param: 'dirigent.distributions.enabled')]
+        private readonly bool $distributionsEnabled,
     ) {
     }
 
@@ -46,6 +50,14 @@ class PackageFormType extends AbstractType
             ])
             ->addEventListener(FormEvents::POST_SET_DATA, [$this, 'onPostSetData'])
             ->addEventListener(FormEvents::SUBMIT, [$this, 'onSubmit']);
+
+        if ($this->distributionsEnabled) {
+            $builder->add('distributionStrategy', EnumType::class, [
+                'label' => 'Resolve distributions',
+                'class' => PackageDistributionStrategy::class,
+                'expanded' => true,
+            ]);
+        }
     }
 
     public function onPostSetData(PostSetDataEvent $event): void

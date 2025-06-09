@@ -39,9 +39,9 @@ readonly class PackageDistributionResolver
         $this->distributionStoragePath = "$storagePath/distribution";
     }
 
-    public function exists(string $packageName, string $packageVersion, string $reference, string $type): bool
+    public function exists(string $packageName, string $packageVersion, ?string $reference, ?string $type): bool
     {
-        return $this->filesystem->exists($this->path($packageName, $packageVersion, $reference, $type));
+        return null !== $reference && null !== $type && $this->filesystem->exists($this->path($packageName, $packageVersion, $reference, $type));
     }
 
     public function path(string $packageName, string $packageVersion, string $reference, string $type): string
@@ -49,7 +49,7 @@ readonly class PackageDistributionResolver
         return "$this->distributionStoragePath/$packageName/$packageVersion-$reference.$type";
     }
 
-    public function resolve(Version $version, string $reference, string $type, bool $async): bool
+    public function resolve(Version $version, ?string $reference, ?string $type, bool $async): bool
     {
         $package = $version->getPackage();
         $packageName = $package->getName();
@@ -73,13 +73,13 @@ readonly class PackageDistributionResolver
         }
 
         return match (true) {
-            $this->buildDistributions && null === $version->getDist() => $this->build($version, $reference, $type),
-            $this->mirrorDistributions && null !== $version->getDist() => $this->mirror($version, $reference, $type),
+            $this->buildDistributions && null === $version->getDist() => $this->build($version, $reference ?? $version->getSourceReference(), $type ?? $version->getSourceType()),
+            $this->mirrorDistributions && null !== $version->getDist() => $this->mirror($version, $reference ?? $version->getDistReference(), $type ?? $version->getDistType()),
             default => false,
         };
     }
 
-    private function build(Version $version, string $reference, string $type): bool
+    private function build(Version $version, ?string $reference, ?string $type): bool
     {
         // Skip building of outdated references for now
         if ($reference !== $version->getSourceReference()) {
@@ -116,7 +116,7 @@ readonly class PackageDistributionResolver
         return true;
     }
 
-    private function mirror(Version $version, string $reference, string $type): bool
+    private function mirror(Version $version, ?string $reference, ?string $type): bool
     {
         // Skip mirroring of outdated references for now
         if ($reference !== $version->getDistReference()) {

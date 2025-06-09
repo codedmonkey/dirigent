@@ -113,6 +113,10 @@ class ApiController extends AbstractController
                 throw new NotFoundHttpException();
             }
 
+            if (!$package->getDistributionStrategy()->allowDynamic()) {
+                throw $this->createNotFoundException();
+            }
+
             $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
             if (null === $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $packageVersion])) {
