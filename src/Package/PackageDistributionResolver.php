@@ -4,7 +4,9 @@ namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Composer\ConfigFactory;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Composer\IO\NullIO;
 use Composer\Pcre\Preg;
@@ -26,6 +28,7 @@ readonly class PackageDistributionResolver
     public function __construct(
         private MessageBusInterface $messenger,
         private ComposerClient $composer,
+        private DistributionRepository $distributionRepository,
         #[Autowire(param: 'dirigent.distributions.build')]
         private bool $buildDistributions,
         #[Autowire(param: 'dirigent.distributions.mirror')]
@@ -116,6 +119,14 @@ readonly class PackageDistributionResolver
             ['git', 'archive', '--format=zip', "--output=$distributionPath", $reference],
         ], $repositoryUrl, $cachePath);
 
+        $distribution = new Distribution();
+        $distribution->setVersion($version);
+        $distribution->setReference($reference);
+        $distribution->setType($type);
+        $distribution->setReleasedAt($version->getReleasedAt());
+
+        $this->distributionRepository->save($distribution, flush: true);
+
         return true;
     }
 
@@ -139,6 +150,15 @@ readonly class PackageDistributionResolver
 
         $httpDownloader = $this->composer->createHttpDownloader();
         $httpDownloader->copy($distributionUrl, $distributionPath);
+
+        $distribution = new Distribution();
+        $distribution->setVersion($version);
+        $distribution->setReference($reference);
+        $distribution->setType($type);
+        $distribution->setReleasedAt($version->getReleasedAt());
+        $distribution->setSource($distributionUrl);
+
+        $this->distributionRepository->save($distribution, flush: true);
 
         return true;
     }
