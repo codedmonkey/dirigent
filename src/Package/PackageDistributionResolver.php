@@ -39,9 +39,9 @@ readonly class PackageDistributionResolver
         $this->distributionStoragePath = "$storagePath/distribution";
     }
 
-    public function exists(string $packageName, string $versionName, string $reference, string $type): bool
+    public function exists(string $packageName, string $versionName, ?string $reference, ?string $type): bool
     {
-        return $this->filesystem->exists($this->path($packageName, $versionName, $reference, $type));
+        return null !== $reference && null !== $type && $this->filesystem->exists($this->path($packageName, $versionName, $reference, $type));
     }
 
     public function path(string $packageName, string $versionName, string $reference, string $type): string
@@ -49,7 +49,7 @@ readonly class PackageDistributionResolver
         return "$this->distributionStoragePath/$packageName/$versionName-$reference.$type";
     }
 
-    public function resolve(Version $version, string $reference, string $type, bool $async): bool
+    public function resolve(Version $version, ?string $reference, ?string $type, bool $async): bool
     {
         $package = $version->getPackage();
         $packageName = $package->getName();
@@ -73,16 +73,30 @@ readonly class PackageDistributionResolver
             return false;
         }
 
-        $hasDistribution = null !== $version->getDist();
+        $result = false;
 
-        return match (true) {
-            $this->buildDistributions && !$hasDistribution => $this->build($version, $reference, $type),
-            $this->mirrorDistributions && $hasDistribution => $this->mirror($version, $reference, $type),
-            default => false,
-        };
+        // Build the distribution from source
+        if (
+            $this->buildDistributions
+            && $version->getPackage()->getFetchStrategy()->isVcs()
+        ) {
+            $result = $this->build($version, $reference ?? $version->getSourceReference(), $type ?? $version->getSourceType());
+        }
+
+        // Mirror the distribution from a remote source if it can't be built from source
+        $distributionAvailable = null !== $version->getDist();
+        if (
+            !$result
+            && $this->mirrorDistributions
+            && $distributionAvailable
+        ) {
+            $result = $this->mirror($version, $reference ?? $version->getDistReference(), $type ?? $version->getDistType());
+        }
+
+        return $result;
     }
 
-    private function build(Version $version, string $reference, string $type): bool
+    private function build(Version $version, ?string $reference, ?string $type): bool
     {
         // Skip building of outdated references for now
         if ($reference !== $version->getSourceReference()) {
@@ -119,7 +133,7 @@ readonly class PackageDistributionResolver
         return true;
     }
 
-    private function mirror(Version $version, string $reference, string $type): bool
+    private function mirror(Version $version, ?string $reference, ?string $type): bool
     {
         // Skip mirroring of outdated references for now
         if ($reference !== $version->getDistReference()) {

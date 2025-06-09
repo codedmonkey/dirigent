@@ -9,8 +9,8 @@ readonly class ResolveDistribution
 {
     public function __construct(
         public int $versionId,
-        public string $reference,
-        public string $type,
+        public ?string $reference = null,
+        public ?string $type = null,
     ) {
     }
 }
