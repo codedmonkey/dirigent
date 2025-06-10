@@ -503,6 +503,11 @@ class Version extends TrackedEntity
         $this->releasedAt = $releasedAt;
     }
 
+    public function getSourceUrl(): ?string
+    {
+        return $this->source['url'] ?? null;
+    }
+
     public function getDistReference(): ?string
     {
         return $this->dist['reference'] ?? null;
@@ -557,28 +562,6 @@ class Version extends TrackedEntity
         });
 
         return $funding;
-    }
-
-    public function getPublicUrl(): ?string
-    {
-        $url = $this->getHomepage() ?? $this->getSource()['url'] ?? null;
-
-        if (!$url || (!str_starts_with($url, 'http://') && !str_starts_with($url, 'https://'))) {
-            return null;
-        }
-
-        return $url;
-    }
-
-    public function getPrettyPublicUrl(): ?string
-    {
-        if (null === $url = $this->getPublicUrl()) {
-            return null;
-        }
-
-        $url = preg_replace('#^https?://#', '', $url);
-
-        return $url;
     }
 
     public function getMajorVersion(): int

@@ -339,6 +339,30 @@ class Package extends TrackedEntity
         $this->dumpedAt = $dumpedAt;
     }
 
+    public function getBrowsableRepositoryUrl(): ?string
+    {
+        if (!$this->repositoryUrl) {
+            return null;
+        }
+
+        if (!Preg::isMatch('{^https?://}i', $this->repositoryUrl)) {
+            return null;
+        }
+
+        return $this->repositoryUrl;
+    }
+
+    public function getPrettyBrowsableRepositoryUrl(): ?string
+    {
+        if (null === $url = $this->getBrowsableRepositoryUrl()) {
+            return null;
+        }
+
+        $url = preg_replace('#^https?://#', '', $url);
+
+        return $url;
+    }
+
     /**
      * Returns the default branch or latest version of the package.
      */

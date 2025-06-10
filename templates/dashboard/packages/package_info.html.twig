@@ -23,42 +23,59 @@
 
       <p class="lead">{{ version.description }}</p>
 
-      <p class="mb-0">Last updated at {{ package.updatedAt|date }}</p>
+      {% if version.authors|length > 0 %}
+        <div class="d-flex gap-3 mb-2">
+          {% for author in version.authors %}
+            {% set authorText %}<span class="fa-solid fa-user me-2" aria-hidden="true"></span>{{ author.name }}{% endset %}
+            {% if author.homepage is defined %}<a href="{{ author.homepage }}">{{ authorText }}</a>{% else %}<span>{{ authorText }}</span>{% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
     </div>
     <div class="col-md-4">
-      <div class="bg-body-secondary px-3 py-2 rounded">
-        {% if version.publicUrl %}
+      <div class="dirigent-package-sidebar bg-body-secondary px-3 py-2 mb-2 rounded">
+        {% if package.browsableRepositoryUrl %}
           <div>
-            <a href="{{ version.publicUrl }}">{{ version.prettyPublicUrl }}</a>
+            <a href="{{ package.browsableRepositoryUrl }}">{{ package.prettyBrowsableRepositoryUrl }}</a>
           </div>
         {% endif %}
         {% if package.mirrorRegistry %}
           <div>Mirrored from {{ package.mirrorRegistry.name }}</div>
         {% endif %}
-        {% if version.publicUrl or package.mirrorRegistry %}
+        {% if package.browsableRepositoryUrl or package.mirrorRegistry %}
           <hr class="my-1">
         {% endif %}
         {% if version.homepage %}
           <div><a href="{{ version.homepage }}">Homepage</a></div>
         {% endif %}
-        {% if version.source %}
-          <div><a href="{{ version.source.url }}">Source</a></div>
+        {% if version.sourceUrl %}
+          <div><a href="{{ version.sourceUrl }}">Source</a></div>
         {% endif %}
-        <div>Installs: {{ package.installations.total }}</div>
-        {% set packageDependentsUrl = path('dashboard_packages_dependents', {packageName: package.name}) %}
-        <div><a href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a>: {{ dependentCount }}</div>
-        {% set packageSuggestersUrl = path('dashboard_packages_suggesters', {packageName: package.name}) %}
-        <div><a href="{{ packageSuggestersUrl }}">{{ 'Suggesters'|trans }}</a>: {{ suggesterCount }}</div>
-        {% set packageImplementationsUrl = path('dashboard_packages_implementations', {packageName: package.name}) %}
-        <div><a href="{{ packageImplementationsUrl }}">{{ 'Implementations'|trans }}</a>: {{ implementationCount }}</div>
-        {% set packageProvidersUrl = path('dashboard_packages_providers', {packageName: package.name}) %}
-        <div><a href="{{ packageProvidersUrl }}">{{ 'Providers'|trans }}</a>: {{ providerCount }}</div>
+        {% set packageStatisticsUrl = path('dashboard_packages_statistics', {packageName: package.name}) %}
+        <div><span><a href="{{ packageStatisticsUrl }}">{{ 'Installations'|trans }}</a></span> {{ package.installations.total }}</div>
+        {% if dependentCount > 0 %}
+          {% set packageDependentsUrl = path('dashboard_packages_dependents', {packageName: package.name}) %}
+          <div><span><a href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a></span> {{ dependentCount }}</div>
+        {% endif %}
+        {% if suggesterCount > 0 %}
+          {% set packageSuggestersUrl = path('dashboard_packages_suggesters', {packageName: package.name}) %}
+          <div><span><a href="{{ packageSuggestersUrl }}">{{ 'Suggesters'|trans }}</a></span> {{ suggesterCount }}</div>
+        {% endif %}
+        {% if implementationCount > 0 %}
+          {% set packageImplementationsUrl = path('dashboard_packages_implementations', {packageName: package.name}) %}
+          <div><span><a href="{{ packageImplementationsUrl }}">{{ 'Implementations'|trans }}</a></span> {{ implementationCount }}</div>
+        {% endif %}
+        {% if providerCount > 0 %}
+          {% set packageProvidersUrl = path('dashboard_packages_providers', {packageName: package.name}) %}
+          <div><span><a href="{{ packageProvidersUrl }}">{{ 'Providers'|trans }}</a></span> {{ providerCount }}</div>
+        {% endif %}
         {% if version.license %}
-          <div>License: {{ version.license|join(', ') }}</div>
+          <div><span>{{ 'License'|trans }}</span> {{ version.license|join(', ') }}</div>
         {% else %}
           <div>No license specified</div>
         {% endif %}
       </div>
+      <p class="px-3 mb-0"><small>{{ 'Last updated at %date%'|trans({'%date%': package.updatedAt|date}) }}</small></p>
     </div>
   </div>
 

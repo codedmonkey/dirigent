@@ -3,16 +3,11 @@ Account: Account
 Administration: Administration
 Credits: Credits
 Dashboard: Dashboard
-Dependents: Dependents
 Documentation: Documentation
-Implementations: Implementations
 Info: Info
 Packages: Packages
 Personal: Personal
-Providers: Providers
 Sign out: Sign out
-Statistics: Statistics
-Suggesters: Suggesters
 Usage: Usage
 
 # Entity names
@@ -47,6 +42,16 @@ Username: Username
 No credentials: No credentials
 Search packages: Search packages
 
+# Package labels
+Dependents: Dependents
+Implementations: Implementations
+Installations: Installations
+Last updated at %date%: Last updated at %date%
+License: License
+Providers: Providers
+Statistics: Statistics
+Suggesters: Suggesters
+
 # Page actions
 Impersonate: Impersonate
 Move Down: Move down
@@ -55,7 +60,6 @@ Move Up: Move up
 # Statistics labels
 Daily installations: Daily installations
 Daily installations per version: Daily installations per version
-Installations: Installations
 Last 30 days: Last 30 days
 Today: Today
 Total: Total
