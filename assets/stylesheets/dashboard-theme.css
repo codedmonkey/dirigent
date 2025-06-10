@@ -64,3 +64,8 @@
 .ea-dark-scheme .bg-body-secondary {
   --bs-secondary-bg-rgb: var(--dirigent-body-bg-subtle-rgb);
 }
+
+.dirigent-package-sidebar div span {
+  display: inline-block;
+  width: 120px;
+}

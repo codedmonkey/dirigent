@@ -343,6 +343,38 @@ class Package
         $this->dumpedAt = $dumpedAt;
     }
 
+    public function getBrowsableRepositoryUrl(): ?string
+    {
+        if (!$this->repositoryUrl) {
+            return null;
+        }
+
+        if (Preg::isMatch('{(://|@)bitbucket.org[:/]}i', $this->repositoryUrl)) {
+            return Preg::replace('{^(?:git@|https://|git://)bitbucket.org[:/](.+?)(?:\.git)?$}i', 'https://bitbucket.org/$1', $this->repositoryUrl);
+        }
+
+        if (Preg::isMatch('{(://|@)github.com[:/]}i', $this->repositoryUrl)) {
+            return Preg::replace('{^(git://github.com/|git@github.com:)}', 'https://github.com/', $this->repositoryUrl);
+        }
+
+        if (Preg::isMatch('{(://|@)gitlab.com[:/]}i', $this->repositoryUrl)) {
+            return Preg::replace('{^(git://gitlab.com/|git@gitlab.com:)}', 'https://gitlab.com/', $this->repositoryUrl);
+        }
+
+        return $this->repositoryUrl;
+    }
+
+    public function getPrettyBrowsableRepositoryUrl(): ?string
+    {
+        if (null === $url = $this->getBrowsableRepositoryUrl()) {
+            return null;
+        }
+
+        $url = preg_replace('#^https?://#', '', $url);
+
+        return $url;
+    }
+
     /**
      * Returns the default branch or latest version of the package.
      */

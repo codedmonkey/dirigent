@@ -154,6 +154,7 @@ readonly class PackageMetadataResolver
         foreach ($composerPackages as $composerPackage) {
             if ($composerPackage->isDefaultBranch()) {
                 $package->setRepositoryUrl($composerPackage->getSourceUrl());
+                return;
             }
         }
     }
@@ -197,6 +198,11 @@ readonly class PackageMetadataResolver
 
         if ($primaryVersionName) {
             $primaryVersion = $processedVersions[$primaryVersionName];
+
+            // Only update the repository URL if the package is mirrored
+            if ($package->getMirrorRegistry()) {
+                $package->setRepositoryUrl($primaryVersion->getSourceUrl());
+            }
 
             $this->packageRepository->updatePackageLinks($package->getId(), $primaryVersion->getId());
         }

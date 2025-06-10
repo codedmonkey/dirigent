@@ -26,35 +26,36 @@
       <p class="mb-0">Last updated at {{ package.updatedAt|date }}</p>
     </div>
     <div class="col-md-4">
-      <div class="bg-body-secondary px-3 py-2 rounded">
-        {% if version.publicUrl %}
+      <div class="dirigent-package-sidebar bg-body-secondary px-3 py-2 rounded">
+        {% if package.browsableRepositoryUrl %}
           <div>
-            <a href="{{ version.publicUrl }}">{{ version.prettyPublicUrl }}</a>
+            <a href="{{ package.browsableRepositoryUrl }}">{{ package.prettyBrowsableRepositoryUrl }}</a>
           </div>
         {% endif %}
         {% if package.mirrorRegistry %}
           <div>Mirrored from {{ package.mirrorRegistry.name }}</div>
         {% endif %}
-        {% if version.publicUrl or package.mirrorRegistry %}
+        {% if package.browsableRepositoryUrl or package.mirrorRegistry %}
           <hr class="my-1">
         {% endif %}
         {% if version.homepage %}
           <div><a href="{{ version.homepage }}">Homepage</a></div>
         {% endif %}
-        {% if version.source %}
-          <div><a href="{{ version.source.url }}">Source</a></div>
+        {% if version.sourceUrl %}
+          <div><a href="{{ version.sourceUrl }}">Source</a></div>
         {% endif %}
-        <div>Installs: {{ package.installations.total }}</div>
+        {% set packageStatisticsUrl = path('dashboard_packages_statistics', {packageName: package.name}) %}
+        <div><span><a href="{{ packageStatisticsUrl }}">Installations</a></span> {{ package.installations.total }}</div>
         {% set packageDependentsUrl = path('dashboard_packages_dependents', {packageName: package.name}) %}
-        <div><a href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a>: {{ dependentCount }}</div>
+        <div><span><a href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a></span> {{ dependentCount }}</div>
         {% set packageSuggestersUrl = path('dashboard_packages_suggesters', {packageName: package.name}) %}
-        <div><a href="{{ packageSuggestersUrl }}">{{ 'Suggesters'|trans }}</a>: {{ suggesterCount }}</div>
+        <div><span><a href="{{ packageSuggestersUrl }}">{{ 'Suggesters'|trans }}</a></span> {{ suggesterCount }}</div>
         {% set packageImplementationsUrl = path('dashboard_packages_implementations', {packageName: package.name}) %}
-        <div><a href="{{ packageImplementationsUrl }}">{{ 'Implementations'|trans }}</a>: {{ implementationCount }}</div>
+        <div><span><a href="{{ packageImplementationsUrl }}">{{ 'Implementations'|trans }}</a></span> {{ implementationCount }}</div>
         {% set packageProvidersUrl = path('dashboard_packages_providers', {packageName: package.name}) %}
-        <div><a href="{{ packageProvidersUrl }}">{{ 'Providers'|trans }}</a>: {{ providerCount }}</div>
+        <div><span><a href="{{ packageProvidersUrl }}">{{ 'Providers'|trans }}</a></span> {{ providerCount }}</div>
         {% if version.license %}
-          <div>License: {{ version.license|join(', ') }}</div>
+          <div><span>License</span> {{ version.license|join(', ') }}</div>
         {% else %}
           <div>No license specified</div>
         {% endif %}
