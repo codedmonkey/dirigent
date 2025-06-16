@@ -1,4 +1,4 @@
-# General strings
+# General labels
 Account: Account
 Administration: Administration
 Credits: Credits
@@ -51,19 +51,25 @@ License: License
 Providers: Providers
 Statistics: Statistics
 Suggesters: Suggesters
-Total installations: Total installations
 
-# Page actions
-Impersonate: Impersonate
-Move Down: Move down
-Move Up: Move up
-
-# Statistics labels
+# Package labels (Statistics)
 Daily installations: Daily installations
 Daily installations per version: Daily installations per version
 Last 30 days: Last 30 days
 Today: Today
 Total: Total
+Total installations: Total installations
+
+# Package labels (Versions)
+Development branch versions: Development branch versions
+Development versions: Development versions
+Historical versions: Historical versions
+Latest versions: Latest versions
+
+# Page actions
+Impersonate: Impersonate
+Move Down: Move down
+Move Up: Move up
 
 # User roles
 Admin: Admin

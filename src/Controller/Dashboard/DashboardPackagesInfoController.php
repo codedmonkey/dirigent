@@ -63,13 +63,9 @@ class DashboardPackagesInfoController extends AbstractController
     public function versions(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-        $versions = $package->getVersions()->toArray();
-
-        usort($versions, Package::class . '::sortVersions');
 
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
-            'versions' => $versions,
         ]);
     }
 
