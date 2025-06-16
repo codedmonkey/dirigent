@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Validator\UniquePackage;
+use Composer\Package\Version\VersionParser;
 use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -90,6 +91,8 @@ class Package
      * @var array<string, Version> lookup table for versions
      */
     private array $cachedVersions;
+
+    private array $sortedVersions;
 
     public function __construct()
     {
@@ -376,17 +379,29 @@ class Package
     }
 
     /**
-     * Returns the default branch or latest version of the package.
+     * @return Version[]
+     */
+    public function getSortedVersions(): array
+    {
+        if (!isset($this->sortedVersions)) {
+            $this->sortedVersions = $this->versions->toArray();
+
+            usort($this->sortedVersions, [static::class, 'sortVersions']);
+        }
+
+        return $this->sortedVersions;
+    }
+
+    /**
+     * Returns the default branch or the latest version of the package.
      */
     public function getDefaultVersion(): ?Version
     {
-        $versions = $this->versions->toArray();
+        $versions = $this->getSortedVersions();
 
         if (!count($versions)) {
             return null;
         }
-
-        usort($versions, [static::class, 'sortVersions']);
 
         $latestVersion = reset($versions);
         foreach ($versions as $version) {
@@ -403,13 +418,11 @@ class Package
      */
     public function getLatestVersion(): ?Version
     {
-        $versions = $this->versions->toArray();
+        $versions = $this->getSortedVersions();
 
         if (!count($versions)) {
             return null;
         }
-
-        usort($versions, [static::class, 'sortVersions']);
 
         foreach ($versions as $version) {
             if (!$version->isDevelopment()) {
@@ -418,6 +431,108 @@ class Package
         }
 
         return $this->getDefaultVersion();
+    }
+
+    public function getActiveVersions(): array
+    {
+        $versionParser = new VersionParser();
+
+        $activeVersions = [];
+        $activePrereleaseVersions = [];
+
+        foreach ($this->getSortedVersions() as $version) {
+            [$majorVersion, $minorVersion] = explode('.', $version->getNormalizedVersion());
+
+            if ('7.3.0.0' === $version->getNormalizedVersion()) {
+                // todo REMOVE break for testing
+                continue;
+            }
+
+            if ('stable' !== VersionParser::parseStability($version->getNormalizedVersion())) {
+                continue;
+            }
+
+            if ('0' === $majorVersion) {
+                $prereleaseVersion = "$majorVersion.$minorVersion";
+
+                $activePrereleaseVersions[$prereleaseVersion] ??= $version;
+                if (version_compare($version->getNormalizedVersion(), $activePrereleaseVersions[$prereleaseVersion]->getNormalizedVersion(), '>')) {
+                    $activePrereleaseVersions[$prereleaseVersion] = $version;
+                }
+
+                continue;
+            }
+
+            $activeVersions[$majorVersion] ??= $version;
+            if (version_compare($version->getNormalizedVersion(), $activeVersions[$majorVersion]->getNormalizedVersion(), '>')) {
+                $activeVersions[$majorVersion] = $version;
+            }
+        }
+
+        $activeDevelopmentVersions = [];
+        $activePrereleaseDevelopmentVersions = [];
+
+        // Find newer unstable releases of active versions
+        foreach ($this->getSortedVersions() as $version) {
+            [$majorVersion, $minorVersion] = explode('.', $version->getNormalizedVersion());
+
+            if (in_array(VersionParser::parseStability($version->getNormalizedVersion()), ['stable', 'dev'], true)) {
+                continue;
+            }
+
+            $developmentVersion = "$majorVersion.$minorVersion";
+
+            if ('0' === $majorVersion) {
+                if (isset($activePrereleaseVersions[$developmentVersion]) && !version_compare($version->getNormalizedVersion(), $activePrereleaseVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
+                    continue;
+                }
+
+                $activePrereleaseDevelopmentVersions[$developmentVersion] ??= $version;
+                if (version_compare($version->getNormalizedVersion(), $activePrereleaseDevelopmentVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
+                    $activePrereleaseDevelopmentVersions[$developmentVersion] = $version;
+                }
+
+                continue;
+            }
+
+            if (isset($activeVersions[$majorVersion]) && !version_compare($version->getNormalizedVersion(), $activeVersions[$majorVersion]->getNormalizedVersion(), '>')) {
+                continue;
+            }
+
+            $activeDevelopmentVersions[$developmentVersion] ??= $version;
+            if (version_compare($version->getNormalizedVersion(), $activeDevelopmentVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
+                $activeDevelopmentVersions[$version->getNormalizedVersion()] = $version;
+            }
+        }
+
+        $activeVersions = [...$activeVersions, ...$activeDevelopmentVersions];
+
+        if (count($activeVersions)) {
+            usort($activeVersions, [static::class, 'sortVersions']);
+
+            return $activeVersions;
+        }
+
+        $activePrereleaseVersions = [...$activePrereleaseVersions, ...$activePrereleaseDevelopmentVersions];
+
+        usort($activePrereleaseVersions, [static::class, 'sortVersions']);
+
+        return $activePrereleaseVersions;
+    }
+
+    public function getHistoricalVersions(): array
+    {
+
+    }
+
+    public function getDevelopmentVersions(): array
+    {
+
+    }
+
+    public function getDevelopmentBranchVersions(): array
+    {
+
     }
 
     public static function sortVersions(Version $a, Version $b): int
