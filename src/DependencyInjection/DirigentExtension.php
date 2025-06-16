@@ -12,14 +12,14 @@ class DirigentExtension extends ConfigurableExtension
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         if (null === $slug = $mergedConfig['slug']) {
-            $slug = (new AsciiSlugger())->slug($mergedConfig['title']);
-            $slug = strtolower($slug);
+            $slug = (new AsciiSlugger())->slug($mergedConfig['title'])->lower();
         }
 
         $container->setParameter('dirigent.title', $mergedConfig['title']);
         $container->setParameter('dirigent.slug', $slug);
 
         $this->registerEncryptionConfiguration($mergedConfig['encryption'], $container);
+        $this->registerMetadataConfiguration($mergedConfig['metadata'], $container);
 
         $container->setParameter('dirigent.security.public_access', $mergedConfig['security']['public']);
         $container->setParameter('dirigent.security.registration_enabled', $mergedConfig['security']['registration']);
@@ -57,5 +57,14 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.encryption.private_key_path', $config['private_key_path']);
         $container->setParameter('dirigent.encryption.public_key_path', $config['public_key_path']);
         $container->setParameter('dirigent.encryption.rotated_key_paths', $config['rotated_key_paths']);
+    }
+
+    /**
+     * @param array{mirror_vcs_repositories: bool, resolve_public_packages: bool} $config
+     */
+    private function registerMetadataConfiguration(array $config, ContainerBuilder $container): void
+    {
+        $container->setParameter('dirigent.metadata.mirror_vcs_repositories', $config['mirror_vcs_repositories']);
+        $container->setParameter('dirigent.metadata.resolve_public_packages', $config['resolve_public_packages']);
     }
 }

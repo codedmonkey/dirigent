@@ -82,6 +82,13 @@ class DirigentConfiguration implements ConfigurationInterface
                     ->booleanNode('preferred')->defaultTrue()->end()
                     ->booleanNode('dev_packages')->defaultFalse()->end()
                 ->end()
+            ->end()
+            ->arrayNode('metadata')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->booleanNode('mirror_vcs_repositories')->defaultFalse()->info('Fetch mirrored packages from their VCS repositories by default when possible.')->end()
+                    ->booleanNode('resolve_public_packages')->defaultTrue()->info('Scan packagist.org for the public equivalent of packages.')->end()
+                ->end()
             ->end();
 
         return $treeBuilder;
