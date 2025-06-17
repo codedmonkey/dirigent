@@ -50,21 +50,28 @@ class PackagesUpdateCommand extends Command
                 return Command::FAILURE;
             }
 
+            $io->writeln("Scheduling package $packageName for update...");
+
             $packages = [['id' => $package->getId()]];
 
             $randomTimes = false;
             $reschedule = true;
         } elseif ($force) {
+            $io->writeln('Scheduling all packages for update...');
             $packages = $this->packageRepository->getAllPackageIds();
 
             $reschedule = true;
         } else {
-            $packages = $this->packageRepository->getStalePackages();
+            $io->writeln('Scheduling stale packages for update...');
+            $packages = $this->packageRepository->getStalePackageIds();
         }
 
         foreach ($packages as $package) {
             $this->messenger->dispatch(new SchedulePackageUpdate($package['id'], randomTime: $randomTimes, reschedule: $reschedule, forceRefresh: $force));
         }
+
+        $packageCount = count($packages);
+        $io->success("Scheduled $packageCount package(s) for update.");
 
         return Command::SUCCESS;
     }

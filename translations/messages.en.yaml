@@ -1,3 +1,4 @@
+# General strings
 Account: Account
 Administration: Administration
 Credits: Credits
@@ -14,6 +15,7 @@ Statistics: Statistics
 Suggesters: Suggesters
 Usage: Usage
 
+# Entity names
 Access token: Access token
 Access tokens: Access tokens
 Credentials: Credentials
@@ -23,14 +25,15 @@ User: User
 Users: Users
 Versions: Versions
 
+# Form labels
 Current password: Current password
 Description: Description
-Dynamic Update Delay: Dynamic Update Delay
+Dynamic Update Delay: Dynamic update delay
 Email: Email
 Expires At: Expires at
 New password: New password
 Name: Name
-Package Mirroring: Package Mirroring
+Package Mirroring: Package mirroring
 Password: Password
 Repeat new password: Repeat new password
 Repository url: Repository URL
@@ -40,13 +43,16 @@ Type: Type
 URL: URL
 Username: Username
 
-Impersonate: Impersonate
-Move Down: Move Down
-Move Up: Move Up
-
+# Form placeholders
 No credentials: No credentials
 Search packages: Search packages
 
+# Page actions
+Impersonate: Impersonate
+Move Down: Move down
+Move Up: Move up
+
+# Statistics labels
 Daily installations: Daily installations
 Daily installations per version: Daily installations per version
 Installations: Installations
@@ -54,9 +60,11 @@ Last 30 days: Last 30 days
 Today: Today
 Total: Total
 
+# User roles
 Admin: Admin
 Owner: Owner
 
+# Enums
 credentials:
   type:
     http-basic: HTTP Basic credentials
@@ -64,11 +72,11 @@ credentials:
     gitlab-dt: GitLab deploy token
     gitlab-pat: GitLab personal access token
 package:
-  fetch_strategy:
+  fetch-strategy:
     mirror: Fetch from mirror registry
     vcs: Fetch directly from VCS
 registry:
-  package_mirroring:
+  package-mirroring:
     none: Package mirroring disabled
     manual: Only mirror specified packages
     auto: Automatically mirror packages on request

@@ -1,13 +1,10 @@
 <div class="content-search">
-  <form class="form-action-search" method="get">
+  <form class="form-action-search" action="{{ path('dashboard_packages') }}" method="get">
     <div class="form-group">
-      <input type="hidden" name="routeName" value="dashboard_packages">
-      <input type="hidden" name="page" value="1">
-
       <div class="form-widget">
         <i class="fas fa-search content-search-icon"></i>
 
-        <label class="content-search-label" data-value="{{ app.request.get('query') }}">
+        <label class="content-search-label">
           <input
             name="query"
             class="form-control {{ app.request.get('query') is null ? 'is-blank' }}"
@@ -16,12 +13,13 @@
             placeholder="{{ 'Search packages'|trans }}"
             spellcheck="false"
             autocorrect="off"
-            {% if not searchAutofocus is defined or searchAutofocus %}autofocus="autofocus"{% endif %}
+            {% if autofocus ?? true %}autofocus="autofocus"{% endif %}
           >
         </label>
 
         {% if app.request.get('query') %}
-          <a href="{{ ea_url().unset('query') }}" class="content-search-reset">
+          {% set clearRouteParameters = app.request.get('_route_params')|filter((value, key) => key != 'query' and key != 'page') %}
+          <a href="{{ path('dashboard_packages', clearRouteParameters) }}" class="content-search-reset">
             <i class="fas fa-fw fa-times"></i>
           </a>
         {% endif %}

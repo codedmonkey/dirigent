@@ -59,7 +59,7 @@ class Package
     #[ORM\Column(nullable: true)]
     private ?string $remoteId = null;
 
-    #[ORM\Column(type: Types::STRING, enumType: PackageFetchStrategy::class, nullable: true)]
+    #[ORM\Column(nullable: true, enumType: PackageFetchStrategy::class)]
     private PackageFetchStrategy|string|null $fetchStrategy = null;
 
     #[ORM\ManyToOne]
