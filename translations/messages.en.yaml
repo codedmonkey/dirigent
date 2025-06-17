@@ -20,6 +20,12 @@ User: User
 Users: Users
 Versions: Versions
 
+# Filter labels
+All registries: All registries
+Clear filters: Clear filters
+Filter by: Filter by
+Local: Local
+
 # Form labels
 Current password: Current password
 Description: Description

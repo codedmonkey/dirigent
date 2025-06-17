@@ -7,9 +7,9 @@
         <label class="content-search-label">
           <input
             name="query"
-            class="form-control {{ app.request.get('query') is null ? 'is-blank' }}"
+            class="form-control {{ searchQuery is not defined ? 'is-blank' }}"
             type="search"
-            value="{{ app.request.get('query') ?? '' }}"
+            value="{{ searchQuery ?? '' }}"
             placeholder="{{ 'Search packages'|trans }}"
             spellcheck="false"
             autocorrect="off"
@@ -17,9 +17,12 @@
           >
         </label>
 
-        {% if app.request.get('query') %}
-          {% set clearRouteParameters = app.request.get('_route_params')|filter((value, key) => key != 'query' and key != 'page') %}
-          <a href="{{ path('dashboard_packages', clearRouteParameters) }}" class="content-search-reset">
+        {% for parameter, value in packageFilterParameters('query', null) %}
+          <input type="hidden" name="{{ parameter }}" value="{{ value }}">
+        {% endfor %}
+
+        {% if searchQuery is defined and searchQuery is not null %}
+          <a href="{{ packageFilterUrl('query', null) }}" class="content-search-reset">
             <i class="fas fa-fw fa-times"></i>
           </a>
         {% endif %}

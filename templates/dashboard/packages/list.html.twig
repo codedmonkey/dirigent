@@ -3,7 +3,7 @@
 {% block page_title %}Packages{% endblock %}
 
 {% block search_wrapper %}
-  {{ include('dashboard/packages/_search_box.html.twig', with_context: false) }}
+  {{ include('dashboard/packages/_search_box.html.twig', {searchQuery: searchQuery}, with_context: false) }}
 {% endblock %}
 
 {% block page_actions %}
@@ -25,5 +25,38 @@
 {% endblock %}
 
 {% block page_content %}
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <div>{{ 'Filter by'|trans }}</div>
+    {% if registries|length %}
+      <div>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ selectedRegistry ? (selectedRegistry == 'local' ? ('Local'|trans) : selectedRegistry.name)  : ('All registries'|trans) }}
+          </button>
+          <ul class="dropdown-menu">
+            {{ _self.registryFilterItem(selectedRegistry, null, 'All registries'|trans) }}
+            {{ _self.registryFilterItem(selectedRegistry, 0, 'Local'|trans) }}
+            {% for registry in registries %}
+              {{ _self.registryFilterItem(selectedRegistry, registry.id, registry.name) }}
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+    {% if filtersActive %}
+      <div>
+        <a class="btn btn-secondary" href="{{ path('dashboard_packages') }}">{{ 'Clear filters'|trans }}</a>
+      </div>
+    {% endif %}
+  </div>
+
   {{ include('dashboard/packages/_package_list.html.twig', {paginator: paginator}, with_context: false) }}
 {% endblock %}
+
+{% macro registryFilterItem(selectedRegistry, registry, label) %}
+  {% if registry is same as(selectedRegistry) %}
+    <li><span class="dropdown-item active">{{ label }}</span></li>
+  {% else %}
+    <li><a class="dropdown-item" href="{{ packageFilterUrl('registry', registry) }}">{{ label }}</a></li>
+  {% endif %}
+{% endmacro %}

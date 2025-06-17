@@ -6,7 +6,9 @@ use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Attribute\MapPackage;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use CodedMonkey\Dirigent\Form\PackageAddMirroringFormType;
 use CodedMonkey\Dirigent\Form\PackageAddVcsFormType;
@@ -20,6 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use function Symfony\Component\String\u;
 
 class DashboardPackagesController extends AbstractController
 {
@@ -33,19 +36,46 @@ class DashboardPackagesController extends AbstractController
 
     #[Route('/packages', name: 'dashboard_packages')]
     #[IsGrantedAccess]
-    public function list(Request $request): Response
+    public function list(Request $request, RegistryRepository $registryRepository): Response
     {
         $queryBuilder = $this->packageRepository->createQueryBuilder('package');
+        $filtersActive = false;
 
-        if (null !== $query = $request->query->get('query')) {
+        if ($request->query->has('query')) {
+            $filtersActive = true;
+            $searchQuery = $request->query->getString('query');
+            $searchQuery = u($searchQuery)->lower();
+
             $queryBuilder->andWhere($queryBuilder->expr()->like('package.name', ':query'));
-            $queryBuilder->setParameter('query', "%{$query}%");
+            $queryBuilder->setParameter('query', "%{$searchQuery}%");
+        }
+
+        if ($request->query->has('registry')) {
+            $registryId = $request->query->getInt('registry');
+
+            if (0 === $registryId) {
+                $filtersActive = true;
+                $selectedRegistry = 'local';
+
+                $queryBuilder->andWhere($queryBuilder->expr()->isNull('package.mirrorRegistry'));
+            } elseif (null !== $selectedRegistry = $registryRepository->find($registryId)) {
+                $filtersActive = true;
+
+                $queryBuilder->andWhere($queryBuilder->expr()->eq('package.mirrorRegistry', ':registry'));
+                $queryBuilder->setParameter('registry', $selectedRegistry);
+            }
         }
 
         $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
 
+        $registries = $this->entityManager->getRepository(Registry::class)->findAll();
+
         return $this->render('dashboard/packages/list.html.twig', [
+            'filtersActive' => $filtersActive,
             'paginator' => $paginator,
+            'registries' => $registries,
+            'searchQuery' => $searchQuery ?? null,
+            'selectedRegistry' => $selectedRegistry ?? null,
         ]);
     }
 
