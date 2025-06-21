@@ -74,7 +74,7 @@ class PackageFormType extends AbstractType
                     'expanded' => true,
                     'disabled' => !$package->getRepositoryUrl(),
                     'choice_label' => function (PackageFetchStrategy $choice): string {
-                        return "package.fetch_strategy.{$choice->value}";
+                        return "package.fetch-strategy.{$choice->value}";
                     },
                 ]);
         }

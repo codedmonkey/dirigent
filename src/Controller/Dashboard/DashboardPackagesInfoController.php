@@ -35,7 +35,7 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->versionInfo($packageName, $version->getNormalizedVersion());
     }
 
-    #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+', 'packageVersion' => '.*'])]
     #[IsGrantedAccess]
     public function versionInfo(string $packageName, string $packageVersion): Response
     {

@@ -2,11 +2,10 @@
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
-use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
-use CodedMonkey\Dirigent\Tests\FunctionalTests\WebTestCaseTrait;
+use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 class DashboardPackagesInfoControllerTest extends WebTestCase
 {
@@ -19,7 +18,7 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
 
         $client->request('GET', '/packages/psr/log');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
     public function testPackageInfo(): void
@@ -29,7 +28,7 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
 
         $client->request('GET', '/packages/psr/log/v/1.0.0');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
     public function testVersions(): void
@@ -39,23 +38,17 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
 
         $client->request('GET', '/packages/psr/log/versions');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
     public function testDependents(): void
     {
         $client = static::createClient();
-
-        /** @var UserRepository $userRepository */
-        $userRepository = $client->getContainer()->get(UserRepository::class);
-
-        /** @var User $user */
-        $user = $userRepository->findOneByUsername('user');
-        $client->loginUser($user);
+        $this->loginUser();
 
         $client->request('GET', '/packages/psr/log/dependents');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         $this->assertAnySelectorTextSame('h1 small', 'Dependents');
     }
@@ -63,17 +56,11 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
     public function testImplementations(): void
     {
         $client = static::createClient();
-
-        /** @var UserRepository $userRepository */
-        $userRepository = $client->getContainer()->get(UserRepository::class);
-
-        /** @var User $user */
-        $user = $userRepository->findOneByUsername('user');
-        $client->loginUser($user);
+        $this->loginUser();
 
         $client->request('GET', '/packages/psr/log/implementations');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         $this->assertAnySelectorTextSame('h1 small', 'Implementations');
     }
@@ -81,17 +68,11 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
     public function testProviders(): void
     {
         $client = static::createClient();
-
-        /** @var UserRepository $userRepository */
-        $userRepository = $client->getContainer()->get(UserRepository::class);
-
-        /** @var User $user */
-        $user = $userRepository->findOneByUsername('user');
-        $client->loginUser($user);
+        $this->loginUser();
 
         $client->request('GET', '/packages/psr/log/providers');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         $this->assertAnySelectorTextSame('h1 small', 'Providers');
     }
@@ -99,17 +80,11 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
     public function testSuggesters(): void
     {
         $client = static::createClient();
-
-        /** @var UserRepository $userRepository */
-        $userRepository = $client->getContainer()->get(UserRepository::class);
-
-        /** @var User $user */
-        $user = $userRepository->findOneByUsername('user');
-        $client->loginUser($user);
+        $this->loginUser();
 
         $client->request('GET', '/packages/psr/log/suggesters');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         $this->assertAnySelectorTextSame('h1 small', 'Suggesters');
     }
@@ -121,12 +96,9 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
 
         $client->request('GET', '/packages/psr/log/statistics');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-        /** @var PackageRepository $packageRepository */
-        $packageRepository = $client->getContainer()->get(PackageRepository::class);
-
-        $package = $packageRepository->findOneByName('psr/log');
+        $package = self::getService(PackageRepository::class)->findOneByName('psr/log');
 
         $this->assertAnySelectorTextSame('#total_all .display-6', number_format($package->getInstallations()->getTotal(), thousands_separator: ' '));
 

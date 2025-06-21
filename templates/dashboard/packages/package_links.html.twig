@@ -3,7 +3,7 @@
 {% block page_title %}{{ package.name }} <small>{{ title|trans }}</small>{% endblock %}
 
 {% block page_content %}
-  {% include 'dashboard/packages/_package_header.html.twig' with {currentPage: title|lower} %}
+  {{ include('dashboard/packages/_package_header.html.twig', {currentPage: title|lower}) }}
 
   {{ include('dashboard/packages/_package_list.html.twig', {packages: packageLinks|map(packageLink => packageLink.package), paginator: paginator}, with_context: false) }}
 {% endblock %}

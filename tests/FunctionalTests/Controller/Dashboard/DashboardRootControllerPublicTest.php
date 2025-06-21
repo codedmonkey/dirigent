@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Tests\FunctionalTests\PublicKernel;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 class DashboardRootControllerPublicTest extends WebTestCase
 {
@@ -18,7 +19,7 @@ class DashboardRootControllerPublicTest extends WebTestCase
 
         $client->request('GET', '/');
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         $this->assertAnySelectorTextSame('#total_packages .display-6', '1');
     }
