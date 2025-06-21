@@ -66,9 +66,22 @@ class DashboardPackagesController extends AbstractController
             }
         }
 
+        if ($request->query->has('type')) {
+            $filtersActive = true;
+            $selectedType = $request->query->get('type');
+
+            $queryBuilder->andWhere($queryBuilder->expr()->eq('package.type', ':type'));
+            $queryBuilder->setParameter('type', $selectedType);
+        }
+
         $paginator = PackagePaginator::fromRequest($request, $queryBuilder, $this->container->get('router'));
 
         $registries = $this->entityManager->getRepository(Registry::class)->findAll();
+        $types = $this->packageRepository->createQueryBuilder('package')
+            ->select('DISTINCT package.type')
+            ->andWhere('package.type IS NOT NULL')
+            ->getQuery()
+            ->getSingleColumnResult();
 
         return $this->render('dashboard/packages/list.html.twig', [
             'filtersActive' => $filtersActive,
@@ -76,6 +89,8 @@ class DashboardPackagesController extends AbstractController
             'registries' => $registries,
             'searchQuery' => $searchQuery ?? null,
             'selectedRegistry' => $selectedRegistry ?? null,
+            'selectedType' => $selectedType ?? null,
+            'types' => $types,
         ]);
     }
 

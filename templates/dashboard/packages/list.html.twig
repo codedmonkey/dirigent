@@ -31,13 +31,28 @@
       <div>
         <div class="dropdown">
           <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ selectedRegistry ? (selectedRegistry == 'local' ? ('Local'|trans) : selectedRegistry.name)  : ('All registries'|trans) }}
+            {{ selectedRegistry ? (selectedRegistry == 'local' ? 'Local'|trans : selectedRegistry.name)  : 'All registries'|trans }}
           </button>
           <ul class="dropdown-menu">
-            {{ _self.registryFilterItem(selectedRegistry, null, 'All registries'|trans) }}
-            {{ _self.registryFilterItem(selectedRegistry, 0, 'Local'|trans) }}
+            {{ _self.dropdownItem(selectedRegistry, null, 'registry', 'All registries'|trans) }}
+            {{ _self.dropdownItem(selectedRegistry, 0, 'registry', 'Local'|trans) }}
             {% for registry in registries %}
-              {{ _self.registryFilterItem(selectedRegistry, registry.id, registry.name) }}
+              {{ _self.dropdownItem(selectedRegistry, registry.id, 'registry', registry.name) }}
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+    {% if types|length %}
+      <div>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{ selectedType ? selectedType : ('All types'|trans) }}
+          </button>
+          <ul class="dropdown-menu">
+            {{ _self.dropdownItem(selectedType, null, 'type', 'All tyoes'|trans) }}
+            {% for type in types %}
+              {{ _self.dropdownItem(selectedType, type, 'type', type) }}
             {% endfor %}
           </ul>
         </div>
@@ -53,10 +68,10 @@
   {{ include('dashboard/packages/_package_list.html.twig', {paginator: paginator}, with_context: false) }}
 {% endblock %}
 
-{% macro registryFilterItem(selectedRegistry, registry, label) %}
-  {% if registry is same as(selectedRegistry) %}
+{% macro dropdownItem(selected, value, key, label) %}
+  {% if value is same as(selected) %}
     <li><span class="dropdown-item active">{{ label }}</span></li>
   {% else %}
-    <li><a class="dropdown-item" href="{{ packageFilterUrl('registry', registry) }}">{{ label }}</a></li>
+    <li><a class="dropdown-item" href="{{ packageFilterUrl(key, value) }}">{{ label }}</a></li>
   {% endif %}
 {% endmacro %}
