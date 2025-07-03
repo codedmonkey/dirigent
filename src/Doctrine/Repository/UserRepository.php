@@ -25,6 +25,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         parent::__construct($registry, User::class);
     }
 
+    /**
+     * Checks if at least one user exists in the database. Used to allow registration for the first user.
+     */
+    public function noUsers(): bool
+    {
+        return null === $this->findOneBy([]);
+    }
+
     public function save(User $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
