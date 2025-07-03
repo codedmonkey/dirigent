@@ -6,6 +6,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use CodedMonkey\Dirigent\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,9 +22,7 @@ class DashboardSecurityController extends AbstractController
     #[Route('/login', name: 'dashboard_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        $userCount = $this->userRepository->count([]);
-
-        if (0 === $userCount) {
+        if ($this->userRepository->noUsers()) {
             return $this->redirectToRoute('dashboard_register');
         }
 
@@ -38,12 +37,13 @@ class DashboardSecurityController extends AbstractController
     }
 
     #[Route('/register', name: 'dashboard_register')]
-    public function register(Request $request): Response
+    public function register(Request $request, Security $security): Response
     {
         $registrationEnabled = $this->getParameter('dirigent.security.registration_enabled');
-        $userCount = $this->userRepository->count([]);
+        $noUsers = $this->userRepository->noUsers();
 
-        if (!$registrationEnabled && 0 !== $userCount) {
+        // Redirect to the homepage page if registration is disabled, but continue if there are no users yet
+        if (!$registrationEnabled && !$noUsers) {
             return $this->redirectToRoute('dashboard');
         }
 
@@ -54,13 +54,15 @@ class DashboardSecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (0 === $userCount) {
+            // The first user gets owner privileges
+            if ($noUsers) {
                 $user->setRoles(['ROLE_SUPER_ADMIN', 'ROLE_USER']);
             }
 
             $this->userRepository->save($user, true);
 
-            return $this->redirectToRoute('dashboard_login');
+            // Automatically authenticate the user after registration
+            return $security->login($user, 'security.authenticator.form_login.main', 'main');
         }
 
         return $this->render('dashboard/security/register.html.twig', [
