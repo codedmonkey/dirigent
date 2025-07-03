@@ -5,7 +5,13 @@ framework:
         #auto_mapping:
         #    App\Entity\: []
 
+        # Disable HTTP calls to check for compromised passwords.
+        # Dirigent should be secure, but it also needs to always work offline for now.
+        # todo add offline mode
+        # todo analyze if this is a good and secure way to check for compromised passwords
+        not_compromised_password: false
+
 when@test:
     framework:
         validation:
-            not_compromised_password: false
+            #not_compromised_password: false
