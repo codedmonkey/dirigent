@@ -542,6 +542,11 @@ class Version extends TrackedEntity
         return '';
     }
 
+    public function getVersionTitle(): string
+    {
+        return $this->version . ($this->hasVersionAlias() ? ' / ' . $this->getVersionAlias() : '');
+    }
+
     /**
      * Get funding, sorted to help the V2 metadata compression algo.
      *

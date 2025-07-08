@@ -26,12 +26,7 @@
   {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {packageName: version.package.name, packageVersion: version.version}) %}
   <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
     <div class="d-flex justify-content-between">
-          <span>
-            {{ version.version }}
-            {% if version.hasVersionAlias() %}
-              / {{ version.versionAlias }}
-            {% endif %}
-          </span>
+      <span>{{ version.versionTitle }}</span>
       <span class="text-muted">{{ version.releasedAt.format('Y-m-d H:i') }} UTC</span>
     </div>
   </a>

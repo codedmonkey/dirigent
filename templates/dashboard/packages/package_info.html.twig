@@ -3,12 +3,7 @@
 {% block page_title %}
   {%- apply spaceless -%}
     {{ package.name }}
-    <small>
-      {{ version.version }}
-      {% if version.hasVersionAlias() %}
-        / {{ version.versionAlias }}
-      {% endif %}
-    </small>
+    <small>{{ version.versionTitle }}</small>
   {%- endapply -%}
 {% endblock %}
 
