@@ -26,7 +26,7 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
         $client = static::createClient();
         $this->loginUser();
 
-        $client->request('GET', '/packages/psr/log/v/1.0.0');
+        $client->request('GET', '/packages/psr/log/versions/1.0.0');
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
