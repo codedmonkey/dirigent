@@ -36,6 +36,7 @@
         "symfony/mailer": "^7.3",
         "symfony/mime": "^7.3",
         "symfony/monolog-bundle": "^3.10",
+        "symfony/polyfill-php85": "^1.33",
         "symfony/process": "^7.3",
         "symfony/property-access": "^7.3",
         "symfony/property-info": "^7.3",

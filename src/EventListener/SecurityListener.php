@@ -31,7 +31,7 @@ readonly class SecurityListener
     #[AsEventListener]
     public function checkAccessIsGranted(ControllerEvent $event): void
     {
-        if (null !== ($event->getAttributes(IsGrantedAccess::class)[0] ?? null)) {
+        if (null !== array_first($event->getAttributes(IsGrantedAccess::class))) {
             if (!$this->publicAccess && !$this->authorizationChecker->isGranted('ROLE_USER')) {
                 throw new AccessDeniedException();
             }
