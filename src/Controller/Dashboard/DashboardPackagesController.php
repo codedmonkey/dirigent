@@ -14,6 +14,7 @@ use CodedMonkey\Dirigent\Message\UpdatePackage;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -27,6 +28,8 @@ class DashboardPackagesController extends AbstractController
         private readonly PackageRepository $packageRepository,
         private readonly PackageMetadataResolver $metadataResolver,
         private readonly MessageBusInterface $messenger,
+        #[Autowire(param: 'dirigent.metadata.mirror_vcs_repositories')]
+        private readonly bool $mirrorVcsRepositories = false,
     ) {
     }
 
@@ -104,7 +107,7 @@ class DashboardPackagesController extends AbstractController
                 $package = new Package();
                 $package->setName($packageName);
                 $package->setMirrorRegistry($registry);
-                $package->setFetchStrategy(PackageFetchStrategy::Mirror);
+                $package->setFetchStrategy($this->mirrorVcsRepositories ? PackageFetchStrategy::Vcs : PackageFetchStrategy::Mirror);
 
                 $this->packageRepository->save($package, true);
 

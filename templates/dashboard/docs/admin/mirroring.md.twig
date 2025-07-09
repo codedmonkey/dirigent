@@ -15,7 +15,8 @@ of registries, move the registries up and down in the **Registries** overview.
 To add an external registry, go to **Registries** in the sidebar and click **Add Registry**.
 
 ### Package mirroring
-When adding an external registry, you have the following options regarding package mirroring:
+The package mirroring option allows control over when a package from the mirror registry is added to the current
+registry.
 
 **Package mirroring disabled**<br>
 Package mirroring is disabled for this external registry so new packages can't be added. Existing packages already
@@ -28,3 +29,17 @@ registry will not request the package from this external registry.
 **Automatically mirror packages on request**<br>
 Packages can be added manually or will be created automatically when requested by a developer installing packages
 (through `composer update`).
+
+## Add mirrored packages
+To add a package from an external registry, go to **Packages** in the sidebar and click **Add Package** >
+**Mirror from registry**.
+
+### Fetch strategy
+It's possible to change how Dirigent fetches a mirrored package by changing the fetch strategy of the package. The
+default fetch strategy can be changed by the system administrator.
+
+**Fetch from registry** (default)<br>
+Fetch package metadata directly from the mirror registry. Only metadata from the registry is available.
+
+**Fetch from VCS**<br>
+Fetch package from VCS if possible. Metadata is compiled from the source code, including distributions and README data.

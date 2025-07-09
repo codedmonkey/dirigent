@@ -33,6 +33,8 @@ dirigent:
     enabled: false
     preferred: true
     dev_packages: false
+  metadata:
+    mirror_vcs_repositories: false
 ```
 
 ## dirigent (root)
@@ -118,6 +120,16 @@ Whether to enable or disable distribution mirroring
 ### preferred
 
 ### dev_packages
+
+## metadata
+
+### mirror_vcs_repositories
+
+Type: `boolean` | Default: `false`
+
+Fetch mirrored packages from their VCS repositories by default when possible.
+
+Sets the fetch strategy of new mirrored packages to **Fetch from VCS**.
 
 [iso-8601-durations]: https://en.wikipedia.org/wiki/ISO_8601#Durations
 [symfony]: https://symfony.com

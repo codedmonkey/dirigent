@@ -77,6 +77,16 @@ class PackageFormType extends AbstractType
                         return "package.fetch-strategy.{$choice->value}";
                     },
                 ]);
+
+            if (PackageFetchStrategy::Mirror === $package->getFetchStrategy()) {
+                $form
+                    ->add('repositoryCredentials', EntityType::class, [
+                        'label' => 'Credentials',
+                        'disabled' => true,
+                        'class' => Credentials::class,
+                        'placeholder' => 'No credentials',
+                    ]);
+            }
         }
     }
 
