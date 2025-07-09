@@ -14,6 +14,7 @@ use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use CodedMonkey\Dirigent\Package\PackageProviderManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,6 +36,8 @@ class ApiController extends AbstractController
         private readonly PackageDistributionResolver $distributionResolver,
         private readonly PackageProviderManager $providerManager,
         private readonly MessageBusInterface $messenger,
+        #[Autowire(param: 'dirigent.metadata.mirror_vcs_repositories')]
+        private readonly bool $mirrorVcsRepositories = false,
     ) {
     }
 
@@ -178,7 +181,7 @@ class ApiController extends AbstractController
         $package = new Package();
         $package->setName($packageName);
         $package->setMirrorRegistry($registry);
-        $package->setFetchStrategy(PackageFetchStrategy::Mirror);
+        $package->setFetchStrategy($this->mirrorVcsRepositories ? PackageFetchStrategy::Vcs : PackageFetchStrategy::Mirror);
 
         $this->packageRepository->save($package, true);
 
