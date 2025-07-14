@@ -5,10 +5,35 @@
 {% block page_content %}
   {{ include('dashboard/packages/_package_header.html.twig', {currentPage: 'versions'}) }}
 
-  {{ _self.versionList('Latest versions', package.activeVersions) }}
-  {{ _self.versionList('Development versions', package.devVersions) }}
-  {{ _self.versionList('Historical versions', package.historicalVersions) }}
-  {{ _self.versionList('Development branch versions', package.devBranchVersions) }}
+  {% if package.versions|length > 0 %}
+    {{ _self.versionList('Latest versions', package.activeVersions) }}
+    {{ _self.versionList('Development versions', package.devVersions) }}
+    {{ _self.versionList('Historical versions', package.historicalVersions) }}
+    {{ _self.versionList('Development branch versions', package.devBranchVersions) }}
+  {% else %}
+    <table class="table datagrid datagrid-empty">
+      <tbody>
+        {% for i in 1..14 %}
+          <tr class="empty-row">
+            <td><span></span></td>
+            <td><span></span></td>
+            <td><span></span></td>
+            <td><span></span></td>
+            <td><span></span></td>
+            <td><span></span></td>
+          </tr>
+
+          {% if 3 == loop.index %}
+            <tr class="no-results">
+              <td colspan="100">
+                {{ 'No published versions found'|trans }}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
 {% endblock %}
 
 {% macro versionList(title, versions) %}

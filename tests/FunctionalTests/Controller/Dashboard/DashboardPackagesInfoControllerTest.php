@@ -3,12 +3,14 @@
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
 class DashboardPackagesInfoControllerTest extends WebTestCase
 {
+    use MockEntityFactoryTrait;
     use WebTestCaseTrait;
 
     public function testInfo(): void
@@ -19,6 +21,23 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
         $client->request('GET', '/packages/psr/log');
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+    }
+
+    public function testInfoRedirectsWithNoVersions(): void
+    {
+        $client = static::createClient();
+        $this->loginUser();
+
+        $package = $this->createMockPackage();
+        $this->persistEntities($package);
+
+        $client->request('GET', "/packages/{$package->getName()}");
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
+
+        $client->followRedirect();
+
+        $this->assertSame(sprintf('/packages/%s/versions', $package->getName()), $client->getRequest()->getRequestUri());
     }
 
     public function testPackageInfo(): void

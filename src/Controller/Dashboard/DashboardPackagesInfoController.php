@@ -32,6 +32,10 @@ class DashboardPackagesInfoController extends AbstractController
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
         $version = $package->getLatestVersion();
 
+        if (!$version) {
+            return $this->redirectToRoute('dashboard_packages_versions', ['packageName' => $packageName]);
+        }
+
         return $this->versionInfo($packageName, $version->getNormalizedVersion());
     }
 

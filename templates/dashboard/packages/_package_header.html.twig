@@ -4,8 +4,12 @@
 
 <ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 pb-3 mb-3 border-bottom">
   <li class="nav-item">
-    {% set packageInfoUrl = path('dashboard_packages_info', {packageName: package.name}) %}
-    <a {{ (currentPage == 'info' ? attrActive : attr)|raw }} href="{{ packageInfoUrl }}">{{ 'Info'|trans }}</a>
+    {% if package.versions|length > 0 %}
+      {% set packageInfoUrl = path('dashboard_packages_info', {packageName: package.name}) %}
+      <a {{ (currentPage == 'info' ? attrActive : attr)|raw }} href="{{ packageInfoUrl }}">{{ 'Info'|trans }}</a>
+    {% else %}
+      <span class="nav-link disabled">{{ 'Info'|trans }}</span>
+    {% endif %}
   </li>
   <li class="nav-item">
     {% set packageVersionsUrl = path('dashboard_packages_versions', {packageName: package.name}) %}
