@@ -22,26 +22,22 @@ readonly class SchedulePackageUpdateHandler
     {
         $package = $this->packageRepository->find($message->packageId);
 
-        if (!$message->reschedule && null !== $package->getUpdateScheduledAt()) {
+        if (!$message->reschedule && $package->isUpdateScheduled()) {
             return;
         }
 
-        $updateMessage = new UpdatePackage($message->packageId, scheduled: true, forceRefresh: $message->forceRefresh);
-        $updateEnvelope = new Envelope($updateMessage, [
-            new TransportNamesStamp('async'),
-        ]);
+        $updateMessage = Envelope::wrap(new UpdatePackage($message->packageId, scheduled: true, forceRefresh: $message->forceRefresh))
+            ->with(new TransportNamesStamp('async'));
 
         if ($message->randomTime) {
             // Delay message up to 12 minutes
-            $updateEnvelope = $updateEnvelope->with(
-                new DelayStamp(random_int(1, 720) * 1000),
-            );
+            $updateMessage = $updateMessage->with(new DelayStamp(random_int(1, 720) * 1000));
         }
 
         $package->setUpdateScheduledAt(new \DateTime());
 
         $this->packageRepository->save($package, true);
 
-        $this->messenger->dispatch($updateEnvelope);
+        $this->messenger->dispatch($updateMessage);
     }
 }

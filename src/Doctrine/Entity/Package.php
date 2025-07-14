@@ -333,6 +333,11 @@ class Package
         $this->updateScheduledAt = $updateScheduledAt;
     }
 
+    public function isUpdateScheduled(): bool
+    {
+        return null !== $this->updateScheduledAt;
+    }
+
     public function getDumpedAt(): ?\DateTimeInterface
     {
         return $this->dumpedAt;
