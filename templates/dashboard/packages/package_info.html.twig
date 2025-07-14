@@ -70,7 +70,17 @@
           <div>No license specified</div>
         {% endif %}
       </div>
-      <p class="px-3 mb-0"><small>{{ 'Last updated at %date%'|trans({'%date%': package.updatedAt|date}) }}</small></p>
+      {% apply spaceless %}
+        <p class="px-3 mb-0">
+          <small>
+            {{ 'Last updated at %date%'|trans({'%date%': package.updatedAt|date}) }}
+            {% if package.updateScheduledAt %}
+              <br>
+              {{ 'An update for this package has been scheduled'|trans }}
+            {% endif %}
+          </small>
+        </p>
+      {% endapply %}
     </div>
   </div>
 
