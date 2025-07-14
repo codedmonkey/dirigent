@@ -46,8 +46,6 @@ class DashboardPackagesControllerTest extends WebTestCase
 
         $package = $packageRepository->findOneByName('psr/cache');
         self::assertNotNull($package, 'A package was created.');
-
-        $packageRepository->remove($package, true);
     }
 
     public function testAddVcsRepository(): void
@@ -70,8 +68,6 @@ class DashboardPackagesControllerTest extends WebTestCase
 
         $package = $packageRepository->findOneByName('psr/container');
         self::assertNotNull($package, 'A package was created.');
-
-        $packageRepository->remove($package, true);
     }
 
     public function testEdit(): void
