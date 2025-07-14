@@ -67,17 +67,17 @@ class PackageRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{id: int}>
+     * @return int[]
      */
     public function getAllPackageIds(): array
     {
         $connection = $this->getEntityManager()->getConnection();
 
-        return $connection->fetchAllAssociative('SELECT id FROM package ORDER BY id');
+        return $connection->fetchFirstColumn('SELECT id FROM package ORDER BY id');
     }
 
     /**
-     * @return list<array{id: int}>
+     * @return int[]
      */
     public function getStalePackageIds(): array
     {
@@ -86,12 +86,13 @@ class PackageRepository extends ServiceEntityRepository
         $now = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
         $before = $now->sub($this->updateInterval);
 
-        return $connection->fetchAllAssociative(
-            'SELECT p.id FROM package p
-            WHERE p.update_scheduled_at IS NULL
-                AND (p.updated_at IS NULL OR p.updated_at < :crawled)
-            ORDER BY p.id',
-            [
+        return $connection->fetchFirstColumn(
+            <<<'SQL'
+                SELECT p.id FROM package p
+                WHERE p.update_scheduled_at IS NULL
+                    AND (p.updated_at IS NULL OR p.updated_at < :crawled)
+                ORDER BY p.id
+            SQL, [
                 'crawled' => $before->format('Y-m-d H:i:s'),
             ]
         );

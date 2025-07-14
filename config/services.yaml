@@ -29,4 +29,4 @@ services:
         arguments:
             -
                 'encryption:generate-keys': '@CodedMonkey\Dirigent\Command\EncryptionGenerateKeysCommand'
-                'packages:update': '@CodedMonkey\Dirigent\Command\PackagesUpdateCommand'
+                'packages:update': '@CodedMonkey\Dirigent\Command\PackagesUpdateCommand.command'

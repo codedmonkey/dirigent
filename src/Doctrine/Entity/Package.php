@@ -308,6 +308,11 @@ class Package extends TrackedEntity
         $this->updateScheduledAt = $updateScheduledAt;
     }
 
+    public function isUpdateScheduled(): bool
+    {
+        return null !== $this->updateScheduledAt;
+    }
+
     public function getDumpedAt(): ?\DateTimeImmutable
     {
         return $this->dumpedAt;
