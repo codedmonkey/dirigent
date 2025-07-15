@@ -197,10 +197,9 @@ readonly class PackageMetadataResolver
         }
 
         if ($primaryVersionName) {
-            $message = new Envelope(new UpdatePackageLinks($package->getId(), $primaryVersionName), [
-                new DispatchAfterCurrentBusStamp(),
-                new TransportNamesStamp('async'),
-            ]);
+            $message = Envelope::wrap(new UpdatePackageLinks($package->getId(), $primaryVersionName))
+                ->with(new DispatchAfterCurrentBusStamp())
+                ->with(new TransportNamesStamp('async'));
             $this->messenger->dispatch($message);
         }
 
@@ -211,10 +210,7 @@ readonly class PackageMetadataResolver
             $this->entityManager->remove($versionEntity);
         }
 
-        $updatedAt = new \DateTime();
-        $package->setUpdatedAt($updatedAt);
-
-        $this->entityManager->persist($package);
+        $package->setUpdatedAt(new \DateTimeImmutable());
     }
 
     private function updateVersion(Package $package, Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
