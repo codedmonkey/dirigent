@@ -503,6 +503,16 @@ class Version extends TrackedEntity
         $this->releasedAt = $releasedAt;
     }
 
+    public function getSourceReference(): ?string
+    {
+        return $this->source['reference'] ?? null;
+    }
+
+    public function getSourceType(): ?string
+    {
+        return $this->source['type'] ?? null;
+    }
+
     public function getSourceUrl(): ?string
     {
         return $this->source['url'] ?? null;
@@ -521,6 +531,11 @@ class Version extends TrackedEntity
     public function getDistUrl(): ?string
     {
         return $this->dist['url'] ?? null;
+    }
+
+    public function getReference(): ?string
+    {
+        return $this->source['reference'] ?? $this->dist['reference'] ?? null;
     }
 
     public function hasVersionAlias(): bool

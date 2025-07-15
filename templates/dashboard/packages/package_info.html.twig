@@ -26,6 +26,10 @@
           {% endfor %}
         </div>
       {% endif %}
+
+      {% if version.reference %}
+        <p>{{ 'Reference'|trans }}: <code>{{ version.reference }}</code></p>
+      {% endif %}
     </div>
     <div class="col-md-4">
       <div class="dirigent-package-sidebar bg-body-secondary px-3 py-2 mb-2 rounded">
