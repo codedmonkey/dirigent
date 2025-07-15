@@ -178,6 +178,7 @@ readonly class PackageMetadataResolver
 
             if (!$package->getVersions()->contains($version)) {
                 $package->getVersions()->add($version);
+                $this->entityManager->persist($version);
             }
 
             $this->updateVersion($package, $version, $composerPackage, $driver);
@@ -241,8 +242,8 @@ readonly class PackageMetadataResolver
         $version->setType($this->sanitize($data->getType()));
 
         $version->setPackage($package);
-        $version->setUpdatedAt(new \DateTime());
-        $version->setReleasedAt($data->getReleaseDate());
+        $version->setUpdatedAt(new \DateTimeImmutable());
+        $version->setReleasedAt(\DateTimeImmutable::createFromInterface($data->getReleaseDate()));
 
         $version->setAuthors([]);
         if ($data->getAuthors()) {
@@ -383,8 +384,6 @@ readonly class PackageMetadataResolver
         } else {
             $version->setReadme(null);
         }
-
-        $em->persist($version);
     }
 
     private function sanitize(?string $str): ?string

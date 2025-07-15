@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VersionRepository::class)]
 #[ORM\UniqueConstraint(name: 'pkg_ver_idx', columns: ['package_id', 'normalized_version'])]
-class Version
+class Version extends TrackedEntity
 {
     #[ORM\Id]
     #[ORM\Column]
@@ -115,14 +115,11 @@ class Version
     #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
     private VersionInstallations $installations;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $createdAt;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $updatedAt = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $releasedAt = null;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $releasedAt = null;
 
     public function __construct()
     {
@@ -134,7 +131,6 @@ class Version
         $this->suggest = new ArrayCollection();
         $this->tags = new ArrayCollection();
         $this->installations = new VersionInstallations($this);
-        $this->createdAt = new \DateTime();
     }
 
     public function __toString(): string
@@ -487,27 +483,22 @@ class Version
         return $this->installations;
     }
 
-    public function getCreatedAt(): \DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updatedAt): void
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
 
-    public function getReleasedAt(): ?\DateTimeInterface
+    public function getReleasedAt(): ?\DateTimeImmutable
     {
         return $this->releasedAt;
     }
 
-    public function setReleasedAt(?\DateTimeInterface $releasedAt): void
+    public function setReleasedAt(?\DateTimeImmutable $releasedAt): void
     {
         $this->releasedAt = $releasedAt;
     }
