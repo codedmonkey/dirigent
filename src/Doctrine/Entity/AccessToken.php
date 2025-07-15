@@ -6,7 +6,7 @@ use CodedMonkey\Dirigent\Doctrine\Repository\AccessTokenRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AccessTokenRepository::class)]
-class AccessToken
+class AccessToken extends TrackedEntity
 {
     #[ORM\Column]
     #[ORM\GeneratedValue]
@@ -22,9 +22,6 @@ class AccessToken
     #[ORM\Column]
     private ?string $token = null;
 
-    #[ORM\Column]
-    private readonly \DateTimeImmutable $createdAt;
-
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $expiresAt = null;
 
@@ -32,7 +29,6 @@ class AccessToken
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
         $this->plainToken = uniqid('dirigent-');
     }
 
