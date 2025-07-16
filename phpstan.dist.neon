@@ -19,6 +19,16 @@ parameters:
             count: 1
             path: src/DependencyInjection/DirigentConfiguration.php
         -
+            message: '#^Class CodedMonkey\\Dirigent\\Doctrine\\Entity\\TrackedEntity has an uninitialized readonly property \$createdAt\. Assign it in the constructor\.$#'
+            identifier: property.uninitializedReadonly
+            count: 1
+            path: src/Doctrine/Entity/TrackedEntity.php
+        -
+            message: '#^Readonly property CodedMonkey\\Dirigent\\Doctrine\\Entity\\TrackedEntity\:\:\$createdAt is assigned outside of the constructor\.$#'
+            identifier: property.readOnlyAssignNotInConstructor
+            count: 1
+            path: src/Doctrine/Entity/TrackedEntity.php
+        -
             message: '#^Left side of \|\| is always false\.$#'
             identifier: booleanOr.leftAlwaysFalse
             count: 1

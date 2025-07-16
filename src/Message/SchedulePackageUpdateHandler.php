@@ -38,7 +38,7 @@ readonly class SchedulePackageUpdateHandler
             );
         }
 
-        $package->setUpdateScheduledAt(new \DateTime());
+        $package->setUpdateScheduledAt(new \DateTimeImmutable());
 
         $this->packageRepository->save($package, true);
 

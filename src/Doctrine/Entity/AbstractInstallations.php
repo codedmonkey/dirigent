@@ -57,7 +57,7 @@ abstract class AbstractInstallations
         return $this->mergedAt;
     }
 
-    public function increase(\DateTimeInterface $date): void
+    public function increase(\DateTimeImmutable $date): void
     {
         $key = $date->format('Ymd');
 

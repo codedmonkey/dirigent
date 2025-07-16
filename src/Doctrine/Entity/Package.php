@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: PackageRepository::class)]
 #[ORM\UniqueConstraint(name: 'package_name_idx', columns: ['name'])]
 #[UniquePackage]
-class Package
+class Package extends TrackedEntity
 {
     #[ORM\Id]
     #[ORM\Column]
@@ -74,17 +74,14 @@ class Package
     #[ORM\OneToMany(targetEntity: Version::class, mappedBy: 'package', cascade: ['remove'])]
     private Collection $versions;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $createdAt;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $updatedAt = null;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updateScheduledAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $updateScheduledAt = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dumpedAt = null;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $dumpedAt = null;
 
     /**
      * @var array<string, Version> lookup table for versions
@@ -95,7 +92,6 @@ class Package
     {
         $this->installations = new PackageInstallations($this);
         $this->versions = new ArrayCollection();
-        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -308,37 +304,37 @@ class Package
         return $this->cachedVersions[strtolower($normalizedVersion)] ?? null;
     }
 
-    public function getCreatedAt(): \DateTimeInterface
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updatedAt): void
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
 
-    public function getUpdateScheduledAt(): ?\DateTimeInterface
+    public function getUpdateScheduledAt(): ?\DateTimeImmutable
     {
         return $this->updateScheduledAt;
     }
 
-    public function setUpdateScheduledAt(?\DateTimeInterface $updateScheduledAt): void
+    public function setUpdateScheduledAt(?\DateTimeImmutable $updateScheduledAt): void
     {
         $this->updateScheduledAt = $updateScheduledAt;
     }
 
-    public function getDumpedAt(): ?\DateTimeInterface
+    public function getDumpedAt(): ?\DateTimeImmutable
     {
         return $this->dumpedAt;
     }
 
-    public function setDumpedAt(?\DateTimeInterface $dumpedAt): void
+    public function setDumpedAt(?\DateTimeImmutable $dumpedAt): void
     {
         $this->dumpedAt = $dumpedAt;
     }

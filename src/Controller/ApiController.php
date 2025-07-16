@@ -145,12 +145,9 @@ class ApiController extends AbstractController
             return new JsonResponse(['status' => 'error', 'message' => 'Invalid request format, must be a json object containing a downloads key filled with an array of name/version objects'], 200);
         }
 
-        $message = new TrackInstallations($contents['downloads'], new \DateTime());
-        $envelope = new Envelope($message, [
-            new TransportNamesStamp('async'),
-        ]);
-
-        $this->messenger->dispatch($envelope);
+        $message = Envelope::wrap(new TrackInstallations($contents['downloads'], new \DateTimeImmutable()))
+            ->with(new TransportNamesStamp('async'));
+        $this->messenger->dispatch($message);
 
         return new JsonResponse(['status' => 'success'], Response::HTTP_CREATED);
     }

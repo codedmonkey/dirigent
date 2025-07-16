@@ -178,6 +178,7 @@ readonly class PackageMetadataResolver
 
             if (!$package->getVersions()->contains($version)) {
                 $package->getVersions()->add($version);
+                $this->entityManager->persist($version);
             }
 
             $this->updateVersion($package, $version, $composerPackage, $driver);
@@ -196,10 +197,9 @@ readonly class PackageMetadataResolver
         }
 
         if ($primaryVersionName) {
-            $message = new Envelope(new UpdatePackageLinks($package->getId(), $primaryVersionName), [
-                new DispatchAfterCurrentBusStamp(),
-                new TransportNamesStamp('async'),
-            ]);
+            $message = Envelope::wrap(new UpdatePackageLinks($package->getId(), $primaryVersionName))
+                ->with(new DispatchAfterCurrentBusStamp())
+                ->with(new TransportNamesStamp('async'));
             $this->messenger->dispatch($message);
         }
 
@@ -210,10 +210,7 @@ readonly class PackageMetadataResolver
             $this->entityManager->remove($versionEntity);
         }
 
-        $updatedAt = new \DateTime();
-        $package->setUpdatedAt($updatedAt);
-
-        $this->entityManager->persist($package);
+        $package->setUpdatedAt(new \DateTimeImmutable());
     }
 
     private function updateVersion(Package $package, Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
@@ -241,8 +238,8 @@ readonly class PackageMetadataResolver
         $version->setType($this->sanitize($data->getType()));
 
         $version->setPackage($package);
-        $version->setUpdatedAt(new \DateTime());
-        $version->setReleasedAt($data->getReleaseDate());
+        $version->setUpdatedAt(new \DateTimeImmutable());
+        $version->setReleasedAt(\DateTimeImmutable::createFromInterface($data->getReleaseDate()));
 
         $version->setAuthors([]);
         if ($data->getAuthors()) {
@@ -383,8 +380,6 @@ readonly class PackageMetadataResolver
         } else {
             $version->setReadme(null);
         }
-
-        $em->persist($version);
     }
 
     private function sanitize(?string $str): ?string
