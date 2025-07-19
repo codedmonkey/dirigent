@@ -7,6 +7,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Events;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
@@ -17,6 +18,10 @@ readonly class VersionListener
 {
     public function __construct(
         private MessageBusInterface $messenger,
+        #[Autowire(param: 'dirigent.distributions.enabled')]
+        private bool $distributionsEnabled,
+        #[Autowire(param: 'dirigent.distributions.dev_versions')]
+        private bool $resolveDevDistributions,
     ) {
     }
 
@@ -33,7 +38,14 @@ readonly class VersionListener
 
     private function resolveDistribution(Version $version): void
     {
-        if (PackageDistributionStrategy::Automatic === $version->getPackage()->getDistributionStrategy()) {
+        if (
+            !$this->distributionsEnabled
+            || ($version->isDevelopment() && !$this->resolveDevDistributions)
+        ) {
+            return;
+        }
+
+        if ($version->getPackage()->getDistributionStrategy()->isAutomatic()) {
             $message = Envelope::wrap(new ResolveDistribution($version->getId()))
                 ->with(new TransportNamesStamp('async'));
             $this->messenger->dispatch($message);

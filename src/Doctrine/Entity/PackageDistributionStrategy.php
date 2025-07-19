@@ -16,8 +16,28 @@ enum PackageDistributionStrategy: string implements TranslatableInterface
         return $translator->trans("package.distribution-strategy.{$this->value}");
     }
 
+    public function isDisabled(): bool
+    {
+        return self::Disabled === $this;
+    }
+
+    public function isDynamic(): bool
+    {
+        return self::Dynamic === $this;
+    }
+
+    public function isAutomatic(): bool
+    {
+        return self::Automatic === $this;
+    }
+
+    /**
+     * Whether the strategy allows dynamic updates.
+     *
+     * Only the disabled strategy doesn't allow this.
+     */
     public function allowDynamic(): bool
     {
-        return self::Disabled !== $this;
+        return !$this->isDisabled();
     }
 }
