@@ -5,7 +5,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
-use CodedMonkey\Dirigent\Tests\Helper\TestEntityFactoryTrait;
+use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DashboardPackagesControllerTest extends WebTestCase
 {
-    use TestEntityFactoryTrait;
+    use MockEntityFactoryTrait;
     use WebTestCaseTrait;
 
     public function testAddMirroring(): void
@@ -91,11 +91,10 @@ class DashboardPackagesControllerTest extends WebTestCase
 
         $entityManager = $this->getService(EntityManagerInterface::class);
 
-        $package = $this->createPackageEntity();
+        $package = $this->createMockPackage();
+        $this->persistEntities($package);
 
-        $entityManager->persist($package);
-        $entityManager->flush();
-
+        // Fetch package id prior to deleting it
         $packageId = $package->getId();
 
         $client->request('GET', "/packages/{$package->getName()}/delete");

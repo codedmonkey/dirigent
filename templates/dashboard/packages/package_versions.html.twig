@@ -5,20 +5,64 @@
 {% block page_content %}
   {{ include('dashboard/packages/_package_header.html.twig', {currentPage: 'versions'}) }}
 
-  <div class="list-group list-group-flush mb-3">
-    {% for version in versions %}
-      {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {packageName: package.name, packageVersion: version.version}) %}
-      <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
-        <div class="d-flex justify-content-between">
-          <span>
-            {{ version.version }}
-            {% if version.hasVersionAlias() %}
-              / {{ version.versionAlias }}
-            {% endif %}
-          </span>
-          <span class="text-muted">{{ version.releasedAt|date }}</span>
-        </div>
-      </a>
-    {% endfor %}
-  </div>
+  {% apply spaceless %}
+    <p>
+      {{ 'Last updated at %date%'|trans({'%date%': package.updatedAt|date}) }}
+      {% if package.updateScheduledAt %}
+        <br>
+        {{ 'An update for this package has been scheduled'|trans }}
+      {% endif %}
+    </p>
+  {% endapply %}
+
+  {% if package.versions|length > 0 %}
+    {{ _self.versionList('Latest versions', package.activeVersions) }}
+    {{ _self.versionList('Development versions', package.devVersions) }}
+    {{ _self.versionList('Historical versions', package.historicalVersions) }}
+    {{ _self.versionList('Development branch versions', package.devBranchVersions) }}
+  {% else %}
+    <table class="table datagrid datagrid-empty">
+      <tbody>
+        {% for i in 1..14 %}
+          <tr class="empty-row">
+            <td><span></span></td>
+            <td><span></span></td>
+            <td><span></span></td>
+            <td><span></span></td>
+            <td><span></span></td>
+            <td><span></span></td>
+          </tr>
+
+          {% if 3 == loop.index %}
+            <tr class="no-results">
+              <td colspan="100">
+                {{ 'No published versions found'|trans }}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
 {% endblock %}
+
+{% macro versionList(title, versions) %}
+  {% if versions|length %}
+    <h2 class="h4">{{ title|trans }}</h2>
+    <div class="list-group list-group-flush border-bottom mb-3">
+      {% for version in versions %}
+        {{ _self.versionListItem(version) }}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro versionListItem(version) %}
+  {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {packageName: version.package.name, packageVersion: version.version}) %}
+  <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
+    <div class="d-flex justify-content-between">
+      <span>{{ version.versionTitle }}</span>
+      <span class="text-muted">{{ version.releasedAt.format('Y-m-d H:i') }} UTC</span>
+    </div>
+  </a>
+{% endmacro %}

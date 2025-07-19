@@ -503,6 +503,21 @@ class Version extends TrackedEntity
         $this->releasedAt = $releasedAt;
     }
 
+    public function getSourceReference(): ?string
+    {
+        return $this->source['reference'] ?? null;
+    }
+
+    public function getSourceType(): ?string
+    {
+        return $this->source['type'] ?? null;
+    }
+
+    public function getSourceUrl(): ?string
+    {
+        return $this->source['url'] ?? null;
+    }
+
     public function getDistReference(): ?string
     {
         return $this->dist['reference'] ?? null;
@@ -516,6 +531,11 @@ class Version extends TrackedEntity
     public function getDistUrl(): ?string
     {
         return $this->dist['url'] ?? null;
+    }
+
+    public function getReference(): ?string
+    {
+        return $this->source['reference'] ?? $this->dist['reference'] ?? null;
     }
 
     public function hasVersionAlias(): bool
@@ -535,6 +555,11 @@ class Version extends TrackedEntity
         }
 
         return '';
+    }
+
+    public function getVersionTitle(): string
+    {
+        return $this->version . ($this->hasVersionAlias() ? ' / ' . $this->getVersionAlias() : '');
     }
 
     /**
@@ -557,28 +582,6 @@ class Version extends TrackedEntity
         });
 
         return $funding;
-    }
-
-    public function getPublicUrl(): ?string
-    {
-        $url = $this->getHomepage() ?? $this->getSource()['url'] ?? null;
-
-        if (!$url || (!str_starts_with($url, 'http://') && !str_starts_with($url, 'https://'))) {
-            return null;
-        }
-
-        return $url;
-    }
-
-    public function getPrettyPublicUrl(): ?string
-    {
-        if (null === $url = $this->getPublicUrl()) {
-            return null;
-        }
-
-        $url = preg_replace('#^https?://#', '', $url);
-
-        return $url;
     }
 
     public function getMajorVersion(): int

@@ -156,6 +156,8 @@ readonly class PackageMetadataResolver
         foreach ($composerPackages as $composerPackage) {
             if ($composerPackage->isDefaultBranch()) {
                 $package->setRepositoryUrl($composerPackage->getSourceUrl());
+
+                return;
             }
         }
     }
@@ -166,8 +168,8 @@ readonly class PackageMetadataResolver
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
         $existingVersions = $this->versionRepository->getVersionMetadataForUpdate($package);
-        /** @var ?string $primaryVersionName Version name to use as the package link source */
-        $primaryVersionName = null;
+        /** @var ?CompletePackageInterface $primaryVersion Version to use as the package info source */
+        $primaryVersion = null;
 
         foreach ($composerPackages as $composerPackage) {
             if ($composerPackage instanceof AliasPackage) {
@@ -185,19 +187,22 @@ readonly class PackageMetadataResolver
             $versionName = $version->getNormalizedVersion();
 
             // Use the first version which should be the highest stable version by default
-            if (null === $primaryVersionName) {
-                $primaryVersionName = $versionName;
-            }
+            $primaryVersion ??= $version;
             // If default branch is present however we prefer that as the canonical package link source
             if ($version->isDefaultBranch()) {
-                $primaryVersionName = $versionName;
+                $primaryVersion = $version;
             }
 
             unset($existingVersions[$versionName]);
         }
 
-        if ($primaryVersionName) {
-            $message = Envelope::wrap(new UpdatePackageLinks($package->getId(), $primaryVersionName))
+        if ($primaryVersion) {
+            // Only update the repository URL if the package is mirrored
+            if ($package->getMirrorRegistry()) {
+                $package->setRepositoryUrl($primaryVersion->getSourceUrl());
+            }
+
+            $message = Envelope::wrap(new UpdatePackageLinks($package->getId(), $primaryVersion->getNormalizedVersion()))
                 ->with(new DispatchAfterCurrentBusStamp())
                 ->with(new TransportNamesStamp('async'));
             $this->messenger->dispatch($message);

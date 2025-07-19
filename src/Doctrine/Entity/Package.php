@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Validator\UniquePackage;
+use Composer\Package\Version\VersionParser;
 use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -87,6 +88,8 @@ class Package extends TrackedEntity
      * @var array<string, Version> lookup table for versions
      */
     private array $cachedVersions;
+
+    private array $sortedVersions;
 
     public function __construct()
     {
@@ -339,18 +342,54 @@ class Package extends TrackedEntity
         $this->dumpedAt = $dumpedAt;
     }
 
+    public function getBrowsableRepositoryUrl(): ?string
+    {
+        if (!$this->repositoryUrl) {
+            return null;
+        }
+
+        if (!Preg::isMatch('{^https?://}i', $this->repositoryUrl)) {
+            return null;
+        }
+
+        return $this->repositoryUrl;
+    }
+
+    public function getPrettyBrowsableRepositoryUrl(): ?string
+    {
+        if (null === $url = $this->getBrowsableRepositoryUrl()) {
+            return null;
+        }
+
+        $url = preg_replace('#^https?://#', '', $url);
+
+        return $url;
+    }
+
     /**
-     * Returns the default branch or latest version of the package.
+     * @return Version[]
+     */
+    public function getSortedVersions(): array
+    {
+        if (!isset($this->sortedVersions)) {
+            $this->sortedVersions = $this->versions->toArray();
+
+            usort($this->sortedVersions, [static::class, 'sortVersions']);
+        }
+
+        return $this->sortedVersions;
+    }
+
+    /**
+     * Returns the default branch or the latest version of the package.
      */
     public function getDefaultVersion(): ?Version
     {
-        $versions = $this->versions->toArray();
+        $versions = $this->getSortedVersions();
 
         if (!count($versions)) {
             return null;
         }
-
-        usort($versions, [static::class, 'sortVersions']);
 
         $latestVersion = reset($versions);
         foreach ($versions as $version) {
@@ -363,18 +402,17 @@ class Package extends TrackedEntity
     }
 
     /**
-     * Returns the latest (numbered) version of the package, or the default version if no versions were found.
+     * The latest (numbered) version of the package, or the default version if no versions were found.
      */
     public function getLatestVersion(): ?Version
     {
-        $versions = $this->versions->toArray();
+        $versions = $this->getSortedVersions();
 
         if (!count($versions)) {
             return null;
         }
 
-        usort($versions, [static::class, 'sortVersions']);
-
+        // Return the first non-development version
         foreach ($versions as $version) {
             if (!$version->isDevelopment()) {
                 return $version;
@@ -382,6 +420,132 @@ class Package extends TrackedEntity
         }
 
         return $this->getDefaultVersion();
+    }
+
+    /**
+     * The latest version of each major version.
+     *
+     * @return Version[]
+     */
+    public function getActiveVersions(): array
+    {
+        $activeVersions = [];
+        $activePrereleaseVersions = [];
+
+        foreach ($this->getSortedVersions() as $version) {
+            if ('stable' !== VersionParser::parseStability($version->getNormalizedVersion())) {
+                continue;
+            }
+
+            [$majorVersion, $minorVersion] = explode('.', $version->getNormalizedVersion());
+
+            if ('0' === $majorVersion) {
+                $prereleaseVersion = "$majorVersion.$minorVersion";
+
+                $activePrereleaseVersions[$prereleaseVersion] ??= $version;
+                if (version_compare($version->getNormalizedVersion(), $activePrereleaseVersions[$prereleaseVersion]->getNormalizedVersion(), '>')) {
+                    $activePrereleaseVersions[$prereleaseVersion] = $version;
+                }
+
+                continue;
+            }
+
+            $activeVersions[$majorVersion] ??= $version;
+            if (version_compare($version->getNormalizedVersion(), $activeVersions[$majorVersion]->getNormalizedVersion(), '>')) {
+                $activeVersions[$majorVersion] = $version;
+            }
+        }
+
+        $activeDevelopmentVersions = [];
+        $activePrereleaseDevelopmentVersions = [];
+
+        // Find newer unstable releases of active versions
+        foreach ($this->getSortedVersions() as $version) {
+            if (in_array(VersionParser::parseStability($version->getNormalizedVersion()), ['stable', 'dev'], true)) {
+                continue;
+            }
+
+            [$majorVersion, $minorVersion] = explode('.', $version->getNormalizedVersion());
+
+            $developmentVersion = "$majorVersion.$minorVersion";
+
+            if ('0' === $majorVersion) {
+                if (isset($activePrereleaseVersions[$developmentVersion]) && !version_compare($version->getNormalizedVersion(), $activePrereleaseVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
+                    continue;
+                }
+
+                $activePrereleaseDevelopmentVersions[$developmentVersion] ??= $version;
+                if (version_compare($version->getNormalizedVersion(), $activePrereleaseDevelopmentVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
+                    $activePrereleaseDevelopmentVersions[$developmentVersion] = $version;
+                }
+
+                continue;
+            }
+
+            if (isset($activeVersions[$majorVersion]) && !version_compare($version->getNormalizedVersion(), $activeVersions[$majorVersion]->getNormalizedVersion(), '>')) {
+                continue;
+            }
+
+            $activeDevelopmentVersions[$developmentVersion] ??= $version;
+            if (version_compare($version->getNormalizedVersion(), $activeDevelopmentVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
+                $activeDevelopmentVersions[$version->getNormalizedVersion()] = $version;
+            }
+        }
+
+        $activeVersions = [...$activeVersions, ...$activeDevelopmentVersions];
+
+        if (count($activeVersions)) {
+            usort($activeVersions, [static::class, 'sortVersions']);
+
+            return $activeVersions;
+        }
+
+        // Only show pre-release versions (0.x.x) if no versions after 1.0.0 was found
+        $activePrereleaseVersions = [...$activePrereleaseVersions, ...$activePrereleaseDevelopmentVersions];
+
+        usort($activePrereleaseVersions, [static::class, 'sortVersions']);
+
+        return $activePrereleaseVersions;
+    }
+
+    /**
+     * All non-development versions that are not part of the active versions.
+     *
+     * @return Version[]
+     */
+    public function getHistoricalVersions(): array
+    {
+        $historicalVersions = array_filter($this->getSortedVersions(), static fn (Version $version) => !$version->isDevelopment());
+
+        return array_diff($historicalVersions, $this->getActiveVersions());
+    }
+
+    /**
+     * All development versions associated with a version number (2.0.x-dev, 0.1.x-dev).
+     *
+     * @return Version[]
+     */
+    public function getDevVersions(): array
+    {
+        return array_filter($this->getSortedVersions(), static function (Version $version) {
+            if (str_ends_with($version->getNormalizedVersion(), '.9999999-dev')) {
+                return true;
+            }
+
+            static $parser = new VersionParser();
+
+            return $version->hasVersionAlias() && str_ends_with($parser->normalize($version->getVersionAlias()), '.9999999-dev');
+        });
+    }
+
+    /**
+     * All development versions associated with a branch (dev-main, dev-master, dev-develop).
+     *
+     * @return Version[]
+     */
+    public function getDevBranchVersions(): array
+    {
+        return array_filter($this->getSortedVersions(), static fn (Version $version) => str_starts_with($version->getNormalizedVersion(), 'dev-'));
     }
 
     public static function sortVersions(Version $a, Version $b): int

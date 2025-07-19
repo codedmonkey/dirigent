@@ -1,18 +1,13 @@
-# General strings
+# General labels
 Account: Account
 Administration: Administration
 Credits: Credits
 Dashboard: Dashboard
-Dependents: Dependents
 Documentation: Documentation
-Implementations: Implementations
 Info: Info
 Packages: Packages
 Personal: Personal
-Providers: Providers
 Sign out: Sign out
-Statistics: Statistics
-Suggesters: Suggesters
 Usage: Usage
 
 # Entity names
@@ -47,18 +42,38 @@ Username: Username
 No credentials: No credentials
 Search packages: Search packages
 
+# Package labels
+Dependents: Dependents
+Implementations: Implementations
+Installations: Installations
+License: License
+Providers: Providers
+Reference: Reference
+Statistics: Statistics
+Suggesters: Suggesters
+
+An update for this package has been scheduled: An update for this package has been scheduled.
+Last updated at %date%: Last updated at %date%.
+No published versions found: No published versions found.
+
+# Package labels (Statistics)
+Daily installations: Daily installations
+Daily installations per version: Daily installations per version
+Last 30 days: Last 30 days
+Today: Today
+Total: Total
+Total installations: Total installations
+
+# Package labels (Versions)
+Development branch versions: Development branch versions
+Development versions: Development versions
+Historical versions: Historical versions
+Latest versions: Latest versions
+
 # Page actions
 Impersonate: Impersonate
 Move Down: Move down
 Move Up: Move up
-
-# Statistics labels
-Daily installations: Daily installations
-Daily installations per version: Daily installations per version
-Installations: Installations
-Last 30 days: Last 30 days
-Today: Today
-Total: Total
 
 # User roles
 Admin: Admin

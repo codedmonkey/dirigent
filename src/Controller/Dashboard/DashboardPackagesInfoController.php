@@ -32,10 +32,14 @@ class DashboardPackagesInfoController extends AbstractController
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
         $version = $package->getLatestVersion();
 
+        if (!$version) {
+            return $this->redirectToRoute('dashboard_packages_versions', ['packageName' => $packageName]);
+        }
+
         return $this->versionInfo($packageName, $version->getNormalizedVersion());
     }
 
-    #[Route('/packages/{packageName}/v/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+', 'packageVersion' => '.*'])]
+    #[Route('/packages/{packageName}/versions/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+', 'packageVersion' => '.*'])]
     #[IsGrantedAccess]
     public function versionInfo(string $packageName, string $packageVersion): Response
     {
@@ -63,13 +67,9 @@ class DashboardPackagesInfoController extends AbstractController
     public function versions(string $packageName): Response
     {
         $package = $this->packageRepository->findOneBy(['name' => $packageName]);
-        $versions = $package->getVersions()->toArray();
-
-        usort($versions, Package::class . '::sortVersions');
 
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
-            'versions' => $versions,
         ]);
     }
 

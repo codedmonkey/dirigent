@@ -6,7 +6,7 @@
   {{ include('dashboard/packages/_package_header.html.twig', {currentPage: 'statistics'}) }}
 
   <div class="mb-3">
-    <h2>{{ 'Installations'|trans }}</h2>
+    <h2 class="h4">{{ 'Installations'|trans }}</h2>
     <div class="row">
       <div class="col-md-4">
         <div id="total_all" class="card mb-2">
@@ -36,7 +36,7 @@
   </div>
 
   <div class="mb-3">
-    <h2>{{ 'Daily installations'|trans }}</h2>
+    <h2 class="h4">{{ 'Daily installations'|trans }}</h2>
     <div
       data-controller="chart"
       data-chart-data-value="{{ package.installations.data ? package.installations.data|json_encode|escape : '{}' }}"
@@ -47,7 +47,7 @@
   </div>
 
   <div>
-    <h2>{{ 'Daily installations per version'|trans }}</h2>
+    <h2 class="h4">{{ 'Daily installations per version'|trans }}</h2>
     <div
       data-controller="chart"
       data-chart-data-value="{{ versionInstallationsData|json_encode|escape }}"
