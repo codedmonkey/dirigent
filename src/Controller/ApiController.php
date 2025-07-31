@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Controller;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Attribute\MapPackage;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
@@ -41,7 +42,7 @@ class ApiController extends AbstractController
     public function root(RouterInterface $router): JsonResponse
     {
         $metadataUrlPattern = u($router->getRouteCollection()->get('api_package_metadata')->getPath())
-            ->replace('{packageName}', '%package%')
+            ->replace('{package}', '%package%')
             ->toString();
 
         $data = [
@@ -52,8 +53,8 @@ class ApiController extends AbstractController
 
         if ($this->getParameter('dirigent.dist_mirroring.enabled')) {
             $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
-                ->replace('{packageName}', '%package%')
-                ->replace('{packageVersion}', '%version%')
+                ->replace('{package}', '%package%')
+                ->replace('{version}', '%version%')
                 ->replace('{reference}', '%reference%')
                 ->replace('{type}', '%type%')
                 ->toString();
@@ -67,14 +68,15 @@ class ApiController extends AbstractController
         return new JsonResponse(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), json: true);
     }
 
-    #[Route('/p2/{packageName}.json',
+    #[Route('/p2/{package}.json',
         name: 'api_package_metadata',
-        requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+(~dev)?'],
+        requirements: ['package' => MapPackage::PACKAGE_DEV_REGEX],
         methods: ['GET'],
     )]
     #[IsGrantedAccess]
-    public function packageMetadata(string $packageName): Response
+    public function packageMetadata(Request $request): Response
     {
+        $packageName = $request->attributes->get('package');
         $basePackageName = u($packageName)->trimSuffix('~dev')->toString();
 
         if (null === $package = $this->findPackage($basePackageName)) {
@@ -90,29 +92,34 @@ class ApiController extends AbstractController
         return new BinaryFileResponse($this->providerManager->path($packageName), headers: ['Content-Type' => 'application/json']);
     }
 
-    #[Route('/dist/{packageName}/{packageVersion}-{reference}.{type}',
+    #[Route('/dist/{package}/{version}-{reference}.{type}',
         name: 'api_package_distribution',
         requirements: [
-            'packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+',
-            'packageVersion' => '.+',
+            'package' => MapPackage::PACKAGE_REGEX,
+            'version' => '.+',
             'reference' => '[a-z0-9]+',
             'type' => '(zip)',
         ],
         methods: ['GET'],
     )]
     #[IsGrantedAccess]
-    public function packageDistribution(string $packageName, string $packageVersion, string $reference, string $type): Response
+    public function packageDistribution(Request $request, string $reference, string $type): Response
     {
         if (!$this->getParameter('dirigent.dist_mirroring.enabled')) {
             throw $this->createNotFoundException();
         }
 
-        if (!$this->distributionResolver->exists($packageName, $packageVersion, $reference, $type)) {
-            if (null === $package = $this->packageRepository->findOneByName($packageName)) {
+        $packageName = $request->attributes->get('package');
+        $versionName = $request->attributes->get('version');
+
+        if (!$this->distributionResolver->exists($packageName, $versionName, $reference, $type)) {
+            if (null === $package = $this->findPackage($packageName)) {
                 throw $this->createNotFoundException();
             }
 
-            if (null === $version = $this->versionRepository->findOneByNormalizedVersion($package, $packageVersion)) {
+            $this->messenger->dispatch(new UpdatePackage($package->getId()));
+
+            if (null === $version = $this->versionRepository->findOneByNormalizedVersion($package, $versionName)) {
                 throw $this->createNotFoundException();
             }
 
@@ -120,14 +127,12 @@ class ApiController extends AbstractController
                 throw $this->createNotFoundException();
             }
 
-            $this->messenger->dispatch(new UpdatePackage($package->getId()));
-
             if (!$this->distributionResolver->resolve($version, $reference, $type)) {
                 throw $this->createNotFoundException();
             }
         }
 
-        $path = $this->distributionResolver->path($packageName, $packageVersion, $reference, $type);
+        $path = $this->distributionResolver->path($packageName, $versionName, $reference, $type);
 
         return $this->file($path);
     }

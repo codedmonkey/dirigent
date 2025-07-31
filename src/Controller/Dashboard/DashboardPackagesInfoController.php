@@ -3,13 +3,13 @@
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Attribute\MapPackage;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageSuggestLink;
-use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
-use Composer\Semver\VersionParser;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,31 +21,29 @@ class DashboardPackagesInfoController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly PackageRepository $packageRepository,
     ) {
     }
 
-    #[Route('/packages/{packageName}', name: 'dashboard_packages_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    /**
+     * Show info for the latest available version of the package.
+     */
+    #[Route('/packages/{package}', name: 'dashboard_packages_info', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGrantedAccess]
-    public function info(string $packageName): Response
+    public function info(#[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
         $version = $package->getLatestVersion();
 
         if (!$version) {
-            return $this->redirectToRoute('dashboard_packages_versions', ['packageName' => $packageName]);
+            return $this->redirectToRoute('dashboard_packages_versions', ['package' => $package->getName()]);
         }
 
-        return $this->versionInfo($packageName, $version->getNormalizedVersion());
+        return $this->versionInfo($package, $version);
     }
 
-    #[Route('/packages/{packageName}/versions/{packageVersion}', name: 'dashboard_packages_version_info', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+', 'packageVersion' => '.*'])]
+    #[Route('/packages/{package}/versions/{version}', name: 'dashboard_packages_version_info', requirements: ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'])]
     #[IsGrantedAccess]
-    public function versionInfo(string $packageName, string $packageVersion): Response
+    public function versionInfo(#[MapPackage] Package $package, #[MapPackage] Version $version): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-        $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
-
         $dependentCount = $this->entityManager->getRepository(PackageRequireLink::class)->count(['linkedPackageName' => $package->getName()]);
         $implementationCount = $this->entityManager->getRepository(PackageProvideLink::class)->count(['linkedPackageName' => $package->getName(), 'implementation' => true]);
         $providerCount = $this->entityManager->getRepository(PackageProvideLink::class)->count(['linkedPackageName' => $package->getName(), 'implementation' => false]);
@@ -62,32 +60,26 @@ class DashboardPackagesInfoController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{packageName}/versions', name: 'dashboard_packages_versions', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/versions', name: 'dashboard_packages_versions', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGrantedAccess]
-    public function versions(string $packageName): Response
+    public function versions(#[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
         ]);
     }
 
-    #[Route('/packages/{packageName}/dependents', name: 'dashboard_packages_dependents', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/dependents', name: 'dashboard_packages_dependents', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGrantedAccess]
-    public function dependents(Request $request, string $packageName): Response
+    public function dependents(Request $request, #[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         return $this->packageLinks($request, $package, PackageRequireLink::class, 'Dependents');
     }
 
-    #[Route('/packages/{packageName}/implementations', name: 'dashboard_packages_implementations', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/implementations', name: 'dashboard_packages_implementations', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGrantedAccess]
-    public function implementations(Request $request, string $packageName): Response
+    public function implementations(Request $request, #[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         $providerRepository = $this->entityManager->getRepository(PackageProvideLink::class);
         $queryBuilder = $providerRepository->createQueryBuilder('provider');
         $queryBuilder
@@ -99,12 +91,10 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->packageLinks($request, $package, PackageProvideLink::class, 'Implementations', queryBuilder: $queryBuilder);
     }
 
-    #[Route('/packages/{packageName}/providers', name: 'dashboard_packages_providers', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/providers', name: 'dashboard_packages_providers', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGrantedAccess]
-    public function providers(Request $request, string $packageName): Response
+    public function providers(Request $request, #[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         $providerRepository = $this->entityManager->getRepository(PackageProvideLink::class);
         $queryBuilder = $providerRepository->createQueryBuilder('provider');
         $queryBuilder
@@ -116,12 +106,10 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->packageLinks($request, $package, PackageProvideLink::class, 'Providers', queryBuilder: $queryBuilder);
     }
 
-    #[Route('/packages/{packageName}/suggesters', name: 'dashboard_packages_suggesters', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/suggesters', name: 'dashboard_packages_suggesters', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGrantedAccess]
-    public function suggesters(Request $request, string $packageName): Response
+    public function suggesters(Request $request, #[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         return $this->packageLinks($request, $package, PackageSuggestLink::class, 'Suggesters');
     }
 
@@ -147,12 +135,10 @@ class DashboardPackagesInfoController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{packageName}/statistics', name: 'dashboard_packages_statistics', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/statistics', name: 'dashboard_packages_statistics', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGrantedAccess]
-    public function statistics(string $packageName): Response
+    public function statistics(#[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         $versionInstallationsData = [];
 
         foreach ($package->getVersions() as $version) {

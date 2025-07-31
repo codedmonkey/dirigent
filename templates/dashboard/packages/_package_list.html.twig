@@ -6,7 +6,7 @@
       <div class="card-body py-2">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            {% set packageInfoUrl = path('dashboard_packages_info', {packageName: package.name}) %}
+            {% set packageInfoUrl = path('dashboard_packages_info', {package: package.name}) %}
             <a href="{{ packageInfoUrl }}"><h5 class="card-title">{{ package.name }}</h5></a>
             {% if package.mirrorRegistry %}
               <p class="card-text mb-1 text-body-secondary">Mirrored from {{ package.mirrorRegistry.name }}</p>

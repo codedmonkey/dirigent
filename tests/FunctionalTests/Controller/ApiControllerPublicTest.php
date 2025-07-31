@@ -5,6 +5,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller;
 use CodedMonkey\Dirigent\Tests\FunctionalTests\PublicKernel;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ApiControllerPublicTest extends KernelTestCase
 {
@@ -35,10 +36,21 @@ class ApiControllerPublicTest extends KernelTestCase
         $this->assertNotSame([], $packageData);
     }
 
+    public function testPackageDev(): void
+    {
+        self::bootKernel();
+
+        $packageData = $this->requestJson('/p2/psr/log~dev.json', 'GET');
+
+        $this->assertNotSame([], $packageData);
+    }
+
     private function requestJson(...$requestArguments)
     {
         $request = Request::create(...$requestArguments);
         $response = self::$kernel->handle($request);
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
 
         return json_decode($response->getContent(), true);
     }
