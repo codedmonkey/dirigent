@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
@@ -89,7 +90,11 @@ class ApiController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        return new BinaryFileResponse($this->providerManager->path($packageName), headers: ['Content-Type' => 'application/json']);
+        $filename = u("$packageName.json")->replace('/', '-')->toString();
+        $response = new BinaryFileResponse($this->providerManager->path($packageName), headers: ['Content-Type' => 'application/json']);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_INLINE, $filename);
+
+        return $response;
     }
 
     #[Route('/dist/{package}/{version}-{reference}.{type}',
@@ -133,8 +138,9 @@ class ApiController extends AbstractController
         }
 
         $path = $this->distributionResolver->path($packageName, $versionName, $reference, $type);
+        $filename = u("$packageName-$versionName-$reference.$type")->replace('/', '-')->toString();
 
-        return $this->file($path);
+        return $this->file($path, $filename);
     }
 
     #[Route('/downloads', name: 'api_track_installations', methods: ['POST'])]
