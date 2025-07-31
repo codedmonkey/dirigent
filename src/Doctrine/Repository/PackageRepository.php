@@ -21,6 +21,11 @@ class PackageRepository extends ServiceEntityRepository
 {
     private \DateInterval $updateInterval;
 
+    /**
+     * @var array<string, Package>
+     */
+    private array $cachedPackages = [];
+
     public function __construct(
         ManagerRegistry $registry,
         #[Autowire(param: 'dirigent.packages.periodic_update_interval')]
@@ -49,9 +54,16 @@ class PackageRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * Find a package by name.
+     *
+     * The results of this method are cached locally.
+     */
     public function findOneByName(string $name): ?Package
     {
-        return $this->findOneBy(['name' => $name]);
+        $this->cachedPackages[$name] ??= $this->findOneBy(['name' => $name]);
+
+        return $this->cachedPackages[$name];
     }
 
     /**
