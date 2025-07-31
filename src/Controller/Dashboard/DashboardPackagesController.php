@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
+use CodedMonkey\Dirigent\Attribute\MapPackage;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
@@ -65,7 +66,7 @@ class DashboardPackagesController extends AbstractController
             $results = [];
 
             foreach ($packageNames as $packageName) {
-                if (!preg_match('#[a-z0-9_.-]+/[a-z0-9_.-]+#', $packageName)) {
+                if (!preg_match('#' . MapPackage::PACKAGE_REGEX . '#', $packageName)) {
                     $results[] = [
                         'packageName' => $packageName,
                         'registryName' => null,
@@ -77,7 +78,7 @@ class DashboardPackagesController extends AbstractController
                     continue;
                 }
 
-                if (null !== $this->packageRepository->findOneBy(['name' => $packageName])) {
+                if (null !== $this->packageRepository->findOneByName($packageName)) {
                     $results[] = [
                         'packageName' => $packageName,
                         'registryName' => null,
@@ -154,12 +155,10 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{packageName}/edit', name: 'dashboard_packages_edit', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/edit', name: 'dashboard_packages_edit', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGranted('ROLE_ADMIN')]
-    public function edit(Request $request, string $packageName): Response
+    public function edit(Request $request, #[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         $form = $this->createForm(PackageFormType::class, $package);
 
         $form->handleRequest($request);
@@ -171,7 +170,7 @@ class DashboardPackagesController extends AbstractController
 
             $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
-            return $this->redirectToRoute('dashboard_packages_info', ['packageName' => $package->getName()]);
+            return $this->redirectToRoute('dashboard_packages_info', ['package' => $package->getName()]);
         }
 
         return $this->render('dashboard/packages/edit.html.twig', [
@@ -180,23 +179,19 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{packageName}/update', name: 'dashboard_packages_update', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/update', name: 'dashboard_packages_update', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGranted('ROLE_ADMIN')]
-    public function update(string $packageName): Response
+    public function update(#[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         $this->messenger->dispatch(new UpdatePackage($package->getId(), forceRefresh: true));
 
-        return $this->redirectToRoute('dashboard_packages_info', ['packageName' => $package->getName()]);
+        return $this->redirectToRoute('dashboard_packages_info', ['package' => $package->getName()]);
     }
 
-    #[Route('/packages/{packageName}/delete', name: 'dashboard_packages_delete', requirements: ['packageName' => '[a-z0-9_.-]+/[a-z0-9_.-]+'])]
+    #[Route('/packages/{package}/delete', name: 'dashboard_packages_delete', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGranted('ROLE_ADMIN')]
-    public function delete(string $packageName): Response
+    public function delete(#[MapPackage] Package $package): Response
     {
-        $package = $this->packageRepository->findOneByName($packageName);
-
         $this->packageRepository->remove($package, true);
 
         return $this->redirectToRoute('dashboard_packages');

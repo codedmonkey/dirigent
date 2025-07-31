@@ -2,6 +2,9 @@
 
 namespace CodedMonkey\Dirigent\Message;
 
+use Symfony\Component\Messenger\Attribute\AsMessage;
+
+#[AsMessage]
 readonly class UpdatePackage
 {
     public function __construct(

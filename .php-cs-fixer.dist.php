@@ -17,6 +17,7 @@ return (new PhpCsFixer\Config())
         '@Symfony:risky' => true,
         'blank_line_between_import_groups' => false,
         'concat_space' => ['spacing' => 'one'],
+        'date_time_immutable' => true,
         'linebreak_after_opening_tag' => true,
         'mb_str_functions' => false,
         'native_constant_invocation' => false,

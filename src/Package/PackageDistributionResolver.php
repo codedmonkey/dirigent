@@ -21,23 +21,23 @@ readonly class PackageDistributionResolver
         $this->storagePath = "$storagePath/distribution";
     }
 
-    public function exists(string $packageName, string $packageVersion, string $reference, string $type): bool
+    public function exists(string $packageName, string $versionName, string $reference, string $type): bool
     {
-        return $this->filesystem->exists($this->path($packageName, $packageVersion, $reference, $type));
+        return $this->filesystem->exists($this->path($packageName, $versionName, $reference, $type));
     }
 
-    public function path(string $packageName, string $packageVersion, string $reference, string $type): string
+    public function path(string $packageName, string $versionName, string $reference, string $type): string
     {
-        return "{$this->storagePath}/{$packageName}/{$packageVersion}-{$reference}.{$type}";
+        return "{$this->storagePath}/{$packageName}/{$versionName}-{$reference}.{$type}";
     }
 
     public function resolve(Version $version, string $reference, string $type): bool
     {
         $package = $version->getPackage();
         $packageName = $package->getName();
-        $packageVersion = $version->getNormalizedVersion();
+        $versionName = $version->getNormalizedVersion();
 
-        if ($this->exists($packageName, $packageVersion, $reference, $type)) {
+        if ($this->exists($packageName, $versionName, $reference, $type)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ readonly class PackageDistributionResolver
         }
 
         $distUrl = $version->getDistUrl();
-        $path = $this->path($packageName, $packageVersion, $reference, $type);
+        $path = $this->path($packageName, $versionName, $reference, $type);
 
         $this->filesystem->mkdir(dirname($path));
 

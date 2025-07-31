@@ -117,6 +117,9 @@
         "sort-packages": true
     },
     "extra": {
+        "branch-alias": {
+            "dev-main": "0.5.x-dev"
+        },
         "runtime": {
             "dotenv_path": ".env.dirigent"
         },

@@ -129,7 +129,10 @@ jobs:
         run: bin/phpunit --version
 
       - name: Run PHPUnit
-        run: bin/phpunit --coverage-text ${{ env.PHPUNIT_FLAGS }}
+        run: bin/phpunit --coverage-text=var/coverage.txt ${{ env.PHPUNIT_FLAGS }}
+
+      - name: Code coverage
+        run: cat var/coverage.txt
 
   phpunit-lowest:
     name: "PHPUnit (Lowest dependencies)"

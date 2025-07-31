@@ -50,22 +50,22 @@
         {% if version.sourceUrl %}
           <div><a href="{{ version.sourceUrl }}">Source</a></div>
         {% endif %}
-        {% set packageStatisticsUrl = path('dashboard_packages_statistics', {packageName: package.name}) %}
+        {% set packageStatisticsUrl = path('dashboard_packages_statistics', {package: package.name}) %}
         <div><span><a href="{{ packageStatisticsUrl }}">{{ 'Installations'|trans }}</a></span> {{ package.installations.total }}</div>
         {% if dependentCount > 0 %}
-          {% set packageDependentsUrl = path('dashboard_packages_dependents', {packageName: package.name}) %}
+          {% set packageDependentsUrl = path('dashboard_packages_dependents', {package: package.name}) %}
           <div><span><a href="{{ packageDependentsUrl }}">{{ 'Dependents'|trans }}</a></span> {{ dependentCount }}</div>
         {% endif %}
         {% if suggesterCount > 0 %}
-          {% set packageSuggestersUrl = path('dashboard_packages_suggesters', {packageName: package.name}) %}
+          {% set packageSuggestersUrl = path('dashboard_packages_suggesters', {package: package.name}) %}
           <div><span><a href="{{ packageSuggestersUrl }}">{{ 'Suggesters'|trans }}</a></span> {{ suggesterCount }}</div>
         {% endif %}
         {% if implementationCount > 0 %}
-          {% set packageImplementationsUrl = path('dashboard_packages_implementations', {packageName: package.name}) %}
+          {% set packageImplementationsUrl = path('dashboard_packages_implementations', {package: package.name}) %}
           <div><span><a href="{{ packageImplementationsUrl }}">{{ 'Implementations'|trans }}</a></span> {{ implementationCount }}</div>
         {% endif %}
         {% if providerCount > 0 %}
-          {% set packageProvidersUrl = path('dashboard_packages_providers', {packageName: package.name}) %}
+          {% set packageProvidersUrl = path('dashboard_packages_providers', {package: package.name}) %}
           <div><span><a href="{{ packageProvidersUrl }}">{{ 'Providers'|trans }}</a></span> {{ providerCount }}</div>
         {% endif %}
         {% if version.license %}
@@ -118,7 +118,7 @@
     <ul>
       {% for link in links %}
         {% if link.linkedPackageName is existing_package %}
-          <li><a href="{{ path('dashboard_packages_info', {packageName: link.linkedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
+          <li><a href="{{ path('dashboard_packages_info', {package: link.linkedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
         {% else %}
           <li>{{ link.linkedPackageName }}: {{ link.linkedVersionConstraint }}</li>
         {% endif %}
@@ -136,9 +136,9 @@
     <ul>
       {% for link in links %}
         {% if link.linkedPackageName is existing_package %}
-          <li><a href="{{ path('dashboard_packages_info', {packageName: link.linkedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
+          <li><a href="{{ path('dashboard_packages_info', {package: link.linkedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
         {% elseif link.implementation and link.implementedPackageName is existing_package %}
-          <li><a href="{{ path('dashboard_packages_info', {packageName: link.implementedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
+          <li><a href="{{ path('dashboard_packages_info', {package: link.implementedPackageName}) }}">{{ link.linkedPackageName }}</a>: {{ link.linkedVersionConstraint }}</li>
         {% else %}
           <li>{{ link.linkedPackageName }}: {{ link.linkedVersionConstraint }}</li>
         {% endif %}

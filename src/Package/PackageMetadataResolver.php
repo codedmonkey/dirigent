@@ -176,7 +176,7 @@ readonly class PackageMetadataResolver
                 continue;
             }
 
-            $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $composerPackage->getVersion()]) ?: new Version();
+            $version = $this->versionRepository->findOneByNormalizedVersion($package, $composerPackage->getVersion()) ?: new Version();
 
             if (!$package->getVersions()->contains($version)) {
                 $package->getVersions()->add($version);
@@ -402,12 +402,8 @@ readonly class PackageMetadataResolver
     private function updateReadme(Version $version, VcsDriverInterface $driver): void
     {
         try {
-            $composerInfo = $driver->getComposerInformation($driver->getRootIdentifier());
-            if (isset($composerInfo['readme']) && is_string($composerInfo['readme'])) {
-                $readmeFile = $composerInfo['readme'];
-            } else {
-                $readmeFile = 'README.md';
-            }
+            $composerInfo = $driver->getComposerInformation($version->getSource()['reference']);
+            $readmeFile = is_string($composerInfo['readme'] ?? null) ? $composerInfo['readme'] : 'README.md';
 
             $ext = substr($readmeFile, (int) strrpos($readmeFile, '.'));
             if ($ext === $readmeFile) {

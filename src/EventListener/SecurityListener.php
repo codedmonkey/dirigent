@@ -25,6 +25,9 @@ readonly class SecurityListener
     ) {
     }
 
+    /**
+     * Deny access to all pages with IsGrantedAccess unless public access is enabled or the user is logged in.
+     */
     #[AsEventListener]
     public function checkAccessIsGranted(ControllerEvent $event): void
     {
@@ -35,6 +38,9 @@ readonly class SecurityListener
         }
     }
 
+    /**
+     * Validate authorization for requests using an access token.
+     */
     #[AsEventListener]
     public function checkAccessTokenIsValid(CheckPassportEvent $event): void
     {

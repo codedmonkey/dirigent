@@ -5,23 +5,16 @@ namespace CodedMonkey\Dirigent\Twig;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use Composer\Pcre\Preg;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigTest;
+use Twig\Attribute\AsTwigTest;
 
-class PackageExtension extends AbstractExtension
+class PackageExtension
 {
     public function __construct(
         private readonly PackageRepository $packageRepository,
     ) {
     }
 
-    public function getTests(): array
-    {
-        return [
-            new TwigTest('existing_package', [$this, 'packageExistsTest']),
-        ];
-    }
-
+    #[AsTwigTest('existing_package')]
     public function packageExistsTest(mixed $package): bool
     {
         if ($package instanceof Package) {
@@ -33,7 +26,7 @@ class PackageExtension extends AbstractExtension
                 return false;
             }
 
-            return null !== $this->packageRepository->findOneBy(['name' => $package]);
+            return null !== $this->packageRepository->findOneByName($package);
         }
 
         return false;
