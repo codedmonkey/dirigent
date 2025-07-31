@@ -273,11 +273,8 @@ readonly class PackageMetadataResolver
 
         if ($data->getSourceType()) {
             $source['type'] = $data->getSourceType();
-            $source['url'] = $data->getSourceUrl();
             // force public URLs even if the package somehow got downgraded to a GitDriver
-            if (is_string($source['url']) && Preg::isMatch('{^git@github.com:(?P<repo>.*?)\.git$}', $source['url'], $match)) {
-                $source['url'] = 'https://github.com/' . $match['repo'];
-            }
+            $source['url'] = static::optimizeRepositoryUrl($data->getSourceUrl());
             $source['reference'] = $data->getSourceReference();
             $version->setSource($source);
         } else {
@@ -442,5 +439,33 @@ readonly class PackageMetadataResolver
     private function prepareReadme(string $readme): string
     {
         return $readme;
+    }
+
+    public static function optimizeRepositoryUrl(?string $url): ?string
+    {
+        if (null === $url) {
+            return null;
+        }
+
+        // Force GitHub repos to use standardized format
+        $url = Preg::replace('{^git@github.com:}i', 'https://github.com/', $url);
+        $url = Preg::replace('{^git://github.com/}i', 'https://github.com/', $url);
+        $url = Preg::replace('{^(https://github.com/.*?)\.git$}i', '$1', $url);
+        $url = Preg::replace('{^(https://github.com/.*?)/$}i', '$1', $url);
+
+        // Force GitLab repos to use standardized format
+        $url = Preg::replace('{^git@gitlab.com:}i', 'https://gitlab.com/', $url);
+        $url = Preg::replace('{^https?://(?:www\.)?gitlab\.com/(.*?)\.git$}i', 'https://gitlab.com/$1', $url);
+
+        // Force Bitbucket repos to use standardized format
+        $url = Preg::replace('{^git@+bitbucket.org:}i', 'https://bitbucket.org/', $url);
+        $url = Preg::replace('{^bitbucket.org:}i', 'https://bitbucket.org/', $url);
+        $url = Preg::replace('{^https://[a-z0-9_-]*@bitbucket.org/}i', 'https://bitbucket.org/', $url);
+        $url = Preg::replace('{^(https://bitbucket.org/[^/]+/[^/]+)/src/[^.]+}i', '$1.git', $url);
+
+        // Normalize protocol case
+        $url = Preg::replaceCallbackStrictGroups('{^(https?|git|svn)://}i', static fn ($match) => strtolower($match[1]) . '://', $url);
+
+        return $url;
     }
 }

@@ -26,10 +26,6 @@
           {% endfor %}
         </div>
       {% endif %}
-
-      {% if version.reference %}
-        <p>{{ 'Reference'|trans }}: <code>{{ version.reference }}</code></p>
-      {% endif %}
     </div>
     <div class="col-md-4">
       <div class="dirigent-package-sidebar bg-body-secondary px-3 py-2 mb-2 rounded">
@@ -46,9 +42,6 @@
         {% endif %}
         {% if version.homepage %}
           <div><a href="{{ version.homepage }}">Homepage</a></div>
-        {% endif %}
-        {% if version.sourceUrl %}
-          <div><a href="{{ version.sourceUrl }}">Source</a></div>
         {% endif %}
         {% set packageStatisticsUrl = path('dashboard_packages_statistics', {package: package.name}) %}
         <div><span><a href="{{ packageStatisticsUrl }}">{{ 'Installations'|trans }}</a></span> {{ package.installations.total }}</div>
@@ -102,6 +95,60 @@
     {{ _self.linkBlock('suggests', version.suggest) }}
     {{ _self.linkBlock('conflicts', version.conflict) }}
     {{ _self.linkBlock('replaces', version.replace) }}
+  </div>
+
+  <div class="row border-bottom pb-3 mb-3">
+    <div class="col-md-6">
+      {% if version.hasSource() %}
+        <div class="h5">
+          {{ 'Source'|trans }}
+          <span class="badge text-bg-secondary">{{ version.sourceType }}</span>
+        </div>
+
+        <div class="mb-2">
+          <code>{{ version.sourceUrl }}</code>
+        </div>
+
+        <div class="mb-2">
+          {{ 'Reference'|trans }}: <code>{{ version.sourceReference }}</code>
+        </div>
+
+        <div class="mb-2">
+          {% set browseUrl = package.getBrowsableRepositoryUrl(version.sourceReference) %}
+          {% if browseUrl %}
+            <a class="btn btn-sm btn-secondary" href="{{ browseUrl }}">
+              <span class="fa-solid fa-code me-1" aria-hidden="true"></span>
+              {{ 'Browse code'|trans }}
+            </a>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="h5">{{ 'Source'|trans }}</div>
+        -
+      {% endif %}
+    </div>
+    <div class="col-md-6">
+      {% if version.hasDist() %}
+        <div class="h5">
+          {{ 'Distribution'|trans }}
+          <span class="badge text-bg-secondary">{{ version.distType }}</span>
+        </div>
+
+        <div class="mb-2">
+          {{ 'Reference'|trans }}: <code>{{ version.distReference }}</code>
+        </div>
+
+        <div class="mb-2">
+          <a class="btn btn-sm btn-secondary" href="{{ version.distUrl }}" download>
+            <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
+            {{ 'Download' }}
+          </a>
+        </div>
+      {% else %}
+        <div class="h5">{{ 'Distribution'|trans }}</div>
+        -
+      {% endif %}
+    </div>
   </div>
 
   {% if version.readme %}
