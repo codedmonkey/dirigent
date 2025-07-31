@@ -176,7 +176,7 @@ readonly class PackageMetadataResolver
                 continue;
             }
 
-            $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $composerPackage->getVersion()]) ?: new Version();
+            $version = $this->versionRepository->findOneByNormalizedVersion($package, $composerPackage->getVersion()) ?: new Version();
 
             if (!$package->getVersions()->contains($version)) {
                 $package->getVersions()->add($version);

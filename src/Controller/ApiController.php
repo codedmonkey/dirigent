@@ -108,11 +108,11 @@ class ApiController extends AbstractController
         }
 
         if (!$this->distributionResolver->exists($packageName, $packageVersion, $reference, $type)) {
-            if (null === $package = $this->packageRepository->findOneBy(['name' => $packageName])) {
+            if (null === $package = $this->packageRepository->findOneByName($packageName)) {
                 throw $this->createNotFoundException();
             }
 
-            if (null === $version = $this->versionRepository->findOneBy(['package' => $package, 'normalizedVersion' => $packageVersion])) {
+            if (null === $version = $this->versionRepository->findOneByNormalizedVersion($package, $packageVersion)) {
                 throw $this->createNotFoundException();
             }
 
@@ -155,7 +155,7 @@ class ApiController extends AbstractController
     private function findPackage(string $packageName): ?Package
     {
         // Search for the package in the database
-        if (null !== $package = $this->packageRepository->findOneBy(['name' => $packageName])) {
+        if (null !== $package = $this->packageRepository->findOneByName($packageName)) {
             return $package;
         }
 

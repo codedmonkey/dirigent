@@ -77,7 +77,7 @@ class DashboardPackagesController extends AbstractController
                     continue;
                 }
 
-                if (null !== $this->packageRepository->findOneBy(['name' => $packageName])) {
+                if (null !== $this->packageRepository->findOneByName($packageName)) {
                     $results[] = [
                         'packageName' => $packageName,
                         'registryName' => null,

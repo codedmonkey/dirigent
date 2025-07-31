@@ -29,7 +29,7 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function info(string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
         $version = $package->getLatestVersion();
 
         if (!$version) {
@@ -43,7 +43,7 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function versionInfo(string $packageName, string $packageVersion): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
         $version = $package->getVersion((new VersionParser())->normalize($packageVersion));
 
         $dependentCount = $this->entityManager->getRepository(PackageRequireLink::class)->count(['linkedPackageName' => $package->getName()]);
@@ -66,7 +66,7 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function versions(string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
 
         return $this->render('dashboard/packages/package_versions.html.twig', [
             'package' => $package,
@@ -77,7 +77,7 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function dependents(Request $request, string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
 
         return $this->packageLinks($request, $package, PackageRequireLink::class, 'Dependents');
     }
@@ -86,7 +86,7 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function implementations(Request $request, string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
 
         $providerRepository = $this->entityManager->getRepository(PackageProvideLink::class);
         $queryBuilder = $providerRepository->createQueryBuilder('provider');
@@ -103,7 +103,7 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function providers(Request $request, string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
 
         $providerRepository = $this->entityManager->getRepository(PackageProvideLink::class);
         $queryBuilder = $providerRepository->createQueryBuilder('provider');
@@ -120,7 +120,7 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function suggesters(Request $request, string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
 
         return $this->packageLinks($request, $package, PackageSuggestLink::class, 'Suggesters');
     }
@@ -151,7 +151,7 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function statistics(string $packageName): Response
     {
-        $package = $this->packageRepository->findOneBy(['name' => $packageName]);
+        $package = $this->packageRepository->findOneByName($packageName);
 
         $versionInstallationsData = [];
 
