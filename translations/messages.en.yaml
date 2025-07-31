@@ -59,6 +59,14 @@ An update for this package has been scheduled: An update for this package has be
 Last updated at %date%: Last updated at %date%.
 No published versions found: No published versions found.
 
+# Package labels (Links)
+Conflicts: Conflicts
+Provides: Provides
+Replaces: Replaces
+Requires: Requires
+Requires (dev): Requires (dev)
+Suggests: Suggests
+
 # Package labels (Statistics)
 Daily installations: Daily installations
 Daily installations per version: Daily installations per version

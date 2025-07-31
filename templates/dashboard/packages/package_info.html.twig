@@ -89,12 +89,12 @@
   </div>
 
   <div class="row border-bottom pb-3 mb-3">
-    {{ _self.linkBlock('requires', version.require) }}
-    {{ _self.linkBlock('requires (dev)', version.devRequire) }}
+    {{ _self.linkBlock('Requires', version.require) }}
+    {{ _self.linkBlock('Requires (dev)', version.devRequire) }}
     {{ _self.provideBlock(version.provide) }}
-    {{ _self.linkBlock('suggests', version.suggest) }}
-    {{ _self.linkBlock('conflicts', version.conflict) }}
-    {{ _self.linkBlock('replaces', version.replace) }}
+    {{ _self.linkBlock('Suggests', version.suggest) }}
+    {{ _self.linkBlock('Conflicts', version.conflict) }}
+    {{ _self.linkBlock('Replaces', version.replace) }}
   </div>
 
   <div class="row border-bottom pb-3 mb-3">
@@ -160,7 +160,7 @@
 
 {% macro linkBlock(title, links) %}
   <div class="col-md-6 col-lg-4">
-    <div class="h5">{{ title }}</div>
+    <div class="h5">{{ title|trans }}</div>
 
     <ul>
       {% for link in links %}
@@ -178,7 +178,7 @@
 
 {% macro provideBlock(links) %}
   <div class="col-md-6 col-lg-4">
-    <div class="h5">provides</div>
+    <div class="h5">{{ 'Provides'|trans }}</div>
 
     <ul>
       {% for link in links %}
