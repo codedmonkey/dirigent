@@ -19,11 +19,23 @@
       <p class="lead">{{ version.description }}</p>
 
       {% if version.authors|length > 0 %}
-        <div class="d-flex gap-3 mb-2">
+        <div class="d-flex flex-wrap gap-2 mb-2" aria-label="{{ 'Authors'|trans }}">
           {% for author in version.authors %}
-            {% set authorText %}<span class="fa-solid fa-user me-2" aria-hidden="true"></span>{{ author.name }}{% endset %}
+            {% set authorText %}<span class="fa-solid fa-user fa-fw me-1" aria-hidden="true"></span>{{ author.name }}{% endset %}
             {% if author.homepage is defined %}<a href="{{ author.homepage }}">{{ authorText }}</a>{% else %}<span>{{ authorText }}</span>{% endif %}
           {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if version.keywords|length > 0 %}
+        <div class="d-flex align-items-center mb-2">
+          <span class="fa-solid fa-tags fa-fw me-1" title="{{ 'Keywords'|trans }}" aria-hidden="true"></span>
+
+          <div class="d-flex flex-wrap gap-2" aria-label="{{ 'Keywords'|trans }}">
+            {% for keyword in version.keywords %}
+              <span>{{ keyword.name }}</span>
+            {% endfor %}
+          </div>
         </div>
       {% endif %}
     </div>
