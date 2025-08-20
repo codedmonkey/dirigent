@@ -73,8 +73,8 @@ class Version extends TrackedEntity
     #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionSuggestLink::class, cascade: ['persist', 'detach', 'remove'])]
     private Collection $suggest;
 
-    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'versions', cascade: ['persist', 'detach', 'remove'])]
-    private Collection $tags;
+    #[ORM\ManyToMany(targetEntity: Keyword::class, inversedBy: 'versions', cascade: ['persist', 'detach', 'remove'])]
+    private Collection $keywords;
 
     #[ORM\Column]
     private array $autoload;
@@ -129,7 +129,7 @@ class Version extends TrackedEntity
         $this->provide = new ArrayCollection();
         $this->replace = new ArrayCollection();
         $this->suggest = new ArrayCollection();
-        $this->tags = new ArrayCollection();
+        $this->keywords = new ArrayCollection();
         $this->installations = new VersionInstallations($this);
     }
 
@@ -348,16 +348,16 @@ class Version extends TrackedEntity
     }
 
     /**
-     * @return Collection<int, Tag>
+     * @return Collection<int, Keyword>
      */
-    public function getTags(): Collection
+    public function getKeywords(): Collection
     {
-        return $this->tags;
+        return $this->keywords;
     }
 
-    public function addTag(Tag $tag): void
+    public function addKeyword(Keyword $keyword): void
     {
-        $this->tags[] = $tag;
+        $this->keywords[] = $keyword;
     }
 
     public function getAutoload(): array
@@ -612,9 +612,9 @@ class Version extends TrackedEntity
 
     public function toComposerArray(): array
     {
-        $tags = [];
-        foreach ($this->getTags() as $tag) {
-            $tags[] = $tag->getName();
+        $keywords = [];
+        foreach ($this->getKeywords() as $keyword) {
+            $keywords[] = $keyword->getName();
         }
 
         $authors = $this->getAuthors();
@@ -626,7 +626,7 @@ class Version extends TrackedEntity
         $data = [
             'name' => $this->getName(),
             'description' => (string) $this->getDescription(),
-            'keywords' => $tags,
+            'keywords' => $keywords,
             'homepage' => (string) $this->getHomepage(),
             'version' => $this->getVersion(),
             'version_normalized' => $this->getNormalizedVersion(),

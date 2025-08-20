@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-abstract class Tag
+class Keyword
 {
     #[ORM\Id]
     #[ORM\Column]
@@ -17,7 +17,7 @@ abstract class Tag
     #[ORM\Column(length: 191)]
     private string $name;
 
-    #[ORM\ManyToMany(targetEntity: Version::class, mappedBy: 'tags')]
+    #[ORM\ManyToMany(targetEntity: Version::class, mappedBy: 'keywords')]
     protected Collection $versions;
 
     public function __construct()
