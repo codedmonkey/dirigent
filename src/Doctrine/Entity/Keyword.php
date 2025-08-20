@@ -2,11 +2,12 @@
 
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
+use CodedMonkey\Dirigent\Doctrine\Repository\KeywordRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: KeywordRepository::class)]
 class Keyword
 {
     #[ORM\Id]
@@ -20,8 +21,9 @@ class Keyword
     #[ORM\ManyToMany(targetEntity: Version::class, mappedBy: 'keywords')]
     protected Collection $versions;
 
-    public function __construct()
+    public function __construct(string $name)
     {
+        $this->name = $name;
         $this->versions = new ArrayCollection();
     }
 
@@ -33,10 +35,5 @@ class Keyword
     public function getName(): string
     {
         return $this->name;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = $name;
     }
 }

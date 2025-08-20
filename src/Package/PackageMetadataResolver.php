@@ -16,6 +16,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\VersionProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionReplaceLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionSuggestLink;
+use CodedMonkey\Dirigent\Doctrine\Repository\KeywordRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
@@ -32,6 +33,15 @@ use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 readonly class PackageMetadataResolver
 {
+    /**
+     * Available link types and their associated methods and entities.
+     *
+     * Each link type maps to an array that specifies:
+     * - the `method` to be used for handling the link type.
+     * - the `entity` class associated with the link type.
+     *
+     * Does not include `suggest` as it's not defined as a Link object in the Composer package interface.
+     */
     private const array SUPPORTED_LINK_TYPES = [
         'conflict' => [
             'method' => 'getConflicts',
@@ -59,6 +69,7 @@ readonly class PackageMetadataResolver
         private ComposerClient $composer,
         private MessageBusInterface $messenger,
         private EntityManagerInterface $entityManager,
+        private KeywordRepository $keywordRepository,
         private RegistryRepository $registryRepository,
         private VersionRepository $versionRepository,
     ) {
@@ -375,6 +386,30 @@ readonly class PackageMetadataResolver
                 $em->remove($link);
             }
             $version->getSuggest()->clear();
+        }
+
+        // Handle keywords
+        if ($keywordsData = $data->getKeywords()) {
+            foreach ($version->getKeywords() as $keyword) {
+                $keywordName = $keyword->getName();
+                // Clear keywords that have disappeared (for updates)
+                if (!in_array($keywordName, $keywordsData, true)) {
+                    $version->getKeywords()->removeElement($keyword);
+                    $em->remove($keyword);
+                } else {
+                    // Clear those that are already set
+                    $index = array_search($keywordName, $keywordsData, true);
+                    unset($keywordsData[$index]);
+                }
+            }
+
+            foreach ($keywordsData as $keywordName) {
+                $keyword = $this->keywordRepository->getByName($keywordName);
+                $version->addKeyword($keyword);
+            }
+        } elseif (count($version->getKeywords())) {
+            // Clear existing keywords if present
+            $version->getKeywords()->clear();
         }
 
         if ($driver) {
