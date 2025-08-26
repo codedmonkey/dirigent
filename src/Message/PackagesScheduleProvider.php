@@ -8,11 +8,13 @@ use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 
 #[AsSchedule('packages')]
 class PackagesScheduleProvider implements ScheduleProviderInterface
 {
     public function __construct(
+        private readonly CacheInterface $cache,
         #[Autowire(param: 'dirigent.packages.periodic_updates')]
         private readonly bool $periodicUpdatesEnabled,
     ) {
@@ -26,9 +28,10 @@ class PackagesScheduleProvider implements ScheduleProviderInterface
             $schedule = new Schedule();
 
             if ($this->periodicUpdatesEnabled) {
-                $schedule = $schedule->with(
-                    RecurringMessage::every('15 minutes', new RunCommandMessage('packages:update')),
-                );
+                $schedule = $schedule
+                    ->with(RecurringMessage::every('15 minutes', new RunCommandMessage('packages:update')))
+                    ->stateful($this->cache)
+                    ->processOnlyLastMissedRun(true);
             }
 
             $this->schedule = $schedule;
