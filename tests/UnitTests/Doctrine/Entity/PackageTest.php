@@ -13,27 +13,20 @@ class PackageTest extends TestCase
     {
         $package = new Package();
 
+        $package->setRepositoryUrl('https://github.com/super/trouper');
+        self::assertSame('https://github.com/super/trouper', $package->getBrowsableRepositoryUrl());
+        self::assertSame('github.com/super/trouper', $package->getPrettyBrowsableRepositoryUrl());
+
         $package->setRepositoryUrl('https://example.com/super/trouper');
-        self::assertSame('https://example.com/super/trouper', $package->getBrowsableRepositoryUrl());
+        self::assertNull($package->getBrowsableRepositoryUrl());
+        self::assertNull($package->getPrettyBrowsableRepositoryUrl());
 
         $package->setRepositoryUrl('git://example.com/super/trouper');
         self::assertNull($package->getBrowsableRepositoryUrl());
-
-        $package->setRepositoryUrl('git@example.com/super/trouper.git');
-        self::assertNull($package->getBrowsableRepositoryUrl());
-    }
-
-    public function testPrettyBrowsableRepositoryUrl(): void
-    {
-        $package = new Package();
-
-        $package->setRepositoryUrl('https://example.com/super/trouper');
-        self::assertSame('example.com/super/trouper', $package->getPrettyBrowsableRepositoryUrl());
-
-        $package->setRepositoryUrl('git://example.com/super/trouper');
         self::assertNull($package->getPrettyBrowsableRepositoryUrl());
 
         $package->setRepositoryUrl('git@example.com/super/trouper.git');
+        self::assertNull($package->getBrowsableRepositoryUrl());
         self::assertNull($package->getPrettyBrowsableRepositoryUrl());
     }
 }

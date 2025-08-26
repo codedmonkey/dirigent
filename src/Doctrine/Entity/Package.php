@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use CodedMonkey\Dirigent\Validator\UniquePackage;
 use Composer\Package\Version\VersionParser;
 use Composer\Pcre\Preg;
@@ -210,32 +211,7 @@ class Package extends TrackedEntity
 
     public function setRepositoryUrl(?string $repoUrl): void
     {
-        if (!$repoUrl) {
-            $this->repositoryUrl = null;
-
-            return;
-        }
-
-        // Force GitHub repos to use standardized format
-        $repoUrl = Preg::replace('{^git@github.com:}i', 'https://github.com/', $repoUrl);
-        $repoUrl = Preg::replace('{^git://github.com/}i', 'https://github.com/', $repoUrl);
-        $repoUrl = Preg::replace('{^(https://github.com/.*?)\.git$}i', '$1', $repoUrl);
-        $repoUrl = Preg::replace('{^(https://github.com/.*?)/$}i', '$1', $repoUrl);
-
-        // Force GitLab repos to use standardized format
-        $repoUrl = Preg::replace('{^git@gitlab.com:}i', 'https://gitlab.com/', $repoUrl);
-        $repoUrl = Preg::replace('{^https?://(?:www\.)?gitlab\.com/(.*?)\.git$}i', 'https://gitlab.com/$1', $repoUrl);
-
-        // Force Bitbucket repos to use standardized format
-        $repoUrl = Preg::replace('{^git@+bitbucket.org:}i', 'https://bitbucket.org/', $repoUrl);
-        $repoUrl = Preg::replace('{^bitbucket.org:}i', 'https://bitbucket.org/', $repoUrl);
-        $repoUrl = Preg::replace('{^https://[a-z0-9_-]*@bitbucket.org/}i', 'https://bitbucket.org/', $repoUrl);
-        $repoUrl = Preg::replace('{^(https://bitbucket.org/[^/]+/[^/]+)/src/[^.]+}i', '$1.git', $repoUrl);
-
-        // Normalize protocol case
-        $repoUrl = Preg::replaceCallbackStrictGroups('{^(https?|git|svn)://}i', static fn ($match) => strtolower($match[1]) . '://', $repoUrl);
-
-        $this->repositoryUrl = $repoUrl;
+        $this->repositoryUrl = PackageMetadataResolver::optimizeRepositoryUrl($repoUrl);
     }
 
     public function getRepositoryCredentials(): ?Credentials
@@ -344,15 +320,20 @@ class Package extends TrackedEntity
 
     public function getBrowsableRepositoryUrl(): ?string
     {
-        if (!$this->repositoryUrl) {
+        if (null === $this->repositoryUrl) {
             return null;
         }
 
-        if (!Preg::isMatch('{^https?://}i', $this->repositoryUrl)) {
-            return null;
+        $url = PackageMetadataResolver::optimizeRepositoryUrl($this->repositoryUrl);
+
+        static $allowedDomains = ['github.com', 'gitlab.com', 'bitbucket.org'];
+        foreach ($allowedDomains as $domain) {
+            if (str_starts_with($url, "https://$domain/")) {
+                return $url;
+            }
         }
 
-        return $this->repositoryUrl;
+        return null;
     }
 
     public function getPrettyBrowsableRepositoryUrl(): ?string

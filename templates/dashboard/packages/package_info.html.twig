@@ -19,16 +19,24 @@
       <p class="lead">{{ version.description }}</p>
 
       {% if version.authors|length > 0 %}
-        <div class="d-flex gap-3 mb-2">
+        <div class="d-flex flex-wrap gap-2 mb-2" aria-label="{{ 'Authors'|trans }}">
           {% for author in version.authors %}
-            {% set authorText %}<span class="fa-solid fa-user me-2" aria-hidden="true"></span>{{ author.name }}{% endset %}
+            {% set authorText %}<span class="fa-solid fa-user fa-fw me-1" aria-hidden="true"></span>{{ author.name }}{% endset %}
             {% if author.homepage is defined %}<a href="{{ author.homepage }}">{{ authorText }}</a>{% else %}<span>{{ authorText }}</span>{% endif %}
           {% endfor %}
         </div>
       {% endif %}
 
-      {% if version.reference %}
-        <p>{{ 'Reference'|trans }}: <code>{{ version.reference }}</code></p>
+      {% if version.keywords|length > 0 %}
+        <div class="d-flex align-items-center mb-2">
+          <span class="fa-solid fa-tags fa-fw me-1" title="{{ 'Keywords'|trans }}" aria-hidden="true"></span>
+
+          <div class="d-flex flex-wrap gap-2" aria-label="{{ 'Keywords'|trans }}">
+            {% for keyword in version.keywords %}
+              <span>{{ keyword.name }}</span>
+            {% endfor %}
+          </div>
+        </div>
       {% endif %}
     </div>
     <div class="col-md-4">
@@ -46,9 +54,6 @@
         {% endif %}
         {% if version.homepage %}
           <div><a href="{{ version.homepage }}">Homepage</a></div>
-        {% endif %}
-        {% if version.sourceUrl %}
-          <div><a href="{{ version.sourceUrl }}">Source</a></div>
         {% endif %}
         {% set packageStatisticsUrl = path('dashboard_packages_statistics', {package: package.name}) %}
         <div><span><a href="{{ packageStatisticsUrl }}">{{ 'Installations'|trans }}</a></span> {{ package.installations.total }}</div>
@@ -96,12 +101,66 @@
   </div>
 
   <div class="row border-bottom pb-3 mb-3">
-    {{ _self.linkBlock('requires', version.require) }}
-    {{ _self.linkBlock('requires (dev)', version.devRequire) }}
+    {{ _self.linkBlock('Requires', version.require) }}
+    {{ _self.linkBlock('Requires (dev)', version.devRequire) }}
     {{ _self.provideBlock(version.provide) }}
-    {{ _self.linkBlock('suggests', version.suggest) }}
-    {{ _self.linkBlock('conflicts', version.conflict) }}
-    {{ _self.linkBlock('replaces', version.replace) }}
+    {{ _self.linkBlock('Suggests', version.suggest) }}
+    {{ _self.linkBlock('Conflicts', version.conflict) }}
+    {{ _self.linkBlock('Replaces', version.replace) }}
+  </div>
+
+  <div class="row border-bottom pb-3 mb-3">
+    <div class="col-md-6">
+      {% if version.hasSource() %}
+        <div class="h5">
+          {{ 'Source'|trans }}
+          <span class="badge text-bg-secondary">{{ version.sourceType }}</span>
+        </div>
+
+        <div class="mb-2">
+          <code>{{ version.sourceUrl }}</code>
+        </div>
+
+        <div class="mb-2">
+          {{ 'Reference'|trans }}: <code>{{ version.sourceReference }}</code>
+        </div>
+
+        <div class="mb-2">
+          {% set browseUrl = version.browsableRepositoryUrl %}
+          {% if browseUrl %}
+            <a class="btn btn-sm btn-secondary" href="{{ browseUrl }}">
+              <span class="fa-solid fa-code me-1" aria-hidden="true"></span>
+              {{ 'Browse code'|trans }}
+            </a>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="h5">{{ 'Source'|trans }}</div>
+        -
+      {% endif %}
+    </div>
+    <div class="col-md-6">
+      {% if version.hasDist() %}
+        <div class="h5">
+          {{ 'Distribution'|trans }}
+          <span class="badge text-bg-secondary">{{ version.distType }}</span>
+        </div>
+
+        <div class="mb-2">
+          {{ 'Reference'|trans }}: <code>{{ version.distReference }}</code>
+        </div>
+
+        <div class="mb-2">
+          <a class="btn btn-sm btn-secondary" href="{{ version.distUrl }}" download>
+            <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
+            {{ 'Download' }}
+          </a>
+        </div>
+      {% else %}
+        <div class="h5">{{ 'Distribution'|trans }}</div>
+        -
+      {% endif %}
+    </div>
   </div>
 
   {% if version.readme %}
@@ -113,7 +172,7 @@
 
 {% macro linkBlock(title, links) %}
   <div class="col-md-6 col-lg-4">
-    <div class="h5">{{ title }}</div>
+    <div class="h5">{{ title|trans }}</div>
 
     <ul>
       {% for link in links %}
@@ -131,7 +190,7 @@
 
 {% macro provideBlock(links) %}
   <div class="col-md-6 col-lg-4">
-    <div class="h5">provides</div>
+    <div class="h5">{{ 'Provides'|trans }}</div>
 
     <ul>
       {% for link in links %}

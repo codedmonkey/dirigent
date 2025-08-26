@@ -43,18 +43,31 @@ No credentials: No credentials
 Search packages: Search packages
 
 # Package labels
+Authors: Authors
+Browse code: Browse code
 Dependents: Dependents
+Distribution: Distribution
 Implementations: Implementations
 Installations: Installations
+Keywords: Keywords
 License: License
 Providers: Providers
 Reference: Reference
+Source: Source
 Statistics: Statistics
 Suggesters: Suggesters
 
 An update for this package has been scheduled: An update for this package has been scheduled.
 Last updated at %date%: Last updated at %date%.
 No published versions found: No published versions found.
+
+# Package labels (Links)
+Conflicts: Conflicts
+Provides: Provides
+Replaces: Replaces
+Requires: Requires
+Requires (dev): Requires (dev)
+Suggests: Suggests
 
 # Package labels (Statistics)
 Daily installations: Daily installations
