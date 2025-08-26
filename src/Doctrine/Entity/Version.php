@@ -610,6 +610,29 @@ class Version extends TrackedEntity
         return (int) $split[2];
     }
 
+    public function getBrowsableRepositoryUrl(): ?string
+    {
+        $reference = $this->getSourceReference();
+        $url = $this->package->getBrowsableRepositoryUrl();
+        if (null === $reference || null === $url) {
+            return null;
+        }
+
+        if (false === $this->isDevelopment()) {
+            $reference = $this->getVersion();
+        }
+
+        if (str_starts_with($url, 'https://github.com/')) {
+            return "$url/tree/$reference";
+        } elseif (str_starts_with($url, 'https://gitlab.com/')) {
+            return "$url/-/tree/$reference";
+        } elseif (str_starts_with($url, 'https://bitbucket.org/')) {
+            return "$url/src/$reference/";
+        }
+
+        return null;
+    }
+
     public function toComposerArray(): array
     {
         $keywords = [];

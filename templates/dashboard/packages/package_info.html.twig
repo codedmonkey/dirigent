@@ -126,7 +126,7 @@
         </div>
 
         <div class="mb-2">
-          {% set browseUrl = package.getBrowsableRepositoryUrl(version.sourceReference) %}
+          {% set browseUrl = version.browsableRepositoryUrl %}
           {% if browseUrl %}
             <a class="btn btn-sm btn-secondary" href="{{ browseUrl }}">
               <span class="fa-solid fa-code me-1" aria-hidden="true"></span>

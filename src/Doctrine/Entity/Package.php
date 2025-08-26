@@ -318,7 +318,7 @@ class Package extends TrackedEntity
         $this->dumpedAt = $dumpedAt;
     }
 
-    public function getBrowsableRepositoryUrl(?string $reference = null): ?string
+    public function getBrowsableRepositoryUrl(): ?string
     {
         if (null === $this->repositoryUrl) {
             return null;
@@ -326,12 +326,11 @@ class Package extends TrackedEntity
 
         $url = PackageMetadataResolver::optimizeRepositoryUrl($this->repositoryUrl);
 
-        if (str_starts_with($url, 'https://github.com/')) {
-            return $reference ? "$url/tree/$reference" : $url;
-        } elseif (str_starts_with($url, 'https://gitlab.com/')) {
-            return $reference ? "$url/-/tree/$reference" : $url;
-        } elseif (str_starts_with($url, 'https://bitbucket.org/')) {
-            return $reference ? "$url/src/$reference/" : $url;
+        static $allowedDomains = ['github.com', 'gitlab.com', 'bitbucket.org'];
+        foreach ($allowedDomains as $domain) {
+            if (str_starts_with($url, "https://$domain/")) {
+                return $url;
+            }
         }
 
         return null;
