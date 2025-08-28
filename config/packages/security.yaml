@@ -25,7 +25,7 @@ security:
             lazy: true
             provider: database_users
             form_login:
-                login_path: /?routeName=dashboard_login
+                login_path: dashboard_login
                 check_path: dashboard_login
             remember_me:
                 secret: '%kernel.secret%'
