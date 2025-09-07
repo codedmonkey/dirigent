@@ -104,7 +104,31 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "lint": [
+            "@lint:coding-style",
+            "@lint:static-analysis",
+            "@lint:composer",
+            "@lint:yaml",
+            "@lint:container",
+            "@lint:templates",
+            "@lint:translations"
+        ],
+        "lint:coding-style": "vendor/bin/php-cs-fixer fix --diff",
+        "lint:composer": "composer validate",
+        "lint:container": "bin/console lint:container",
+        "lint:static-analysis": "vendor/bin/phpstan analyze --no-progress",
+        "lint:templates": "bin/console lint:twig templates",
+        "lint:translations": "bin/console lint:translations",
+        "lint:yaml": "bin/console lint:yaml .github config translations --parse-tags",
+        "tests": [
+            "@tests:unit",
+            "@tests:functional",
+            "@tests:docker"
+        ],
+        "tests:docker": "bin/phpunit --configuration phpunit.docker.xml",
+        "tests:functional": "bin/phpunit tests/FunctionalTests",
+        "tests:unit": "bin/phpunit tests/UnitTests"
     },
     "config": {
         "allow-plugins": {
