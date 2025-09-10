@@ -8,6 +8,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\Entity\PackageUpdateSource;
 use CodedMonkey\Dirigent\Message\TrackInstallations;
 use CodedMonkey\Dirigent\Message\UpdatePackage;
 use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
@@ -84,7 +85,7 @@ class ApiController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $this->messenger->dispatch(new UpdatePackage($package->getId()));
+        $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Dynamic));
 
         if (!$this->providerManager->exists($packageName)) {
             throw $this->createNotFoundException();
@@ -122,7 +123,7 @@ class ApiController extends AbstractController
                 throw $this->createNotFoundException();
             }
 
-            $this->messenger->dispatch(new UpdatePackage($package->getId()));
+            $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Dynamic));
 
             if (null === $version = $this->versionRepository->findOneByNormalizedVersion($package, $versionName)) {
                 throw $this->createNotFoundException();

@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  */
 class PackageRepository extends ServiceEntityRepository
 {
-    private \DateInterval $updateInterval;
+    private \DateInterval $periodicUpdateInterval;
 
     /**
      * @var array<string, Package>
@@ -29,11 +29,11 @@ class PackageRepository extends ServiceEntityRepository
     public function __construct(
         ManagerRegistry $registry,
         #[Autowire(param: 'dirigent.packages.periodic_update_interval')]
-        string $updateInterval,
+        string $periodicUpdateInterval,
     ) {
         parent::__construct($registry, Package::class);
 
-        $this->updateInterval = new \DateInterval($updateInterval);
+        $this->periodicUpdateInterval = new \DateInterval($periodicUpdateInterval);
     }
 
     public function save(Package $entity, bool $flush = false): void
@@ -83,17 +83,28 @@ class PackageRepository extends ServiceEntityRepository
     {
         $connection = $this->getEntityManager()->getConnection();
 
-        $now = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
-        $before = $now->sub($this->updateInterval);
+        $staleAt = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
+        $staleAt = $staleAt->sub($this->periodicUpdateInterval);
 
+        // Find package (id)s that have:
+        // - never been updated or are stale
+        // - and either:
+        //   - no update is scheduled
+        //   - the schedule date has gone stale
+        // This should cover all packages. Packages may never come into
+        // a state where they can't be stale,
+        // until functionality is created to disable updates altogether.
         return $connection->fetchFirstColumn(
             <<<'SQL'
                 SELECT p.id FROM package p
-                WHERE p.update_scheduled_at IS NULL
-                    AND (p.updated_at IS NULL OR p.updated_at < :crawled)
+                WHERE (p.updated_at IS NULL OR p.updated_at < :staleAt)
+                    AND (
+                        p.update_scheduled_at IS NULL
+                        OR p.update_scheduled_at < :staleAt
+                    )
                 ORDER BY p.id
             SQL, [
-                'crawled' => $before->format('Y-m-d H:i:s'),
+                'staleAt' => $staleAt->format('Y-m-d H:i:s'),
             ]
         );
     }

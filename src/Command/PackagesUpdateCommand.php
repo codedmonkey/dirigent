@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Command;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Entity\PackageUpdateSource;
 use CodedMonkey\Dirigent\Message\SchedulePackageUpdate;
 use CodedMonkey\Dirigent\Message\UpdatePackage;
 use Symfony\Component\Console\Attribute\Argument;
@@ -61,12 +62,8 @@ readonly class PackagesUpdateCommand
             return Command::FAILURE;
         }
 
-        // Force refresh updates even if already up-to-date
-        $forceRefresh = false;
-        // Randomize time of updates
-        $randomTimes = true;
-        // Schedule update even if already scheduled
-        $reschedule = false;
+        $randomTimes = true; // Randomize time of updates
+        $source = PackageUpdateSource::Stale;
 
         if (count($packageNames)) {
             $packageIds = [];
@@ -81,15 +78,13 @@ readonly class PackagesUpdateCommand
                 $packageIds[] = $package->getId();
             }
 
-            $forceRefresh = true;
             $randomTimes = false;
-            $reschedule = true;
+            $source = PackageUpdateSource::Manual;
         } elseif ($all) {
             $io->writeln('Scheduling all packages for update...');
             $packageIds = $this->packageRepository->getAllPackageIds();
 
-            $forceRefresh = true;
-            $reschedule = true;
+            $source = PackageUpdateSource::Manual;
         } else {
             $io->writeln('Scheduling stale packages for update...');
             $packageIds = $this->packageRepository->getStalePackageIds();
@@ -97,7 +92,7 @@ readonly class PackagesUpdateCommand
 
         if ($sync) {
             foreach ($packageIds as $packageId) {
-                $this->messenger->dispatch(new UpdatePackage($packageId, forceRefresh: $forceRefresh));
+                $this->messenger->dispatch(new UpdatePackage($packageId, $source));
             }
 
             $packageCount = count($packageIds);
@@ -105,12 +100,7 @@ readonly class PackagesUpdateCommand
         }
 
         foreach ($packageIds as $packageId) {
-            $this->messenger->dispatch(new SchedulePackageUpdate(
-                packageId: $packageId,
-                randomTime: $randomTimes,
-                reschedule: $reschedule,
-                forceRefresh: $forceRefresh,
-            ));
+            $this->messenger->dispatch(new SchedulePackageUpdate($packageId, $source, $randomTimes));
         }
 
         $packageCount = count($packageIds);
