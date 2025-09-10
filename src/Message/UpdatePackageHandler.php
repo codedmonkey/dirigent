@@ -26,7 +26,7 @@ readonly class UpdatePackageHandler
 
     public function __invoke(UpdatePackage $message): void
     {
-        if (!$message->scheduled && !$message->forceRefresh && !$this->dynamicUpdatesEnabled) {
+        if ($message->source->isDynamic() && !$this->dynamicUpdatesEnabled) {
             // Dynamic updates are disabled
             return;
         }
@@ -34,11 +34,12 @@ readonly class UpdatePackageHandler
         $package = $this->packageRepository->find($message->packageId);
 
         if ($message->scheduled && null === $package->getUpdateScheduledAt()) {
-            // Package was already updated between being scheduled and now
+            // Package was already updated between being scheduled and now,
+            // so stop the update to prevent excessive requests
             return;
         }
 
-        if (!$message->forceRefresh && $this->isFresh($package)) {
+        if (!$message->source->isManual() && $this->isFresh($package)) {
             // Package was recently updated
             return;
         }
