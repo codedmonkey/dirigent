@@ -9,6 +9,8 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 readonly class DumpPackageProviderHandler
 {
+    use PackageHandlerTrait;
+
     public function __construct(
         private PackageRepository $packageRepository,
         private PackageProviderManager $providerManager,
@@ -17,7 +19,7 @@ readonly class DumpPackageProviderHandler
 
     public function __invoke(DumpPackageProvider $message): void
     {
-        $package = $this->packageRepository->find($message->packageId);
+        $package = $this->getPackage($this->packageRepository, $message->packageId);
 
         $this->providerManager->dump($package);
     }

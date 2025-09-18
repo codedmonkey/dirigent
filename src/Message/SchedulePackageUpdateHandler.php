@@ -11,6 +11,8 @@ use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 #[AsMessageHandler]
 readonly class SchedulePackageUpdateHandler
 {
+    use PackageHandlerTrait;
+
     public function __construct(
         private PackageRepository $packageRepository,
         private MessageBusInterface $messenger,
@@ -19,7 +21,7 @@ readonly class SchedulePackageUpdateHandler
 
     public function __invoke(SchedulePackageUpdate $message): void
     {
-        $package = $this->packageRepository->find($message->packageId);
+        $package = $this->getPackage($this->packageRepository, $message->packageId);
 
         $stamps = [new TransportNamesStamp('async')];
 

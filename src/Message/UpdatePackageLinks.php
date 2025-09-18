@@ -9,7 +9,7 @@ readonly class UpdatePackageLinks
 {
     public function __construct(
         public int $packageId,
-        public string $versionName,
+        public int $primaryVersionId,
     ) {
     }
 }

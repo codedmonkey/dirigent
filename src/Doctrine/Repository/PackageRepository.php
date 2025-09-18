@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  */
 class PackageRepository extends ServiceEntityRepository
 {
-    private \DateInterval $periodicUpdateInterval;
+    private ?\DateInterval $periodicUpdateInterval;
 
     /**
      * @var array<string, Package>
@@ -29,11 +29,11 @@ class PackageRepository extends ServiceEntityRepository
     public function __construct(
         ManagerRegistry $registry,
         #[Autowire(param: 'dirigent.packages.periodic_update_interval')]
-        string $periodicUpdateInterval,
+        ?string $periodicUpdateInterval,
     ) {
         parent::__construct($registry, Package::class);
 
-        $this->periodicUpdateInterval = new \DateInterval($periodicUpdateInterval);
+        $this->periodicUpdateInterval = $periodicUpdateInterval ? new \DateInterval($periodicUpdateInterval) : null;
     }
 
     public function save(Package $entity, bool $flush = false): void
@@ -83,8 +83,12 @@ class PackageRepository extends ServiceEntityRepository
     {
         $connection = $this->getEntityManager()->getConnection();
 
-        $staleAt = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
-        $staleAt = $staleAt->sub($this->periodicUpdateInterval);
+        if (!$this->periodicUpdateInterval) {
+            return [];
+        }
+
+        $staleFrom = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
+        $staleFrom = $staleFrom->sub($this->periodicUpdateInterval);
 
         // Find package (id)s that have:
         // - never been updated or are stale
@@ -97,14 +101,14 @@ class PackageRepository extends ServiceEntityRepository
         return $connection->fetchFirstColumn(
             <<<'SQL'
                 SELECT p.id FROM package p
-                WHERE (p.updated_at IS NULL OR p.updated_at < :staleAt)
+                WHERE (p.updated_at IS NULL OR p.updated_at < :staleFrom)
                     AND (
                         p.update_scheduled_at IS NULL
-                        OR p.update_scheduled_at < :staleAt
+                        OR p.update_scheduled_at < :staleFrom
                     )
                 ORDER BY p.id
             SQL, [
-                'staleAt' => $staleAt->format('Y-m-d H:i:s'),
+                'staleFrom' => $staleFrom->format('Y-m-d H:i:s'),
             ]
         );
     }
@@ -156,6 +160,35 @@ class PackageRepository extends ServiceEntityRepository
                 $queryParameters,
             );
         });
+    }
+
+    /**
+     * @param array<int|Package>|int|Package $packageIds
+     * @param \DateTimeImmutable $scheduledAt
+     */
+    public function setUpdateScheduledAt(array|int|Package $packageIds, \DateTimeImmutable $scheduledAt = new \DateTimeImmutable()): void
+    {
+        if (!is_array($packageIds)) {
+            $packageIds = [$packageIds];
+        }
+
+        foreach ($packageIds as &$packageId) {
+            if ($packageId instanceof Package) {
+                $packageId = $packageId->getId();
+            } elseif (!is_int($packageId)) {
+                throw new \InvalidArgumentException(sprintf('Invalid package id, received %s.', gettype($packageId)));
+            }
+        }
+
+        $query = $this->createQueryBuilder('package')
+            ->update()
+            ->set('package.updateScheduledAt', ':scheduledAt')
+            ->andWhere('package.id IN (:packageIds)')
+            ->setParameter('scheduledAt', $scheduledAt->format('Y-m-d H:i:s'))
+            ->setParameter('packageIds', $packageIds)
+            ->getQuery();
+
+        $query->execute();
     }
 
     public function deletePackageLinks(Package $package): void

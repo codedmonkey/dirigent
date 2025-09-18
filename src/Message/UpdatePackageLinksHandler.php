@@ -9,6 +9,8 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 readonly class UpdatePackageLinksHandler
 {
+    use PackageHandlerTrait;
+
     public function __construct(
         private PackageRepository $packageRepository,
         private VersionRepository $versionRepository,
@@ -17,8 +19,8 @@ readonly class UpdatePackageLinksHandler
 
     public function __invoke(UpdatePackageLinks $message): void
     {
-        $package = $this->packageRepository->find($message->packageId);
-        $version = $this->versionRepository->findOneByNormalizedVersion($package, $message->versionName);
+        $package = $this->getPackage($this->packageRepository, $message->packageId);
+        $version = $this->getVersion($this->versionRepository, $message->primaryVersionId);
 
         $this->packageRepository->updatePackageLinks($package, $version);
     }
