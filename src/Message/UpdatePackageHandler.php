@@ -11,35 +11,30 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 readonly class UpdatePackageHandler
 {
-    private \DateInterval $updateDelay;
+    use PackageHandlerTrait;
+
+    private ?\DateInterval $dynamicUpdateDelay;
 
     public function __construct(
         private PackageRepository $packageRepository,
         private PackageMetadataResolver $metadataResolver,
-        #[Autowire(param: 'dirigent.packages.dynamic_updates')]
-        private bool $dynamicUpdatesEnabled,
         #[Autowire(param: 'dirigent.packages.dynamic_update_delay')]
-        string $updateDelay,
+        ?string $dynamicUpdateDelay,
     ) {
-        $this->updateDelay = new \DateInterval($updateDelay);
+        $this->dynamicUpdateDelay = $dynamicUpdateDelay ? new \DateInterval($dynamicUpdateDelay) : null;
     }
 
     public function __invoke(UpdatePackage $message): void
     {
-        if ($message->source->isDynamic() && !$this->dynamicUpdatesEnabled) {
-            // Dynamic updates are disabled
-            return;
-        }
+        $package = $this->getPackage($this->packageRepository, $message->packageId);
 
-        $package = $this->packageRepository->find($message->packageId);
-
-        if ($message->scheduled && null === $package->getUpdateScheduledAt()) {
+        if ($message->scheduled && !$package->isUpdateScheduled()) {
             // Package was already updated between being scheduled and now,
             // so stop the update to prevent excessive requests
             return;
         }
 
-        if (!$message->source->isManual() && $this->isFresh($package)) {
+        if ($message->source->isDynamic() && $this->isFreshDynamicUpdate($package)) {
             // Package was recently updated
             return;
         }
@@ -51,17 +46,20 @@ readonly class UpdatePackageHandler
         $this->packageRepository->save($package, true);
     }
 
-    private function isFresh(Package $package): bool
+    private function isFreshDynamicUpdate(Package $package): bool
     {
+        // If the package was never updated, it's always stale
         if (null === $lastUpdatedAt = $package->getUpdatedAt()) {
             return false;
         }
 
-        $updateDelay = $package->getMirrorRegistry()?->getDynamicUpdateDelay() ?? $this->updateDelay;
+        // Override update delay from registry
+        $dynamicUpdateDelay = $package->getMirrorRegistry()?->getDynamicUpdateDelay() ?? $this->dynamicUpdateDelay;
 
-        $now = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
-        $before = $now->sub($updateDelay);
+        $freshFrom = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
+        $freshFrom = $freshFrom->sub($dynamicUpdateDelay ?? new \DateInterval('PT0'));
 
-        return $before->getTimestamp() < $lastUpdatedAt->getTimestamp();
+        // Check if the package was updated recently, and therefore fresh
+        return $freshFrom < $lastUpdatedAt;
     }
 }

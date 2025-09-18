@@ -26,7 +26,6 @@ use Composer\Package\CompletePackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
@@ -178,10 +177,11 @@ readonly class PackageMetadataResolver
      */
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
-        $existingVersions = $this->versionRepository->getVersionMetadataForUpdate($package);
-        /** @var ?CompletePackageInterface $primaryVersion Version to use as the package info source */
+        $existingVersionMetadata = $this->versionRepository->getVersionMetadataForUpdate($package);
+        /** @var ?Version $primaryVersion Version to use as the package info source */
         $primaryVersion = null;
 
+        // Every Composer package is a separate package version
         foreach ($composerPackages as $composerPackage) {
             if ($composerPackage instanceof AliasPackage) {
                 continue;
@@ -204,7 +204,7 @@ readonly class PackageMetadataResolver
                 $primaryVersion = $version;
             }
 
-            unset($existingVersions[$versionName]);
+            unset($existingVersionMetadata[$versionName]);
         }
 
         if ($primaryVersion) {
@@ -213,17 +213,16 @@ readonly class PackageMetadataResolver
                 $package->setRepositoryUrl($primaryVersion->getSourceUrl());
             }
 
-            $message = Envelope::wrap(new UpdatePackageLinks($package->getId(), $primaryVersion->getNormalizedVersion()))
-                ->with(new DispatchAfterCurrentBusStamp())
-                ->with(new TransportNamesStamp('async'));
-            $this->messenger->dispatch($message);
+            $this->messenger->dispatch(new UpdatePackageLinks($package->getId(), $primaryVersion->getNormalizedVersion()), [
+                new DispatchAfterCurrentBusStamp(),
+                new TransportNamesStamp('async'),
+            ]);
         }
 
         // Remove outdated versions
-        foreach ($existingVersions as $version) {
-            $versionEntity = $this->versionRepository->find($version['id']);
-
-            $this->entityManager->remove($versionEntity);
+        foreach ($existingVersionMetadata as $versionMetadata) {
+            $version = $this->entityManager->getReference(Version::class, $versionMetadata['id']);
+            $this->entityManager->remove($version);
         }
 
         $package->setUpdatedAt(new \DateTimeImmutable());

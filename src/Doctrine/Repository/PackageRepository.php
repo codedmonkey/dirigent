@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  */
 class PackageRepository extends ServiceEntityRepository
 {
-    private \DateInterval $periodicUpdateInterval;
+    private ?\DateInterval $periodicUpdateInterval;
 
     /**
      * @var array<string, Package>
@@ -29,11 +29,11 @@ class PackageRepository extends ServiceEntityRepository
     public function __construct(
         ManagerRegistry $registry,
         #[Autowire(param: 'dirigent.packages.periodic_update_interval')]
-        string $periodicUpdateInterval,
+        ?string $periodicUpdateInterval,
     ) {
         parent::__construct($registry, Package::class);
 
-        $this->periodicUpdateInterval = new \DateInterval($periodicUpdateInterval);
+        $this->periodicUpdateInterval = $periodicUpdateInterval ? new \DateInterval($periodicUpdateInterval) : null;
     }
 
     public function save(Package $entity, bool $flush = false): void
@@ -82,6 +82,10 @@ class PackageRepository extends ServiceEntityRepository
     public function getStalePackageIds(): array
     {
         $connection = $this->getEntityManager()->getConnection();
+
+        if (!$this->periodicUpdateInterval) {
+            return [];
+        }
 
         $staleFrom = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
         $staleFrom = $staleFrom->sub($this->periodicUpdateInterval);
