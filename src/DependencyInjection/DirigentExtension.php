@@ -20,6 +20,7 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.slug', $slug);
 
         $this->registerEncryptionConfiguration($mergedConfig['encryption'], $container);
+        $this->registerPackagesConfiguration($mergedConfig['packages'], $container);
 
         $container->setParameter('dirigent.security.public_access', $mergedConfig['security']['public']);
         $container->setParameter('dirigent.security.registration_enabled', $mergedConfig['security']['registration']);
@@ -29,11 +30,6 @@ class DirigentExtension extends ConfigurableExtension
         } else {
             $container->setParameter('dirigent.storage.path', $mergedConfig['storage']['path']);
         }
-
-        $container->setParameter('dirigent.packages.dynamic_updates', $mergedConfig['packages']['dynamic_updates']);
-        $container->setParameter('dirigent.packages.dynamic_update_delay', $mergedConfig['packages']['dynamic_update_delay']);
-        $container->setParameter('dirigent.packages.periodic_updates', $mergedConfig['packages']['periodic_updates']);
-        $container->setParameter('dirigent.packages.periodic_update_interval', $mergedConfig['packages']['periodic_update_interval']);
 
         $container->setParameter('dirigent.dist_mirroring.enabled', $mergedConfig['dist_mirroring']['enabled']);
         $container->setParameter('dirigent.dist_mirroring.preferred', $mergedConfig['dist_mirroring']['preferred']);
@@ -57,5 +53,37 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.encryption.private_key_path', $config['private_key_path']);
         $container->setParameter('dirigent.encryption.public_key_path', $config['public_key_path']);
         $container->setParameter('dirigent.encryption.rotated_key_paths', $config['rotated_key_paths']);
+    }
+
+    /**
+     * @param array{periodic_update_interval: string, periodic_updates: bool, dynamic_update_delay: string, dynamic_updates: bool} $config
+     */
+    private function registerPackagesConfiguration(array $config, ContainerBuilder $container): void
+    {
+        $dynamicUpdatesEnabled = $config['dynamic_updates'];
+        $dynamicUpdateDelay = $dynamicUpdatesEnabled ? $config['dynamic_update_delay'] : null;
+        $periodicUpdatesEnabled = $config['periodic_updates'];
+        $periodicUpdateInterval = $periodicUpdatesEnabled ? $config['periodic_update_interval'] : null;
+
+        if (null !== $dynamicUpdateDelay) {
+            try {
+                new \DateInterval($dynamicUpdateDelay);
+            } catch (\DateMalformedIntervalStringException) {
+                throw new \LogicException("Invalid dynamic update delay: '$dynamicUpdateDelay' is not a valid ISO 8601 duration.");
+            }
+        }
+
+        if (null !== $periodicUpdateInterval) {
+            try {
+                new \DateInterval($periodicUpdateInterval);
+            } catch (\DateMalformedIntervalStringException) {
+                throw new \LogicException("Invalid periodic update interval: '$periodicUpdateInterval' is not a valid ISO 8601 duration.");
+            }
+        }
+
+        $container->setParameter('dirigent.packages.dynamic_updates', $dynamicUpdatesEnabled);
+        $container->setParameter('dirigent.packages.dynamic_update_delay', $dynamicUpdateDelay);
+        $container->setParameter('dirigent.packages.periodic_updates', $periodicUpdatesEnabled);
+        $container->setParameter('dirigent.packages.periodic_update_interval', $periodicUpdateInterval);
     }
 }
