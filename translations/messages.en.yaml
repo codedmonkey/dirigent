@@ -118,5 +118,6 @@ account:
     disable: Disable MFA authentication
     enable: Enable MFA authentication
     help: Secure your account with a time-based code from an authenticator app.
+    qr-code-alt: QR-code containing the MFA secret.
     state-disabled: Multi-Factor Authentication is currently disabled.
     state-enabled: Multi-Factor Authentication is currently enabled.
