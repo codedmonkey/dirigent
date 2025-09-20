@@ -8,6 +8,8 @@ use CodedMonkey\Dirigent\Form\AccountFormType;
 use CodedMonkey\Dirigent\Form\ChangePasswordFormType;
 use CodedMonkey\Dirigent\Form\MfaClearFormType;
 use CodedMonkey\Dirigent\Form\MfaSetupFormType;
+use Endroid\QrCode\Builder\Builder as QrCodeBuilder;
+use Endroid\QrCode\Color\Color;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -118,5 +120,28 @@ class DashboardAccountController extends AbstractController
         return $this->render('dashboard/account/mfa_clear.html.twig', [
             'form' => $form,
         ]);
+    }
+
+    #[Route('/account/mfa/qr-code', name: 'dashboard_account_mfa_qr_code', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function mfaQrCode(Request $request, #[CurrentUser] User $user): Response
+    {
+        $session = $request->getSession();
+
+        if (null === $totpSecret = $session->get('totp_secret')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $darkMode = 'dark' === $request->query->getString('mode', 'light');
+
+        $user->setTotpSecret($totpSecret);
+
+        $builder = new QrCodeBuilder(data: $this->totpAuthenticator->getQRContent($user));
+        $result = $builder->build(
+            foregroundColor: $darkMode ? new Color(212, 212, 212) : null,
+            backgroundColor: $darkMode ? new Color(17, 21, 23) : null,
+        );
+
+        return new Response($result->getString(), 200, ['Content-Type' => 'image/png']);
     }
 }

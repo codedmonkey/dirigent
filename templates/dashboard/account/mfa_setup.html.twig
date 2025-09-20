@@ -6,6 +6,10 @@
   <div class="row">
     <div class="col-md-6 col-xxl-5">
       <div class="mb-3">
+        <img src="{{ path('dashboard_account_mfa_qr_code', {mode: 'dark'}) }}" alt="{{ 'account.mfa.qr-code-alt'|trans }}" class="img-dark">
+        <img src="{{ path('dashboard_account_mfa_qr_code') }}" alt="{{ 'account.mfa.qr-code-alt'|trans }}" class="img-light">
+      </div>
+      <div class="mb-3">
         <label for="totp_secret" class="form-label">{{ 'MFA secret' }}</label>
         <input id="totp_secret" type="text" value="{{ totpContent }}" readonly class="form-control">
       </div>
