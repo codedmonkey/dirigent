@@ -112,12 +112,11 @@ class DashboardAccountController extends AbstractController
             $totpCode = $form->get('totpCode')->getData();
 
             if (!$this->totpAuthenticator->checkCode($user, $totpCode)) {
-                $user->setTotpSecret(null);
-
                 $form->get('totpCode')->addError(new FormError('account.error.totp-incorrect'));
+            } else {
+                // Only validate password if TOTP code is correct
+                $this->validatePassword($form->get('currentPassword'), $user);
             }
-
-            $this->validatePassword($form->get('currentPassword'), $user);
 
             if ($form->isValid()) {
                 $this->userRepository->save($user, true);
@@ -143,7 +142,7 @@ class DashboardAccountController extends AbstractController
         $session = $request->getSession();
 
         if (null === $totpSecret = $session->get('totp_secret')) {
-            throw $this->createNotFoundException();
+            throw $this->createAccessDeniedException();
         }
 
         $darkMode = 'dark' === $request->query->getString('mode', 'light');
