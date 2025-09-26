@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Message;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -12,6 +13,7 @@ readonly class UpdatePackageLinksHandler
     public function __construct(
         private PackageRepository $packageRepository,
         private VersionRepository $versionRepository,
+        private PackageMetadataResolver $metadataResolver,
     ) {
     }
 
@@ -21,5 +23,7 @@ readonly class UpdatePackageLinksHandler
         $version = $this->versionRepository->findOneByNormalizedVersion($package, $message->versionName);
 
         $this->packageRepository->updatePackageLinks($package, $version);
+
+        $this->metadataResolver->updateLockedPackages($version);
     }
 }

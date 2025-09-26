@@ -4,6 +4,8 @@ namespace CodedMonkey\Dirigent\Package;
 
 use cebe\markdown\GithubMarkdown;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Composer\ConfigFactory;
+use CodedMonkey\Dirigent\Composer\InMemoryJsonFile;
 use CodedMonkey\Dirigent\Doctrine\Entity\AbstractVersionLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
@@ -21,10 +23,15 @@ use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use CodedMonkey\Dirigent\Message\UpdatePackageLinks;
+use Composer\Installer\InstallationManager;
+use Composer\IO\NullIO;
 use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
+use Composer\Package\Locker;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
+use Composer\Util\Loop;
+use Composer\Util\ProcessExecutor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -120,6 +127,8 @@ readonly class PackageMetadataResolver
         /** @var CompletePackageInterface[] $composerPackages */
         $composerPackages = $repository->findPackages($packageName);
 
+        dd($composerPackages);
+
         $this->updatePackage($package, $composerPackages);
     }
 
@@ -155,6 +164,10 @@ readonly class PackageMetadataResolver
 
         /** @var CompletePackageInterface[] $composerPackages */
         $composerPackages = $repository->findPackages($packageName);
+
+        dump($repository);
+        dump($composerPackages[0]);
+        //dd($composerPackages);
 
         $this->updatePackage($package, $composerPackages, $driver);
     }
@@ -429,6 +442,14 @@ readonly class PackageMetadataResolver
         $str = Preg::replace("{\x1B(?:\[.)?}u", '', $str);
 
         return Preg::replace("{[\x01-\x1A]}u", '', $str);
+    }
+
+    private function updateLockedPackages(Version $version): void
+    {
+        $locker = $this->composer->createLocker($version);
+
+        dump($locker->getLockedRepository());
+        dd();
     }
 
     private function updateReadme(Version $version, VcsDriverInterface $driver): void
