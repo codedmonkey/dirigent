@@ -26,6 +26,7 @@ Description: Description
 Dynamic Update Delay: Dynamic update delay
 Email: Email
 Expires At: Expires at
+Multi-Factor Authentication: Multi-Factor Authentication
 New password: New password
 Name: Name
 Package Mirroring: Package mirroring
@@ -108,3 +109,15 @@ registry:
     none: Package mirroring disabled
     manual: Only mirror specified packages
     auto: Automatically mirror packages on request
+
+account:
+  error:
+    password-incorrect: Your current password is incorrect.
+    totp-incorrect: The verification code is incorrect.
+  mfa:
+    disable: Disable MFA authentication
+    enable: Enable MFA authentication
+    help: Secure your account with a time-based code from an authenticator app.
+    qr-code-alt: QR-code containing the MFA secret.
+    state-disabled: Multi-Factor Authentication is currently disabled.
+    state-enabled: Multi-Factor Authentication is currently enabled.

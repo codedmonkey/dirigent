@@ -18,10 +18,6 @@ class DashboardSecurityControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/');
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
-
-        $client->followRedirect();
-
-        self::assertSame('/login', $client->getRequest()->getRequestUri());
+        $this->assertResponseRedirects('/login', Response::HTTP_FOUND);
     }
 }

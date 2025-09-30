@@ -1,0 +1,50 @@
+{% extends ea.templatePath('layout') %}
+
+{% block page_title ea.dashboardTitle|raw %}
+
+{% block body_class 'page-login' %}
+
+{% block wrapper_wrapper %}
+  <div class="login-wrapper">
+    <header class="main-header">
+      <div id="header-logo">
+        <a href="{{ path('dashboard') }}" class="logo logo-long">
+          {{ block('page_title') }}
+        </a>
+      </div>
+    </header>
+
+    <section class="content">
+      <p class="lead">{{ 'Multi-Factor Authentication'|trans }}</p>
+
+      <form class="form" action="{{ checkPathUrl ? checkPathUrl: path(checkPathRoute) }}" method="post">
+        <div class="form-group">
+          <label class="form-control-label required" for="_auth_code">{{ 'auth_code'|trans({}, 'SchebTwoFactorBundle') }}</label>
+          <div class="form-widget">
+            <input
+              id="_auth_code"
+              name="{{ authCodeParameterName }}"
+              type="text"
+              autocomplete="one-time-code"
+              autofocus
+              inputmode="numeric"
+              pattern="[0-9]*"
+              class="form-control"
+            />
+          </div>
+        </div>
+
+        {% if isCsrfProtectionEnabled %}
+          <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+        {% endif %}
+
+        <div class="form-group">
+          <button class="btn btn-primary">{{ 'login'|trans({}, 'SchebTwoFactorBundle') }}</button>
+        </div>
+      </form>
+
+    </section>
+  </div>
+
+  <script src="{{ asset('login.js', constant('EasyCorp\\Bundle\\EasyAdminBundle\\Asset\\AssetPackage::PACKAGE_NAME')) }}"></script>
+{% endblock wrapper_wrapper %}

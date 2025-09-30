@@ -34,14 +34,18 @@ security:
                 target: dashboard
             switch_user: true
 
+            two_factor:
+                auth_form_path: mfa_login
+                check_path: mfa_login_check
+
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/logout, role: PUBLIC_ACCESS }
+        - { path: ^/mfa, role: IS_AUTHENTICATED_2FA_IN_PROGRESS }
 
 when@test:
     security:

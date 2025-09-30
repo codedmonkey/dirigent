@@ -1,0 +1,7 @@
+mfa_login:
+    path: /mfa
+    defaults:
+        _controller: "scheb_two_factor.form_controller::form"
+
+mfa_login_check:
+    path: /mfa-check
