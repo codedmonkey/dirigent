@@ -9,15 +9,19 @@ class ParametersPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
+        $this->setMfaIssuer($container);
         $this->setTwigGlobal($container);
+    }
+
+    private function setMfaIssuer(ContainerBuilder $container): void
+    {
+        $container->setParameter('scheb_two_factor.totp.issuer', $container->getParameter('dirigent.title'));
     }
 
     private function setTwigGlobal(ContainerBuilder $container): void
     {
-        $parameterBag = $container->getParameterBag();
-
         $variables = [
-            'slug' => $parameterBag->get('dirigent.slug'),
+            'slug' => $container->getParameter('dirigent.slug'),
         ];
 
         $container->getDefinition('twig')->addMethodCall('addGlobal', ['dirigent', $variables]);
