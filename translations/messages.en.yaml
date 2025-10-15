@@ -122,3 +122,8 @@ account:
     qr-code-alt: QR-code containing the MFA secret.
     state-disabled: Multi-factor authentication is currently disabled.
     state-enabled: Multi-factor authentication is currently enabled.
+
+form:
+  user:
+    help:
+      totp-authentication-enabled: Multi-factor authentication can be disabled for users that lost their access to their MFA code, but has to be enabled by the user.

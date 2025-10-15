@@ -182,6 +182,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return null !== $this->totpSecret;
     }
 
+    public function setTotpAuthenticationEnabled(bool $enabled): void
+    {
+        if (!$this->isTotpAuthenticationEnabled() || $enabled) {
+            throw new \LogicException(sprintf('TOTP authentication can not be enabled through the `%s` method.', __METHOD__));
+        }
+
+        $this->totpSecret = null;
+    }
+
     public function getTotpAuthenticationUsername(): string
     {
         return $this->username;
