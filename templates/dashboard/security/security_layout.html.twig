@@ -1,0 +1,23 @@
+{% extends ea.templatePath('layout') %}
+
+{% block page_title ea.dashboardTitle|raw %}
+
+{% block body_class 'page-login' %}
+
+{% block wrapper_wrapper %}
+  <div class="login-wrapper">
+    <header class="main-header">
+      <div id="header-logo">
+        <a href="{{ path('dashboard') }}" class="logo logo-long">
+          {{ block('page_title') }}
+        </a>
+      </div>
+    </header>
+
+    <section class="content">
+      {% block main %}{% endblock %}
+    </section>
+  </div>
+
+  <script src="{{ asset('login.js', constant('EasyCorp\\Bundle\\EasyAdminBundle\\Asset\\AssetPackage::PACKAGE_NAME')) }}"></script>
+{% endblock wrapper_wrapper %}

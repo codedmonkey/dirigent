@@ -69,3 +69,11 @@
   display: inline-block;
   width: 120px;
 }
+
+body.ea-dark-scheme img.img-light {
+  display: none;
+}
+
+body:not(.ea-dark-scheme) img.img-dark {
+  display: none;
+}

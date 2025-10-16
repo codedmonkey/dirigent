@@ -1,12 +1,14 @@
 # General labels
 Account: Account
 Administration: Administration
+Cancel: Cancel
 Credits: Credits
 Dashboard: Dashboard
 Documentation: Documentation
 Info: Info
 Packages: Packages
 Personal: Personal
+Sign in: Sign in
 Sign out: Sign out
 Usage: Usage
 
@@ -26,6 +28,7 @@ Description: Description
 Dynamic Update Delay: Dynamic update delay
 Email: Email
 Expires At: Expires at
+Multi-factor authentication: Multi-factor authentication
 New password: New password
 Name: Name
 Package Mirroring: Package mirroring
@@ -108,3 +111,19 @@ registry:
     none: Package mirroring disabled
     manual: Only mirror specified packages
     auto: Automatically mirror packages on request
+
+account:
+  error:
+    password-incorrect: The password is incorrect.
+  mfa:
+    disable: Disable MFA authentication
+    enable: Enable MFA authentication
+    help: Secure your account with a time-based code from an authenticator app.
+    qr-code-alt: QR-code containing the MFA secret.
+    state-disabled: Multi-factor authentication is currently disabled.
+    state-enabled: Multi-factor authentication is currently enabled.
+
+form:
+  user:
+    help:
+      totp-authentication-enabled: Multi-factor authentication can be disabled for users that lost their access to their MFA code, but has to be enabled by the user.

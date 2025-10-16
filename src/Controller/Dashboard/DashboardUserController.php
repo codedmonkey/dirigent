@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -68,5 +69,8 @@ class DashboardUserController extends AbstractCrudController
             ->renderExpanded()
             ->allowMultipleChoices()
             ->setSortable(false);
+        yield BooleanField::new('totpAuthenticationEnabled', 'Multi-factor authentication')
+            ->setHelp('form.user.help.totp-authentication-enabled')
+            ->onlyOnForms();
     }
 }
