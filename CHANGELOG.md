@@ -1,5 +1,19 @@
 # Changelog
 
+* 0.5.0 (2025-10-17)
+  * **Breaking changes**
+    * Changed unique field for users from their email address to their username
+  * Added *optional* multi-factor authentication [#6](https://github.com/codedmonkey/dirigent/pull/6)
+  * Added source and distribution info to package pages
+  * Added package links and for dependents, suggesters and providers
+  * Improved package and package list pages
+  * Implemented pretty URLs through EasyAdmin
+  * Disabled online check for compromised password
+  * Improved code quality with:
+    * Run tests in database transactions with `dama/doctrine-test-bundle`
+    * Various code style improvements
+  * Updated Symfony dependencies to version 7.3
+
 * 0.4.0 (2025-04-06)
   * **Breaking changes**
     * An encryption key is now required for Dirigent to function. When using the standalone image, make sure to
