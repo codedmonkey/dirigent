@@ -2,6 +2,8 @@
 
 namespace CodedMonkey\Dirigent\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use function Symfony\Component\String\u;
@@ -84,6 +86,22 @@ class DirigentConfiguration implements ConfigurationInterface
                 ->end()
             ->end();
 
+        $this->addMetadataSection($rootNode);
+
         return $treeBuilder;
+    }
+
+    private function addMetadataSection(ArrayNodeDefinition|NodeDefinition $rootNode): void
+    {
+        $rootNode->children()
+            ->arrayNode('metadata')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->booleanNode('mirror_vcs_repositories')
+                        ->defaultFalse()
+                        ->info('Fetch mirrored packages from their VCS repositories by default when possible.')
+                    ->end()
+                ->end()
+            ->end();
     }
 }

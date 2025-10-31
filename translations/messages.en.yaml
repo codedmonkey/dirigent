@@ -104,8 +104,8 @@ credentials:
     gitlab-pat: GitLab personal access token
 package:
   fetch-strategy:
-    mirror: Fetch from mirror registry
-    vcs: Fetch directly from VCS
+    mirror: Fetch from registry
+    vcs: Fetch from VCS
 registry:
   package-mirroring:
     none: Package mirroring disabled
