@@ -107,7 +107,58 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "build:standalone": "docker build . -t dirigent-standalone",
+        "lint": [
+            "@lint:coding-style",
+            "@lint:static-analysis",
+            "@lint:composer",
+            "@lint:yaml",
+            "@lint:container",
+            "@lint:templates",
+            "@lint:translations"
+        ],
+        "lint:coding-style": "vendor/bin/php-cs-fixer fix --diff",
+        "lint:composer": "composer validate",
+        "lint:container": "bin/console lint:container",
+        "lint:static-analysis": "vendor/bin/phpstan analyze",
+        "lint:templates": "bin/console lint:twig templates",
+        "lint:translations": "bin/console lint:translations",
+        "lint:yaml": "bin/console lint:yaml .github config translations --parse-tags",
+        "tests": [
+            "@tests:php",
+            "@tests:docker"
+        ],
+        "tests:docker": [
+            "@tests:docker:standalone"
+        ],
+        "tests:docker:standalone": [
+            "@build:standalone",
+            "bin/phpunit --configuration phpunit.docker.xml tests/Docker/Standalone"
+        ],
+        "tests:php": [
+            "@tests:php:unit",
+            "@tests:php:functional"
+        ],
+        "tests:php:functional": "bin/phpunit tests/FunctionalTests",
+        "tests:php:unit": "bin/phpunit tests/UnitTests"
+    },
+    "scripts-descriptions": {
+        "build:standalone": "Build the standalone image",
+        "lint": "Perform all linting validations",
+        "lint:coding-style": "Validate the code style of the PHP code",
+        "lint:composer": "Validate the Composer configuration",
+        "lint:container": "Validate the Symfony container configuration",
+        "lint:static-analysis": "Run static analysis on the PHP code",
+        "lint:templates": "Validate the Twig templates",
+        "lint:translations": "Validate the translations",
+        "lint:yaml": "Validate YAML files",
+        "tests": "Perform all code tests",
+        "tests:docker": "Run all tests for images",
+        "tests:docker:standalone": "Run tests in the standalone image",
+        "tests:php": "Run all PHP tests",
+        "tests:php:functional": "Run the functional test suite",
+        "tests:php:unit": "Run the unit test suite"
     },
     "config": {
         "allow-plugins": {
