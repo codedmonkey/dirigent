@@ -5,7 +5,7 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 use CodedMonkey\Dirigent\Doctrine\Entity\AccessToken;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use Doctrine\ORM\QueryBuilder;
-use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminCrud;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -20,7 +20,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-#[AdminCrud(routePath: '/access-tokens', routeName: 'access_tokens')]
+#[AdminRoute(path: '/access-tokens', name: 'access_tokens')]
 class DashboardAccessTokenController extends AbstractCrudController implements EventSubscriberInterface
 {
     public static function getEntityFqcn(): string

@@ -4,7 +4,7 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Form\NewPasswordType;
-use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminCrud;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -15,7 +15,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-#[AdminCrud(routePath: '/users', routeName: 'users')]
+#[AdminRoute(path: '/users', name: 'users')]
 class DashboardUserController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
