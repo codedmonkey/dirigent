@@ -1,7 +1,7 @@
 {# template override to limit flash messages to Boostrap color types #}
 
-{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider #}
-{% trans_default_domain ea.hasContext ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? 'messages') %}
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{% trans_default_domain ea.i18n.translationDomain %}
 
 {% set flash_messages = app.flashes(['primary', 'secondary', 'danger', 'info', 'success', 'warning']) %}
 
