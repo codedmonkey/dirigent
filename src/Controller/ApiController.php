@@ -43,8 +43,8 @@ class ApiController extends AbstractController
         private readonly MessageBusInterface $messenger,
         #[Autowire(param: 'dirigent.packages.dynamic_updates')]
         private readonly bool $dynamicUpdatesEnabled,
-        #[Autowire(param: 'dirigent.metadata.mirror_vcs_repositories')]
-        private readonly bool $mirrorVcsRepositories = false,
+        #[Autowire(param: 'dirigent.metadata.default_mirror_fetch_strategy')]
+        private readonly PackageFetchStrategy $defaultMirrorFetchStrategy,
     ) {
     }
 
@@ -186,7 +186,7 @@ class ApiController extends AbstractController
 
                 $package = new Package($packageName);
                 $package->setMirrorRegistry($registry);
-                $package->setFetchStrategy($this->mirrorVcsRepositories ? PackageFetchStrategy::Vcs : PackageFetchStrategy::Mirror);
+                $package->setFetchStrategy($this->defaultMirrorFetchStrategy);
 
                 $this->packageRepository->save($package, true);
             }

@@ -1649,7 +1649,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         dev_packages?: bool|Param, // Default: false
  *     },
  *     metadata?: array{
- *         mirror_vcs_repositories?: bool|Param, // Fetch mirrored packages from their VCS repositories by default when possible. // Default: false
+ *         default_fetch_strategy?: value-of<\CodedMonkey\Dirigent\Entity\PackageFetchStrategy>|\CodedMonkey\Dirigent\Entity\PackageFetchStrategy|Param, // Available values are "mirror" (default, fetch from the mirror), "source" (fetch from the VCS source) and "vcs" (fetch complete VCS repository) // Default: "mirror"
+ *         mirror_vcs_repositories?: bool|Param, // Deprecated: The node "mirror_vcs_repositories" at path "dirigent.metadata.mirror_vcs_repositories" is deprecated. Use the "default_fetch_strategy" option instead. // Fetch mirrored packages from their VCS repositories by default when possible. // Default: false
  *         retain_pruned_versions?: bool|array{
  *             enabled?: bool|Param, // Retain pruned package versions. // Default: true
  *             tagged_versions?: bool|Param, // Retain pruned tagged package versions. // Default: true

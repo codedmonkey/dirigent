@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\DependencyInjection;
 
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -91,9 +92,19 @@ class DirigentConfiguration implements ConfigurationInterface
             ->arrayNode('metadata')
                 ->addDefaultsIfNotSet()
                 ->children()
+                    ->enumNode('default_fetch_strategy')
+                        ->enumFqcn(PackageFetchStrategy::class)
+                        ->defaultValue(PackageFetchStrategy::Mirror)
+                        ->info('Available values are "mirror" (default, fetch from the mirror), "source" (fetch from the VCS source) and "vcs" (fetch complete VCS repository)')
+                    ->end()
                     ->booleanNode('mirror_vcs_repositories')
                         ->defaultFalse()
                         ->info('Fetch mirrored packages from their VCS repositories by default when possible.')
+                        ->setDeprecated(
+                            package: 'codedmonkey/dirigent',
+                            version: '0.8.0',
+                            message: 'The node "%node%" at path "%path%" is deprecated. Use the "default_fetch_strategy" option instead.',
+                        )
                     ->end()
                     ->arrayNode('retain_pruned_versions')
                         ->canBeDisabled('Retain pruned package versions.')

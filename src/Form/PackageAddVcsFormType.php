@@ -9,6 +9,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Package\PackageVcsRepositoryValidator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\SubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -21,6 +22,8 @@ class PackageAddVcsFormType extends AbstractType
 {
     public function __construct(
         private readonly PackageVcsRepositoryValidator $vcsRepositoryValidator,
+        #[Autowire(param: 'dirigent.metadata.default_vcs_fetch_strategy')]
+        private readonly PackageFetchStrategy $defaultVcsFetchStrategy,
     ) {
     }
 
@@ -43,7 +46,7 @@ class PackageAddVcsFormType extends AbstractType
         /** @var Package $package */
         $package = $event->getData();
 
-        $package->setFetchStrategy(PackageFetchStrategy::Vcs);
+        $package->setFetchStrategy($this->defaultVcsFetchStrategy);
 
         $validationResult = $this->vcsRepositoryValidator->validate($package);
 

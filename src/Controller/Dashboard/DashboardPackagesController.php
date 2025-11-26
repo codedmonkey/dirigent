@@ -32,8 +32,8 @@ class DashboardPackagesController extends AbstractController
         private readonly PackageRepository $packageRepository,
         private readonly PackageMetadataResolver $metadataResolver,
         private readonly MessageBusInterface $messenger,
-        #[Autowire(param: 'dirigent.metadata.mirror_vcs_repositories')]
-        private readonly bool $mirrorVcsRepositories = false,
+        #[Autowire(param: 'dirigent.metadata.default_mirror_fetch_strategy')]
+        private readonly PackageFetchStrategy $defaultMirrorFetchStrategy,
     ) {
     }
 
@@ -110,7 +110,7 @@ class DashboardPackagesController extends AbstractController
 
                 $package = new Package($packageName);
                 $package->setMirrorRegistry($registry);
-                $package->setFetchStrategy($this->mirrorVcsRepositories ? PackageFetchStrategy::Vcs : PackageFetchStrategy::Mirror);
+                $package->setFetchStrategy($this->defaultMirrorFetchStrategy);
 
                 $this->packageRepository->save($package, true);
 
@@ -148,6 +148,7 @@ class DashboardPackagesController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var Package $package */
             $package = $form->getData();
+
             $this->packageRepository->save($package, true);
 
             $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Manual));

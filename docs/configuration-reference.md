@@ -34,7 +34,7 @@ dirigent:
     preferred: true
     dev_packages: false
   metadata:
-    mirror_vcs_repositories: false
+    default_fetch_strategy: 'mirror'
     retain_pruned_versions:
       enabled: true
       tagged_versions: true
@@ -131,13 +131,22 @@ Whether to enable or disable distribution mirroring
 
 ## metadata
 
-### mirror_vcs_repositories
+### default_fetch_strategy
 
-Type: `boolean` | Default: `false`
+Type: `string` | Default: `mirror`
 
-Fetch mirrored packages from their VCS repositories by default when possible.
+Configure the default fetch strategy for new packages:
 
-Sets the fetch strategy of new mirrored packages to **Fetch from VCS**.
+**mirror** (Fetch from mirror)  
+Always try to mirror package metadata from mirror registries when possible. Only metadata from the project's
+`composer.json` is available. If mirroring is not possible, it defaults to `source` instead.  
+**source** (Fetch from source)  
+Fetch the package metadata directly from the source, but it doesn't have to include VCS data. For example, when the
+package is hosted on GitHub the API is used instead, which saves on storage and bandwidth but limits the amount of
+metadata that's available.  
+**vcs** (Fetch from VCS)  
+Fetch the package metadata directly from the source through VCS. Package metadata is created directly from the
+source code.
 
 ### retain_pruned_versions
 
