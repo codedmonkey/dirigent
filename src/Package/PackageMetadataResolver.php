@@ -78,6 +78,7 @@ readonly class PackageMetadataResolver
     {
         match ($package->getFetchStrategy()) {
             PackageFetchStrategy::Mirror => $this->resolveRegistryPackage($package),
+            PackageFetchStrategy::Source,
             PackageFetchStrategy::Vcs => $this->resolveVcsPackage($package),
         };
 

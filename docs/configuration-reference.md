@@ -140,11 +140,18 @@ Enable building distribution from the source.
 
 Type: `string` | Default: `mirror`
 
-todo
+Configure the default fetch strategy for packages:
 
-Fetch mirrored packages from their VCS repositories by default when possible.
-
-Sets the fetch strategy of new mirrored packages to **Fetch from VCS**.
+**mirror**  
+Always try to mirror package metaddata from mirror registries when possible. Only metadata from the project's
+`composer.json` is available. If mirroring is not possible, it defaults to `source` instead.  
+**source**  
+Try to fetch package metadata directly from the source, but doesn't have to include VCS data. For example, when the
+package is hosted on GitHub the API is used instead which saves on storage and bandwidth, but limits the amount of
+metadata that's available.  
+**vcs**  
+Always fetch package metadata directly from the source through VCS. Package metadata is create directly from the
+source code.
 
 [iso-8601-durations]: https://en.wikipedia.org/wiki/ISO_8601#Durations
 [symfony]: https://symfony.com
