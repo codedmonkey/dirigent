@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Dirigent\DependencyInjection;
 
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -83,7 +84,7 @@ class DirigentConfiguration implements ConfigurationInterface
             ->arrayNode('distributions')
                 ->canBeEnabled('Host the distributions of packages')
                 ->children()
-                    ->booleanNode('build')->defaultTrue()->info('Build distributions from the source code (if not already provided)')->end()
+                    ->booleanNode('build')->defaultTrue()->info('Build distributions from the source code (if available)')->end()
                     ->booleanNode('mirror')->defaultFalse()->info('Mirror distributions from the original source (if provided)')->end()
                     ->booleanNode('async_api_requests')->defaultFalse()->info('Fetch distributions asynchronously instead of during execution (from the API)')->end()
                     ->booleanNode('dev_versions')->defaultFalse()->info('Include distributions of development versions')->end()
@@ -98,9 +99,10 @@ class DirigentConfiguration implements ConfigurationInterface
             ->arrayNode('metadata')
                 ->addDefaultsIfNotSet()
                 ->children()
-                    ->booleanNode('mirror_vcs_repositories')
-                        ->defaultFalse()
-                        ->info('Fetch mirrored packages from their VCS repositories by default when possible.')
+                    ->enumNode('default_fetch_strategy')
+                        ->enumFqcn(PackageFetchStrategy::class)
+                        ->defaultValue(PackageFetchStrategy::Mirror)
+                        ->info('Available values are "mirror" (default, fetch from the mirror), "source" (fetch from the VCS source) and "vcs" (fetch complete VCS repository)')
                     ->end()
                 ->end()
             ->end();

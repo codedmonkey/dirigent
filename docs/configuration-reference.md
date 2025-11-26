@@ -37,7 +37,7 @@ dirigent:
     dev_packages: false
     preferred_mirror: true
   metadata:
-    mirror_vcs_repositories: false
+    default_fetch_strategy: 'mirror'
 ```
 
 ## dirigent (root)
@@ -136,9 +136,11 @@ Enable building distribution from the source.
 
 ## metadata
 
-### mirror_vcs_repositories
+### default_fetch_strategy
 
-Type: `boolean` | Default: `false`
+Type: `string` | Default: `mirror`
+
+todo
 
 Fetch mirrored packages from their VCS repositories by default when possible.
 

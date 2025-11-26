@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Dirigent\DependencyInjection;
 
+use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
@@ -65,11 +66,11 @@ class DirigentExtension extends ConfigurableExtension
     }
 
     /**
-     * @param array{mirror_vcs_repositories: bool} $config
+     * @param array{default_fetch_strategy: PackageFetchStrategy} $config
      */
     private function registerMetadataConfiguration(array $config, ContainerBuilder $container): void
     {
-        $container->setParameter('dirigent.metadata.mirror_vcs_repositories', $config['mirror_vcs_repositories']);
+        $container->setParameter('dirigent.metadata.default_fetch_strategy', $config['default_fetch_strategy']);
     }
 
     /**
