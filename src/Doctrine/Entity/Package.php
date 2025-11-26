@@ -241,7 +241,7 @@ class Package extends TrackedEntity
     public function getFetchStrategy(): PackageFetchStrategy
     {
         if (!$this->fetchStrategy) {
-            return $this->mirrorRegistry ? PackageFetchStrategy::Mirror : PackageFetchStrategy::Vcs;
+            return $this->mirrorRegistry ? PackageFetchStrategy::Mirror : PackageFetchStrategy::Source;
         }
 
         return $this->fetchStrategy;

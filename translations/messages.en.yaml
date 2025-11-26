@@ -117,6 +117,7 @@ credentials:
 package:
   fetch-strategy:
     mirror: Fetch from registry
+    source: Fetch from source
     vcs: Fetch from VCS
 registry:
   package-mirroring:
