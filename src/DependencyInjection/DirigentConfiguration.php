@@ -69,15 +69,6 @@ class DirigentConfiguration implements ConfigurationInterface
                     ->scalarNode('path')->defaultValue('%kernel.project_dir%/storage')->end()
                 ->end()
             ->end()
-            ->arrayNode('packages')
-                ->addDefaultsIfNotSet()
-                ->children()
-                    ->booleanNode('dynamic_updates')->defaultTrue()->end()
-                    ->scalarNode('dynamic_update_delay')->defaultValue('PT4H')->end()
-                    ->booleanNode('periodic_updates')->defaultTrue()->end()
-                    ->scalarNode('periodic_update_interval')->defaultValue('P1W')->end()
-                ->end()
-            ->end()
             ->arrayNode('dist_mirroring')
                 ->canBeEnabled()
                 ->children()
@@ -87,6 +78,7 @@ class DirigentConfiguration implements ConfigurationInterface
             ->end();
 
         $this->addMetadataSection($rootNode);
+        $this->addPackagesSection($rootNode);
 
         return $treeBuilder;
     }
@@ -100,6 +92,34 @@ class DirigentConfiguration implements ConfigurationInterface
                     ->booleanNode('mirror_vcs_repositories')
                         ->defaultFalse()
                         ->info('Fetch mirrored packages from their VCS repositories by default when possible.')
+                    ->end()
+                ->end()
+            ->end();
+    }
+
+    private function addPackagesSection(ArrayNodeDefinition|NodeDefinition $rootNode): void
+    {
+        $rootNode->children()
+            ->arrayNode('packages')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->booleanNode('dynamic_updates')
+                        ->defaultTrue()
+                        ->info('Whether to automatically update packages when using the (Composer) API')
+                    ->end()
+                    ->stringNode('dynamic_update_delay')
+                        ->cannotBeEmpty()
+                        ->defaultValue('PT4H')
+                        ->info('The delay between package updates when using the API, in ISO 8601 duration format')
+                    ->end()
+                    ->booleanNode('periodic_updates')
+                        ->defaultTrue()
+                        ->info('Whether to automatically update packages periodically')
+                    ->end()
+                    ->stringNode('periodic_update_interval')
+                        ->cannotBeEmpty()
+                        ->defaultValue('P1W')
+                        ->info('The interval between periodic package updates, in ISO 8601 duration format')
                     ->end()
                 ->end()
             ->end();

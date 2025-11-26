@@ -8,11 +8,13 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\Entity\PackageUpdateSource;
 use CodedMonkey\Dirigent\Message\TrackInstallations;
 use CodedMonkey\Dirigent\Message\UpdatePackage;
 use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use CodedMonkey\Dirigent\Package\PackageProviderManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -30,12 +32,15 @@ use function Symfony\Component\String\u;
 class ApiController extends AbstractController
 {
     public function __construct(
+        private readonly EntityManagerInterface $entityManager,
         private readonly PackageRepository $packageRepository,
         private readonly VersionRepository $versionRepository,
         private readonly PackageMetadataResolver $metadataResolver,
         private readonly PackageDistributionResolver $distributionResolver,
         private readonly PackageProviderManager $providerManager,
         private readonly MessageBusInterface $messenger,
+        #[Autowire(param: 'dirigent.packages.dynamic_updates')]
+        private readonly bool $dynamicUpdatesEnabled,
         #[Autowire(param: 'dirigent.metadata.mirror_vcs_repositories')]
         private readonly bool $mirrorVcsRepositories = false,
     ) {
@@ -80,14 +85,12 @@ class ApiController extends AbstractController
     #[IsGrantedAccess]
     public function packageMetadata(Request $request): Response
     {
-        $packageName = $request->attributes->get('package');
+        $packageName = $request->attributes->getString('package');
         $basePackageName = u($packageName)->trimSuffix('~dev')->toString();
 
-        if (null === $package = $this->findPackage($basePackageName)) {
+        if (null === $this->findPackage($basePackageName)) {
             throw $this->createNotFoundException();
         }
-
-        $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
         if (!$this->providerManager->exists($packageName)) {
             throw $this->createNotFoundException();
@@ -124,8 +127,6 @@ class ApiController extends AbstractController
             if (null === $package = $this->findPackage($packageName)) {
                 throw $this->createNotFoundException();
             }
-
-            $this->messenger->dispatch(new UpdatePackage($package->getId()));
 
             if (null === $version = $this->versionRepository->findOneByNormalizedVersion($package, $versionName)) {
                 throw $this->createNotFoundException();
@@ -166,24 +167,41 @@ class ApiController extends AbstractController
         return new JsonResponse(['status' => 'success'], Response::HTTP_CREATED);
     }
 
-    private function findPackage(string $packageName): ?Package
+    private function findPackage(string $packageName, ?bool $create = false): ?Package
     {
-        // Search for the package in the database
-        if (null !== $package = $this->packageRepository->findOneByName($packageName)) {
-            return $package;
+        $this->entityManager->beginTransaction();
+
+        try {
+            // Search for the package in the database
+            if (null === $package = $this->packageRepository->findOneByName($packageName)) {
+                if (!$create || !$this->dynamicUpdatesEnabled) {
+                    // It doesn't exist in the database and we can't create it dynamically
+                    return null;
+                }
+
+                // Search for the package in external registries
+                if (null === $registry = $this->metadataResolver->findPackageProvider($packageName)) {
+                    return null;
+                }
+
+                $package = new Package();
+                $package->setName($packageName);
+                $package->setMirrorRegistry($registry);
+                $package->setFetchStrategy($this->mirrorVcsRepositories ? PackageFetchStrategy::Vcs : PackageFetchStrategy::Mirror);
+
+                $this->packageRepository->save($package, true);
+            }
+
+            if ($this->dynamicUpdatesEnabled) {
+                $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Dynamic));
+            }
+        } catch (\Throwable $exception) {
+            $this->entityManager->rollback();
+
+            throw $exception;
         }
 
-        // Attempt to find a package from external registries
-        if (null === $registry = $this->metadataResolver->findPackageProvider($packageName)) {
-            return null;
-        }
-
-        $package = new Package();
-        $package->setName($packageName);
-        $package->setMirrorRegistry($registry);
-        $package->setFetchStrategy($this->mirrorVcsRepositories ? PackageFetchStrategy::Vcs : PackageFetchStrategy::Mirror);
-
-        $this->packageRepository->save($package, true);
+        $this->entityManager->commit();
 
         return $package;
     }

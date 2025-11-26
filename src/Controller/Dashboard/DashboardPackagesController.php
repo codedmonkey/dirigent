@@ -8,6 +8,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
+use CodedMonkey\Dirigent\Entity\PackageUpdateSource;
 use CodedMonkey\Dirigent\Form\PackageAddMirroringFormType;
 use CodedMonkey\Dirigent\Form\PackageAddVcsFormType;
 use CodedMonkey\Dirigent\Form\PackageFormType;
@@ -112,7 +113,7 @@ class DashboardPackagesController extends AbstractController
 
                 $this->packageRepository->save($package, true);
 
-                $this->messenger->dispatch(new UpdatePackage($package->getId()));
+                $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Manual));
 
                 $results[] = [
                     'packageName' => $packageName,
@@ -148,7 +149,7 @@ class DashboardPackagesController extends AbstractController
             $package = $form->getData();
             $this->packageRepository->save($package, true);
 
-            $this->messenger->dispatch(new UpdatePackage($package->getId()));
+            $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Manual));
 
             return $this->redirectToRoute('dashboard_packages');
         }
@@ -171,7 +172,7 @@ class DashboardPackagesController extends AbstractController
             $package = $form->getData();
             $this->packageRepository->save($package, true);
 
-            $this->messenger->dispatch(new UpdatePackage($package->getId()));
+            $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Manual));
 
             return $this->redirectToRoute('dashboard_packages_info', ['package' => $package->getName()]);
         }
@@ -186,7 +187,7 @@ class DashboardPackagesController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function update(#[MapPackage] Package $package): Response
     {
-        $this->messenger->dispatch(new UpdatePackage($package->getId(), forceRefresh: true));
+        $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Manual));
 
         return $this->redirectToRoute('dashboard_packages_info', ['package' => $package->getName()]);
     }
