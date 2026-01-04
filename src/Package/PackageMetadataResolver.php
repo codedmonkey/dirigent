@@ -23,6 +23,8 @@ use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use CodedMonkey\Dirigent\Message\UpdatePackageLinks;
 use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
+use Composer\Package\Loader\ArrayLoader;
+use Composer\Package\PackageInterface;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -106,6 +108,15 @@ readonly class PackageMetadataResolver
         return count($composerPackages) > 0;
     }
 
+    public function resolveManualPackage(Package $package, array $packages): void
+    {
+        $composerPackages = (new ArrayLoader())->loadPackages($packages);
+
+        $this->updatePackage($package, $composerPackages);
+
+        $this->messenger->dispatch(new DumpPackageProvider($package->getId()));
+    }
+
     private function resolveRegistryPackage(Package $package, ?Registry $registry = null): void
     {
         $packageName = $package->getName();
@@ -116,7 +127,6 @@ readonly class PackageMetadataResolver
         }
 
         $repository = $this->composer->createComposerRepository($registry);
-        /** @var CompletePackageInterface[] $composerPackages */
         $composerPackages = $repository->findPackages($packageName);
 
         $this->updatePackage($package, $composerPackages);
@@ -152,7 +162,6 @@ readonly class PackageMetadataResolver
         }
         $packageName = trim($information['name']);
 
-        /** @var CompletePackageInterface[] $composerPackages */
         $composerPackages = $repository->findPackages($packageName);
 
         $this->updatePackage($package, $composerPackages, $driver);
@@ -173,7 +182,7 @@ readonly class PackageMetadataResolver
     }
 
     /**
-     * @param CompletePackageInterface[] $composerPackages
+     * @param PackageInterface[] $composerPackages only complete packages will be resolved
      */
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
@@ -183,8 +192,17 @@ readonly class PackageMetadataResolver
 
         // Every Composer package is a separate package version
         foreach ($composerPackages as $composerPackage) {
-            if ($composerPackage instanceof AliasPackage) {
+            if (!$composerPackage instanceof CompletePackageInterface) {
+                // Ignore packages that were not fully loaded
                 continue;
+            } elseif ($composerPackage instanceof AliasPackage) {
+                // Only resolve the actual packages rather than its aliases
+                $composerPackage = $composerPackage->getAliasOf();
+
+                // Ignore the package if the original is already being resolved
+                if (in_array($composerPackage, $composerPackages, true)) {
+                    continue;
+                }
             }
 
             $version = $this->versionRepository->findOneByNormalizedVersion($package, $composerPackage->getVersion()) ?: new Version();

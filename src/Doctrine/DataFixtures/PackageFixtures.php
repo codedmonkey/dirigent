@@ -5,6 +5,7 @@ namespace CodedMonkey\Dirigent\Doctrine\DataFixtures;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
+use Composer\MetadataMinifier\MetadataMinifier;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -27,8 +28,11 @@ class PackageFixtures extends Fixture
             $manager->persist($package);
             $manager->flush();
 
-            // TODO resolve package metadata without fetching from remote
-            $this->packageMetadataResolver->resolve($package);
+            // The source files can (and should) be minimized with the Composer metadata minifier, so expand the definitions before resolving them
+            $composerPackages = json_decode(file_get_contents($packageData['jsonFile']), true);
+            $composerPackages = MetadataMinifier::expand($composerPackages);
+
+            $this->packageMetadataResolver->resolveManualPackage($package, $composerPackages);
 
             $versions = $package->getVersions();
 
@@ -59,8 +63,15 @@ class PackageFixtures extends Fixture
     private function getPackages(): \Generator
     {
         yield [
+            'name' => 'psr/container',
+            'repositoryUrl' => 'https://github.com/php-fig/container.git',
+            'jsonFile' => __DIR__ . '/packages/psr-container.json',
+        ];
+
+        yield [
             'name' => 'psr/log',
             'repositoryUrl' => 'https://github.com/php-fig/log.git',
+            'jsonFile' => __DIR__ . '/packages/psr-log.json',
         ];
     }
 }

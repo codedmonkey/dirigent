@@ -58,7 +58,7 @@ class DashboardPackagesControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         $client->submitForm('Add VCS repository', [
-            'package_add_vcs_form[repositoryUrl]' => 'https://github.com/php-fig/container',
+            'package_add_vcs_form[repositoryUrl]' => 'https://github.com/php-fig/cache',
         ]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
@@ -66,7 +66,7 @@ class DashboardPackagesControllerTest extends WebTestCase
         /** @var PackageRepository $packageRepository */
         $packageRepository = self::getService(PackageRepository::class);
 
-        $package = $packageRepository->findOneByName('psr/container');
+        $package = $packageRepository->findOneByName('psr/cache');
         self::assertNotNull($package, 'A package was created.');
     }
 

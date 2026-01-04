@@ -1,0 +1,243 @@
+[
+    {
+        "name": "psr/container",
+        "description": "Common Container Interface (PHP FIG PSR-11)",
+        "keywords": [
+            "psr",
+            "psr-11",
+            "container",
+            "container-interop",
+            "container-interface"
+        ],
+        "homepage": "https://github.com/php-fig/container",
+        "version": "dev-master",
+        "version_normalized": "dev-master",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "PHP-FIG",
+                "homepage": "https://www.php-fig.org/"
+            }
+        ],
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "707984727bd5b2b670e59559d3ed2500240cf875"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/707984727bd5b2b670e59559d3ed2500240cf875",
+            "reference": "707984727bd5b2b670e59559d3ed2500240cf875",
+            "shasum": ""
+        },
+        "type": "library",
+        "support": {
+            "source": "https://github.com/php-fig/container"
+        },
+        "funding": [],
+        "time": "2023-09-22T11:11:30+00:00",
+        "autoload": {
+            "psr-4": {
+                "Psr\\Container\\": "src/"
+            }
+        },
+        "extra": {
+            "branch-alias": {
+                "dev-master": "2.0.x-dev"
+            }
+        },
+        "default-branch": true,
+        "require": {
+            "php": ">=7.4.0"
+        }
+    },
+    {
+        "version": "1.x-dev",
+        "version_normalized": "1.9999999.9999999.9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "513e0666f7216c7459170d56df27dfcefe1689ea"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/513e0666f7216c7459170d56df27dfcefe1689ea",
+            "reference": "513e0666f7216c7459170d56df27dfcefe1689ea",
+            "shasum": ""
+        },
+        "time": "2021-11-05T13:24:30+00:00",
+        "support": "__unset",
+        "extra": "__unset",
+        "default-branch": "__unset"
+    },
+    {
+        "version": "1.1.x-dev",
+        "version_normalized": "1.1.9999999.9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "8622567409010282b7aeebe4bb841fe98b58dcaf"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/8622567409010282b7aeebe4bb841fe98b58dcaf",
+            "reference": "8622567409010282b7aeebe4bb841fe98b58dcaf",
+            "shasum": ""
+        },
+        "time": "2021-03-05T17:36:06+00:00",
+        "require": {
+            "php": ">=7.2.0"
+        }
+    },
+    {
+        "version": "2.0.2",
+        "version_normalized": "2.0.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/c71ecc56dfe541dbd90c5360474fbc405f8d5963",
+            "reference": "c71ecc56dfe541dbd90c5360474fbc405f8d5963",
+            "shasum": ""
+        },
+        "time": "2021-11-05T16:47:00+00:00",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "2.0.x-dev"
+            }
+        },
+        "require": {
+            "php": ">=7.4.0"
+        }
+    },
+    {
+        "version": "2.0.1",
+        "version_normalized": "2.0.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "2ae37329ee82f91efadc282cc2d527fd6065a5ef"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/2ae37329ee82f91efadc282cc2d527fd6065a5ef",
+            "reference": "2ae37329ee82f91efadc282cc2d527fd6065a5ef",
+            "shasum": ""
+        },
+        "time": "2021-03-24T13:40:57+00:00",
+        "require": {
+            "php": ">=7.2.0"
+        }
+    },
+    {
+        "version": "2.0.0",
+        "version_normalized": "2.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "68f5200c33f18c018db17eb869d4b0f97da17cad"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/68f5200c33f18c018db17eb869d4b0f97da17cad",
+            "reference": "68f5200c33f18c018db17eb869d4b0f97da17cad",
+            "shasum": ""
+        },
+        "time": "2021-03-05T16:02:18+00:00"
+    },
+    {
+        "version": "1.1.2",
+        "version_normalized": "1.1.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "513e0666f7216c7459170d56df27dfcefe1689ea"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/513e0666f7216c7459170d56df27dfcefe1689ea",
+            "reference": "513e0666f7216c7459170d56df27dfcefe1689ea",
+            "shasum": ""
+        },
+        "time": "2021-11-05T13:24:30+00:00",
+        "require": {
+            "php": ">=7.4.0"
+        },
+        "extra": "__unset"
+    },
+    {
+        "version": "1.1.1",
+        "version_normalized": "1.1.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "8622567409010282b7aeebe4bb841fe98b58dcaf"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/8622567409010282b7aeebe4bb841fe98b58dcaf",
+            "reference": "8622567409010282b7aeebe4bb841fe98b58dcaf",
+            "shasum": ""
+        },
+        "time": "2021-03-05T17:36:06+00:00",
+        "require": {
+            "php": ">=7.2.0"
+        }
+    },
+    {
+        "version": "1.1.0",
+        "version_normalized": "1.1.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "9fc7aab7a78057a124384358ebae8a1711b6f6fc"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/9fc7aab7a78057a124384358ebae8a1711b6f6fc",
+            "reference": "9fc7aab7a78057a124384358ebae8a1711b6f6fc",
+            "shasum": ""
+        },
+        "time": "2021-03-05T15:48:30+00:00",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.1.x-dev"
+            }
+        }
+    },
+    {
+        "version": "1.0.0",
+        "version_normalized": "1.0.0.0",
+        "authors": [
+            {
+                "name": "PHP-FIG",
+                "homepage": "http://www.php-fig.org/"
+            }
+        ],
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/container",
+            "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/container/zipball/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
+            "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
+            "shasum": ""
+        },
+        "time": "2017-02-14T16:28:37+00:00",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.0.x-dev"
+            }
+        },
+        "require": {
+            "php": ">=5.3.0"
+        }
+    }
+]
