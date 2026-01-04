@@ -20,7 +20,7 @@ class DashboardRootControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-        $this->assertAnySelectorTextSame('#total_packages .display-6', '1');
+        $this->assertAnySelectorTextSame('#total_packages .display-6', '2');
     }
 
     public function testCredits(): void
