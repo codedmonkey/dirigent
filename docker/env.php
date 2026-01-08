@@ -7,6 +7,7 @@ return [
 
     'DECRYPTION_KEY' => '',
     'DECRYPTION_KEY_FILE' => '/srv/config/secrets/decryption_key',
+    'DEFAULT_URI' => 'http://localhost',
     'ENCRYPTION_KEY' => '',
     'ENCRYPTION_KEY_FILE' => '/srv/config/secrets/encryption_key',
     'GITHUB_TOKEN' => '',
