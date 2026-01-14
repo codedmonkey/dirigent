@@ -5,6 +5,7 @@ namespace CodedMonkey\Dirigent\Doctrine\DataFixtures;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Entity\UserRole;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -18,7 +19,7 @@ class AppFixtures extends Fixture
             $user->setUsername($userData['username']);
             $user->setName($userData['name']);
             $user->setEmail($userData['email']);
-            $user->setRoles($userData['roles']);
+            $user->setRole($userData['role']);
             $user->setPlainPassword($userData['password']);
 
             $manager->persist($user);
@@ -45,7 +46,7 @@ class AppFixtures extends Fixture
             'username' => 'owner',
             'name' => 'Owner',
             'email' => 'owner@example.com',
-            'roles' => ['ROLE_SUPER_ADMIN'],
+            'role' => UserRole::Owner,
             'password' => 'PlainPassword99',
         ];
 
@@ -53,7 +54,7 @@ class AppFixtures extends Fixture
             'username' => 'admin',
             'name' => 'Admin User',
             'email' => 'admin@example.com',
-            'roles' => ['ROLE_ADMIN'],
+            'role' => UserRole::Admin,
             'password' => 'PlainPassword99',
         ];
 
@@ -61,7 +62,7 @@ class AppFixtures extends Fixture
             'username' => 'user',
             'name' => 'Regular User',
             'email' => 'user@example.com',
-            'roles' => [],
+            'role' => UserRole::User,
             'password' => 'PlainPassword99',
         ];
     }

@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
+use CodedMonkey\Dirigent\Entity\UserRole;
 use CodedMonkey\Dirigent\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -56,7 +57,7 @@ class DashboardSecurityController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // The first user gets owner privileges
             if ($noUsers) {
-                $user->setRoles(['ROLE_SUPER_ADMIN', 'ROLE_USER']);
+                $user->setRole(UserRole::Owner);
             }
 
             $this->userRepository->save($user, true);
