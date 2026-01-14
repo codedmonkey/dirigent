@@ -3,6 +3,8 @@
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
+use CodedMonkey\Dirigent\Entity\UserRole;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
@@ -34,8 +36,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[Column(length: 180, nullable: true)]
     private ?string $email = null;
 
-    #[Column]
-    private array $roles = [];
+    #[Column(type: Types::STRING, length: 64, enumType: UserRole::class)]
+    private UserRole $role = UserRole::User;
 
     #[Column]
     private ?string $password = null;
@@ -82,15 +84,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        return [$this->role->value];
     }
 
-    public function setRoles(array $roles): void
+    public function getRole(): UserRole
     {
-        $this->roles = $roles;
+        return $this->role;
+    }
+
+    public function setRole(UserRole $role): void
+    {
+        $this->role = $role;
     }
 
     public function getPassword(): ?string
@@ -143,38 +147,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function isAdmin(): bool
     {
-        return in_array('ROLE_ADMIN', $this->roles, true) || in_array('ROLE_SUPER_ADMIN', $this->roles, true);
+        return $this->role->isAdmin();
     }
 
     public function isSuperAdmin(): bool
     {
-        return in_array('ROLE_SUPER_ADMIN', $this->roles, true);
-    }
-
-    public function setAdmin(bool $admin): void
-    {
-        if ($admin) {
-            if (!in_array('ROLE_ADMIN', $this->roles, true)) {
-                $this->roles[] = 'ROLE_ADMIN';
-            }
-        } else {
-            if (false !== $key = array_search('ROLE_ADMIN', $this->roles, true)) {
-                unset($this->roles[$key]);
-            }
-        }
-    }
-
-    public function setSuperAdmin(bool $admin): void
-    {
-        if ($admin) {
-            if (!in_array('ROLE_SUPER_ADMIN', $this->roles, true)) {
-                $this->roles[] = 'ROLE_SUPER_ADMIN';
-            }
-        } else {
-            if (false !== $key = array_search('ROLE_SUPER_ADMIN', $this->roles, true)) {
-                unset($this->roles[$key]);
-            }
-        }
+        return $this->role->isSuperAdmin();
     }
 
     public function isTotpAuthenticationEnabled(): bool

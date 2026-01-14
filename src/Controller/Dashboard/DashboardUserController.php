@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Entity\UserRole;
 use CodedMonkey\Dirigent\Form\NewPasswordType;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -55,19 +56,13 @@ class DashboardUserController extends AbstractCrudController
             ->setFormType(PasswordType::class)
             ->setFormTypeOption('constraints', NewPasswordType::constraints())
             ->onlyOnForms();
-        yield ChoiceField::new('roles')
-            ->setChoices([
-                'User' => 'ROLE_USER',
-                'Admin' => 'ROLE_ADMIN',
-                'Owner' => 'ROLE_SUPER_ADMIN',
-            ])
+        yield ChoiceField::new('role')
+            ->setChoices(UserRole::cases())
             ->renderAsBadges([
-                'ROLE_USER' => 'primary',
-                'ROLE_ADMIN' => 'success',
-                'ROLE_SUPER_ADMIN' => 'success',
+                UserRole::User->value => 'primary',
+                UserRole::Admin->value => 'success',
+                UserRole::Owner->value => 'success',
             ])
-            ->renderExpanded()
-            ->allowMultipleChoices()
             ->setSortable(false);
         yield BooleanField::new('totpAuthenticationEnabled', 'Multi-factor authentication')
             ->setHelp('form.user.help.totp-authentication-enabled')
