@@ -24,7 +24,7 @@ readonly class TrackInstallationsHandler
                 continue;
             }
 
-            if (!$version = $this->versionRepository->findOneByNormalizedVersion($package, $install['version'])) {
+            if (!$version = $this->versionRepository->findOneByNormalizedName($package, $install['version'])) {
                 continue;
             }
 

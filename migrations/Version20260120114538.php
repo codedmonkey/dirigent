@@ -18,11 +18,15 @@ final class Version20260120114538 extends AbstractMigration
     {
         $this->createMetadataTables();
         $this->fillMetadataTables();
+        $this->addCurrentMetadataColumnToVersionTable();
+        $this->updateVersionTableColumns();
     }
 
     public function down(Schema $schema): void
     {
+        $this->revertVersionTableColumns();
         $this->fillVersionTables();
+        $this->dropCurrentMetadataColumnFromVersionTable();
         $this->dropMetadataTables();
     }
 
@@ -292,6 +296,93 @@ final class Version20260120114538 extends AbstractMigration
         }
     }
 
+    private function addCurrentMetadataColumnToVersionTable(): void
+    {
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD current_metadata_id INT DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version
+            ADD
+                CONSTRAINT FK_BF1CD3C3624A4280 FOREIGN KEY (current_metadata_id) REFERENCES metadata (id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE UNIQUE INDEX UNIQ_BF1CD3C3624A4280 ON version (current_metadata_id)
+        SQL);
+
+        $this->addSql(<<<'SQL'
+            UPDATE version
+            SET current_metadata_id = metadata.id
+            FROM metadata
+            WHERE metadata.version_id = version.id
+        SQL);
+    }
+
+    private function updateVersionTableColumns(): void
+    {
+        $this->addSql(<<<'SQL'
+            DROP INDEX pkg_ver_idx
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version RENAME COLUMN name TO package_name
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version RENAME COLUMN version TO name
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version RENAME COLUMN normalized_version TO normalized_name
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE UNIQUE INDEX package_version_idx ON version (package_id, normalized_name)
+        SQL);
+
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP CONSTRAINT fk_bf1cd3c3f44cabff
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ALTER package_id SET NOT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version
+            ADD
+                CONSTRAINT FK_BF1CD3C3F44CABFF FOREIGN KEY (package_id) REFERENCES package (id) ON DELETE CASCADE NOT DEFERRABLE
+        SQL);
+    }
+
+    private function revertVersionTableColumns(): void
+    {
+        $this->addSql(<<<'SQL'
+            DROP INDEX package_version_idx
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version RENAME COLUMN name TO version
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version RENAME COLUMN normalized_name TO normalized_version
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version RENAME COLUMN package_name TO name
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE UNIQUE INDEX pkg_ver_idx ON version (package_id, normalized_version)
+        SQL);
+
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP CONSTRAINT FK_BF1CD3C3F44CABFF
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ALTER package_id DROP NOT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version
+            ADD
+                CONSTRAINT fk_bf1cd3c3f44cabff FOREIGN KEY (package_id) REFERENCES package (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+    }
+
     private function fillVersionTables(): void
     {
         $this->addSql(<<<'SQL'
@@ -348,6 +439,19 @@ final class Version20260120114538 extends AbstractMigration
                 )
             SQL);
         }
+    }
+
+    private function dropCurrentMetadataColumnFromVersionTable(): void
+    {
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP CONSTRAINT FK_BF1CD3C3624A4280
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP INDEX UNIQ_BF1CD3C3624A4280
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP current_metadata_id
+        SQL);
     }
 
     private function dropMetadataTables(): void
