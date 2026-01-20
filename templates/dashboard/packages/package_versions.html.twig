@@ -58,7 +58,7 @@
 {% endmacro %}
 
 {% macro versionListItem(version) %}
-  {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {package: version.package.name, version: version.version}) %}
+  {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {package: version.packageName, version: version.name}) %}
   <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
     <div class="d-flex justify-content-between">
       <span>{{ version.versionTitle }}</span>
