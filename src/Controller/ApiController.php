@@ -128,7 +128,7 @@ class ApiController extends AbstractController
                 throw $this->createNotFoundException();
             }
 
-            if (null === $version = $this->versionRepository->findOneByNormalizedVersion($package, $versionName)) {
+            if (null === $version = $this->versionRepository->findOneByNormalizedVersionName($package, $versionName)) {
                 throw $this->createNotFoundException();
             }
 

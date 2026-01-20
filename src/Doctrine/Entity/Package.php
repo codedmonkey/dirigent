@@ -276,7 +276,7 @@ class Package extends TrackedEntity
         if (!isset($this->cachedVersions)) {
             $this->cachedVersions = [];
             foreach ($this->getVersions() as $version) {
-                $this->cachedVersions[strtolower($version->getNormalizedVersion())] = $version;
+                $this->cachedVersions[strtolower($version->getNormalizedName())] = $version;
             }
         }
 
@@ -419,17 +419,17 @@ class Package extends TrackedEntity
         $activePrereleaseVersions = [];
 
         foreach ($this->getSortedVersions() as $version) {
-            if ('stable' !== VersionParser::parseStability($version->getNormalizedVersion())) {
+            if ('stable' !== VersionParser::parseStability($version->getNormalizedName())) {
                 continue;
             }
 
-            [$majorVersion, $minorVersion] = explode('.', $version->getNormalizedVersion());
+            [$majorVersion, $minorVersion] = explode('.', $version->getNormalizedName());
 
             if ('0' === $majorVersion) {
                 $prereleaseVersion = "$majorVersion.$minorVersion";
 
                 $activePrereleaseVersions[$prereleaseVersion] ??= $version;
-                if (version_compare($version->getNormalizedVersion(), $activePrereleaseVersions[$prereleaseVersion]->getNormalizedVersion(), '>')) {
+                if (version_compare($version->getNormalizedName(), $activePrereleaseVersions[$prereleaseVersion]->getNormalizedName(), '>')) {
                     $activePrereleaseVersions[$prereleaseVersion] = $version;
                 }
 
@@ -437,7 +437,7 @@ class Package extends TrackedEntity
             }
 
             $activeVersions[$majorVersion] ??= $version;
-            if (version_compare($version->getNormalizedVersion(), $activeVersions[$majorVersion]->getNormalizedVersion(), '>')) {
+            if (version_compare($version->getNormalizedName(), $activeVersions[$majorVersion]->getNormalizedName(), '>')) {
                 $activeVersions[$majorVersion] = $version;
             }
         }
@@ -447,34 +447,34 @@ class Package extends TrackedEntity
 
         // Find newer unstable releases of active versions
         foreach ($this->getSortedVersions() as $version) {
-            if (in_array(VersionParser::parseStability($version->getNormalizedVersion()), ['stable', 'dev'], true)) {
+            if (in_array(VersionParser::parseStability($version->getNormalizedName()), ['stable', 'dev'], true)) {
                 continue;
             }
 
-            [$majorVersion, $minorVersion] = explode('.', $version->getNormalizedVersion());
+            [$majorVersion, $minorVersion] = explode('.', $version->getNormalizedName());
 
             $developmentVersion = "$majorVersion.$minorVersion";
 
             if ('0' === $majorVersion) {
-                if (isset($activePrereleaseVersions[$developmentVersion]) && !version_compare($version->getNormalizedVersion(), $activePrereleaseVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
+                if (isset($activePrereleaseVersions[$developmentVersion]) && !version_compare($version->getNormalizedName(), $activePrereleaseVersions[$developmentVersion]->getNormalizedName(), '>')) {
                     continue;
                 }
 
                 $activePrereleaseDevelopmentVersions[$developmentVersion] ??= $version;
-                if (version_compare($version->getNormalizedVersion(), $activePrereleaseDevelopmentVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
+                if (version_compare($version->getNormalizedName(), $activePrereleaseDevelopmentVersions[$developmentVersion]->getNormalizedName(), '>')) {
                     $activePrereleaseDevelopmentVersions[$developmentVersion] = $version;
                 }
 
                 continue;
             }
 
-            if (isset($activeVersions[$majorVersion]) && !version_compare($version->getNormalizedVersion(), $activeVersions[$majorVersion]->getNormalizedVersion(), '>')) {
+            if (isset($activeVersions[$majorVersion]) && !version_compare($version->getNormalizedName(), $activeVersions[$majorVersion]->getNormalizedName(), '>')) {
                 continue;
             }
 
             $activeDevelopmentVersions[$developmentVersion] ??= $version;
-            if (version_compare($version->getNormalizedVersion(), $activeDevelopmentVersions[$developmentVersion]->getNormalizedVersion(), '>')) {
-                $activeDevelopmentVersions[$version->getNormalizedVersion()] = $version;
+            if (version_compare($version->getNormalizedName(), $activeDevelopmentVersions[$developmentVersion]->getNormalizedName(), '>')) {
+                $activeDevelopmentVersions[$version->getNormalizedName()] = $version;
             }
         }
 
@@ -514,7 +514,7 @@ class Package extends TrackedEntity
     public function getDevVersions(): array
     {
         return array_filter($this->getSortedVersions(), static function (Version $version) {
-            if (str_ends_with($version->getNormalizedVersion(), '.9999999-dev')) {
+            if (str_ends_with($version->getNormalizedName(), '.9999999-dev')) {
                 return true;
             }
 
@@ -531,13 +531,13 @@ class Package extends TrackedEntity
      */
     public function getDevBranchVersions(): array
     {
-        return array_filter($this->getSortedVersions(), static fn (Version $version) => str_starts_with($version->getNormalizedVersion(), 'dev-'));
+        return array_filter($this->getSortedVersions(), static fn (Version $version) => str_starts_with($version->getNormalizedName(), 'dev-'));
     }
 
     public static function sortVersions(Version $a, Version $b): int
     {
-        $aVersion = $a->getNormalizedVersion();
-        $bVersion = $b->getNormalizedVersion();
+        $aVersion = $a->getNormalizedName();
+        $bVersion = $b->getNormalizedName();
 
         // use branch alias for sorting if one is provided
         if (isset($a->getExtra()['branch-alias'][$aVersion])) {
@@ -562,7 +562,7 @@ class Package extends TrackedEntity
         if ($aVersion === $bVersion) {
             // make sure sort is stable
             if ($a->getReleasedAt() === $b->getReleasedAt()) {
-                return $a->getNormalizedVersion() <=> $b->getNormalizedVersion();
+                return $a->getNormalizedName() <=> $b->getNormalizedName();
             }
 
             return $b->getReleasedAt() > $a->getReleasedAt() ? 1 : -1;
