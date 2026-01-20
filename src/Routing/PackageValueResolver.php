@@ -55,7 +55,7 @@ readonly class PackageValueResolver implements ValueResolverInterface
             $versionName = $request->attributes->get('version');
             $versionName = $versionParser->normalize($versionName);
 
-            if (null === $version = $this->versionRepository->findOneByNormalizedVersion($package, $versionName)) {
+            if (null === $version = $this->versionRepository->findOneByNormalizedName($package, $versionName)) {
                 throw new NotFoundHttpException('The package version does not exist.');
             }
 

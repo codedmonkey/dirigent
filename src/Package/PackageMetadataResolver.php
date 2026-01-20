@@ -188,7 +188,7 @@ readonly class PackageMetadataResolver
                 continue;
             }
 
-            $version = $this->versionRepository->findOneByNormalizedVersion($package, $composerPackage->getVersion()) ?: new Version();
+            $version = $this->versionRepository->findOneByNormalizedName($package, $composerPackage->getVersion()) ?: new Version($package);
 
             if (!$package->getVersions()->contains($version)) {
                 $package->getVersions()->add($version);
@@ -196,7 +196,7 @@ readonly class PackageMetadataResolver
             }
 
             $this->updateVersion($package, $version, $composerPackage, $driver);
-            $versionName = $version->getNormalizedVersion();
+            $versionName = $version->getNormalizedName();
 
             // Use the first version which should be the highest stable version by default
             $primaryVersion ??= $version;
@@ -214,7 +214,7 @@ readonly class PackageMetadataResolver
                 $package->setRepositoryUrl($primaryVersion->getSourceUrl());
             }
 
-            $this->messenger->dispatch(new UpdatePackageLinks($package->getId(), $primaryVersion->getNormalizedVersion()), [
+            $this->messenger->dispatch(new UpdatePackageLinks($package->getId(), $primaryVersion->getNormalizedName()), [
                 new DispatchAfterCurrentBusStamp(),
                 new TransportNamesStamp('async'),
             ]);
@@ -235,9 +235,9 @@ readonly class PackageMetadataResolver
 
         $description = $this->sanitize($data->getDescription());
 
-        $version->setName($package->getName());
-        $version->setVersion($data->getPrettyVersion());
-        $version->setNormalizedVersion($data->getVersion());
+        $version->setPackageName($package->getName());
+        $version->setName($data->getPrettyVersion());
+        $version->setNormalizedName($data->getVersion());
         $version->setDescription($description);
         $version->setDevelopment($data->isDev());
         $version->setPhpExt($data->getPhpExt());
@@ -253,7 +253,6 @@ readonly class PackageMetadataResolver
         $version->setLicense($data->getLicense() ?: []);
         $version->setType($this->sanitize($data->getType()));
 
-        $version->setPackage($package);
         $version->setUpdatedAt(new \DateTimeImmutable());
         $version->setReleasedAt(\DateTimeImmutable::createFromInterface($data->getReleaseDate()));
 
