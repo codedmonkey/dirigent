@@ -35,7 +35,7 @@ readonly class PackageDistributionResolver
     {
         $package = $version->getPackage();
         $packageName = $package->getName();
-        $versionName = $version->getNormalizedVersion();
+        $versionName = $version->getNormalizedName();
 
         if ($this->exists($packageName, $versionName, $reference, $type)) {
             return true;
