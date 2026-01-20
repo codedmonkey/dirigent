@@ -11,7 +11,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VersionRepository::class)]
-#[ORM\UniqueConstraint(name: 'pkg_ver_idx', columns: ['package_id', 'normalized_version'])]
+#[ORM\UniqueConstraint(name: 'package_version_idx', columns: ['package_id', 'normalized_name'])]
 class Version extends TrackedEntity implements \Stringable
 {
     #[ORM\Id]
@@ -20,13 +20,13 @@ class Version extends TrackedEntity implements \Stringable
     private ?int $id = null;
 
     #[ORM\Column]
-    private string $name;
+    private string $packageName;
 
     #[ORM\Column]
-    private string $version;
+    private string $name;
 
     #[ORM\Column(length: 191)]
-    private string $normalizedVersion;
+    private string $normalizedName;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
@@ -41,7 +41,7 @@ class Version extends TrackedEntity implements \Stringable
     private bool $development;
 
     #[ORM\Column]
-    private array $license;
+    private array $license = [];
 
     #[ORM\Column(nullable: true)]
     private ?string $type = null;
@@ -77,7 +77,7 @@ class Version extends TrackedEntity implements \Stringable
     private Collection $keywords;
 
     #[ORM\Column]
-    private array $autoload;
+    private array $autoload = [];
 
     /**
      * @var array<string>|null
@@ -109,20 +109,30 @@ class Version extends TrackedEntity implements \Stringable
     #[ORM\Column]
     private bool $defaultBranch = false;
 
-    #[ORM\ManyToOne(targetEntity: Package::class, inversedBy: 'versions')]
-    private ?Package $package = null;
-
-    #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
-    private VersionInstallations $installations;
-
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $releasedAt = null;
 
-    public function __construct()
+    #[ORM\ManyToOne(targetEntity: Package::class, inversedBy: 'versions')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Package $package;
+
+    #[ORM\OneToOne]
+    private ?Metadata $currentMetadata = null;
+
+    #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
+    private VersionInstallations $installations;
+
+    #[ORM\OneToMany(targetEntity: Metadata::class, mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
+    private Collection $metadata;
+
+    public function __construct(Package $package)
     {
+        $this->package = $package;
+        $this->packageName = $package->getName();
+
         $this->require = new ArrayCollection();
         $this->devRequire = new ArrayCollection();
         $this->conflict = new ArrayCollection();
@@ -131,16 +141,29 @@ class Version extends TrackedEntity implements \Stringable
         $this->suggest = new ArrayCollection();
         $this->keywords = new ArrayCollection();
         $this->installations = new VersionInstallations($this);
+        $this->metadata = new ArrayCollection();
     }
 
     public function __toString(): string
     {
-        return "$this->name $this->version ($this->normalizedVersion)";
+        $packageName = $this->package->getName();
+
+        return "$packageName $this->name ($this->normalizedName)";
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getPackageName(): string
+    {
+        return $this->packageName;
+    }
+
+    public function setPackageName(string $packageName): void
+    {
+        $this->packageName = $packageName;
     }
 
     public function getName(): string
@@ -153,24 +176,14 @@ class Version extends TrackedEntity implements \Stringable
         $this->name = $name;
     }
 
-    public function getVersion(): string
+    public function getNormalizedName(): string
     {
-        return $this->version;
+        return $this->normalizedName;
     }
 
-    public function setVersion(string $version): void
+    public function setNormalizedName(string $normalizedName): void
     {
-        $this->version = $version;
-    }
-
-    public function getNormalizedVersion(): string
-    {
-        return $this->normalizedVersion;
-    }
-
-    public function setNormalizedVersion(string $normalizedVersion): void
-    {
-        $this->normalizedVersion = $normalizedVersion;
+        $this->normalizedName = $normalizedName;
     }
 
     public function getDescription(): ?string
@@ -468,21 +481,6 @@ class Version extends TrackedEntity implements \Stringable
         $this->defaultBranch = $defaultBranch;
     }
 
-    public function getPackage(): ?Package
-    {
-        return $this->package;
-    }
-
-    public function setPackage(Package $package): void
-    {
-        $this->package = $package;
-    }
-
-    public function getInstallations(): VersionInstallations
-    {
-        return $this->installations;
-    }
-
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
@@ -501,6 +499,34 @@ class Version extends TrackedEntity implements \Stringable
     public function setReleasedAt(?\DateTimeImmutable $releasedAt): void
     {
         $this->releasedAt = $releasedAt;
+    }
+
+    public function getPackage(): ?Package
+    {
+        return $this->package;
+    }
+
+    public function getCurrentMetadata(): ?Metadata
+    {
+        return $this->currentMetadata;
+    }
+
+    public function setCurrentMetadata(Metadata $metadata): void
+    {
+        $this->currentMetadata = $metadata;
+    }
+
+    public function getInstallations(): VersionInstallations
+    {
+        return $this->installations;
+    }
+
+    /**
+     * @return Collection<int, Metadata>
+     */
+    public function getMetadata(): Collection
+    {
+        return $this->metadata;
     }
 
     public function hasSource(): bool
@@ -552,9 +578,9 @@ class Version extends TrackedEntity implements \Stringable
     {
         $extra = $this->getExtra();
 
-        if (isset($extra['branch-alias'][$this->getVersion()])) {
+        if (isset($extra['branch-alias'][$this->getName()])) {
             $parser = new VersionParser();
-            $version = $parser->normalizeBranch(str_replace('-dev', '', $extra['branch-alias'][$this->getVersion()]));
+            $version = $parser->normalizeBranch(str_replace('-dev', '', $extra['branch-alias'][$this->getName()]));
 
             return Preg::replace('{(\.9{7})+}', '.x', $version);
         }
@@ -564,7 +590,7 @@ class Version extends TrackedEntity implements \Stringable
 
     public function getVersionTitle(): string
     {
-        return $this->version . ($this->hasVersionAlias() ? ' / ' . $this->getVersionAlias() : '');
+        return $this->name . ($this->hasVersionAlias() ? ' / ' . $this->getVersionAlias() : '');
     }
 
     /**
@@ -591,21 +617,21 @@ class Version extends TrackedEntity implements \Stringable
 
     public function getMajorVersion(): int
     {
-        $split = explode('.', $this->version);
+        $split = explode('.', $this->name);
 
         return (int) $split[0];
     }
 
     public function getMinorVersion(): int
     {
-        $split = explode('.', $this->version);
+        $split = explode('.', $this->name);
 
         return (int) $split[1];
     }
 
     public function getPatchVersion(): int
     {
-        $split = explode('.', $this->version);
+        $split = explode('.', $this->name);
 
         return (int) $split[2];
     }
@@ -619,7 +645,7 @@ class Version extends TrackedEntity implements \Stringable
         }
 
         if (false === $this->isDevelopment()) {
-            $reference = $this->getVersion();
+            $reference = $this->getName();
         }
 
         if (str_starts_with($url, 'https://github.com/')) {
@@ -647,12 +673,12 @@ class Version extends TrackedEntity implements \Stringable
         unset($author);
 
         $data = [
-            'name' => $this->getName(),
+            'name' => $this->getPackageName(),
             'description' => (string) $this->getDescription(),
             'keywords' => $keywords,
             'homepage' => (string) $this->getHomepage(),
-            'version' => $this->getVersion(),
-            'version_normalized' => $this->getNormalizedVersion(),
+            'version' => $this->getName(),
+            'version_normalized' => $this->getNormalizedName(),
             'license' => $this->getLicense(),
             'authors' => $authors,
             'source' => $this->getSource(),
