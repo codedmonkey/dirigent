@@ -138,7 +138,7 @@ class Version extends TrackedEntity implements \Stringable
         return "$this->name $this->version ($this->normalizedVersion)";
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
