@@ -11,6 +11,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MetadataRepository::class)]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 class Metadata extends TrackedEntity
 {
     #[ORM\Id]

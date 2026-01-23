@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: KeywordRepository::class)]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 class Keyword
 {
     #[ORM\Id]

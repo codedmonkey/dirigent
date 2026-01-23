@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PackageRepository::class)]
 #[ORM\UniqueConstraint(name: 'package_name_idx', columns: ['name'])]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 #[UniquePackage]
 class Package extends TrackedEntity
 {
