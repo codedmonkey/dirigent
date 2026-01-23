@@ -11,6 +11,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MetadataRepository::class)]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 #[ORM\UniqueConstraint(name: 'version_revision_idx', columns: ['version_id', 'revision'])]
 class Metadata extends TrackedEntity implements \Stringable
 {

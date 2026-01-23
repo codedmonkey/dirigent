@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VersionRepository::class)]
 #[ORM\UniqueConstraint(name: 'package_version_idx', columns: ['package_id', 'normalized_name'])]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 class Version extends TrackedEntity implements \Stringable
 {
     #[ORM\Id]
