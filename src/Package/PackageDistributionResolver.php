@@ -41,11 +41,13 @@ readonly class PackageDistributionResolver
             return true;
         }
 
-        if ($reference !== $version->getDistReference() || $type !== $version->getDistType()) {
+        $metadata = $version->getCurrentMetadata();
+
+        if ($reference !== $metadata->getDistReference() || $type !== $metadata->getDistType()) {
             return false;
         }
 
-        $distUrl = $version->getDistUrl();
+        $distUrl = $metadata->getDistUrl();
         $path = $this->path($packageName, $versionName, $reference, $type);
 
         $this->filesystem->mkdir(dirname($path));
