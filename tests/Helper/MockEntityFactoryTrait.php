@@ -38,8 +38,6 @@ trait MockEntityFactoryTrait
     protected function createMockVersion(Package $package, string $versionName = '1.0.0'): Version
     {
         $version = new Version($package);
-
-        $version->setPackageName($package->getName());
         $version->setName($versionName);
         $version->setNormalizedName((new VersionParser())->normalize($versionName));
 
