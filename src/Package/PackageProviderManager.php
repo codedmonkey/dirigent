@@ -29,7 +29,7 @@ readonly class PackageProviderManager
         usort($versions, Package::sortVersions(...));
 
         foreach ($versions as $version) {
-            $versionData = $version->toComposerArray();
+            $versionData = $version->getCurrentMetadata()->toComposerArray();
 
             if (!$version->isDevelopment()) {
                 $releasePackages[] = $versionData;

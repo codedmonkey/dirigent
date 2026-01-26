@@ -4,18 +4,19 @@ namespace CodedMonkey\Dirigent\Package;
 
 use cebe\markdown\GithubMarkdown;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
-use CodedMonkey\Dirigent\Doctrine\Entity\AbstractVersionLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\AbstractMetadataLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\MetadataConflictLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\MetadataDevRequireLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\MetadataProvideLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\MetadataReplaceLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\MetadataRequireLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\MetadataSuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
-use CodedMonkey\Dirigent\Doctrine\Entity\VersionConflictLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\VersionDevRequireLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\VersionProvideLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\VersionReplaceLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\VersionRequireLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\VersionSuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Repository\KeywordRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
@@ -23,6 +24,7 @@ use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use CodedMonkey\Dirigent\Message\UpdatePackageLinks;
 use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
+use Composer\Package\Link as ComposerPackageLink;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,23 +46,23 @@ readonly class PackageMetadataResolver
     private const array SUPPORTED_LINK_TYPES = [
         'conflict' => [
             'method' => 'getConflicts',
-            'entity' => VersionConflictLink::class,
+            'entity' => MetadataConflictLink::class,
         ],
         'devRequire' => [
             'method' => 'getDevRequires',
-            'entity' => VersionDevRequireLink::class,
+            'entity' => MetadataDevRequireLink::class,
         ],
         'provide' => [
             'method' => 'getProvides',
-            'entity' => VersionProvideLink::class,
+            'entity' => MetadataProvideLink::class,
         ],
         'replace' => [
             'method' => 'getReplaces',
-            'entity' => VersionReplaceLink::class,
+            'entity' => MetadataReplaceLink::class,
         ],
         'require' => [
             'method' => 'getRequires',
-            'entity' => VersionRequireLink::class,
+            'entity' => MetadataRequireLink::class,
         ],
     ];
 
@@ -178,8 +180,11 @@ readonly class PackageMetadataResolver
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
         $existingVersionMetadata = $this->versionRepository->getVersionMetadataForUpdate($package);
+
         /** @var ?Version $primaryVersion Version to use as the package info source */
         $primaryVersion = null;
+        /** @var ?CompletePackageInterface $primaryVersionData */
+        $primaryVersionData = null;
 
         // Every Composer package is a separate package version
         foreach ($composerPackages as $composerPackage) {
@@ -187,30 +192,44 @@ readonly class PackageMetadataResolver
                 continue;
             }
 
-            $version = $this->versionRepository->findOneByNormalizedName($package, $composerPackage->getVersion()) ?: new Version($package);
+            $key = strtolower($composerPackage->getVersion());
+            if ($versionId = $existingVersionMetadata[$key] ?? null) {
+                $version = $this->entityManager->getReference(Version::class, $versionId);
+            } else {
+                $version = new Version($package);
+                $version->setName($composerPackage->getPrettyVersion());
+                $version->setNormalizedName($composerPackage->getVersion());
+                $version->setDevelopment($composerPackage->isDev());
 
-            if (!$package->getVersions()->contains($version)) {
                 $package->getVersions()->add($version);
-                $this->entityManager->persist($version);
             }
 
-            $this->updateVersion($package, $version, $composerPackage, $driver);
-            $versionName = $version->getNormalizedName();
+            $this->updateVersion($version, $composerPackage, $driver);
 
             // Use the first version which should be the highest stable version by default
             $primaryVersion ??= $version;
+            $primaryVersionData ??= $composerPackage;
             // If default branch is present however we prefer that as the canonical package link source
             if ($version->isDefaultBranch()) {
                 $primaryVersion = $version;
+                $primaryVersionData = $composerPackage;
             }
 
-            unset($existingVersionMetadata[$versionName]);
+            unset($existingVersionMetadata[$key]);
         }
 
         if ($primaryVersion) {
+            // Update package fields from metadata
+            $package->setDescription($this->sanitize($primaryVersionData->getDescription()));
+            $package->setType($this->sanitize($primaryVersionData->getType()));
+
+            // Update abandoned data at the package level
+            $package->setAbandoned($primaryVersionData->isAbandoned());
+            $package->setReplacementPackage($primaryVersionData->getReplacementPackage());
+
             // Only update the repository URL if the package is mirrored
             if ($package->getMirrorRegistry()) {
-                $package->setRepositoryUrl($primaryVersion->getSourceUrl());
+                $package->setRepositoryUrl($primaryVersion->getCurrentMetadata()->getSourceUrl());
             }
 
             $this->messenger->dispatch(new UpdatePackageLinks($package->getId(), $primaryVersion->getNormalizedName()), [
@@ -220,47 +239,57 @@ readonly class PackageMetadataResolver
         }
 
         // Remove outdated versions
-        foreach ($existingVersionMetadata as $versionMetadata) {
-            $version = $this->entityManager->getReference(Version::class, $versionMetadata['id']);
+        foreach ($existingVersionMetadata as $versionId) {
+            $version = $this->entityManager->getReference(Version::class, $versionId);
             $this->entityManager->remove($version);
         }
 
         $package->setUpdatedAt(new \DateTimeImmutable());
+
+        $this->entityManager->persist($package);
     }
 
-    private function updateVersion(Package $package, Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
+    private function updateVersion(Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
     {
-        $em = $this->entityManager;
+        $metadata = $this->createMetadata($version, $data, $driver);
 
-        $description = $this->sanitize($data->getDescription());
+        if ($this->hasMetadataChanged($version->getCurrentMetadata(), $metadata)) {
+            $version->setCurrentMetadata($metadata);
 
-        $version->setPackageName($package->getName());
-        $version->setName($data->getPrettyVersion());
-        $version->setNormalizedName($data->getVersion());
-        $version->setDescription($description);
-        $version->setDevelopment($data->isDev());
-        $version->setPhpExt($data->getPhpExt());
-        $version->setDefaultBranch($data->isDefaultBranch());
-        $version->setTargetDir($data->getTargetDir());
-        $version->setAutoload($data->getAutoload());
-        $version->setExtra($data->getExtra());
-        $version->setBinaries($data->getBinaries());
-        $version->setIncludePaths($data->getIncludePaths());
-        $version->setSupport($data->getSupport());
-        $version->setFunding($data->getFunding());
-        $version->setHomepage($data->getHomepage());
-        $version->setLicense($data->getLicense() ?: []);
-        $version->setType($this->sanitize($data->getType()));
+            $this->entityManager->persist($metadata);
+
+            $version->setDefaultBranch($data->isDefaultBranch());
+        }
 
         $version->setUpdatedAt(new \DateTimeImmutable());
-        $version->setReleasedAt(\DateTimeImmutable::createFromInterface($data->getReleaseDate()));
 
-        $version->setAuthors([]);
+        $this->entityManager->persist($version);
+    }
+
+    private function createMetadata(Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver): Metadata
+    {
+        $metadata = new Metadata($version);
+        $metadata->setPackageName($data->getName());
+        $metadata->setVersionName($data->getPrettyVersion());
+        $metadata->setNormalizedVersionName($data->getVersion());
+        $metadata->setDescription($this->sanitize($data->getDescription()));
+        $metadata->setPhpExt($data->getPhpExt());
+        $metadata->setTargetDir($data->getTargetDir());
+        $metadata->setAutoload($data->getAutoload());
+        $metadata->setExtra($data->getExtra());
+        $metadata->setBinaries($data->getBinaries());
+        $metadata->setIncludePaths($data->getIncludePaths());
+        $metadata->setSupport($data->getSupport());
+        $metadata->setFunding($data->getFunding());
+        $metadata->setHomepage($data->getHomepage());
+        $metadata->setLicense($data->getLicense() ?: []);
+        $metadata->setType($this->sanitize($data->getType()));
+        $metadata->setReleasedAt(\DateTimeImmutable::createFromInterface($data->getReleaseDate()));
+
         if ($data->getAuthors()) {
             $authors = [];
             foreach ($data->getAuthors() as $authorData) {
                 $author = [];
-
                 foreach (['email', 'name', 'homepage', 'role'] as $field) {
                     if (isset($authorData[$field])) {
                         $author[$field] = trim($authorData[$field]);
@@ -270,53 +299,39 @@ readonly class PackageMetadataResolver
                     }
                 }
 
-                // skip authors with no information
+                // Skip authors with no information
                 if (!isset($authorData['email']) && !isset($authorData['name'])) {
                     continue;
                 }
 
                 $authors[] = $author;
             }
-            $version->setAuthors($authors);
+
+            $metadata->setAuthors($authors);
         }
 
         if ($data->getSourceType()) {
-            $source['type'] = $data->getSourceType();
-            // force public URLs even if the package somehow got downgraded to a GitDriver
-            $source['url'] = static::optimizeRepositoryUrl($data->getSourceUrl());
-            $source['reference'] = $data->getSourceReference();
-            $version->setSource($source);
-        } else {
-            $version->setSource(null);
+            $metadata->setSource([
+                'type' => $data->getSourceType(),
+                'url' => static::optimizeRepositoryUrl($data->getSourceUrl()),
+                'reference' => $data->getSourceReference(),
+            ]);
         }
 
         if ($data->getDistType()) {
-            $dist['type'] = $data->getDistType();
-            $dist['url'] = $data->getDistUrl();
-            $dist['reference'] = $data->getDistReference();
-            $dist['shasum'] = $data->getDistSha1Checksum();
-            $version->setDist($dist);
-        } else {
-            $version->setDist(null);
+            $metadata->setDist([
+                'type' => $data->getDistType(),
+                'url' => $data->getDistUrl(),
+                'reference' => $data->getDistReference(),
+                'shasum' => $data->getDistSha1Checksum(),
+            ]);
         }
 
-        if ($data->isDefaultBranch()) {
-            $package->setRepositoryUrl($data->getSourceUrl());
-            $package->setDescription($description);
-            $package->setType($this->sanitize($data->getType()));
-            if ($data->isAbandoned() && !$package->isAbandoned()) {
-                // $io->write('Marking package abandoned as per composer metadata from '.$version->getVersion());
-                $package->setAbandoned(true);
-                if ($data->getReplacementPackage()) {
-                    $package->setReplacementPackage($data->getReplacementPackage());
-                }
-            }
-        }
-
-        // handle links
-        foreach (self::SUPPORTED_LINK_TYPES as $linkType => $opts) {
+        // Handle links
+        foreach (self::SUPPORTED_LINK_TYPES as $linkType => $linkOptions) {
             $links = [];
-            foreach ($data->{$opts['method']}() as $link) {
+            /** @var ComposerPackageLink $link */
+            foreach ($data->{$linkOptions['method']}() as $link) {
                 $constraint = $link->getPrettyConstraint();
                 if (str_contains($constraint, ',') && str_contains($constraint, '@')) {
                     $constraint = Preg::replaceCallback('{([><]=?\s*[^@]+?)@([a-z]+)}i', static function ($matches) {
@@ -331,108 +346,83 @@ readonly class PackageMetadataResolver
                 $links[$link->getTarget()] = $constraint;
             }
 
-            /** @var AbstractVersionLink $link */
-            foreach ($version->{'get' . $linkType}() as $link) {
-                $linkPackageName = $link->getLinkedPackageName();
-
-                // Clear links that have changed/disappeared (for updates)
-                if (!isset($links[$linkPackageName]) || $links[$linkPackageName] !== $link->getLinkedVersionConstraint()) {
-                    $version->{'get' . $linkType}()->removeElement($link);
-                    $em->remove($link);
-                } else {
-                    // Clear those that are already set
-                    unset($links[$linkPackageName]);
-                }
-            }
-
             foreach ($links as $linkPackageName => $linkPackageConstraint) {
-                /** @var AbstractVersionLink $link */
-                $link = new $opts['entity']();
+                /** @var AbstractMetadataLink $link */
+                $link = new $linkOptions['entity']($metadata);
                 $link->setLinkedPackageName($linkPackageName);
                 $link->setLinkedVersionConstraint($linkPackageConstraint);
-                $version->{'add' . $linkType . 'Link'}($link);
-                $link->setVersion($version);
-                $em->persist($link);
+
+                $metadata->{'get' . ucfirst($linkType)}()->add($link);
             }
         }
 
-        // handle suggests
+        // Handle suggests
         if ($suggests = $data->getSuggests()) {
-            foreach ($version->getSuggest() as $link) {
-                $linkPackageName = $link->getLinkedPackageName();
-                // clear links that have changed/disappeared (for updates)
-                if (!isset($suggests[$linkPackageName]) || $suggests[$linkPackageName] !== $link->getLinkedVersionConstraint()) {
-                    $version->getSuggest()->removeElement($link);
-                    $em->remove($link);
-                } else {
-                    // clear those that are already set
-                    unset($suggests[$linkPackageName]);
-                }
-            }
-
             foreach ($suggests as $linkPackageName => $linkPackageConstraint) {
-                $link = new VersionSuggestLink();
+                $link = new MetadataSuggestLink($metadata);
                 $link->setLinkedPackageName($linkPackageName);
                 $link->setLinkedVersionConstraint($linkPackageConstraint);
-                $version->addSuggestLink($link);
-                $link->setVersion($version);
-                $em->persist($link);
+
+                $metadata->getSuggest()->add($link);
             }
-        } elseif (count($version->getSuggest())) {
-            // clear existing suggests if present
-            foreach ($version->getSuggest() as $link) {
-                $em->remove($link);
-            }
-            $version->getSuggest()->clear();
         }
 
         // Handle keywords
         if ($keywordsData = $data->getKeywords()) {
-            foreach ($version->getKeywords() as $keyword) {
-                $keywordName = $keyword->getName();
-                // Clear keywords that have disappeared (for updates)
-                if (!in_array($keywordName, $keywordsData, true)) {
-                    $version->getKeywords()->removeElement($keyword);
-                    $em->remove($keyword);
-                } else {
-                    // Clear those that are already set
-                    $index = array_search($keywordName, $keywordsData, true);
-                    unset($keywordsData[$index]);
-                }
-            }
-
             foreach ($keywordsData as $keywordName) {
                 $keyword = $this->keywordRepository->getByName($keywordName);
-                $version->addKeyword($keyword);
+
+                $metadata->getKeywords()->add($keyword);
             }
-        } elseif (count($version->getKeywords())) {
-            // Clear existing keywords if present
-            $version->getKeywords()->clear();
         }
 
         if ($driver) {
-            $this->updateReadme($version, $driver);
-        } else {
-            $version->setReadme(null);
+            $metadata->setReadme($this->getReadmeContents($metadata, $driver));
         }
+
+        return $metadata;
     }
 
-    private function sanitize(?string $str): ?string
+    private function sanitize(?string $string): ?string
     {
-        if (null === $str) {
+        if (null === $string || '' === $string) {
             return null;
         }
 
-        // remove escape chars
-        $str = Preg::replace("{\x1B(?:\[.)?}u", '', $str);
+        // Remove escape chars
+        $string = Preg::replace("{\x1B(?:\[.)?}u", '', $string);
+        $string = Preg::replace("{[\x01-\x1A]}u", '', $string);
 
-        return Preg::replace("{[\x01-\x1A]}u", '', $str);
+        return $string;
     }
 
-    private function updateReadme(Version $version, VcsDriverInterface $driver): void
+    private function hasMetadataChanged(?Metadata $currentMetadata, Metadata $metadata): bool
+    {
+        $currentData = $currentMetadata?->toComposerArray();
+        $data = $metadata->toComposerArray();
+
+        if (null === $currentData) {
+            return true;
+        }
+
+        // Fields that shouldn't trigger a new revision
+        $excludeFields = ['abandoned', 'default-branch'];
+
+        foreach ($excludeFields as $field) {
+            unset($currentData[$field], $data[$field]);
+        }
+
+        // Normalize both arrays for comparison
+        ksort($currentData);
+        ksort($data);
+
+        return $currentData !== $data;
+    }
+
+    private function getReadmeContents(Metadata $metadata, VcsDriverInterface $driver): ?string
     {
         try {
-            $composerInfo = $driver->getComposerInformation($version->getSource()['reference']);
+            $composerInfo = $driver->getComposerInformation($metadata->getSourceReference());
             $readmeFile = is_string($composerInfo['readme'] ?? null) ? $composerInfo['readme'] : 'README.md';
 
             $ext = substr($readmeFile, (int) strrpos($readmeFile, '.'));
@@ -442,23 +432,24 @@ readonly class PackageMetadataResolver
 
             switch ($ext) {
                 case '.txt':
-                    $source = $driver->getFileContent($readmeFile, $version->getSource()['reference']);
+                    $source = $driver->getFileContent($readmeFile, $metadata->getSourceReference());
 
                     if (!empty($source)) {
-                        $version->setReadme('<pre>' . htmlspecialchars($source) . '</pre>');
+                        return '<pre>' . htmlspecialchars($source) . '</pre>';
                     }
 
                     break;
 
+                case '.markdown':
                 case '.md':
-                    $source = $driver->getFileContent($readmeFile, $version->getSource()['reference']);
+                    $source = $driver->getFileContent($readmeFile, $metadata->getSourceReference());
 
                     if (!empty($source)) {
                         $parser = new GithubMarkdown();
                         $readme = $parser->parse($source);
 
                         if (!empty($readme)) {
-                            $version->setReadme($this->prepareReadme($readme));
+                            return $this->prepareReadmeContents($readme);
                         }
                     }
 
@@ -467,9 +458,11 @@ readonly class PackageMetadataResolver
         } catch (\Exception $exception) {
             throw $exception; // todo handle politely
         }
+
+        return null;
     }
 
-    private function prepareReadme(string $readme): string
+    private function prepareReadmeContents(string $readme): string
     {
         return $readme;
     }

@@ -46,23 +46,19 @@ class VersionRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return array<string, array{id: int, name: string, normalized_name: string, source: ?array}>
+     * @return array<string, int>
      */
     public function getVersionMetadataForUpdate(Package $package): array
     {
         $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
-            'SELECT id, name, normalized_name, source FROM version v WHERE v.package_id = :id',
+            'SELECT id, normalized_name FROM version v WHERE v.package_id = :id',
             ['id' => $package->getId()],
         );
 
         $versions = [];
         foreach ($rows as $row) {
-            if ($row['source']) {
-                $row['source'] = json_decode((string) $row['source'], true);
-            }
-
             $key = strtolower((string) $row['normalized_name']);
-            $versions[$key] = $row;
+            $versions[$key] = $row['id'];
         }
 
         return $versions;
