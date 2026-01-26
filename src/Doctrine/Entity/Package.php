@@ -519,9 +519,11 @@ class Package extends TrackedEntity
                 return true;
             }
 
+            $metadata = $version->getCurrentMetadata();
+
             static $parser = new VersionParser();
 
-            return $version->hasVersionAlias() && str_ends_with((string) $parser->normalize($version->getVersionAlias()), '.9999999-dev');
+            return $metadata->hasVersionAlias() && str_ends_with((string) $parser->normalize($metadata->getVersionAlias()), '.9999999-dev');
         });
     }
 
@@ -544,10 +546,10 @@ class Package extends TrackedEntity
         $bName = $b->getNormalizedName();
 
         // Use the branch alias for sorting if one is provided
-        if (null !== $aBranchAlias = $a->getExtra()['branch-alias'][$aName] ?? null) {
+        if (null !== $aBranchAlias = $a->getCurrentMetadata()->getExtra()['branch-alias'][$aName] ?? null) {
             $aName = Preg::replace('{(.x)?-dev$}', '.9999999-dev', $aBranchAlias);
         }
-        if (null !== $bBranchAlias = $b->getExtra()['branch-alias'][$bName] ?? null) {
+        if (null !== $bBranchAlias = $b->getCurrentMetadata()->getExtra()['branch-alias'][$bName] ?? null) {
             $bName = Preg::replace('{(.x)?-dev$}', '.9999999-dev', $bBranchAlias);
         }
 
@@ -567,8 +569,8 @@ class Package extends TrackedEntity
         }
 
         // Equal versions are sorted by release date
-        $aReleasedAt = $a->getReleasedAt();
-        $bReleasedAt = $b->getReleasedAt();
+        $aReleasedAt = $a->getCurrentMetadata()->getReleasedAt();
+        $bReleasedAt = $b->getCurrentMetadata()->getReleasedAt();
 
         if (0 !== $sort = $bReleasedAt <=> $aReleasedAt) {
             return $sort;
