@@ -20,10 +20,14 @@ final class Version20260120114538 extends AbstractMigration
         $this->fillMetadataTables();
         $this->addCurrentMetadataColumnToVersionTable();
         $this->updateVersionTableColumns();
+        $this->dropVersionLinkTables();
+        $this->dropVersionTableFields();
     }
 
     public function down(Schema $schema): void
     {
+        $this->createVersionTableFields();
+        $this->createVersionLinkTables();
         $this->revertVersionTableColumns();
         $this->fillVersionTables();
         $this->dropCurrentMetadataColumnFromVersionTable();
@@ -348,6 +352,322 @@ final class Version20260120114538 extends AbstractMigration
                 version
             ADD
                 CONSTRAINT FK_BF1CD3C3F44CABFF FOREIGN KEY (package_id) REFERENCES package (id) ON DELETE CASCADE NOT DEFERRABLE
+        SQL);
+    }
+
+    private function dropVersionLinkTables(): void
+    {
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version_conflict_link DROP CONSTRAINT fk_ad52d6c4bbc2705
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version_dev_require_link DROP CONSTRAINT fk_98f2e46e4bbc2705
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version_keyword DROP CONSTRAINT fk_a65a946f4bbc2705
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version_keyword DROP CONSTRAINT fk_a65a946f115d4552
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version_provide_link DROP CONSTRAINT fk_150ec10c4bbc2705
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version_replace_link DROP CONSTRAINT fk_87f1b96a4bbc2705
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version_require_link DROP CONSTRAINT fk_7a1caab14bbc2705
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version_suggest_link DROP CONSTRAINT fk_de9b76884bbc2705
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE version_conflict_link
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE version_dev_require_link
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE version_keyword
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE version_provide_link
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE version_replace_link
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE version_require_link
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE version_suggest_link
+        SQL);
+    }
+
+    private function dropVersionTableFields(): void
+    {
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP package_name
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP description
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP readme
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP homepage
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP license
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP type
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP target_dir
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP source
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP dist
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP autoload
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP binaries
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP include_paths
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP php_ext
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP authors
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP support
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP funding
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP extra
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version DROP released_at
+        SQL);
+    }
+
+    private function createVersionTableFields(): void
+    {
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD package_name VARCHAR(255) DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD description TEXT DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD readme TEXT DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD homepage VARCHAR(255) DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD license JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD type VARCHAR(255) DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD target_dir VARCHAR(255) DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD source JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD dist JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD autoload JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD binaries JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD include_paths JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD php_ext JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD authors JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD support JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD funding JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD extra JSON DEFAULT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ADD released_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL
+        SQL);
+
+        $this->addSql(<<<'SQL'
+            UPDATE version SET package_name = 'place/holder', license = '[]', autoload = '[]'
+        SQL);
+
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ALTER COLUMN package_name SET NOT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ALTER COLUMN license SET NOT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ALTER COLUMN autoload SET NOT NULL
+        SQL);
+    }
+
+    private function createVersionLinkTables(): void
+    {
+        $this->addSql(<<<'SQL'
+            CREATE TABLE version_conflict_link (
+                id INT GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+                linked_package_name VARCHAR(191) NOT NULL,
+                linked_version_constraint TEXT NOT NULL,
+                version_id INT NOT NULL,
+                PRIMARY KEY (id)
+            )
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX idx_ad52d6c4bbc2705 ON version_conflict_link (version_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE version_dev_require_link (
+                id INT GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+                linked_package_name VARCHAR(191) NOT NULL,
+                linked_version_constraint TEXT NOT NULL,
+                version_id INT NOT NULL,
+                PRIMARY KEY (id)
+            )
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX idx_98f2e46e4bbc2705 ON version_dev_require_link (version_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE version_keyword (
+                version_id INT NOT NULL,
+                keyword_id INT NOT NULL,
+                PRIMARY KEY (version_id, keyword_id)
+            )
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX idx_a65a946f115d4552 ON version_keyword (keyword_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX idx_a65a946f4bbc2705 ON version_keyword (version_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE version_provide_link (
+                id INT GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+                linked_package_name VARCHAR(191) NOT NULL,
+                linked_version_constraint TEXT NOT NULL,
+                version_id INT NOT NULL,
+                PRIMARY KEY (id)
+            )
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX idx_150ec10c4bbc2705 ON version_provide_link (version_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE version_replace_link (
+                id INT GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+                linked_package_name VARCHAR(191) NOT NULL,
+                linked_version_constraint TEXT NOT NULL,
+                version_id INT NOT NULL,
+                PRIMARY KEY (id)
+            )
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX idx_87f1b96a4bbc2705 ON version_replace_link (version_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE version_require_link (
+                id INT GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+                linked_package_name VARCHAR(191) NOT NULL,
+                linked_version_constraint TEXT NOT NULL,
+                version_id INT NOT NULL,
+                PRIMARY KEY (id)
+            )
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX idx_7a1caab14bbc2705 ON version_require_link (version_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE version_suggest_link (
+                id INT GENERATED BY DEFAULT AS IDENTITY NOT NULL,
+                linked_package_name VARCHAR(191) NOT NULL,
+                linked_version_constraint TEXT NOT NULL,
+                version_id INT NOT NULL,
+                PRIMARY KEY (id)
+            )
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE INDEX idx_de9b76884bbc2705 ON version_suggest_link (version_id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version_conflict_link
+            ADD
+                CONSTRAINT fk_ad52d6c4bbc2705 FOREIGN KEY (version_id) REFERENCES version (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version_dev_require_link
+            ADD
+                CONSTRAINT fk_98f2e46e4bbc2705 FOREIGN KEY (version_id) REFERENCES version (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version_keyword
+            ADD
+                CONSTRAINT fk_a65a946f4bbc2705 FOREIGN KEY (version_id) REFERENCES version (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version_keyword
+            ADD
+                CONSTRAINT fk_a65a946f115d4552 FOREIGN KEY (keyword_id) REFERENCES keyword (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version_provide_link
+            ADD
+                CONSTRAINT fk_150ec10c4bbc2705 FOREIGN KEY (version_id) REFERENCES version (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version_replace_link
+            ADD
+                CONSTRAINT fk_87f1b96a4bbc2705 FOREIGN KEY (version_id) REFERENCES version (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version_require_link
+            ADD
+                CONSTRAINT fk_7a1caab14bbc2705 FOREIGN KEY (version_id) REFERENCES version (id) NOT DEFERRABLE INITIALLY IMMEDIATE
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE
+                version_suggest_link
+            ADD
+                CONSTRAINT fk_de9b76884bbc2705 FOREIGN KEY (version_id) REFERENCES version (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
     }
 
