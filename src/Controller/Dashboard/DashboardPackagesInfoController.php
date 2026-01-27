@@ -52,6 +52,7 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'version' => $version,
+            'metadata' => $version->getCurrentMetadata(),
 
             'dependentCount' => $dependentCount,
             'implementationCount' => $implementationCount,
