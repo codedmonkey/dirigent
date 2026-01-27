@@ -29,6 +29,7 @@ final class Version20260120114538 extends AbstractMigration
         $this->createVersionTableFields();
         $this->createVersionLinkTables();
         $this->revertVersionTableColumns();
+        $this->fillVersionTables();
         $this->dropCurrentMetadataColumnFromVersionTable();
         $this->dropMetadataTables();
     }
@@ -454,7 +455,7 @@ final class Version20260120114538 extends AbstractMigration
     private function createVersionTableFields(): void
     {
         $this->addSql(<<<'SQL'
-            ALTER TABLE version ADD package_name VARCHAR(255) NOT NULL
+            ALTER TABLE version ADD package_name VARCHAR(255) DEFAULT NULL
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE version ADD description TEXT DEFAULT NULL
@@ -466,7 +467,7 @@ final class Version20260120114538 extends AbstractMigration
             ALTER TABLE version ADD homepage VARCHAR(255) DEFAULT NULL
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE version ADD license JSON NOT NULL
+            ALTER TABLE version ADD license JSON DEFAULT NULL
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE version ADD type VARCHAR(255) DEFAULT NULL
@@ -481,7 +482,7 @@ final class Version20260120114538 extends AbstractMigration
             ALTER TABLE version ADD dist JSON DEFAULT NULL
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE version ADD autoload JSON NOT NULL
+            ALTER TABLE version ADD autoload JSON DEFAULT NULL
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE version ADD binaries JSON DEFAULT NULL
@@ -506,6 +507,26 @@ final class Version20260120114538 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE version ADD released_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL
+        SQL);
+
+        $this->addSql(<<<'SQL'
+            UPDATE version
+            SET
+                package_name = metadata.package_name,
+                license = metadata.license,
+                autoload = metadata.autoload,
+            FROM metadata
+            WHERE version.current_metadata_id = metadata.id
+        SQL);
+
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ALTER COLUMN package_name SET NOT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ALTER COLUMN license SET NOT NULL
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE version ALTER COLUMN autoload SET NOT NULL
         SQL);
     }
 
@@ -676,6 +697,48 @@ final class Version20260120114538 extends AbstractMigration
             ADD
                 CONSTRAINT fk_bf1cd3c3f44cabff FOREIGN KEY (package_id) REFERENCES package (id) NOT DEFERRABLE INITIALLY IMMEDIATE
         SQL);
+    }
+
+    private function fillVersionTables(): void
+    {
+        $this->addSql(<<<'SQL'
+            UPDATE version
+            SET
+                description = metadata.description,
+                readme = metadata.readme,
+                homepage = metadata.homepage,
+                type = metadata.type,
+                target_dir = metadata.target_dir,
+                source = metadata.source,
+                dist = metadata.dist,
+                binaries = metadata.binaries,
+                include_paths = metadata.include_paths,
+                php_ext = metadata.php_ext,
+                authors = metadata.authors,
+                support = metadata.support,
+                funding = metadata.funding,
+                extra = metadata.extra,
+                released_at = metadata.released_at
+            FROM metadata
+            WHERE version.current_metadata_id = metadata.id
+        SQL);
+
+        $linkTables = ['require', 'dev_require', 'conflict', 'provide', 'replace', 'suggest'];
+
+        foreach ($linkTables as $linkTable) {
+            $this->addSql(<<<SQL
+                INSERT INTO version_{$linkTable}_link (version_id, linked_package_name, linked_version_constraint)
+                SELECT version.id, metadata_link.linked_package_name, metadata_link.linked_version_constraint
+                FROM metadata_{$linkTable}_link metadata_link
+                INNER JOIN metadata metadata ON metadata_link.metadata_id = metadata.id
+                INNER JOIN version version ON version.current_metadata_id = metadata.id
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM version_{$linkTable}_link version_link
+                    WHERE version_link.version_id = metadata.version_id
+                    AND version_link.linked_package_name = metadata_link.linked_package_name
+                )
+            SQL);
+        }
     }
 
     private function dropCurrentMetadataColumnFromVersionTable(): void
