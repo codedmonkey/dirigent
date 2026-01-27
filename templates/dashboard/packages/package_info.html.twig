@@ -3,7 +3,7 @@
 {% block page_title %}
   {%- apply spaceless -%}
     {{ package.name }}
-    <small>{{ version.versionTitle }}</small>
+    <small>{{ version.extendedName }}</small>
   {%- endapply -%}
 {% endblock %}
 
@@ -16,23 +16,23 @@
         <pre class="m-0"><code>composer require {{ package.name }}</code></pre>
       </div>
 
-      <p class="lead">{{ version.description }}</p>
+      <p class="lead">{{ metadata.description }}</p>
 
-      {% if version.authors|length > 0 %}
+      {% if metadata.authors|length > 0 %}
         <div class="d-flex flex-wrap gap-2 mb-2" aria-label="{{ 'Authors'|trans }}">
-          {% for author in version.authors %}
+          {% for author in metadata.authors %}
             {% set authorText %}<span class="fa-solid fa-user fa-fw me-1" aria-hidden="true"></span>{{ author.name }}{% endset %}
             {% if author.homepage is defined %}<a href="{{ author.homepage }}">{{ authorText }}</a>{% else %}<span>{{ authorText }}</span>{% endif %}
           {% endfor %}
         </div>
       {% endif %}
 
-      {% if version.keywords|length > 0 %}
+      {% if metadata.keywords|length > 0 %}
         <div class="d-flex align-items-center mb-2">
           <span class="fa-solid fa-tags fa-fw me-1" title="{{ 'Keywords'|trans }}" aria-hidden="true"></span>
 
           <div class="d-flex flex-wrap gap-2" aria-label="{{ 'Keywords'|trans }}">
-            {% for keyword in version.keywords %}
+            {% for keyword in metadata.keywords %}
               <span>{{ keyword.name }}</span>
             {% endfor %}
           </div>
@@ -52,8 +52,8 @@
         {% if package.browsableRepositoryUrl or package.mirrorRegistry %}
           <hr class="my-1">
         {% endif %}
-        {% if version.homepage %}
-          <div><a href="{{ version.homepage }}">Homepage</a></div>
+        {% if metadata.homepage %}
+          <div><a href="{{ metadata.homepage }}">Homepage</a></div>
         {% endif %}
         {% set packageStatisticsUrl = path('dashboard_packages_statistics', {package: package.name}) %}
         <div><span><a href="{{ packageStatisticsUrl }}">{{ 'Installations'|trans }}</a></span> {{ package.installations.total }}</div>
@@ -73,8 +73,8 @@
           {% set packageProvidersUrl = path('dashboard_packages_providers', {package: package.name}) %}
           <div><span><a href="{{ packageProvidersUrl }}">{{ 'Providers'|trans }}</a></span> {{ providerCount }}</div>
         {% endif %}
-        {% if version.license %}
-          <div><span>{{ 'License'|trans }}</span> {{ version.license|join(', ') }}</div>
+        {% if metadata.license %}
+          <div><span>{{ 'License'|trans }}</span> {{ metadata.license|join(', ') }}</div>
         {% else %}
           <div>No license specified</div>
         {% endif %}
@@ -95,38 +95,38 @@
 
   <div class="d-flex justify-content-between border-top border-bottom py-3 mb-3">
     <div><strong>{{ version.name }}</strong></div>
-    {% if version.releasedAt %}
-      <div>{{ version.releasedAt.format('Y-m-d H:i') }} UTC</div>
+    {% if metadata.releasedAt %}
+      <div>{{ metadata.releasedAt.format('Y-m-d H:i') }} UTC</div>
     {% endif %}
   </div>
 
   <div class="row border-bottom pb-3 mb-3">
-    {{ _self.linkBlock('Requires', version.require) }}
-    {{ _self.linkBlock('Requires (dev)', version.devRequire) }}
-    {{ _self.provideBlock(version.provide) }}
-    {{ _self.linkBlock('Suggests', version.suggest) }}
-    {{ _self.linkBlock('Conflicts', version.conflict) }}
-    {{ _self.linkBlock('Replaces', version.replace) }}
+    {{ _self.linkBlock('Requires', metadata.require) }}
+    {{ _self.linkBlock('Requires (dev)', metadata.devRequire) }}
+    {{ _self.provideBlock(metadata.provide) }}
+    {{ _self.linkBlock('Suggests', metadata.suggest) }}
+    {{ _self.linkBlock('Conflicts', metadata.conflict) }}
+    {{ _self.linkBlock('Replaces', metadata.replace) }}
   </div>
 
   <div class="row border-bottom pb-3 mb-3">
     <div class="col-md-6">
-      {% if version.hasSource() %}
+      {% if metadata.hasSource() %}
         <div class="h5">
           {{ 'Source'|trans }}
-          <span class="badge text-bg-secondary">{{ version.sourceType }}</span>
+          <span class="badge text-bg-secondary">{{ metadata.sourceType }}</span>
         </div>
 
         <div class="mb-2">
-          <code>{{ version.sourceUrl }}</code>
+          <code>{{ metadata.sourceUrl }}</code>
         </div>
 
         <div class="mb-2">
-          {{ 'Reference'|trans }}: <code>{{ version.sourceReference }}</code>
+          {{ 'Reference'|trans }}: <code>{{ metadata.sourceReference }}</code>
         </div>
 
         <div class="mb-2">
-          {% set browseUrl = version.browsableRepositoryUrl %}
+          {% set browseUrl = metadata.browsableRepositoryUrl %}
           {% if browseUrl %}
             <a class="btn btn-sm btn-secondary" href="{{ browseUrl }}">
               <span class="fa-solid fa-code me-1" aria-hidden="true"></span>
@@ -140,18 +140,18 @@
       {% endif %}
     </div>
     <div class="col-md-6">
-      {% if version.hasDist() %}
+      {% if metadata.hasDist() %}
         <div class="h5">
           {{ 'Distribution'|trans }}
-          <span class="badge text-bg-secondary">{{ version.distType }}</span>
+          <span class="badge text-bg-secondary">{{ metadata.distType }}</span>
         </div>
 
         <div class="mb-2">
-          {{ 'Reference'|trans }}: <code>{{ version.distReference }}</code>
+          {{ 'Reference'|trans }}: <code>{{ metadata.distReference }}</code>
         </div>
 
         <div class="mb-2">
-          <a class="btn btn-sm btn-secondary" href="{{ version.distUrl }}" download>
+          <a class="btn btn-sm btn-secondary" href="{{ metadata.distUrl }}" download>
             <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
             {{ 'Download' }}
           </a>
@@ -163,9 +163,9 @@
     </div>
   </div>
 
-  {% if version.readme %}
+  {% if metadata.readme %}
     <div class="mb-3">
-      {{ version.readme|raw }}
+      {{ metadata.readme|raw }}
     </div>
   {% endif %}
 {% endblock %}
