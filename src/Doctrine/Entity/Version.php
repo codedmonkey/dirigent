@@ -588,7 +588,7 @@ class Version extends TrackedEntity implements \Stringable
         return '';
     }
 
-    public function getVersionTitle(): string
+    public function getExtendedName(): string
     {
         return $this->name . ($this->hasVersionAlias() ? ' / ' . $this->getVersionAlias() : '');
     }
