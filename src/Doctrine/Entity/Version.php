@@ -3,15 +3,13 @@
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
-use Composer\Package\Version\VersionParser;
-use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VersionRepository::class)]
-#[ORM\UniqueConstraint(name: 'pkg_ver_idx', columns: ['package_id', 'normalized_version'])]
+#[ORM\UniqueConstraint(name: 'package_version_idx', columns: ['package_id', 'normalized_name'])]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 class Version extends TrackedEntity
 {
     #[ORM\Id]
@@ -22,123 +20,47 @@ class Version extends TrackedEntity
     #[ORM\Column]
     private string $name;
 
-    #[ORM\Column]
-    private string $version;
-
     #[ORM\Column(length: 191)]
-    private string $normalizedVersion;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $description = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $readme = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?string $homepage = null;
+    private string $normalizedName;
 
     #[ORM\Column]
     private bool $development;
 
     #[ORM\Column]
-    private array $license;
-
-    #[ORM\Column(nullable: true)]
-    private ?string $type = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?string $targetDir = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?array $source = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?array $dist = null;
-
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionRequireLink::class, cascade: ['persist', 'detach', 'remove'])]
-    private Collection $require;
-
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionDevRequireLink::class, cascade: ['persist', 'detach', 'remove'])]
-    private Collection $devRequire;
-
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionConflictLink::class, cascade: ['persist', 'detach', 'remove'])]
-    private Collection $conflict;
-
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionProvideLink::class, cascade: ['persist', 'detach', 'remove'])]
-    private Collection $provide;
-
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionReplaceLink::class, cascade: ['persist', 'detach', 'remove'])]
-    private Collection $replace;
-
-    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionSuggestLink::class, cascade: ['persist', 'detach', 'remove'])]
-    private Collection $suggest;
-
-    #[ORM\ManyToMany(targetEntity: Keyword::class, inversedBy: 'versions', cascade: ['persist', 'detach', 'remove'])]
-    private Collection $keywords;
-
-    #[ORM\Column]
-    private array $autoload;
-
-    /**
-     * @var array<string>|null
-     */
-    #[ORM\Column(nullable: true)]
-    private ?array $binaries = null;
-
-    /**
-     * @var array<string>|null
-     */
-    #[ORM\Column(nullable: true)]
-    private ?array $includePaths = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?array $phpExt = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?array $authors = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?array $support = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?array $funding = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?array $extra = null;
-
-    #[ORM\Column]
     private bool $defaultBranch = false;
-
-    #[ORM\ManyToOne(targetEntity: Package::class, inversedBy: 'versions')]
-    private ?Package $package = null;
-
-    #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
-    private VersionInstallations $installations;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $releasedAt = null;
+    #[ORM\ManyToOne(targetEntity: Package::class, inversedBy: 'versions')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Package $package;
 
-    public function __construct()
+    #[ORM\OneToOne]
+    private ?Metadata $currentMetadata = null;
+
+    #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
+    private VersionInstallations $installations;
+
+    #[ORM\OneToMany(targetEntity: Metadata::class, mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
+    private Collection $metadata;
+
+    public function __construct(Package $package)
     {
-        $this->require = new ArrayCollection();
-        $this->devRequire = new ArrayCollection();
-        $this->conflict = new ArrayCollection();
-        $this->provide = new ArrayCollection();
-        $this->replace = new ArrayCollection();
-        $this->suggest = new ArrayCollection();
-        $this->keywords = new ArrayCollection();
+        $this->package = $package;
+
         $this->installations = new VersionInstallations($this);
+        $this->metadata = new ArrayCollection();
     }
 
     public function __toString(): string
     {
-        return "$this->name $this->version ($this->normalizedVersion)";
+        $packageName = $this->package->getName();
+
+        return "$packageName $this->name ($this->normalizedName)";
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -153,54 +75,14 @@ class Version extends TrackedEntity
         $this->name = $name;
     }
 
-    public function getVersion(): string
+    public function getNormalizedName(): string
     {
-        return $this->version;
+        return $this->normalizedName;
     }
 
-    public function setVersion(string $version): void
+    public function setNormalizedName(string $normalizedName): void
     {
-        $this->version = $version;
-    }
-
-    public function getNormalizedVersion(): string
-    {
-        return $this->normalizedVersion;
-    }
-
-    public function setNormalizedVersion(string $normalizedVersion): void
-    {
-        $this->normalizedVersion = $normalizedVersion;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): void
-    {
-        $this->description = $description;
-    }
-
-    public function getReadme(): ?string
-    {
-        return $this->readme;
-    }
-
-    public function setReadme(?string $readme): void
-    {
-        $this->readme = $readme;
-    }
-
-    public function getHomepage(): ?string
-    {
-        return $this->homepage;
-    }
-
-    public function setHomepage(?string $homepage): void
-    {
-        $this->homepage = $homepage;
+        $this->normalizedName = $normalizedName;
     }
 
     public function isDevelopment(): bool
@@ -213,251 +95,6 @@ class Version extends TrackedEntity
         $this->development = $development;
     }
 
-    /**
-     * @return array<string>
-     */
-    public function getLicense(): array
-    {
-        return $this->license;
-    }
-
-    /**
-     * @param array<string> $license
-     */
-    public function setLicense(array $license): void
-    {
-        $this->license = $license;
-    }
-
-    public function getType(): ?string
-    {
-        return $this->type;
-    }
-
-    public function setType(?string $type): void
-    {
-        $this->type = $type;
-    }
-
-    public function getTargetDir(): ?string
-    {
-        return $this->targetDir;
-    }
-
-    public function setTargetDir(?string $targetDir): void
-    {
-        $this->targetDir = $targetDir;
-    }
-
-    public function getSource(): ?array
-    {
-        return $this->source;
-    }
-
-    public function setSource(?array $source): void
-    {
-        $this->source = $source;
-    }
-
-    public function getDist(): ?array
-    {
-        return $this->dist;
-    }
-
-    public function setDist(?array $dist): void
-    {
-        $this->dist = $dist;
-    }
-
-    /**
-     * @return Collection<int, VersionRequireLink>
-     */
-    public function getRequire(): Collection
-    {
-        return $this->require;
-    }
-
-    public function addRequireLink(VersionRequireLink $require): void
-    {
-        $this->require[] = $require;
-    }
-
-    /**
-     * @return Collection<int, VersionDevRequireLink>
-     */
-    public function getDevRequire(): Collection
-    {
-        return $this->devRequire;
-    }
-
-    public function addDevRequireLink(VersionDevRequireLink $devRequire): void
-    {
-        $this->devRequire[] = $devRequire;
-    }
-
-    /**
-     * @return Collection<int, VersionConflictLink>
-     */
-    public function getConflict(): Collection
-    {
-        return $this->conflict;
-    }
-
-    public function addConflictLink(VersionConflictLink $conflict): void
-    {
-        $this->conflict[] = $conflict;
-    }
-
-    /**
-     * @return Collection<int, VersionProvideLink>
-     */
-    public function getProvide(): Collection
-    {
-        return $this->provide;
-    }
-
-    public function addProvideLink(VersionProvideLink $provide): void
-    {
-        $this->provide[] = $provide;
-    }
-
-    /**
-     * @return Collection<int, VersionReplaceLink>
-     */
-    public function getReplace(): Collection
-    {
-        return $this->replace;
-    }
-
-    public function addReplaceLink(VersionReplaceLink $replace): void
-    {
-        $this->replace[] = $replace;
-    }
-
-    /**
-     * @return Collection<int, VersionSuggestLink>
-     */
-    public function getSuggest(): Collection
-    {
-        return $this->suggest;
-    }
-
-    public function addSuggestLink(VersionSuggestLink $suggest): void
-    {
-        $this->suggest[] = $suggest;
-    }
-
-    /**
-     * @return Collection<int, Keyword>
-     */
-    public function getKeywords(): Collection
-    {
-        return $this->keywords;
-    }
-
-    public function addKeyword(Keyword $keyword): void
-    {
-        $this->keywords[] = $keyword;
-    }
-
-    public function getAutoload(): array
-    {
-        return $this->autoload;
-    }
-
-    public function setAutoload(array $autoload): void
-    {
-        $this->autoload = $autoload;
-    }
-
-    /**
-     * @return array<string>|null
-     */
-    public function getBinaries(): ?array
-    {
-        return $this->binaries;
-    }
-
-    /**
-     * @param array<string>|null $binaries
-     */
-    public function setBinaries(?array $binaries): void
-    {
-        $this->binaries = $binaries;
-    }
-
-    /**
-     * @return array<string>|null
-     */
-    public function getIncludePaths(): ?array
-    {
-        return $this->includePaths;
-    }
-
-    /**
-     * @param array<string>|null $paths
-     */
-    public function setIncludePaths(?array $paths): void
-    {
-        $this->includePaths = $paths;
-    }
-
-    public function getPhpExt(): ?array
-    {
-        return $this->phpExt;
-    }
-
-    public function setPhpExt(?array $phpExt): void
-    {
-        $this->phpExt = $phpExt;
-    }
-
-    public function getAuthors(): array
-    {
-        return $this->authors ?? [];
-    }
-
-    public function setAuthors(array $authors): void
-    {
-        $this->authors = $authors;
-    }
-
-    public function getSupport(): ?array
-    {
-        return $this->support;
-    }
-
-    public function setSupport(?array $support): void
-    {
-        $this->support = $support;
-    }
-
-    public function getFunding(): ?array
-    {
-        return $this->funding;
-    }
-
-    public function setFunding(?array $funding): void
-    {
-        $this->funding = $funding;
-    }
-
-    /**
-     * @return array<mixed>|null
-     */
-    public function getExtra(): ?array
-    {
-        return $this->extra;
-    }
-
-    /**
-     * @param array<mixed>|null $extra
-     */
-    public function setExtra(?array $extra): void
-    {
-        $this->extra = $extra;
-    }
-
     public function isDefaultBranch(): bool
     {
         return $this->defaultBranch;
@@ -466,21 +103,6 @@ class Version extends TrackedEntity
     public function setDefaultBranch(bool $defaultBranch): void
     {
         $this->defaultBranch = $defaultBranch;
-    }
-
-    public function getPackage(): ?Package
-    {
-        return $this->package;
-    }
-
-    public function setPackage(Package $package): void
-    {
-        $this->package = $package;
-    }
-
-    public function getInstallations(): VersionInstallations
-    {
-        return $this->installations;
     }
 
     public function getUpdatedAt(): ?\DateTimeImmutable
@@ -495,244 +117,268 @@ class Version extends TrackedEntity
 
     public function getReleasedAt(): ?\DateTimeImmutable
     {
-        return $this->releasedAt;
+        return $this->currentMetadata->getReleasedAt();
     }
 
-    public function setReleasedAt(?\DateTimeImmutable $releasedAt): void
+    public function getPackage(): ?Package
     {
-        $this->releasedAt = $releasedAt;
+        return $this->package;
+    }
+
+    public function getCurrentMetadata(): ?Metadata
+    {
+        return $this->currentMetadata;
+    }
+
+    public function setCurrentMetadata(Metadata $metadata): void
+    {
+        $this->currentMetadata = $metadata;
+    }
+
+    public function getInstallations(): VersionInstallations
+    {
+        return $this->installations;
+    }
+
+    /**
+     * @return Collection<int, Metadata>
+     */
+    public function getMetadata(): Collection
+    {
+        return $this->metadata;
+    }
+
+    public function getPackageName(): string
+    {
+        return $this->package->getName();
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->currentMetadata->getDescription();
+    }
+
+    public function getReadme(): ?string
+    {
+        return $this->currentMetadata->getReadme();
+    }
+
+    public function getHomepage(): ?string
+    {
+        return $this->currentMetadata->getHomepage();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLicense(): array
+    {
+        return $this->currentMetadata->getLicense();
+    }
+
+    public function getType(): ?string
+    {
+        return $this->currentMetadata->getType();
+    }
+
+    public function getTargetDir(): ?string
+    {
+        return $this->currentMetadata->getTargetDir();
+    }
+
+    public function getSource(): ?array
+    {
+        return $this->currentMetadata->getSource();
+    }
+
+    public function getDist(): ?array
+    {
+        return $this->currentMetadata->getDist();
+    }
+
+    /**
+     * @return Collection<int, MetadataRequireLink>
+     */
+    public function getRequire(): Collection
+    {
+        return $this->currentMetadata->getRequire();
+    }
+
+    /**
+     * @return Collection<int, MetadataDevRequireLink>
+     */
+    public function getDevRequire(): Collection
+    {
+        return $this->currentMetadata->getDevRequire();
+    }
+
+    /**
+     * @return Collection<int, MetadataConflictLink>
+     */
+    public function getConflict(): Collection
+    {
+        return $this->currentMetadata->getConflict();
+    }
+
+    /**
+     * @return Collection<int, MetadataProvideLink>
+     */
+    public function getProvide(): Collection
+    {
+        return $this->currentMetadata->getProvide();
+    }
+
+    /**
+     * @return Collection<int, MetadataReplaceLink>
+     */
+    public function getReplace(): Collection
+    {
+        return $this->currentMetadata->getReplace();
+    }
+
+    /**
+     * @return Collection<int, MetadataSuggestLink>
+     */
+    public function getSuggest(): Collection
+    {
+        return $this->currentMetadata->getSuggest();
+    }
+
+    /**
+     * @return Collection<int, Keyword>
+     */
+    public function getKeywords(): Collection
+    {
+        return $this->currentMetadata->getKeywords();
+    }
+
+    public function getAutoload(): array
+    {
+        return $this->currentMetadata->getAutoload();
+    }
+
+    /**
+     * @return string[]|null
+     */
+    public function getBinaries(): ?array
+    {
+        return $this->currentMetadata->getBinaries();
+    }
+
+    /**
+     * @return string[]|null
+     */
+    public function getIncludePaths(): ?array
+    {
+        return $this->currentMetadata->getIncludePaths();
+    }
+
+    public function getPhpExt(): ?array
+    {
+        return $this->currentMetadata->getPhpExt();
+    }
+
+    public function getAuthors(): array
+    {
+        return $this->currentMetadata->getAuthors();
+    }
+
+    public function getSupport(): ?array
+    {
+        return $this->currentMetadata->getSupport();
+    }
+
+    public function getFunding(): ?array
+    {
+        return $this->currentMetadata->getFunding();
+    }
+
+    /**
+     * @return array<mixed>|null
+     */
+    public function getExtra(): ?array
+    {
+        return $this->currentMetadata->getExtra();
     }
 
     public function hasSource(): bool
     {
-        return null !== $this->source;
+        return $this->currentMetadata->hasSource();
     }
 
     public function getSourceReference(): ?string
     {
-        return $this->source['reference'] ?? null;
+        return $this->currentMetadata->getSourceReference();
     }
 
     public function getSourceType(): ?string
     {
-        return $this->source['type'] ?? null;
+        return $this->currentMetadata->getSourceType();
     }
 
     public function getSourceUrl(): ?string
     {
-        return $this->source['url'] ?? null;
+        return $this->currentMetadata->getSourceUrl();
     }
 
     public function hasDist(): bool
     {
-        return null !== $this->dist;
+        return $this->currentMetadata->hasDist();
     }
 
     public function getDistReference(): ?string
     {
-        return $this->dist['reference'] ?? null;
+        return $this->currentMetadata->getDistReference();
     }
 
     public function getDistType(): ?string
     {
-        return $this->dist['type'] ?? null;
+        return $this->currentMetadata->getDistType();
     }
 
     public function getDistUrl(): ?string
     {
-        return $this->dist['url'] ?? null;
+        return $this->currentMetadata->getDistUrl();
     }
 
     public function hasVersionAlias(): bool
     {
-        return $this->isDevelopment() && $this->getVersionAlias();
+        return $this->currentMetadata->hasVersionAlias();
     }
 
     public function getVersionAlias(): string
     {
-        $extra = $this->getExtra();
-
-        if (isset($extra['branch-alias'][$this->getVersion()])) {
-            $parser = new VersionParser();
-            $version = $parser->normalizeBranch(str_replace('-dev', '', $extra['branch-alias'][$this->getVersion()]));
-
-            return Preg::replace('{(\.9{7})+}', '.x', $version);
-        }
-
-        return '';
+        return $this->currentMetadata->getVersionAlias();
     }
 
     public function getVersionTitle(): string
     {
-        return $this->version . ($this->hasVersionAlias() ? ' / ' . $this->getVersionAlias() : '');
-    }
-
-    /**
-     * Get funding, sorted to help the V2 metadata compression algo.
-     *
-     * @return array<array{type?: string, url?: string}>|null
-     */
-    public function getFundingSorted(): ?array
-    {
-        if (null === $this->funding) {
-            return null;
-        }
-
-        $funding = $this->funding;
-        usort($funding, static function ($a, $b) {
-            $keyA = ($a['type'] ?? '') . ($a['url'] ?? '');
-            $keyB = ($b['type'] ?? '') . ($b['url'] ?? '');
-
-            return $keyA <=> $keyB;
-        });
-
-        return $funding;
+        return $this->name . ($this->hasVersionAlias() ? ' / ' . $this->getVersionAlias() : '');
     }
 
     public function getMajorVersion(): int
     {
-        $split = explode('.', $this->version);
+        $split = explode('.', $this->name);
 
         return (int) $split[0];
     }
 
     public function getMinorVersion(): int
     {
-        $split = explode('.', $this->version);
+        $split = explode('.', $this->name);
 
         return (int) $split[1];
     }
 
     public function getPatchVersion(): int
     {
-        $split = explode('.', $this->version);
+        $split = explode('.', $this->name);
 
         return (int) $split[2];
     }
 
     public function getBrowsableRepositoryUrl(): ?string
     {
-        $reference = $this->getSourceReference();
-        $url = $this->package->getBrowsableRepositoryUrl();
-        if (null === $reference || null === $url) {
-            return null;
-        }
-
-        if (false === $this->isDevelopment()) {
-            $reference = $this->getVersion();
-        }
-
-        if (str_starts_with($url, 'https://github.com/')) {
-            return "$url/tree/$reference";
-        } elseif (str_starts_with($url, 'https://gitlab.com/')) {
-            return "$url/-/tree/$reference";
-        } elseif (str_starts_with($url, 'https://bitbucket.org/')) {
-            return "$url/src/$reference/";
-        }
-
-        return null;
-    }
-
-    public function toComposerArray(): array
-    {
-        $keywords = [];
-        foreach ($this->getKeywords() as $keyword) {
-            $keywords[] = $keyword->getName();
-        }
-
-        $authors = $this->getAuthors();
-        foreach ($authors as &$author) {
-            uksort($author, [$this, 'sortAuthorKeys']);
-        }
-        unset($author);
-
-        $data = [
-            'name' => $this->getName(),
-            'description' => (string) $this->getDescription(),
-            'keywords' => $keywords,
-            'homepage' => (string) $this->getHomepage(),
-            'version' => $this->getVersion(),
-            'version_normalized' => $this->getNormalizedVersion(),
-            'license' => $this->getLicense(),
-            'authors' => $authors,
-            'source' => $this->getSource(),
-            'dist' => $this->getDist(),
-            'type' => $this->getType(),
-        ];
-
-        if ($this->getSupport()) {
-            $data['support'] = $this->getSupport();
-        }
-        if (null !== $this->getPhpExt()) {
-            $data['php-ext'] = $this->getPhpExt();
-        }
-        $funding = $this->getFundingSorted();
-        if (null !== $funding) {
-            $data['funding'] = $funding;
-        }
-        if ($this->getReleasedAt()) {
-            $data['time'] = $this->getReleasedAt()->format('Y-m-d\TH:i:sP');
-        }
-        if ($this->getAutoload()) {
-            $data['autoload'] = $this->getAutoload();
-        }
-        if ($this->getExtra()) {
-            $data['extra'] = $this->getExtra();
-        }
-        if ($this->getTargetDir()) {
-            $data['target-dir'] = $this->getTargetDir();
-        }
-        if ($this->getIncludePaths()) {
-            $data['include-path'] = $this->getIncludePaths();
-        }
-        if ($this->getBinaries()) {
-            $data['bin'] = $this->getBinaries();
-        }
-
-        $supportedLinkTypes = [
-            'require' => 'require',
-            'devRequire' => 'require-dev',
-            'suggest' => 'suggest',
-            'conflict' => 'conflict',
-            'provide' => 'provide',
-            'replace' => 'replace',
-        ];
-
-        if ($this->isDefaultBranch()) {
-            $data['default-branch'] = true;
-        }
-
-        foreach ($supportedLinkTypes as $method => $linkType) {
-            /** @var AbstractVersionLink $link */
-            foreach ($this->{'get' . $method}() as $link) {
-                $data[$linkType][$link->getLinkedPackageName()] = $link->getLinkedVersionConstraint();
-            }
-        }
-
-        if ($this->getPackage()->isAbandoned()) {
-            $data['abandoned'] = $this->getPackage()->getReplacementPackage() ?: true;
-        }
-
-        if (isset($data['support'])) {
-            ksort($data['support']);
-        }
-
-        if (isset($data['php-ext']['configure-options'])) {
-            usort($data['php-ext']['configure-options'], fn ($a, $b) => ($a['name'] ?? '') <=> ($b['name'] ?? ''));
-        }
-
-        return $data;
-    }
-
-    private function sortAuthorKeys(string $a, string $b): int
-    {
-        static $order = ['name' => 1, 'email' => 2, 'homepage' => 3, 'role' => 4];
-        $aIndex = $order[$a] ?? 5;
-        $bIndex = $order[$b] ?? 5;
-        if ($aIndex === $bIndex) {
-            return $a <=> $b;
-        }
-
-        return $aIndex <=> $bIndex;
+        return $this->currentMetadata->getBrowsableRepositoryUrl();
     }
 }
