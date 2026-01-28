@@ -22,7 +22,7 @@ class NewPasswordType extends AbstractType
             'options' => [
                 'attr' => ['autocomplete' => 'new-password'],
             ],
-            'first_options' => function (Options $options): array {
+            'first_options' => static function (Options $options): array {
                 $label = $options['new_password'] ? 'New password' : 'Password';
 
                 return [
@@ -30,7 +30,7 @@ class NewPasswordType extends AbstractType
                     'label' => $label,
                 ];
             },
-            'second_options' => function (Options $options): array {
+            'second_options' => static function (Options $options): array {
                 $label = $options['new_password'] ? 'Repeat new password' : 'Repeat password';
 
                 return [

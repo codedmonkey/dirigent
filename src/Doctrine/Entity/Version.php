@@ -718,7 +718,7 @@ class Version extends TrackedEntity
         }
 
         if (isset($data['php-ext']['configure-options'])) {
-            usort($data['php-ext']['configure-options'], fn ($a, $b) => ($a['name'] ?? '') <=> ($b['name'] ?? ''));
+            usort($data['php-ext']['configure-options'], static fn ($a, $b) => ($a['name'] ?? '') <=> ($b['name'] ?? ''));
         }
 
         return $data;

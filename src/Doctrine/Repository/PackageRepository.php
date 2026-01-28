@@ -166,7 +166,7 @@ class PackageRepository extends ServiceEntityRepository
     public function deletePackageLinks(Package $package): void
     {
         $connection = $this->getEntityManager()->getConnection();
-        $connection->transactional(function (Connection $connection) use ($package) {
+        $connection->transactional(static function (Connection $connection) use ($package) {
             $queryParameters = ['id' => $package->getId()];
 
             $connection->executeStatement('DELETE FROM package_provide_link WHERE package_id = :id', $queryParameters);
