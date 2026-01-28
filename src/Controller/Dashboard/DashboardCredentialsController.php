@@ -36,7 +36,7 @@ class DashboardCredentialsController extends AbstractCrudController
             ->setTemplatePath('dashboard/fields/credentials_type.html.twig')
             ->setRequired(true)
             ->setChoices(CredentialsType::cases())
-            ->setFormTypeOption('choice_label', function (CredentialsType $choice): string {
+            ->setFormTypeOption('choice_label', static function (CredentialsType $choice): string {
                 return "credentials.type.{$choice->value}";
             })
             ->renderExpanded();

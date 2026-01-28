@@ -153,7 +153,7 @@
             "repo": "github.com/symfony/recipes-contrib",
             "branch": "main",
             "version": "5.0",
-            "ref": "b6cb4b34429dadecd7187852123be19d628fa37a"
+            "ref": "12f504985eb24e3b20a9e41e0ec7e398798d18f0"
         },
         "files": [
             "config/packages/sentry.yaml"
@@ -427,7 +427,7 @@
             "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "1.0",
-            "ref": "7d5c5e282f7e2c36a2c3bbb1504f78456c352407"
+            "ref": "b9e6cc8e7b6069d0e8a816665809a423864eb4dd"
         },
         "files": [
             "config/packages/messenger.yaml"

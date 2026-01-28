@@ -63,7 +63,7 @@ class PackageFormType extends AbstractType
                 ->add('mirrorRegistry', EntityType::class, [
                     'class' => Registry::class,
                     'required' => false,
-                    'query_builder' => function (RegistryRepository $repository) use ($package) {
+                    'query_builder' => static function (RegistryRepository $repository) use ($package) {
                         return $repository->createQueryBuilder('registry')
                             ->where('registry.id = :id')
                             ->setParameter('id', $package->getMirrorRegistry()->getId());
@@ -73,7 +73,7 @@ class PackageFormType extends AbstractType
                     'class' => PackageFetchStrategy::class,
                     'expanded' => true,
                     'disabled' => !$package->getRepositoryUrl(),
-                    'choice_label' => function (PackageFetchStrategy $choice): string {
+                    'choice_label' => static function (PackageFetchStrategy $choice): string {
                         return "package.fetch-strategy.{$choice->value}";
                     },
                 ]);

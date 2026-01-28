@@ -69,7 +69,7 @@ class DashboardRegistryController extends AbstractCrudController
             ->setTemplatePath('dashboard/fields/registry_package_mirroring.html.twig')
             ->setRequired(true)
             ->setChoices(RegistryPackageMirroring::cases())
-            ->setFormTypeOption('choice_label', function (RegistryPackageMirroring $choice): string {
+            ->setFormTypeOption('choice_label', static function (RegistryPackageMirroring $choice): string {
                 return "registry.package-mirroring.{$choice->value}";
             })
             ->renderExpanded();

@@ -17,7 +17,7 @@ class PackageAddMirroringFormType extends AbstractType
             ->add('packages', TextareaType::class)
             ->add('registry', EntityType::class, [
                 'class' => Registry::class,
-                'query_builder' => function (RegistryRepository $repository) {
+                'query_builder' => static function (RegistryRepository $repository) {
                     return $repository->createPackageMirroringQueryBuilder('manual');
                 },
             ]);
