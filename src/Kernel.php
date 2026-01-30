@@ -45,4 +45,10 @@ class Kernel extends BaseKernel
         $_SERVER['COMPOSER_CACHE_DIR'] = $this->container->getParameter('dirigent.storage.path') . '/composer-cache';
         $_SERVER['COMPOSER_HOME'] = $this->container->getParameter('dirigent.storage.path') . '/composer';
     }
+
+    #[\Override]
+    public function getCacheDir(): string
+    {
+        return sprintf('%s/var/cache/symfony/%s', $this->getProjectDir(), $this->environment);
+    }
 }

@@ -15,7 +15,7 @@ class PhpPlatformTest extends DockerStandaloneTestCase
     public function testSymfonyCacheGenerated(): void
     {
         $this->assertContainerFileExists(
-            'var/cache/prod/CodedMonkey_Dirigent_KernelProdContainer.php',
+            'var/cache/symfony/prod/CodedMonkey_Dirigent_KernelProdContainer.php',
             'The Symfony cache must be generated during initialization.',
         );
     }
