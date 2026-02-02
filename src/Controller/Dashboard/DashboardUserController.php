@@ -37,11 +37,9 @@ class DashboardUserController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         $impersonate = Action::new('impersonate', 'Impersonate')
-            ->linkToUrl(function (User $user): string {
-                return $this->generateUrl('dashboard', [
-                    '_switch_user' => $user->getUserIdentifier(),
-                ]);
-            });
+            ->linkToUrl(fn (User $user): string => $this->generateUrl('dashboard', [
+                '_switch_user' => $user->getUserIdentifier(),
+            ]));
 
         return $actions
             ->add(Crud::PAGE_INDEX, $impersonate)
