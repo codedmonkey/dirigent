@@ -37,7 +37,7 @@ class PackageFixtures extends Fixture
 
             while ($date->getTimestamp() <= $today->getTimestamp()) {
                 foreach ($versions as $version) {
-                    for ($number = rand(0, 100); $number > 0; --$number) {
+                    for ($number = random_int(0, 100); $number > 0; --$number) {
                         $version->getInstallations()->increase($date);
                         $package->getInstallations()->increase($date);
                     }
