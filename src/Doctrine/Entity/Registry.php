@@ -117,6 +117,6 @@ class Registry
 
     public function getDomain(): string
     {
-        return parse_url($this->url, PHP_URL_HOST);
+        return parse_url((string) $this->url, PHP_URL_HOST);
     }
 }

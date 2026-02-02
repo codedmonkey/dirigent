@@ -334,7 +334,7 @@ class Package extends TrackedEntity
 
         static $allowedDomains = ['github.com', 'gitlab.com', 'bitbucket.org'];
         foreach ($allowedDomains as $domain) {
-            if (str_starts_with($url, "https://$domain/")) {
+            if (str_starts_with((string) $url, "https://$domain/")) {
                 return $url;
             }
         }
@@ -521,7 +521,7 @@ class Package extends TrackedEntity
 
             static $parser = new VersionParser();
 
-            return $version->hasVersionAlias() && str_ends_with($parser->normalize($version->getVersionAlias()), '.9999999-dev');
+            return $version->hasVersionAlias() && str_ends_with((string) $parser->normalize($version->getVersionAlias()), '.9999999-dev');
         });
     }
 

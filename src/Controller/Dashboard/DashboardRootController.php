@@ -55,11 +55,12 @@ class DashboardRootController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         $request = $this->container->get('request_stack')->getCurrentRequest();
+        $routeName = (string) $request->attributes->getString('_route');
         /** @var User|null $user */
         $user = $this->getUser();
 
         $packagesItem = MenuItem::linkToUrl('Packages', 'fa fa-cubes', $this->generateUrl('dashboard_packages'));
-        if (str_starts_with($request->query->getString('routeName'), 'dashboard_packages_')) {
+        if (str_starts_with($routeName, 'dashboard_packages_')) {
             $packagesItem->getAsDto()->setSelected(true);
         }
 

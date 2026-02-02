@@ -64,7 +64,7 @@ class DashboardPackagesController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $registry = $form->get('registry')->getData();
 
-            $packageNamesInput = $form->get('packages')->getData();
+            $packageNamesInput = (string) $form->get('packages')->getData();
             $packageNames = preg_split('#(\s|,)+#', $packageNamesInput);
 
             $results = [];

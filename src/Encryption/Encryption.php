@@ -63,8 +63,8 @@ readonly class Encryption
             );
         }
 
-        $binaryPrivateKey = sodium_hex2bin($privateKey);
-        $binaryPublicKey = sodium_hex2bin($publicKey);
+        $binaryPrivateKey = sodium_hex2bin((string) $privateKey);
+        $binaryPublicKey = sodium_hex2bin((string) $publicKey);
         $binaryRotatedKeys = array_map(
             static fn (string $rotatedKey): string => sodium_hex2bin($rotatedKey),
             $rotatedKeys,

@@ -16,7 +16,7 @@ readonly class DashboardRoutingListener
     public function dashboardContext(RequestEvent $event): void
     {
         $request = $event->getRequest();
-        $routeName = $request->attributes->get('_route');
+        $routeName = $request->attributes->getString('_route');
 
         if (str_starts_with($routeName, 'dashboard_') || 'mfa_login' === $routeName) {
             $request->attributes->set(EA::DASHBOARD_CONTROLLER_FQCN, DashboardRootController::class);
