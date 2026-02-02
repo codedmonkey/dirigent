@@ -12,7 +12,7 @@ class ConsoleApplication extends Application
     private bool $commandsRegistered = false;
 
     public function __construct(
-        private KernelInterface $kernel,
+        private readonly KernelInterface $kernel,
     ) {
         parent::__construct('Dirigent', Kernel::VERSION);
     }
