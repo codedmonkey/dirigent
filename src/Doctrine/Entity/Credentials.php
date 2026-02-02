@@ -8,7 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CredentialsRepository::class)]
-class Credentials
+class Credentials implements \Stringable
 {
     #[ORM\Column]
     #[ORM\GeneratedValue]
@@ -40,7 +40,7 @@ class Credentials
 
     public function __toString(): string
     {
-        return $this->name;
+        return (string) $this->name;
     }
 
     public function getDescription(): ?string
