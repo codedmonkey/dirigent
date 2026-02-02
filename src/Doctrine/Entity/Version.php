@@ -642,7 +642,7 @@ class Version extends TrackedEntity
 
         $authors = $this->getAuthors();
         foreach ($authors as &$author) {
-            uksort($author, [$this, 'sortAuthorKeys']);
+            uksort($author, $this->sortAuthorKeys(...));
         }
         unset($author);
 

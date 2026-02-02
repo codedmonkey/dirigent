@@ -361,7 +361,7 @@ class Package extends TrackedEntity
         if (!isset($this->sortedVersions)) {
             $this->sortedVersions = $this->versions->toArray();
 
-            usort($this->sortedVersions, [static::class, 'sortVersions']);
+            usort($this->sortedVersions, static::sortVersions(...));
         }
 
         return $this->sortedVersions;
@@ -482,7 +482,7 @@ class Package extends TrackedEntity
         $activeVersions = [...$activeVersions, ...$activeDevelopmentVersions];
 
         if (count($activeVersions)) {
-            usort($activeVersions, [static::class, 'sortVersions']);
+            usort($activeVersions, static::sortVersions(...));
 
             return $activeVersions;
         }
@@ -490,7 +490,7 @@ class Package extends TrackedEntity
         // Only show pre-release versions (0.x.x) if no versions after 1.0.0 was found
         $activePrereleaseVersions = [...$activePrereleaseVersions, ...$activePrereleaseDevelopmentVersions];
 
-        usort($activePrereleaseVersions, [static::class, 'sortVersions']);
+        usort($activePrereleaseVersions, static::sortVersions(...));
 
         return $activePrereleaseVersions;
     }

@@ -44,8 +44,8 @@ class PackageFormType extends AbstractType
                 'disabled' => true,
                 'help' => 'Adding a mirror registry to a package is not possible. Delete the package first.',
             ])
-            ->addEventListener(FormEvents::POST_SET_DATA, [$this, 'onPostSetData'])
-            ->addEventListener(FormEvents::SUBMIT, [$this, 'onSubmit']);
+            ->addEventListener(FormEvents::POST_SET_DATA, $this->onPostSetData(...))
+            ->addEventListener(FormEvents::SUBMIT, $this->onSubmit(...));
     }
 
     public function onPostSetData(PostSetDataEvent $event): void
