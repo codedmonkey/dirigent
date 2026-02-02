@@ -62,6 +62,7 @@ class AccessToken extends TrackedEntity
         return $this->token;
     }
 
+    #[\Override]
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;

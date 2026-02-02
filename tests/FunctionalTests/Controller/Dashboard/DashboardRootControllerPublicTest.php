@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DashboardRootControllerPublicTest extends WebTestCase
 {
+    #[\Override]
     protected static function getKernelClass(): string
     {
         return PublicKernel::class;

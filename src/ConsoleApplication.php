@@ -17,6 +17,7 @@ class ConsoleApplication extends Application
         parent::__construct('Dirigent', Kernel::VERSION);
     }
 
+    #[\Override]
     public function doRun(InputInterface $input, OutputInterface $output): int
     {
         $this->registerCommands();

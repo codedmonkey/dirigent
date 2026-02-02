@@ -283,6 +283,7 @@ class Package extends TrackedEntity
         return $this->cachedVersions[strtolower($normalizedVersion)] ?? null;
     }
 
+    #[\Override]
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;

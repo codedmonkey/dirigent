@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Tests\Docker\Standalone;
 
 abstract class DockerStandaloneIsolatedTestCase extends DockerStandaloneTestCase
 {
+    #[\Override]
     protected function setUp(): void
     {
     }

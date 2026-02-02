@@ -37,18 +37,21 @@ class DashboardRootController extends AbstractDashboardController
     ) {
     }
 
+    #[\Override]
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()
             ->setTitle($this->title);
     }
 
+    #[\Override]
     public function configureAssets(): Assets
     {
         return Assets::new()
             ->addWebpackEncoreEntry('dashboard');
     }
 
+    #[\Override]
     public function configureMenuItems(): iterable
     {
         $request = $this->container->get('request_stack')->getCurrentRequest();
@@ -93,6 +96,7 @@ class DashboardRootController extends AbstractDashboardController
     /**
      * @param User $user
      */
+    #[\Override]
     public function configureUserMenu(UserInterface $user): UserMenu
     {
         $menu = parent::configureUserMenu($user)
@@ -109,6 +113,7 @@ class DashboardRootController extends AbstractDashboardController
     }
 
     #[IsGrantedAccess]
+    #[\Override]
     public function index(): Response
     {
         $packageCount = $this->packageRepository->count();

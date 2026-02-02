@@ -7,6 +7,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 
 class PublicKernel extends Kernel
 {
+    #[\Override]
     protected function configureContainer(ContainerConfigurator $container): void
     {
         parent::configureContainer($container);

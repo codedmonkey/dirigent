@@ -37,6 +37,7 @@ class Kernel extends BaseKernel
         $container->addCompilerPass(new ParametersPass());
     }
 
+    #[\Override]
     public function boot(): void
     {
         parent::boot();

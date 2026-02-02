@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApiControllerPublicTest extends KernelTestCase
 {
+    #[\Override]
     protected static function getKernelClass(): string
     {
         return PublicKernel::class;

@@ -19,6 +19,7 @@ class DashboardCredentialsController extends AbstractCrudController
         return Credentials::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return parent::configureCrud($crud)
@@ -27,6 +28,7 @@ class DashboardCredentialsController extends AbstractCrudController
             ->overrideTemplate('layout', 'dashboard/credentials/layout.html.twig');
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         yield TextField::new('name');

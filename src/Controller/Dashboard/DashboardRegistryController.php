@@ -28,6 +28,7 @@ class DashboardRegistryController extends AbstractCrudController
         return Registry::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
@@ -36,6 +37,7 @@ class DashboardRegistryController extends AbstractCrudController
             ->setEntityPermission('ROLE_ADMIN');
     }
 
+    #[\Override]
     public function configureActions(Actions $actions): Actions
     {
         $upAction = Action::new('moveUp', icon: 'fa fa-arrow-up')
@@ -48,6 +50,7 @@ class DashboardRegistryController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, $upAction);
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         yield TextField::new('name')

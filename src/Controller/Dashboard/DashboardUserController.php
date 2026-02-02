@@ -24,6 +24,7 @@ class DashboardUserController extends AbstractCrudController
         return User::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return parent::configureCrud($crud)
@@ -32,6 +33,7 @@ class DashboardUserController extends AbstractCrudController
             ->setEntityPermission('ROLE_ADMIN');
     }
 
+    #[\Override]
     public function configureActions(Actions $actions): Actions
     {
         $impersonate = Action::new('impersonate', 'Impersonate')
@@ -46,6 +48,7 @@ class DashboardUserController extends AbstractCrudController
             ->setPermission('impersonate', 'ROLE_ALLOWED_TO_SWITCH');
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         yield TextField::new('username');
