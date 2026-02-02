@@ -35,6 +35,7 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.dist_mirroring.dev_packages', $mergedConfig['dist_mirroring']['dev_packages']);
     }
 
+    #[\Override]
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
     {
         return new DirigentConfiguration();

@@ -32,7 +32,7 @@ class PackageAddVcsFormType extends AbstractType
                 'class' => Credentials::class,
                 'placeholder' => 'No credentials',
             ])
-            ->addEventListener(FormEvents::SUBMIT, [$this, 'onSubmit']);
+            ->addEventListener(FormEvents::SUBMIT, $this->onSubmit(...));
     }
 
     public function onSubmit(SubmitEvent $event): void

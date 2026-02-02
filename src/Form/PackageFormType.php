@@ -44,8 +44,8 @@ class PackageFormType extends AbstractType
                 'disabled' => true,
                 'help' => 'Adding a mirror registry to a package is not possible. Delete the package first.',
             ])
-            ->addEventListener(FormEvents::POST_SET_DATA, [$this, 'onPostSetData'])
-            ->addEventListener(FormEvents::SUBMIT, [$this, 'onSubmit']);
+            ->addEventListener(FormEvents::POST_SET_DATA, $this->onPostSetData(...))
+            ->addEventListener(FormEvents::SUBMIT, $this->onSubmit(...));
     }
 
     public function onPostSetData(PostSetDataEvent $event): void
@@ -63,19 +63,15 @@ class PackageFormType extends AbstractType
                 ->add('mirrorRegistry', EntityType::class, [
                     'class' => Registry::class,
                     'required' => false,
-                    'query_builder' => static function (RegistryRepository $repository) use ($package) {
-                        return $repository->createQueryBuilder('registry')
-                            ->where('registry.id = :id')
-                            ->setParameter('id', $package->getMirrorRegistry()->getId());
-                    },
+                    'query_builder' => static fn (RegistryRepository $repository) => $repository->createQueryBuilder('registry')
+                        ->where('registry.id = :id')
+                        ->setParameter('id', $package->getMirrorRegistry()->getId()),
                 ])
                 ->add('fetchStrategy', EnumType::class, [
                     'class' => PackageFetchStrategy::class,
                     'expanded' => true,
                     'disabled' => !$package->getRepositoryUrl(),
-                    'choice_label' => static function (PackageFetchStrategy $choice): string {
-                        return "package.fetch-strategy.{$choice->value}";
-                    },
+                    'choice_label' => static fn (PackageFetchStrategy $choice): string => "package.fetch-strategy.{$choice->value}",
                 ]);
 
             if (PackageFetchStrategy::Mirror === $package->getFetchStrategy()) {

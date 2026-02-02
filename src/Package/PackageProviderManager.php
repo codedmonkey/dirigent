@@ -26,7 +26,7 @@ readonly class PackageProviderManager
         $devPackages = [];
 
         $versions = $package->getVersions()->toArray();
-        usort($versions, [Package::class, 'sortVersions']);
+        usort($versions, Package::sortVersions(...));
 
         foreach ($versions as $version) {
             $versionData = $version->toComposerArray();

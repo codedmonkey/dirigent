@@ -37,6 +37,7 @@ class Kernel extends BaseKernel
         $container->addCompilerPass(new ParametersPass());
     }
 
+    #[\Override]
     public function boot(): void
     {
         parent::boot();
@@ -44,5 +45,11 @@ class Kernel extends BaseKernel
         // Set Composer env vars
         $_SERVER['COMPOSER_CACHE_DIR'] = $this->container->getParameter('dirigent.storage.path') . '/composer-cache';
         $_SERVER['COMPOSER_HOME'] = $this->container->getParameter('dirigent.storage.path') . '/composer';
+    }
+
+    #[\Override]
+    public function getCacheDir(): string
+    {
+        return sprintf('%s/var/cache/symfony/%s', $this->getProjectDir(), $this->environment);
     }
 }

@@ -24,6 +24,7 @@ class DashboardUserController extends AbstractCrudController
         return User::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return parent::configureCrud($crud)
@@ -32,20 +33,20 @@ class DashboardUserController extends AbstractCrudController
             ->setEntityPermission('ROLE_ADMIN');
     }
 
+    #[\Override]
     public function configureActions(Actions $actions): Actions
     {
         $impersonate = Action::new('impersonate', 'Impersonate')
-            ->linkToUrl(function (User $user): string {
-                return $this->generateUrl('dashboard', [
-                    '_switch_user' => $user->getUserIdentifier(),
-                ]);
-            });
+            ->linkToUrl(fn (User $user): string => $this->generateUrl('dashboard', [
+                '_switch_user' => $user->getUserIdentifier(),
+            ]));
 
         return $actions
             ->add(Crud::PAGE_INDEX, $impersonate)
             ->setPermission('impersonate', 'ROLE_ALLOWED_TO_SWITCH');
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         yield TextField::new('username');

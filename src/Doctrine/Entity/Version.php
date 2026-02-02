@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VersionRepository::class)]
 #[ORM\UniqueConstraint(name: 'pkg_ver_idx', columns: ['package_id', 'normalized_version'])]
-class Version extends TrackedEntity
+class Version extends TrackedEntity implements \Stringable
 {
     #[ORM\Id]
     #[ORM\Column]
@@ -642,7 +642,7 @@ class Version extends TrackedEntity
 
         $authors = $this->getAuthors();
         foreach ($authors as &$author) {
-            uksort($author, [$this, 'sortAuthorKeys']);
+            uksort($author, $this->sortAuthorKeys(...));
         }
         unset($author);
 

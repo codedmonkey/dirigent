@@ -25,6 +25,7 @@ class EncryptionGenerateKeysCommandTest extends KernelTestCase
         $this->clearKeys();
     }
 
+    #[\Override]
     protected function tearDown(): void
     {
         $this->clearKeys();

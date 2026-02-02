@@ -58,10 +58,10 @@ class VersionRepository extends ServiceEntityRepository
         $versions = [];
         foreach ($rows as $row) {
             if ($row['source']) {
-                $row['source'] = json_decode($row['source'], true);
+                $row['source'] = json_decode((string) $row['source'], true);
             }
 
-            $key = strtolower($row['normalized_version']);
+            $key = strtolower((string) $row['normalized_version']);
             $versions[$key] = $row;
         }
 

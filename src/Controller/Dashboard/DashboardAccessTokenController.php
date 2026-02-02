@@ -35,6 +35,7 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
         ];
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
@@ -43,6 +44,7 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
             ->overrideTemplate('crud/index', 'dashboard/access_token/index.html.twig');
     }
 
+    #[\Override]
     public function configureActions(Actions $actions): Actions
     {
         return $actions
@@ -50,12 +52,14 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
             ->remove(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER);
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         yield TextField::new('name');
         yield DateTimeField::new('expiresAt');
     }
 
+    #[\Override]
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
     {
         /** @var User $user */

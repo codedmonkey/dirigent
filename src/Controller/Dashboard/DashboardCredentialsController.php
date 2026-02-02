@@ -19,6 +19,7 @@ class DashboardCredentialsController extends AbstractCrudController
         return Credentials::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return parent::configureCrud($crud)
@@ -27,6 +28,7 @@ class DashboardCredentialsController extends AbstractCrudController
             ->overrideTemplate('layout', 'dashboard/credentials/layout.html.twig');
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         yield TextField::new('name');
@@ -36,9 +38,7 @@ class DashboardCredentialsController extends AbstractCrudController
             ->setTemplatePath('dashboard/fields/credentials_type.html.twig')
             ->setRequired(true)
             ->setChoices(CredentialsType::cases())
-            ->setFormTypeOption('choice_label', static function (CredentialsType $choice): string {
-                return "credentials.type.{$choice->value}";
-            })
+            ->setFormTypeOption('choice_label', static fn (CredentialsType $choice): string => "credentials.type.{$choice->value}")
             ->renderExpanded();
         yield TextField::new('username')
             ->setFormTypeOption('row_attr', ['data-credentials-field' => 'username'])

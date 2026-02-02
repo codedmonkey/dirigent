@@ -31,6 +31,7 @@ class EncryptedTextType extends Type
         return $platform->getClobTypeDeclarationSQL($column);
     }
 
+    #[\Override]
     public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         if (null === $value) {
@@ -40,6 +41,7 @@ class EncryptedTextType extends Type
         return $this->encryption->reveal($value);
     }
 
+    #[\Override]
     public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if (null === $value) {

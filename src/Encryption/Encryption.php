@@ -58,15 +58,15 @@ readonly class Encryption
             $privateKey = $filesystem->readFile($privateKeyPath);
             $publicKey = $filesystem->readFile($publicKeyPath);
             $rotatedKeys = array_map(
-                static fn (string $rotatedKeyPath): string => $filesystem->readFile($rotatedKeyPath),
+                $filesystem->readFile(...),
                 $rotatedKeyPaths
             );
         }
 
-        $binaryPrivateKey = sodium_hex2bin($privateKey);
-        $binaryPublicKey = sodium_hex2bin($publicKey);
+        $binaryPrivateKey = sodium_hex2bin((string) $privateKey);
+        $binaryPublicKey = sodium_hex2bin((string) $publicKey);
         $binaryRotatedKeys = array_map(
-            static fn (string $rotatedKey): string => sodium_hex2bin($rotatedKey),
+            sodium_hex2bin(...),
             $rotatedKeys,
         );
 

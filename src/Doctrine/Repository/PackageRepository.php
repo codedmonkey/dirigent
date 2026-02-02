@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  */
 class PackageRepository extends ServiceEntityRepository
 {
-    private ?\DateInterval $periodicUpdateInterval;
+    private readonly ?\DateInterval $periodicUpdateInterval;
 
     /**
      * @var array<string, Package>

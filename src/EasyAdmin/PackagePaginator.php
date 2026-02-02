@@ -88,8 +88,8 @@ class PackagePaginator implements EntityPaginatorInterface
 
     public function getPageRange(?int $pagesOnEachSide = null, ?int $pagesOnEdges = null): iterable
     {
-        $pagesOnEachSide = $pagesOnEachSide ?? $this->rangeSize;
-        $pagesOnEdges = $pagesOnEdges ?? $this->rangeEdgeSize;
+        $pagesOnEachSide ??= $this->rangeSize;
+        $pagesOnEdges ??= $this->rangeEdgeSize;
 
         if (0 === $pagesOnEachSide) {
             return null;

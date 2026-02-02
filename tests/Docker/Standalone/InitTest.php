@@ -11,11 +11,13 @@ class InitTest extends DockerStandaloneIsolatedTestCase
 {
     protected Filesystem $filesystem;
 
+    #[\Override]
     protected function setUp(): void
     {
         $this->filesystem = new Filesystem();
     }
 
+    #[\Override]
     protected function tearDown(): void
     {
         parent::tearDown();

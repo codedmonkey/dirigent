@@ -283,6 +283,7 @@ class Package extends TrackedEntity
         return $this->cachedVersions[strtolower($normalizedVersion)] ?? null;
     }
 
+    #[\Override]
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
@@ -333,7 +334,7 @@ class Package extends TrackedEntity
 
         static $allowedDomains = ['github.com', 'gitlab.com', 'bitbucket.org'];
         foreach ($allowedDomains as $domain) {
-            if (str_starts_with($url, "https://$domain/")) {
+            if (str_starts_with((string) $url, "https://$domain/")) {
                 return $url;
             }
         }
@@ -360,7 +361,7 @@ class Package extends TrackedEntity
         if (!isset($this->sortedVersions)) {
             $this->sortedVersions = $this->versions->toArray();
 
-            usort($this->sortedVersions, [static::class, 'sortVersions']);
+            usort($this->sortedVersions, static::sortVersions(...));
         }
 
         return $this->sortedVersions;
@@ -481,7 +482,7 @@ class Package extends TrackedEntity
         $activeVersions = [...$activeVersions, ...$activeDevelopmentVersions];
 
         if (count($activeVersions)) {
-            usort($activeVersions, [static::class, 'sortVersions']);
+            usort($activeVersions, static::sortVersions(...));
 
             return $activeVersions;
         }
@@ -489,7 +490,7 @@ class Package extends TrackedEntity
         // Only show pre-release versions (0.x.x) if no versions after 1.0.0 was found
         $activePrereleaseVersions = [...$activePrereleaseVersions, ...$activePrereleaseDevelopmentVersions];
 
-        usort($activePrereleaseVersions, [static::class, 'sortVersions']);
+        usort($activePrereleaseVersions, static::sortVersions(...));
 
         return $activePrereleaseVersions;
     }
@@ -520,7 +521,7 @@ class Package extends TrackedEntity
 
             static $parser = new VersionParser();
 
-            return $version->hasVersionAlias() && str_ends_with($parser->normalize($version->getVersionAlias()), '.9999999-dev');
+            return $version->hasVersionAlias() && str_ends_with((string) $parser->normalize($version->getVersionAlias()), '.9999999-dev');
         });
     }
 

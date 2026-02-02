@@ -37,26 +37,30 @@ class DashboardRootController extends AbstractDashboardController
     ) {
     }
 
+    #[\Override]
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()
             ->setTitle($this->title);
     }
 
+    #[\Override]
     public function configureAssets(): Assets
     {
         return Assets::new()
             ->addWebpackEncoreEntry('dashboard');
     }
 
+    #[\Override]
     public function configureMenuItems(): iterable
     {
         $request = $this->container->get('request_stack')->getCurrentRequest();
+        $routeName = (string) $request->attributes->getString('_route');
         /** @var User|null $user */
         $user = $this->getUser();
 
         $packagesItem = MenuItem::linkToUrl('Packages', 'fa fa-cubes', $this->generateUrl('dashboard_packages'));
-        if (str_starts_with($request->query->getString('routeName'), 'dashboard_packages_')) {
+        if (str_starts_with($routeName, 'dashboard_packages_')) {
             $packagesItem->getAsDto()->setSelected(true);
         }
 
@@ -93,6 +97,7 @@ class DashboardRootController extends AbstractDashboardController
     /**
      * @param User $user
      */
+    #[\Override]
     public function configureUserMenu(UserInterface $user): UserMenu
     {
         $menu = parent::configureUserMenu($user)
@@ -109,6 +114,7 @@ class DashboardRootController extends AbstractDashboardController
     }
 
     #[IsGrantedAccess]
+    #[\Override]
     public function index(): Response
     {
         $packageCount = $this->packageRepository->count();

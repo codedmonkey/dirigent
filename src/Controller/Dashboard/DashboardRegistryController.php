@@ -28,6 +28,7 @@ class DashboardRegistryController extends AbstractCrudController
         return Registry::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
@@ -36,6 +37,7 @@ class DashboardRegistryController extends AbstractCrudController
             ->setEntityPermission('ROLE_ADMIN');
     }
 
+    #[\Override]
     public function configureActions(Actions $actions): Actions
     {
         $upAction = Action::new('moveUp', icon: 'fa fa-arrow-up')
@@ -48,6 +50,7 @@ class DashboardRegistryController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, $upAction);
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         yield TextField::new('name')
@@ -69,9 +72,7 @@ class DashboardRegistryController extends AbstractCrudController
             ->setTemplatePath('dashboard/fields/registry_package_mirroring.html.twig')
             ->setRequired(true)
             ->setChoices(RegistryPackageMirroring::cases())
-            ->setFormTypeOption('choice_label', static function (RegistryPackageMirroring $choice): string {
-                return "registry.package-mirroring.{$choice->value}";
-            })
+            ->setFormTypeOption('choice_label', static fn (RegistryPackageMirroring $choice): string => "registry.package-mirroring.{$choice->value}")
             ->renderExpanded();
 
         yield DateIntervalField::new('dynamicUpdateDelay')

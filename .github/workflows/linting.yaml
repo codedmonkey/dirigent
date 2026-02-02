@@ -63,6 +63,38 @@ jobs:
       #  if: always() && steps.composer-install.outcome == 'success'
       #  run: bin/console lint:xliff translations --ansi
 
+  rector:
+    name: Rector
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: Run Rector
+        run: vendor/bin/rector process --dry-run --ansi --no-progress-bar
+
   php-cs-fixer:
     name: PHP-CS-Fixer
 

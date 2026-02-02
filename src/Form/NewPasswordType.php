@@ -41,6 +41,7 @@ class NewPasswordType extends AbstractType
         ]);
     }
 
+    #[\Override]
     public function getParent(): string
     {
         return RepeatedType::class;
@@ -49,19 +50,17 @@ class NewPasswordType extends AbstractType
     public static function constraints(bool $nullable = true): array
     {
         $constraints = [
-            new Length([
-                'min' => 8,
-                'minMessage' => 'Your password must be at least {{ limit }} characters',
-                'max' => 4096, // max length allowed by Symfony for security reasons
-            ]),
+            new Length(
+                min: 8,
+                max: 4096,
+                minMessage: 'Your password must be at least {{ limit }} characters',
+            ),
             new PasswordStrength(minScore: PasswordStrength::STRENGTH_WEAK),
             new NotCompromisedPassword(),
         ];
 
         if (!$nullable) {
-            $constraints[] = new NotBlank([
-                'message' => 'Enter a password',
-            ]);
+            $constraints[] = new NotBlank(message: 'Enter a password');
         }
 
         return $constraints;
