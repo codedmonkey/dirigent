@@ -114,11 +114,6 @@ class Version extends TrackedEntity implements \Stringable
         $this->updatedAt = $updatedAt;
     }
 
-    public function getReleasedAt(): ?\DateTimeImmutable
-    {
-        return $this->currentMetadata->getReleasedAt();
-    }
-
     public function getPackage(): ?Package
     {
         return $this->package;
@@ -149,7 +144,7 @@ class Version extends TrackedEntity implements \Stringable
 
     public function getExtendedName(): string
     {
-        return $this->name . ($this->hasVersionAlias() ? ' / ' . $this->getVersionAlias() : '');
+        return $this->name . ($this->getCurrentMetadata()->hasVersionAlias() ? ' / ' . $this->getCurrentMetadata()->getVersionAlias() : '');
     }
 
     public function getMajorVersion(): int
