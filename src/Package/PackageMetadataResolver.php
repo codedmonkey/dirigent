@@ -229,7 +229,7 @@ readonly class PackageMetadataResolver
 
             // Only update the repository URL if the package is mirrored
             if ($package->getMirrorRegistry()) {
-                $package->setRepositoryUrl($primaryVersion->getSourceUrl());
+                $package->setRepositoryUrl($primaryVersion->getCurrentMetadata()->getSourceUrl());
             }
 
             $this->messenger->dispatch(new UpdatePackageLinks($package->getId(), $primaryVersion->getNormalizedName()), [

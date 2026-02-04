@@ -520,9 +520,11 @@ class Package extends TrackedEntity
                 return true;
             }
 
+            $metadata = $version->getCurrentMetadata();
+
             static $parser = new VersionParser();
 
-            return $version->hasVersionAlias() && str_ends_with((string) $parser->normalize($version->getVersionAlias()), '.9999999-dev');
+            return $metadata->hasVersionAlias() && str_ends_with((string) $parser->normalize($metadata->getVersionAlias()), '.9999999-dev');
         });
     }
 
@@ -536,41 +538,46 @@ class Package extends TrackedEntity
         return array_filter($this->getSortedVersions(), static fn (Version $version) => str_starts_with($version->getNormalizedName(), 'dev-'));
     }
 
+    /**
+     * Sort versions from newest to oldest.
+     */
     public static function sortVersions(Version $a, Version $b): int
     {
-        $aVersion = $a->getNormalizedName();
-        $bVersion = $b->getNormalizedName();
+        $aName = $a->getNormalizedName();
+        $bName = $b->getNormalizedName();
 
-        // use branch alias for sorting if one is provided
-        if (isset($a->getExtra()['branch-alias'][$aVersion])) {
-            $aVersion = Preg::replace('{(.x)?-dev$}', '.9999999-dev', $a->getExtra()['branch-alias'][$aVersion]);
+        // Use the branch alias for sorting if one is provided
+        if (null !== $aBranchAlias = $a->getCurrentMetadata()->getExtra()['branch-alias'][$aName] ?? null) {
+            $aName = Preg::replace('{(.x)?-dev$}', '.9999999-dev', $aBranchAlias);
         }
-        if (isset($b->getExtra()['branch-alias'][$bVersion])) {
-            $bVersion = Preg::replace('{(.x)?-dev$}', '.9999999-dev', $b->getExtra()['branch-alias'][$bVersion]);
+        if (null !== $bBranchAlias = $b->getCurrentMetadata()->getExtra()['branch-alias'][$bName] ?? null) {
+            $bName = Preg::replace('{(.x)?-dev$}', '.9999999-dev', $bBranchAlias);
         }
 
-        $aVersion = Preg::replace('{^dev-.*}', '0.0.0-alpha', $aVersion);
-        $bVersion = Preg::replace('{^dev-.*}', '0.0.0-alpha', $bVersion);
+        $aName = Preg::replace('{^dev-.*}', '0.0.0-alpha', $aName);
+        $bName = Preg::replace('{^dev-.*}', '0.0.0-alpha', $bName);
 
-        // sort default branch first if it is non numeric
-        if ('0.0.0-alpha' === $aVersion && $a->isDefaultBranch()) {
+        // Sort the default branch first if it is non-numeric
+        if ('0.0.0-alpha' === $aName && $a->isDefaultBranch()) {
             return -1;
         }
-        if ('0.0.0-alpha' === $bVersion && $b->isDefaultBranch()) {
+        if ('0.0.0-alpha' === $bName && $b->isDefaultBranch()) {
             return 1;
         }
 
-        // equal versions are sorted by date
-        if ($aVersion === $bVersion) {
-            // make sure sort is stable
-            if ($a->getReleasedAt() === $b->getReleasedAt()) {
-                return $a->getNormalizedName() <=> $b->getNormalizedName();
-            }
-
-            return $b->getReleasedAt() > $a->getReleasedAt() ? 1 : -1;
+        if ($aName !== $bName) {
+            return version_compare($bName, $aName);
         }
 
-        // the rest is sorted by version
-        return version_compare($bVersion, $aVersion);
+        // Equal versions are sorted by release date
+        $aReleasedAt = $a->getCurrentMetadata()->getReleasedAt();
+        $bReleasedAt = $b->getCurrentMetadata()->getReleasedAt();
+
+        if (0 !== $sort = $bReleasedAt <=> $aReleasedAt) {
+            return $sort;
+        }
+
+        // Add a stable fallback sort
+        return $b->getId() <=> $a->getId();
     }
 }

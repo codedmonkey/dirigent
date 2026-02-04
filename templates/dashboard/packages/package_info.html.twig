@@ -3,7 +3,7 @@
 {% block page_title %}
   {%- apply spaceless -%}
     {{ package.name }}
-    <small>{{ version.versionTitle }}</small>
+    <small>{{ version.extendedName }}</small>
   {%- endapply -%}
 {% endblock %}
 
@@ -73,8 +73,8 @@
           {% set packageProvidersUrl = path('dashboard_packages_providers', {package: package.name}) %}
           <div><span><a href="{{ packageProvidersUrl }}">{{ 'Providers'|trans }}</a></span> {{ providerCount }}</div>
         {% endif %}
-        {% if version.license %}
-          <div><span>{{ 'License'|trans }}</span> {{ version.license|join(', ') }}</div>
+        {% if metadata.license %}
+          <div><span>{{ 'License'|trans }}</span> {{ metadata.license|join(', ') }}</div>
         {% else %}
           <div>No license specified</div>
         {% endif %}
