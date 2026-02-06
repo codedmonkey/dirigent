@@ -253,7 +253,7 @@ readonly class PackageMetadataResolver
     {
         $metadata = $this->createMetadata($version, $data, $driver);
 
-        if ($this->hasMetadataChanged($version->getCurrentMetadata(), $metadata)) {
+        if ($this->hasMetadataChanged($metadata)) {
             $version->setCurrentMetadata($metadata);
 
             $this->entityManager->persist($metadata);
@@ -396,27 +396,17 @@ readonly class PackageMetadataResolver
         return $string;
     }
 
-    private function hasMetadataChanged(?Metadata $currentMetadata, Metadata $metadata): bool
+    private function hasMetadataChanged(Metadata $resolvedMetadata): bool
     {
-        $currentData = $currentMetadata?->toComposerArray();
-        $data = $metadata->toComposerArray();
-
-        if (null === $currentData) {
+        // Check if the package version has existing metadata first
+        if (null === $currentMetadata = $resolvedMetadata->getVersion()->getCurrentMetadata()) {
             return true;
         }
 
-        // Fields that shouldn't trigger a new revision
-        $excludeFields = ['abandoned', 'default-branch'];
+        $currentData = $currentMetadata->toComposerArray(includePackageMetadata: false);
+        $resolvedData = $resolvedMetadata->toComposerArray(includePackageMetadata: false);
 
-        foreach ($excludeFields as $field) {
-            unset($currentData[$field], $data[$field]);
-        }
-
-        // Normalize both arrays for comparison
-        ksort($currentData);
-        ksort($data);
-
-        return $currentData !== $data;
+        return $currentData !== $resolvedData;
     }
 
     private function getReadmeContents(Metadata $metadata, VcsDriverInterface $driver): ?string

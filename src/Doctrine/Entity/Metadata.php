@@ -596,7 +596,7 @@ class Metadata extends TrackedEntity implements \Stringable
         return null;
     }
 
-    public function toComposerArray(): array
+    public function toComposerArray(bool $includePackageMetadata = true): array
     {
         // Set default fields
         $data = [
@@ -628,6 +628,9 @@ class Metadata extends TrackedEntity implements \Stringable
             /** @var AbstractMetadataLink $link */
             foreach ($linkCollection as $link) {
                 $data[$linkType][$link->getLinkedPackageName()] = $link->getLinkedVersionConstraint();
+            }
+            if (isset($data[$linkType])) {
+                ksort($data[$linkType]);
             }
         }
 
@@ -662,7 +665,10 @@ class Metadata extends TrackedEntity implements \Stringable
             $data['bin'] = $this->binaries;
         }
 
-        // Set administrative fields
+        if (!$includePackageMetadata) {
+            return $data;
+        }
+
         if ($this->getVersion()->isDefaultBranch()) {
             $data['default-branch'] = true;
         }
