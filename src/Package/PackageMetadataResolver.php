@@ -346,24 +346,17 @@ readonly class PackageMetadataResolver
                 $links[$link->getTarget()] = $constraint;
             }
 
+            $index = 0;
             foreach ($links as $linkPackageName => $linkPackageConstraint) {
-                /** @var AbstractMetadataLink $link */
-                $link = new $linkOptions['entity']($metadata);
-                $link->setLinkedPackageName($linkPackageName);
-                $link->setLinkedVersionConstraint($linkPackageConstraint);
-
-                $metadata->{'get' . ucfirst($linkType)}()->add($link);
+                new $linkOptions['entity']($metadata, $linkPackageName, $linkPackageConstraint, $index++);
             }
         }
 
         // Handle suggests
         if ($suggests = $data->getSuggests()) {
+            $index = 0;
             foreach ($suggests as $linkPackageName => $linkPackageConstraint) {
-                $link = new MetadataSuggestLink($metadata);
-                $link->setLinkedPackageName($linkPackageName);
-                $link->setLinkedVersionConstraint($linkPackageConstraint);
-
-                $metadata->getSuggest()->add($link);
+                new MetadataSuggestLink($metadata, $linkPackageName, $linkPackageConstraint, $index++);
             }
         }
 

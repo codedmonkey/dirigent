@@ -21,10 +21,24 @@ abstract class AbstractMetadataLink
     #[ORM\Column(type: Types::TEXT)]
     private string $linkedVersionConstraint;
 
-    public function __construct(Metadata $metadata)
-    {
+    #[ORM\Column]
+    private int $index;
+
+    public function __construct(
+        Metadata $metadata,
+        string $linkedPackageName,
+        string $linkedVersionConstraint,
+        int $index,
+    ) {
         $this->metadata = $metadata;
+        $this->linkedPackageName = $linkedPackageName;
+        $this->linkedVersionConstraint = $linkedVersionConstraint;
+        $this->index = $index;
+
+        $this->addToCollection();
     }
+
+    abstract protected function addToCollection(): void;
 
     public function getId(): ?int
     {
@@ -41,18 +55,13 @@ abstract class AbstractMetadataLink
         return $this->linkedPackageName;
     }
 
-    public function setLinkedPackageName(string $packageName): void
-    {
-        $this->linkedPackageName = $packageName;
-    }
-
     public function getLinkedVersionConstraint(): string
     {
         return $this->linkedVersionConstraint;
     }
 
-    public function setLinkedVersionConstraint(string $packageVersion): void
+    public function getIndex(): int
     {
-        $this->linkedVersionConstraint = $packageVersion;
+        return $this->index;
     }
 }

@@ -100,36 +100,42 @@ class Metadata extends TrackedEntity implements \Stringable
      * @var Collection<int, MetadataRequireLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataRequireLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $require;
 
     /**
      * @var Collection<int, MetadataDevRequireLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataDevRequireLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $devRequire;
 
     /**
      * @var Collection<int, MetadataConflictLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataConflictLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $conflict;
 
     /**
      * @var Collection<int, MetadataProvideLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataProvideLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $provide;
 
     /**
      * @var Collection<int, MetadataReplaceLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataReplaceLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $replace;
 
     /**
      * @var Collection<int, MetadataSuggestLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataSuggestLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $suggest;
 
     /**
