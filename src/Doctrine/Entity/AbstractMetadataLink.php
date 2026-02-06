@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
+use CodedMonkey\Dirigent\Entity\MetadataLinkType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -21,9 +22,21 @@ abstract class AbstractMetadataLink
     #[ORM\Column(type: Types::TEXT)]
     private string $linkedVersionConstraint;
 
-    public function __construct(Metadata $metadata)
-    {
+    #[ORM\Column]
+    private int $index;
+
+    public function __construct(
+        Metadata $metadata,
+        string $linkedPackageName,
+        string $linkedVersionConstraint,
+        int $index,
+    ) {
         $this->metadata = $metadata;
+        $this->linkedPackageName = $linkedPackageName;
+        $this->linkedVersionConstraint = $linkedVersionConstraint;
+        $this->index = $index;
+
+        $this->addToCollection();
     }
 
     public function getId(): ?int
@@ -41,18 +54,19 @@ abstract class AbstractMetadataLink
         return $this->linkedPackageName;
     }
 
-    public function setLinkedPackageName(string $packageName): void
-    {
-        $this->linkedPackageName = $packageName;
-    }
-
     public function getLinkedVersionConstraint(): string
     {
         return $this->linkedVersionConstraint;
     }
 
-    public function setLinkedVersionConstraint(string $packageVersion): void
+    public function getIndex(): int
     {
-        $this->linkedVersionConstraint = $packageVersion;
+        return $this->index;
+    }
+
+    private function addToCollection(): void
+    {
+        $linkType = MetadataLinkType::fromClass(static::class);
+        $linkType->getMetadataLinks($this->metadata)->add($this);
     }
 }

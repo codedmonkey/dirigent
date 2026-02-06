@@ -23,9 +23,16 @@ class MetadataKeyword
     #[ORM\Column]
     private int $index;
 
-    public function __construct(Metadata $metadata)
-    {
+    public function __construct(
+        Metadata $metadata,
+        Keyword $keyword,
+        int $index,
+    ) {
         $this->metadata = $metadata;
+        $this->keyword = $keyword;
+        $this->index = $index;
+
+        $this->metadata->getKeywords()->add($this);
     }
 
     public function getId(): ?int
@@ -43,19 +50,9 @@ class MetadataKeyword
         return $this->keyword;
     }
 
-    public function setKeyword(Keyword $keyword): void
-    {
-        $this->keyword = $keyword;
-    }
-
     public function getIndex(): int
     {
         return $this->index;
-    }
-
-    public function setIndex(int $index): void
-    {
-        $this->index = $index;
     }
 
     public function getName(): string
