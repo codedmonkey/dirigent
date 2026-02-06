@@ -11,8 +11,6 @@ parameters:
         - tests/bootstrap.php
     ignoreErrors:
         - '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'
-        - '#CodedMonkey\\Dirigent\\Doctrine\\Entity\\AbstractMetadataLink given\.#'
-        - '#^PHPDoc tag @var with type CodedMonkey\\Dirigent\\Doctrine\\Entity\\AbstractMetadataLink is not subtype of native type#'
         - '#^Property CodedMonkey\\Dirigent\\Doctrine\\Entity\\[a-zA-Z]+\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
         -
             message: '#^Class CodedMonkey\\Dirigent\\Doctrine\\Entity\\TrackedEntity has an uninitialized readonly property \$createdAt\. Assign it in the constructor\.$#'
