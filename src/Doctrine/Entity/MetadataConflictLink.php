@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class MetadataConflictLink extends AbstractMetadataLink
 {
-    #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'conflict')]
+    #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'conflictLinks')]
     #[ORM\JoinColumn(nullable: false)]
     protected Metadata $metadata;
 }

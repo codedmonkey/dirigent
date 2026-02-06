@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class MetadataReplaceLink extends AbstractMetadataLink
 {
-    #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'replace')]
+    #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'replaceLinks')]
     #[ORM\JoinColumn(nullable: false)]
     protected Metadata $metadata;
 }
