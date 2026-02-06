@@ -6,14 +6,14 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\MappedSuperclass]
-abstract class AbstractVersionLink
+abstract class AbstractMetadataLink
 {
     #[ORM\Id]
     #[ORM\Column]
     #[ORM\GeneratedValue]
     private ?int $id = null;
 
-    protected Version $version;
+    protected Metadata $metadata;
 
     #[ORM\Column(length: 191)]
     private string $linkedPackageName;
@@ -21,19 +21,19 @@ abstract class AbstractVersionLink
     #[ORM\Column(type: Types::TEXT)]
     private string $linkedVersionConstraint;
 
+    public function __construct(Metadata $metadata)
+    {
+        $this->metadata = $metadata;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getVersion(): Version
+    public function getMetadata(): Metadata
     {
-        return $this->version;
-    }
-
-    public function setVersion(Version $version): void
-    {
-        $this->version = $version;
+        return $this->metadata;
     }
 
     public function getLinkedPackageName(): string
