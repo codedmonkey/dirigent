@@ -37,12 +37,9 @@ trait MockEntityFactoryTrait
 
     protected function createMockVersion(Package $package, string $versionName = '1.0.0'): Version
     {
-        $version = new Version();
-
-        $version->setName($package->getName());
-        $version->setVersion($versionName);
-        $version->setNormalizedVersion((new VersionParser())->normalize($versionName));
-        $version->setPackage($package);
+        $version = new Version($package);
+        $version->setName($versionName);
+        $version->setNormalizedName((new VersionParser())->normalize($versionName));
 
         $package->getVersions()->add($version);
 

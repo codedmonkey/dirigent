@@ -40,29 +40,25 @@ class VersionRepository extends ServiceEntityRepository
         }
     }
 
-    public function findOneByNormalizedVersion(Package $package, string $version): ?Version
+    public function findOneByNormalizedVersionName(Package $package, string $name): ?Version
     {
-        return $this->findOneBy(['package' => $package, 'normalizedVersion' => $version]);
+        return $this->findOneBy(['package' => $package, 'normalizedName' => $name]);
     }
 
     /**
-     * @return array<string, array{id: int, version: string, normalized_version: string, source: ?array}>
+     * @return array<string, int>
      */
     public function getVersionMetadataForUpdate(Package $package): array
     {
         $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative(
-            'SELECT id, version, normalized_version, source FROM version v WHERE v.package_id = :id',
-            ['id' => $package->getId()]
+            'SELECT id, normalized_name FROM version v WHERE v.package_id = :id',
+            ['id' => $package->getId()],
         );
 
         $versions = [];
         foreach ($rows as $row) {
-            if ($row['source']) {
-                $row['source'] = json_decode((string) $row['source'], true);
-            }
-
-            $key = strtolower((string) $row['normalized_version']);
-            $versions[$key] = $row;
+            $key = strtolower((string) $row['normalized_name']);
+            $versions[$key] = $row['id'];
         }
 
         return $versions;

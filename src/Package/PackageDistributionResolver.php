@@ -35,17 +35,19 @@ readonly class PackageDistributionResolver
     {
         $package = $version->getPackage();
         $packageName = $package->getName();
-        $versionName = $version->getNormalizedVersion();
+        $versionName = $version->getNormalizedName();
 
         if ($this->exists($packageName, $versionName, $reference, $type)) {
             return true;
         }
 
-        if ($reference !== $version->getDistReference() || $type !== $version->getDistType()) {
+        $metadata = $version->getCurrentMetadata();
+
+        if ($reference !== $metadata->getDistReference() || $type !== $metadata->getDistType()) {
             return false;
         }
 
-        $distUrl = $version->getDistUrl();
+        $distUrl = $metadata->getDistUrl();
         $path = $this->path($packageName, $versionName, $reference, $type);
 
         $this->filesystem->mkdir(dirname($path));

@@ -58,11 +58,11 @@
 {% endmacro %}
 
 {% macro versionListItem(version) %}
-  {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {package: version.package.name, version: version.version}) %}
+  {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {package: version.package.name, version: version.name}) %}
   <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
     <div class="d-flex justify-content-between">
-      <span>{{ version.versionTitle }}</span>
-      <span class="text-muted">{{ version.releasedAt.format('Y-m-d') }}</span>
+      <span>{{ version.extendedName }}</span>
+      <span class="text-muted">{{ version.currentMetadata.releasedAt.format('Y-m-d') }}</span>
     </div>
   </a>
 {% endmacro %}
