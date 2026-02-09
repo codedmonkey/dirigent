@@ -85,11 +85,6 @@ class Package extends TrackedEntity
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $dumpedAt = null;
 
-    /**
-     * @var array<string, Version> lookup table for versions
-     */
-    private array $cachedVersions;
-
     private array $sortedVersions;
 
     public function __construct()
@@ -269,18 +264,6 @@ class Package extends TrackedEntity
     public function getVersions(): Collection
     {
         return $this->versions;
-    }
-
-    public function getVersion(string $normalizedVersion): ?Version
-    {
-        if (!isset($this->cachedVersions)) {
-            $this->cachedVersions = [];
-            foreach ($this->getVersions() as $version) {
-                $this->cachedVersions[strtolower($version->getNormalizedName())] = $version;
-            }
-        }
-
-        return $this->cachedVersions[strtolower($normalizedVersion)] ?? null;
     }
 
     #[\Override]
