@@ -35,7 +35,7 @@ class Version extends TrackedEntity implements \Stringable
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Package $package;
 
-    #[ORM\OneToOne]
+    #[ORM\OneToOne(fetch: 'EAGER')]
     private ?Metadata $currentMetadata = null;
 
     #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
