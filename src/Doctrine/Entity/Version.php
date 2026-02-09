@@ -3,8 +3,6 @@
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VersionRepository::class)]
@@ -41,15 +39,11 @@ class Version extends TrackedEntity implements \Stringable
     #[ORM\OneToOne(mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
     private VersionInstallations $installations;
 
-    #[ORM\OneToMany(targetEntity: Metadata::class, mappedBy: 'version', cascade: ['persist', 'detach', 'remove'])]
-    private Collection $metadata;
-
     public function __construct(Package $package)
     {
         $this->package = $package;
 
         $this->installations = new VersionInstallations($this);
-        $this->metadata = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -132,14 +126,6 @@ class Version extends TrackedEntity implements \Stringable
     public function getInstallations(): VersionInstallations
     {
         return $this->installations;
-    }
-
-    /**
-     * @return Collection<int, Metadata>
-     */
-    public function getMetadata(): Collection
-    {
-        return $this->metadata;
     }
 
     public function getExtendedName(): string
