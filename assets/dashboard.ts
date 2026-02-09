@@ -5,6 +5,6 @@
  * (and its CSS file) in your base layout (base.html.twig).
  */
 
-import './bootstrap';
+import './stimulus_bootstrap.js';
 
 import './stylesheets/dashboard-theme.css';
