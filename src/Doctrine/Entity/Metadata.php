@@ -88,7 +88,7 @@ class Metadata extends TrackedEntity implements \Stringable
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $releasedAt = null;
 
-    #[ORM\ManyToOne(targetEntity: Version::class, inversedBy: 'metadata')]
+    #[ORM\ManyToOne(targetEntity: Version::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Version $version;
 
