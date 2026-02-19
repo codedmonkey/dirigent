@@ -5,12 +5,6 @@ namespace CodedMonkey\Dirigent\Package;
 use cebe\markdown\GithubMarkdown;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
-use CodedMonkey\Dirigent\Doctrine\Entity\MetadataConflictLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\MetadataDevRequireLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\MetadataProvideLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\MetadataReplaceLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\MetadataRequireLink;
-use CodedMonkey\Dirigent\Doctrine\Entity\MetadataSuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
@@ -19,6 +13,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\KeywordRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
+use CodedMonkey\Dirigent\Entity\MetadataLinkType;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use CodedMonkey\Dirigent\Message\UpdatePackageLinks;
 use Composer\Package\AliasPackage;
@@ -33,38 +28,6 @@ use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 readonly class PackageMetadataResolver
 {
-    /**
-     * Available link types and their associated methods and entities.
-     *
-     * Each link type maps to an array that specifies:
-     * - the `method` to be used for handling the link type.
-     * - the `entity` class associated with the link type.
-     *
-     * Does not include `suggest` as it's not defined as a Link object in the Composer package interface.
-     */
-    private const array SUPPORTED_LINK_TYPES = [
-        'conflict' => [
-            'method' => 'getConflicts',
-            'entity' => MetadataConflictLink::class,
-        ],
-        'devRequire' => [
-            'method' => 'getDevRequires',
-            'entity' => MetadataDevRequireLink::class,
-        ],
-        'provide' => [
-            'method' => 'getProvides',
-            'entity' => MetadataProvideLink::class,
-        ],
-        'replace' => [
-            'method' => 'getReplaces',
-            'entity' => MetadataReplaceLink::class,
-        ],
-        'require' => [
-            'method' => 'getRequires',
-            'entity' => MetadataRequireLink::class,
-        ],
-    ];
-
     public function __construct(
         private ComposerClient $composer,
         private MessageBusInterface $messenger,
@@ -327,35 +290,34 @@ readonly class PackageMetadataResolver
         }
 
         // Handle links
-        foreach (self::SUPPORTED_LINK_TYPES as $linkType => $linkOptions) {
-            $links = [];
-            /** @var ComposerPackageLink $link */
-            foreach ($data->{$linkOptions['method']}() as $link) {
-                $constraint = $link->getPrettyConstraint();
-                if (str_contains($constraint, ',') && str_contains($constraint, '@')) {
-                    $constraint = Preg::replaceCallback('{([><]=?\s*[^@]+?)@([a-z]+)}i', static function ($matches) {
-                        if ('stable' === $matches[2]) {
-                            return $matches[1];
-                        }
+        foreach (MetadataLinkType::cases() as $linkType) {
+            $linkClass = $linkType->getClass();
 
-                        return $matches[1] . '-' . $matches[2];
-                    }, $constraint);
+            if ($linkType->isConstraintLink()) {
+                $links = [];
+                /** @var ComposerPackageLink $link */
+                foreach ($linkType->getComposerPackageLinks($data) as $link) {
+                    $constraint = $link->getPrettyConstraint();
+                    if (str_contains($constraint, ',') && str_contains($constraint, '@')) {
+                        $constraint = Preg::replaceCallback('{([><]=?\s*[^@]+?)@([a-z]+)}i', static function ($matches) {
+                            if ('stable' === $matches[2]) {
+                                return $matches[1];
+                            }
+
+                            return $matches[1] . '-' . $matches[2];
+                        }, $constraint);
+                    }
+
+                    $links[$link->getTarget()] = $constraint;
                 }
-
-                $links[$link->getTarget()] = $constraint;
+            } else {
+                // Suggest links don't contain package constraints
+                $links = $linkType->getComposerPackageLinks($data);
             }
 
             $index = 0;
-            foreach ($links as $linkPackageName => $linkPackageConstraint) {
-                new $linkOptions['entity']($metadata, $linkPackageName, $linkPackageConstraint, $index++);
-            }
-        }
-
-        // Handle suggests
-        if ($suggests = $data->getSuggests()) {
-            $index = 0;
-            foreach ($suggests as $linkPackageName => $linkPackageConstraint) {
-                new MetadataSuggestLink($metadata, $linkPackageName, $linkPackageConstraint, $index++);
+            foreach ($links as $linkTarget => $linkConstraint) {
+                new $linkClass($metadata, $linkTarget, $linkConstraint, $index++);
             }
         }
 

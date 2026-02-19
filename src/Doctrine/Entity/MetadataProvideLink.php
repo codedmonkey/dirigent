@@ -11,12 +11,6 @@ class MetadataProvideLink extends AbstractMetadataLink
     #[ORM\JoinColumn(nullable: false)]
     protected Metadata $metadata;
 
-    #[\Override]
-    protected function addToCollection(): void
-    {
-        $this->metadata->getProvide()->add($this);
-    }
-
     public function isImplementation(): bool
     {
         return str_ends_with($this->getLinkedPackageName(), '-implementation');

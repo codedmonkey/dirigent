@@ -10,10 +10,4 @@ class MetadataReplaceLink extends AbstractMetadataLink
     #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'replace')]
     #[ORM\JoinColumn(nullable: false)]
     protected Metadata $metadata;
-
-    #[\Override]
-    protected function addToCollection(): void
-    {
-        $this->metadata->getReplace()->add($this);
-    }
 }

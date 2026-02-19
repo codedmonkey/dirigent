@@ -101,12 +101,12 @@
   </div>
 
   <div class="row border-bottom pb-3 mb-3">
-    {{ _self.linkBlock('Requires', metadata.require) }}
-    {{ _self.linkBlock('Requires (dev)', metadata.devRequire) }}
-    {{ _self.provideBlock(metadata.provide) }}
-    {{ _self.linkBlock('Suggests', metadata.suggest) }}
-    {{ _self.linkBlock('Conflicts', metadata.conflict) }}
-    {{ _self.linkBlock('Replaces', metadata.replace) }}
+    {{ _self.linkBlock('Requires', metadata.requireLinks) }}
+    {{ _self.linkBlock('Requires (dev)', metadata.devRequireLinks) }}
+    {{ _self.provideBlock(metadata.provideLinks) }}
+    {{ _self.linkBlock('Suggests', metadata.suggestLinks) }}
+    {{ _self.linkBlock('Conflicts', metadata.conflictLinks) }}
+    {{ _self.linkBlock('Replaces', metadata.replaceLinks) }}
   </div>
 
   <div class="row border-bottom pb-3 mb-3">

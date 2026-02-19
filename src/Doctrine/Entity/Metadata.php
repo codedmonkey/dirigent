@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
+use CodedMonkey\Dirigent\Entity\MetadataLinkType;
 use Composer\Package\Version\VersionParser;
 use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -101,42 +102,42 @@ class Metadata extends TrackedEntity implements \Stringable
      */
     #[ORM\OneToMany(targetEntity: MetadataRequireLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
     #[ORM\OrderBy(['index' => 'ASC'])]
-    private Collection $require;
+    private Collection $requireLinks;
 
     /**
      * @var Collection<int, MetadataDevRequireLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataDevRequireLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
     #[ORM\OrderBy(['index' => 'ASC'])]
-    private Collection $devRequire;
+    private Collection $devRequireLinks;
 
     /**
      * @var Collection<int, MetadataConflictLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataConflictLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
     #[ORM\OrderBy(['index' => 'ASC'])]
-    private Collection $conflict;
+    private Collection $conflictLinks;
 
     /**
      * @var Collection<int, MetadataProvideLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataProvideLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
     #[ORM\OrderBy(['index' => 'ASC'])]
-    private Collection $provide;
+    private Collection $provideLinks;
 
     /**
      * @var Collection<int, MetadataReplaceLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataReplaceLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
     #[ORM\OrderBy(['index' => 'ASC'])]
-    private Collection $replace;
+    private Collection $replaceLinks;
 
     /**
      * @var Collection<int, MetadataSuggestLink>
      */
     #[ORM\OneToMany(targetEntity: MetadataSuggestLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
     #[ORM\OrderBy(['index' => 'ASC'])]
-    private Collection $suggest;
+    private Collection $suggestLinks;
 
     /**
      * @var Collection<int, Keyword>
@@ -149,12 +150,12 @@ class Metadata extends TrackedEntity implements \Stringable
         $this->version = $version;
         $this->package = $version->getPackage();
 
-        $this->require = new ArrayCollection();
-        $this->devRequire = new ArrayCollection();
-        $this->conflict = new ArrayCollection();
-        $this->provide = new ArrayCollection();
-        $this->replace = new ArrayCollection();
-        $this->suggest = new ArrayCollection();
+        $this->requireLinks = new ArrayCollection();
+        $this->devRequireLinks = new ArrayCollection();
+        $this->conflictLinks = new ArrayCollection();
+        $this->provideLinks = new ArrayCollection();
+        $this->replaceLinks = new ArrayCollection();
+        $this->suggestLinks = new ArrayCollection();
         $this->keywords = new ArrayCollection();
     }
 
@@ -415,49 +416,49 @@ class Metadata extends TrackedEntity implements \Stringable
     /**
      * @return Collection<int, MetadataRequireLink>
      */
-    public function getRequire(): Collection
+    public function getRequireLinks(): Collection
     {
-        return $this->require;
+        return $this->requireLinks;
     }
 
     /**
      * @return Collection<int, MetadataDevRequireLink>
      */
-    public function getDevRequire(): Collection
+    public function getDevRequireLinks(): Collection
     {
-        return $this->devRequire;
+        return $this->devRequireLinks;
     }
 
     /**
      * @return Collection<int, MetadataConflictLink>
      */
-    public function getConflict(): Collection
+    public function getConflictLinks(): Collection
     {
-        return $this->conflict;
+        return $this->conflictLinks;
     }
 
     /**
      * @return Collection<int, MetadataProvideLink>
      */
-    public function getProvide(): Collection
+    public function getProvideLinks(): Collection
     {
-        return $this->provide;
+        return $this->provideLinks;
     }
 
     /**
      * @return Collection<int, MetadataReplaceLink>
      */
-    public function getReplace(): Collection
+    public function getReplaceLinks(): Collection
     {
-        return $this->replace;
+        return $this->replaceLinks;
     }
 
     /**
      * @return Collection<int, MetadataSuggestLink>
      */
-    public function getSuggest(): Collection
+    public function getSuggestLinks(): Collection
     {
-        return $this->suggest;
+        return $this->suggestLinks;
     }
 
     /**
@@ -621,19 +622,10 @@ class Metadata extends TrackedEntity implements \Stringable
         ];
 
         // Set links
-        $supportedLinkTypes = [
-            'require' => $this->require,
-            'require-dev' => $this->devRequire,
-            'suggest' => $this->suggest,
-            'conflict' => $this->conflict,
-            'provide' => $this->provide,
-            'replace' => $this->replace,
-        ];
-
-        foreach ($supportedLinkTypes as $linkType => $linkCollection) {
+        foreach (MetadataLinkType::cases() as $linkType) {
             /** @var AbstractMetadataLink $link */
-            foreach ($linkCollection as $link) {
-                $data[$linkType][$link->getLinkedPackageName()] = $link->getLinkedVersionConstraint();
+            foreach ($linkType->getMetadataLinks($this) as $link) {
+                $data[$linkType->value][$link->getLinkedPackageName()] = $link->getLinkedVersionConstraint();
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
+use CodedMonkey\Dirigent\Entity\MetadataLinkType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -38,8 +39,6 @@ abstract class AbstractMetadataLink
         $this->addToCollection();
     }
 
-    abstract protected function addToCollection(): void;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -63,5 +62,11 @@ abstract class AbstractMetadataLink
     public function getIndex(): int
     {
         return $this->index;
+    }
+
+    private function addToCollection(): void
+    {
+        $linkType = MetadataLinkType::fromClass(static::class);
+        $linkType->getMetadataLinks($this->metadata)->add($this);
     }
 }

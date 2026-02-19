@@ -10,10 +10,4 @@ class MetadataConflictLink extends AbstractMetadataLink
     #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'conflict')]
     #[ORM\JoinColumn(nullable: false)]
     protected Metadata $metadata;
-
-    #[\Override]
-    protected function addToCollection(): void
-    {
-        $this->metadata->getConflict()->add($this);
-    }
 }
