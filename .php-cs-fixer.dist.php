@@ -7,6 +7,10 @@ $binFinder = (new PhpCsFixer\Finder())
 $finder = (new PhpCsFixer\Finder())
     ->in(__DIR__)
     ->exclude('var')
+    ->notPath([
+        'config/bundles.php',
+        'config/reference.php',
+    ])
     ->append($binFinder);
 
 return (new PhpCsFixer\Config())
