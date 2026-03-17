@@ -13,14 +13,11 @@ trim_trailing_whitespace = true
 [*.css]
 indent_size = 2
 
-[*.js]
+[*.{js,ts}]
 indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
-
-[*.ts]
-indent_size = 2
 
 [*.twig]
 indent_size = 2
@@ -28,6 +25,11 @@ indent_size = 2
 [*.yaml]
 indent_size = 2
 
-# Override indent size for YAML files that are managed with Symfony Flex recipes
+# Symfony Flex
+# Use custom indent for files managed by Symfony Flex recipes
+
+[{assets/stimulus_bootstrap.js,assets/controllers/csrf_protection_controller.js}]
+indent_size = 4
+
 [config/**.yaml]
 indent_size = 4
