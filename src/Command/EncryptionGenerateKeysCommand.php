@@ -48,13 +48,18 @@ class EncryptionGenerateKeysCommand extends Command
         $decryptionKeyExists = $filesystem->exists($this->privateKeyPath);
         $encryptionKeyExists = $filesystem->exists($this->publicKeyPath);
 
-        if (!$decryptionKeyExists && $encryptionKeyExists) {
-            $io->error('Unable to generate (private) decryption key because a (public) encryption key exists.');
+        if ($encryptionKeyExists) {
+            if (!$decryptionKeyExists) {
+                // If only the public key exists, generating a new private key is impossible as it would create
+                // an incompatible key pair, or existing data would become unreadable
+                $io->error('Unable to generate (private) decryption key because a (public) encryption key exists.');
 
-            return Command::FAILURE;
-        } elseif ($decryptionKeyExists && $encryptionKeyExists) {
+                return Command::FAILURE;
+            }
+
             $io->info('Encryption keys already exist.');
-        } elseif ($decryptionKeyExists && !$encryptionKeyExists) {
+        } elseif ($decryptionKeyExists) {
+            // If only the private key exists, we can still regenerate a public key
             $decryptionKey = sodium_hex2bin($filesystem->readFile($this->privateKeyPath));
             $encryptionKey = sodium_crypto_box_publickey($decryptionKey);
 
@@ -62,6 +67,7 @@ class EncryptionGenerateKeysCommand extends Command
 
             $io->success('Generated a new (public) encryption key.');
         } else {
+            // Generate a new encryption key pair
             $decryptionKey = sodium_crypto_box_keypair();
             $encryptionKey = sodium_crypto_box_publickey($decryptionKey);
 
