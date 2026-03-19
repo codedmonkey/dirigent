@@ -592,6 +592,11 @@ class Metadata extends TrackedEntity implements \Stringable
             return null;
         }
 
+        if (false === $this->version->isDevelopment() && $this === $this->version->getCurrentMetadata()) {
+            // Use the VCS tag only if it's the current metadata
+            $reference = $this->versionName;
+        }
+
         if (str_starts_with($url, 'https://github.com/')) {
             return "$url/tree/$reference";
         } elseif (str_starts_with($url, 'https://gitlab.com/')) {
