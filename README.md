@@ -47,7 +47,7 @@ Feel free to report issues and make suggestions on [GitHub][github-issues] or fo
 Dirigent is developed by [Coded Monkey][codedmonkey].
 
 [codedmonkey]: https://www.codedmonkey.com
-[codedmonkey-sponsor]: https://www.codedmonkey.com/sponsor?project=dirigent
+[codedmonkey-sponsor]: https://github.com/sponsors/codedmonkey
 [composer]: https://getcomposer.org
 [dirigent]: https://dirigent.dev
 [docs]: docs/readme.md

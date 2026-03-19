@@ -44,5 +44,5 @@ symfony composer tests:php
 symfony composer tests:docker 
 ```
 
-[codedmonkey-sponsor]: https://www.codedmonkey.com/sponsor?project=dirigent
+[codedmonkey-sponsor]: https://github.com/sponsors/codedmonkey
 [dirigent-docs-install-source]: https://dirigent.dev/docs/installation/source
