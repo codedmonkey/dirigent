@@ -216,7 +216,7 @@ readonly class PackageMetadataResolver
     {
         $metadata = $this->createMetadata($version, $data, $driver);
 
-        if ($this->hasMetadataChanged($version->getCurrentMetadata(), $metadata)) {
+        if (!$version->hasCurrentMetadata() || $this->hasMetadataChanged($version->getCurrentMetadata(), $metadata)) {
             $version->setCurrentMetadata($metadata);
 
             $this->entityManager->persist($metadata);
@@ -351,14 +351,10 @@ readonly class PackageMetadataResolver
         return $string;
     }
 
-    private function hasMetadataChanged(?Metadata $currentMetadata, Metadata $metadata): bool
+    private function hasMetadataChanged(Metadata $currentMetadata, Metadata $metadata): bool
     {
-        $currentData = $currentMetadata?->toComposerArray();
+        $currentData = $currentMetadata->toComposerArray();
         $data = $metadata->toComposerArray();
-
-        if (null === $currentData) {
-            return true;
-        }
 
         // Fields that shouldn't trigger a new revision
         $excludeFields = ['abandoned', 'default-branch'];

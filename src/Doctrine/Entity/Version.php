@@ -113,8 +113,18 @@ class Version extends TrackedEntity implements \Stringable
         return $this->package;
     }
 
-    public function getCurrentMetadata(): ?Metadata
+    public function hasCurrentMetadata(): bool
     {
+        return null !== $this->currentMetadata;
+    }
+
+    public function getCurrentMetadata(): Metadata
+    {
+        if (null === $this->currentMetadata) {
+            // Packages are only allowed to have no current metadata during import
+            throw new \RuntimeException(sprintf('No current metadata found for package: %s %s', $this->package->getName(), $this->name));
+        }
+
         return $this->currentMetadata;
     }
 
