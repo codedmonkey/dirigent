@@ -40,7 +40,7 @@ until it's second anniversary. See our [full license][license] for more details.
 
 ## Contributing
 
-Feel free to report issues and make suggestions on [GitHub][github-issues] or follow our [contribution guide](contributing.md).
+Feel free to report issues and make suggestions on [GitHub][github-issues] or follow our [contribution guide](CONTRIBUTING.md).
 
 ## About Me
 

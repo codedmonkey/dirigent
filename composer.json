@@ -144,7 +144,12 @@
             "@tests:php:functional"
         ],
         "tests:php:functional": "bin/phpunit tests/FunctionalTests",
-        "tests:php:unit": "bin/phpunit tests/UnitTests"
+        "tests:php:unit": "bin/phpunit tests/UnitTests",
+        "tests:setup": [
+            "bin/console --env=test doctrine:database:create --if-not-exists",
+            "bin/console --env=test doctrine:schema:update --force",
+            "bin/console --env=test doctrine:fixtures:load --no-interaction"
+        ]
     },
     "scripts-descriptions": {
         "build:standalone": "Build the standalone image",
@@ -162,7 +167,8 @@
         "tests:docker:standalone": "Run tests in the standalone image",
         "tests:php": "Run all PHP tests",
         "tests:php:functional": "Run the functional test suite",
-        "tests:php:unit": "Run the unit test suite"
+        "tests:php:unit": "Run the unit test suite",
+        "tests:setup": "Prepare the Symfony test environment"
     },
     "config": {
         "allow-plugins": {

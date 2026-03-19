@@ -26,20 +26,22 @@ symfony server:start -d
 
 ## Lint & test your code
 
-### Running PHPUnit tests
-
-Before running the tests, make sure the testing database is ready:
-
 ```shell
-symfony console --env=test doctrine:database:create --if-not-exists
-symfony console --env=test doctrine:schema:update --force
-symfony console --env=test doctrine:fixtures:load --no-interaction
+# Run all linters
+symfony composer lint
 ```
 
-Run the PHPUnit tests:
+### Running PHPUnit tests
 
 ```shell
-symfony run bin/phpunit
+# Before running the tests, make sure the testing database is ready
+symfony composer tests:setup
+
+# Run PHP tests
+symfony composer tests:php
+
+# Run tests on Docker images
+symfony composer tests:docker 
 ```
 
 [codedmonkey-sponsor]: https://www.codedmonkey.com/sponsor?project=dirigent
