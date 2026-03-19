@@ -13,7 +13,7 @@ Dirigent into one, including a web server, database and a background worker. The
 
 ### Docker command
 
-```bash
+```shell
 docker volume create dirigent-data
 
 docker container run -d \
