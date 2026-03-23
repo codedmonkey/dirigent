@@ -56,21 +56,27 @@ class Version extends TrackedEntity implements \Stringable
     private ?array $dist = null;
 
     #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionRequireLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $require;
 
     #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionDevRequireLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $devRequire;
 
     #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionConflictLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $conflict;
 
     #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionProvideLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $provide;
 
     #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionReplaceLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $replace;
 
     #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionSuggestLink::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $suggest;
 
     #[ORM\ManyToMany(targetEntity: Keyword::class, inversedBy: 'versions', cascade: ['persist', 'detach', 'remove'])]

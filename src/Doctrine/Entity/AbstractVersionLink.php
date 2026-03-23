@@ -15,6 +15,9 @@ abstract class AbstractVersionLink
 
     protected Version $version;
 
+    #[ORM\Column]
+    private int $index;
+
     #[ORM\Column(length: 191)]
     private string $linkedPackageName;
 
@@ -24,6 +27,16 @@ abstract class AbstractVersionLink
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getIndex(): int
+    {
+        return $this->index;
+    }
+
+    public function setIndex(int $index): void
+    {
+        $this->index = $index;
     }
 
     public function getVersion(): Version
