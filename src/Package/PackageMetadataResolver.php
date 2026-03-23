@@ -317,6 +317,7 @@ readonly class PackageMetadataResolver
         // handle links
         foreach (self::SUPPORTED_LINK_TYPES as $linkType => $opts) {
             $links = [];
+            $linkIndex = 0;
             foreach ($data->{$opts['method']}() as $link) {
                 $constraint = $link->getPrettyConstraint();
                 if (str_contains($constraint, ',') && str_contains($constraint, '@')) {
@@ -329,7 +330,7 @@ readonly class PackageMetadataResolver
                     }, $constraint);
                 }
 
-                $links[$link->getTarget()] = $constraint;
+                $links[$link->getTarget()] = ['constraint' => $constraint, 'index' => $linkIndex++];
             }
 
             /** @var AbstractVersionLink $link */
@@ -337,20 +338,25 @@ readonly class PackageMetadataResolver
                 $linkPackageName = $link->getLinkedPackageName();
 
                 // Clear links that have changed/disappeared (for updates)
-                if (!isset($links[$linkPackageName]) || $links[$linkPackageName] !== $link->getLinkedVersionConstraint()) {
+                if (!isset($links[$linkPackageName]) || $links[$linkPackageName]['constraint'] !== $link->getLinkedVersionConstraint()) {
                     $version->{'get' . $linkType}()->removeElement($link);
                     $em->remove($link);
                 } else {
+                    // Update index if it changed
+                    if ($link->getIndex() !== $links[$linkPackageName]['index']) {
+                        $link->setIndex($links[$linkPackageName]['index']);
+                    }
                     // Clear those that are already set
                     unset($links[$linkPackageName]);
                 }
             }
 
-            foreach ($links as $linkPackageName => $linkPackageConstraint) {
+            foreach ($links as $linkPackageName => $linkData) {
                 /** @var AbstractVersionLink $link */
                 $link = new $opts['entity']();
                 $link->setLinkedPackageName($linkPackageName);
-                $link->setLinkedVersionConstraint($linkPackageConstraint);
+                $link->setLinkedVersionConstraint($linkData['constraint']);
+                $link->setIndex($linkData['index']);
                 $version->{'add' . $linkType . 'Link'}($link);
                 $link->setVersion($version);
                 $em->persist($link);
@@ -358,23 +364,34 @@ readonly class PackageMetadataResolver
         }
 
         // handle suggests
-        if ($suggests = $data->getSuggests()) {
+        if ($suggestsData = $data->getSuggests()) {
+            $suggests = [];
+            $suggestIndex = 0;
+            foreach ($suggestsData as $suggestPackageName => $suggestConstraint) {
+                $suggests[$suggestPackageName] = ['constraint' => $suggestConstraint, 'index' => $suggestIndex++];
+            }
+
             foreach ($version->getSuggest() as $link) {
                 $linkPackageName = $link->getLinkedPackageName();
                 // clear links that have changed/disappeared (for updates)
-                if (!isset($suggests[$linkPackageName]) || $suggests[$linkPackageName] !== $link->getLinkedVersionConstraint()) {
+                if (!isset($suggests[$linkPackageName]) || $suggests[$linkPackageName]['constraint'] !== $link->getLinkedVersionConstraint()) {
                     $version->getSuggest()->removeElement($link);
                     $em->remove($link);
                 } else {
+                    // Update index if it changed
+                    if ($link->getIndex() !== $suggests[$linkPackageName]['index']) {
+                        $link->setIndex($suggests[$linkPackageName]['index']);
+                    }
                     // clear those that are already set
                     unset($suggests[$linkPackageName]);
                 }
             }
 
-            foreach ($suggests as $linkPackageName => $linkPackageConstraint) {
+            foreach ($suggests as $linkPackageName => $linkData) {
                 $link = new VersionSuggestLink();
                 $link->setLinkedPackageName($linkPackageName);
-                $link->setLinkedVersionConstraint($linkPackageConstraint);
+                $link->setLinkedVersionConstraint($linkData['constraint']);
+                $link->setIndex($linkData['index']);
                 $version->addSuggestLink($link);
                 $link->setVersion($version);
                 $em->persist($link);
