@@ -1,11 +1,23 @@
 # Changelog
 
+* 0.6.0 (2026-03-23)
+  * Added configuration option to fetch mirrored packages from their VCS repositories by default when possible 
+  * Improved the `packages:update` command with clearer arguments
+  * Improved user roles by only allowing a single role per user
+  * Improved sorting of package links by adding indices to the stored metadata
+  * Improved code quality with:
+    * Added scripts for development as Composer scripts
+    * Integrated Rector into development workflow
+    * Added development guidelines for AI agents
+    * Added Claude commands for code reviewing
+  * Updated various Composer dependencies
+
 * 0.5.0 (2025-10-17)
   * **Breaking changes**
     * Changed unique field for users from their email address to their username
   * Added *optional* multi-factor authentication [#6](https://github.com/codedmonkey/dirigent/pull/6)
   * Added source and distribution info to package pages
-  * Added package links and for dependents, suggesters and providers
+  * Added package links for dependents, suggesters and providers
   * Improved package and package list pages
   * Implemented pretty URLs through EasyAdmin
   * Disabled online check for compromised password
