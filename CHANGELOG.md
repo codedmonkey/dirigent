@@ -1,5 +1,9 @@
 # Changelog
 
+* 0.6.1 (2026-03-30)
+  * Fixed loading of encryption module in dashboard pages which prevented changes to existing credentials
+  * Disabled autocomplete on credentials information
+
 * 0.6.0 (2026-03-23)
   * Added configuration option to fetch mirrored packages from their VCS repositories by default when possible 
   * Improved the `packages:update` command with clearer arguments
