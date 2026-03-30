@@ -42,12 +42,15 @@ class DashboardCredentialsController extends AbstractCrudController
             ->renderExpanded();
         yield TextField::new('username')
             ->setFormTypeOption('row_attr', ['data-credentials-field' => 'username'])
+            ->setFormTypeOption('attr', ['autocomplete' => 'off'])
             ->onlyOnForms();
         yield TextField::new('password')
             ->setFormTypeOption('row_attr', ['data-credentials-field' => 'password'])
+            ->setFormTypeOption('attr', ['autocomplete' => 'off'])
             ->onlyOnForms();
         yield TextField::new('token')
             ->setFormTypeOption('row_attr', ['data-credentials-field' => 'token'])
+            ->setFormTypeOption('attr', ['autocomplete' => 'off'])
             ->onlyOnForms();
     }
 }

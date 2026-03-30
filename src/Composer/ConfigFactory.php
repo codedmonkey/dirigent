@@ -69,8 +69,8 @@ final class ConfigFactory
             CredentialsType::GitlabPersonalAccessToken => [
                 'gitlab-token' => [
                     $domain => [
-                        'username' => $credentials->getToken(),
-                        'token' => 'private-token',
+                        'username' => 'private-token',
+                        'token' => $credentials->getToken(),
                     ],
                 ],
             ],

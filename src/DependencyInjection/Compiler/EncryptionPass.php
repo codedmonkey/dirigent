@@ -22,6 +22,7 @@ class EncryptionPass implements CompilerPassInterface
         $rotatedKeyPaths = $parameterBag->get('dirigent.encryption.rotated_key_paths');
 
         $container->getDefinition(Encryption::class)
+            ->setLazy(true)
             ->setFactory([Encryption::class, 'create'])
             ->setArguments([
                 $privateKey,

@@ -34,8 +34,3 @@ parameters:
             identifier: booleanOr.rightAlwaysFalse
             count: 1
             path: src/Encryption/Encryption.php
-        -
-            message: '#^Property CodedMonkey\\Dirigent\\EventListener\\EncryptionListener\:\:\$connection is never read, only written\.$#'
-            identifier: property.onlyWritten
-            count: 1
-            path: src/EventListener/EncryptionListener.php
