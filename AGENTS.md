@@ -48,7 +48,7 @@ tests/
 - Always use strict comparisons (`===`, `!==`).
 - Enforce the use of DateTimeImmutable over DateTime.
 - Always use spaces in concatenation (`$a . $b`).
-- Always use imports. Use aliases when collisions occur or the imported name is unclear.
+- Always use imports. Use aliases when collisions occur or the imported name is unclear. Do not import classes from the root namespace (e.g. `\RuntimeException`, `\Stringable`); use the fully-qualified backslash prefix inline instead.
 - Don't use blank lines between import groups.
 
 ## Commands
