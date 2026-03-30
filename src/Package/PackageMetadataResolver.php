@@ -12,6 +12,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionConflictLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionDevRequireLink;
+use CodedMonkey\Dirigent\Doctrine\Entity\VersionKeyword;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionReplaceLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\VersionRequireLink;
@@ -406,25 +407,42 @@ readonly class PackageMetadataResolver
 
         // Handle keywords
         if ($keywordsData = $data->getKeywords()) {
-            foreach ($version->getKeywords() as $keyword) {
-                $keywordName = $keyword->getName();
+            $keywords = [];
+            $keywordIndex = 0;
+            foreach ($keywordsData as $keywordName) {
+                $keywords[$keywordName] = $keywordIndex++;
+            }
+
+            foreach ($version->getKeywords() as $versionKeyword) {
+                $keywordName = $versionKeyword->getKeyword()->getName();
                 // Clear keywords that have disappeared (for updates)
-                if (!in_array($keywordName, $keywordsData, true)) {
-                    $version->getKeywords()->removeElement($keyword);
-                    $em->remove($keyword);
+                if (!isset($keywords[$keywordName])) {
+                    $version->getKeywords()->removeElement($versionKeyword);
+                    $em->remove($versionKeyword);
                 } else {
+                    // Update index if it changed
+                    if ($versionKeyword->getIndex() !== $keywords[$keywordName]) {
+                        $versionKeyword->setIndex($keywords[$keywordName]);
+                    }
                     // Clear those that are already set
-                    $index = array_search($keywordName, $keywordsData, true);
-                    unset($keywordsData[$index]);
+                    unset($keywords[$keywordName]);
                 }
             }
 
-            foreach ($keywordsData as $keywordName) {
+            foreach ($keywords as $keywordName => $keywordIndex) {
                 $keyword = $this->keywordRepository->getByName($keywordName);
-                $version->addKeyword($keyword);
+                $versionKeyword = new VersionKeyword();
+                $versionKeyword->setKeyword($keyword);
+                $versionKeyword->setIndex($keywordIndex);
+                $version->addKeyword($versionKeyword);
+                $versionKeyword->setVersion($version);
+                $em->persist($versionKeyword);
             }
         } elseif (count($version->getKeywords())) {
             // Clear existing keywords if present
+            foreach ($version->getKeywords() as $versionKeyword) {
+                $em->remove($versionKeyword);
+            }
             $version->getKeywords()->clear();
         }
 
