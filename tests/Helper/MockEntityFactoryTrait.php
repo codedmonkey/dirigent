@@ -2,6 +2,8 @@
 
 namespace CodedMonkey\Dirigent\Tests\Helper;
 
+use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\MetadataRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
@@ -11,12 +13,40 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticator;
 
 trait MockEntityFactoryTrait
 {
+    protected function createMockMetadata(Version $version): Metadata
+    {
+        $package = $version->getPackage();
+
+        $metadata = new Metadata($version);
+        $metadata->setPackageName($package->getName());
+        $metadata->setVersionName($version->getName());
+        $metadata->setNormalizedVersionName($version->getNormalizedName());
+
+        new MetadataRequireLink($metadata, 'vendor/dependency', '^1.0', 0);
+
+        return $metadata;
+    }
+
     protected function createMockPackage(): Package
     {
         $package = new Package();
         $package->setName(sprintf('%s/%s', uniqid(), uniqid()));
 
         return $package;
+    }
+
+    /**
+     * @return array{Package, Version, Metadata}
+     */
+    protected function createMockPackageWithMetadata(): array
+    {
+        $package = $this->createMockPackage();
+        $version = $this->createMockVersion($package);
+        $metadata = $this->createMockMetadata($version);
+
+        $version->setCurrentMetadata($metadata);
+
+        return [$package, $version, $metadata];
     }
 
     protected function createMockUser(bool $mfaEnabled = false): User
@@ -35,13 +65,12 @@ trait MockEntityFactoryTrait
         return $user;
     }
 
-    protected function createMockVersion(Package $package, string $versionName = '1.0.0'): Version
+    protected function createMockVersion(Package $package, string $versionName = '1.0.0', bool $development = false): Version
     {
         $version = new Version($package);
         $version->setName($versionName);
         $version->setNormalizedName((new VersionParser())->normalize($versionName));
-
-        $package->getVersions()->add($version);
+        $version->setDevelopment($development);
 
         return $version;
     }

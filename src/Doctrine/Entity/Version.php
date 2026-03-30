@@ -44,6 +44,8 @@ class Version extends TrackedEntity implements \Stringable
         $this->package = $package;
 
         $this->installations = new VersionInstallations($this);
+
+        $package->getVersions()->add($this);
     }
 
     public function __toString(): string

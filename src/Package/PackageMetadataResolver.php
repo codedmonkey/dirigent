@@ -163,8 +163,6 @@ readonly class PackageMetadataResolver
                 $version->setName($composerPackage->getPrettyVersion());
                 $version->setNormalizedName($composerPackage->getVersion());
                 $version->setDevelopment($composerPackage->isDev());
-
-                $package->getVersions()->add($version);
             }
 
             $this->updateVersion($version, $composerPackage, $driver);

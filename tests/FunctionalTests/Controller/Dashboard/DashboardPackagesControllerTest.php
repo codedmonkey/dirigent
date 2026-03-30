@@ -7,7 +7,6 @@ use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -89,10 +88,10 @@ class DashboardPackagesControllerTest extends WebTestCase
         $client = static::createClient();
         $this->loginUser('admin');
 
-        $entityManager = $this->getService(EntityManagerInterface::class);
+        $mockEntities = $this->createMockPackageWithMetadata();
+        $this->persistEntities(...$mockEntities);
 
-        $package = $this->createMockPackage();
-        $this->persistEntities($package);
+        $package = $mockEntities[0];
 
         // Fetch package id prior to deleting it
         $packageId = $package->getId();
@@ -101,9 +100,9 @@ class DashboardPackagesControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
 
-        $entityManager->clear();
+        $this->clearEntities();
 
-        $savedPackage = $entityManager->find(Package::class, $packageId);
+        $savedPackage = $this->findEntity(Package::class, $packageId);
 
         $this->assertNull($savedPackage, 'The package was deleted.');
     }
