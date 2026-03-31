@@ -2,6 +2,13 @@
     "permissions": {
         "allow": [
             "Bash(symfony composer run *)"
+        ],
+        "deny": [
+            "Read(.env)",
+            "Read(.env.dirigent.local)",
+            "Read(.env.dirigent.local.php)",
+            "Read(.env.dirigent.*.local)",
+            "Read(./config/secrets/prod/prod.decrypt.private.php)"
         ]
     }
 }
