@@ -79,7 +79,8 @@ class Version extends TrackedEntity implements \Stringable
     #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $suggest;
 
-    #[ORM\ManyToMany(targetEntity: Keyword::class, inversedBy: 'versions', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'version', targetEntity: VersionKeyword::class, cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $keywords;
 
     #[ORM\Column]
@@ -354,16 +355,16 @@ class Version extends TrackedEntity implements \Stringable
     }
 
     /**
-     * @return Collection<int, Keyword>
+     * @return Collection<int, VersionKeyword>
      */
     public function getKeywords(): Collection
     {
         return $this->keywords;
     }
 
-    public function addKeyword(Keyword $keyword): void
+    public function addKeyword(VersionKeyword $versionKeyword): void
     {
-        $this->keywords[] = $keyword;
+        $this->keywords[] = $versionKeyword;
     }
 
     public function getAutoload(): array
@@ -642,8 +643,8 @@ class Version extends TrackedEntity implements \Stringable
     public function toComposerArray(): array
     {
         $keywords = [];
-        foreach ($this->getKeywords() as $keyword) {
-            $keywords[] = $keyword->getName();
+        foreach ($this->getKeywords() as $versionKeyword) {
+            $keywords[] = $versionKeyword->getKeyword()->getName();
         }
 
         $authors = $this->getAuthors();

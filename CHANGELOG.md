@@ -1,5 +1,8 @@
 # Changelog
 
+* 0.6.2 (2026-03-31)
+  * Improved sorting of package keywords by adding an index to the stored metadata
+
 * 0.6.1 (2026-03-30)
   * Fixed loading of encryption module in dashboard pages which prevented changes to existing credentials
   * Disabled autocomplete on credentials information
