@@ -66,16 +66,16 @@ enum MetadataLinkType: string
     /**
      * @return Collection<int, AbstractMetadataLink>
      */
-    public function getMetadataLinks(Metadata $metadata): Collection
+    public function getMetadataLinks(Metadata $metadata, bool $raw = false): Collection
     {
         /** @var Collection<int, AbstractMetadataLink> $collection */
         $collection = match ($this) {
-            self::Require => $metadata->getRequireLinks(),
-            self::DevRequire => $metadata->getDevRequireLinks(),
-            self::Conflict => $metadata->getConflictLinks(),
-            self::Provide => $metadata->getProvideLinks(),
-            self::Replace => $metadata->getReplaceLinks(),
-            self::Suggest => $metadata->getSuggestLinks(),
+            self::Require => $metadata->getRequireLinks($raw),
+            self::DevRequire => $metadata->getDevRequireLinks($raw),
+            self::Conflict => $metadata->getConflictLinks($raw),
+            self::Provide => $metadata->getProvideLinks($raw),
+            self::Replace => $metadata->getReplaceLinks($raw),
+            self::Suggest => $metadata->getSuggestLinks($raw),
         };
 
         return $collection;

@@ -67,6 +67,6 @@ abstract class AbstractMetadataLink
     private function addToCollection(): void
     {
         $linkType = MetadataLinkType::fromClass(static::class);
-        $linkType->getMetadataLinks($this->metadata)->add($this);
+        $linkType->getMetadataLinks($this->metadata, raw: true)->add($this);
     }
 }

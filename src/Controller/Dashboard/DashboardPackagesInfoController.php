@@ -4,11 +4,13 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Attribute\MapPackage;
+use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageSuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -44,6 +46,10 @@ class DashboardPackagesInfoController extends AbstractController
     #[IsGrantedAccess]
     public function versionInfo(#[MapPackage] Package $package, #[MapPackage] Version $version): Response
     {
+        /** @var MetadataRepository $metadataRepository */
+        $metadataRepository = $this->entityManager->getRepository(Metadata::class);
+        $metadataRepository->fetchMetadataCollections($version->getCurrentMetadata());
+
         $dependentCount = $this->entityManager->getRepository(PackageRequireLink::class)->count(['linkedPackageName' => $package->getName()]);
         $implementationCount = $this->entityManager->getRepository(PackageProvideLink::class)->count(['linkedPackageName' => $package->getName(), 'implementation' => true]);
         $providerCount = $this->entityManager->getRepository(PackageProvideLink::class)->count(['linkedPackageName' => $package->getName(), 'implementation' => false]);
