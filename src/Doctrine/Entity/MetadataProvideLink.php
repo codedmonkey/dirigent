@@ -5,11 +5,11 @@ namespace CodedMonkey\Dirigent\Doctrine\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-class VersionProvideLink extends AbstractVersionLink
+class MetadataProvideLink extends AbstractMetadataLink
 {
-    #[ORM\ManyToOne(targetEntity: Version::class, inversedBy: 'provide')]
-    #[ORM\JoinColumn(nullable: false)]
-    protected Version $version;
+    #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'provideLinks')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    protected Metadata $metadata;
 
     public function isImplementation(): bool
     {

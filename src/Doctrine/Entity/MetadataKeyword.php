@@ -5,16 +5,16 @@ namespace CodedMonkey\Dirigent\Doctrine\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-class VersionKeyword
+class MetadataKeyword
 {
     #[ORM\Id]
     #[ORM\Column]
     #[ORM\GeneratedValue]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Version::class, inversedBy: 'keywords')]
-    #[ORM\JoinColumn(nullable: false)]
-    private Version $version;
+    #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'keywords')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Metadata $metadata;
 
     #[ORM\ManyToOne(targetEntity: Keyword::class)]
     #[ORM\JoinColumn(nullable: false)]
@@ -23,19 +23,26 @@ class VersionKeyword
     #[ORM\Column]
     private int $index;
 
+    public function __construct(
+        Metadata $metadata,
+        Keyword $keyword,
+        int $index,
+    ) {
+        $this->metadata = $metadata;
+        $this->keyword = $keyword;
+        $this->index = $index;
+
+        $this->metadata->getKeywords()->add($this);
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getVersion(): Version
+    public function getMetadata(): Metadata
     {
-        return $this->version;
-    }
-
-    public function setVersion(Version $version): void
-    {
-        $this->version = $version;
+        return $this->metadata;
     }
 
     public function getKeyword(): Keyword
@@ -43,19 +50,9 @@ class VersionKeyword
         return $this->keyword;
     }
 
-    public function setKeyword(Keyword $keyword): void
-    {
-        $this->keyword = $keyword;
-    }
-
     public function getIndex(): int
     {
         return $this->index;
-    }
-
-    public function setIndex(int $index): void
-    {
-        $this->index = $index;
     }
 
     public function getName(): string

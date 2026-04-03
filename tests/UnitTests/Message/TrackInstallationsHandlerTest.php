@@ -36,9 +36,8 @@ class TrackInstallationsHandlerTest extends TestCase
         $package = new Package();
         $package->setName('foo/bar');
 
-        $version = new Version();
-        $version->setPackage($package);
-        $version->setNormalizedVersion('1.0.0');
+        $version = new Version($package);
+        $version->setNormalizedName('1.0.0');
 
         $this->packageRepository->expects($this->once())
             ->method('findOneByName')
@@ -46,7 +45,7 @@ class TrackInstallationsHandlerTest extends TestCase
             ->willReturn($package);
 
         $this->versionRepository->expects($this->once())
-            ->method('findOneByNormalizedVersion')
+            ->method('findOneByNormalizedName')
             ->with($package, '1.0.0')
             ->willReturn($version);
 

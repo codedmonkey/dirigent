@@ -1,0 +1,13 @@
+<?php
+
+namespace CodedMonkey\Dirigent\Doctrine\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class MetadataDevRequireLink extends AbstractMetadataLink
+{
+    #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'devRequireLinks')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    protected Metadata $metadata;
+}
