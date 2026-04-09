@@ -12,8 +12,8 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\KeywordRepository;
+use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
-use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Entity\MetadataLinkType;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use CodedMonkey\Dirigent\Message\UpdatePackageLinks;
@@ -35,7 +35,7 @@ readonly class PackageMetadataResolver
         private EntityManagerInterface $entityManager,
         private KeywordRepository $keywordRepository,
         private RegistryRepository $registryRepository,
-        private VersionRepository $versionRepository,
+        private PackageRepository $packageRepository,
     ) {
     }
 
@@ -142,7 +142,12 @@ readonly class PackageMetadataResolver
      */
     private function updatePackage(Package $package, array $composerPackages, ?VcsDriverInterface $driver = null): void
     {
-        $existingVersionMetadata = $this->versionRepository->getVersionMetadataForUpdate($package);
+        $this->packageRepository->fetchPackageDataForUpdate($package);
+
+        $existingVersionMetadata = [];
+        foreach ($package->getVersions() as $version) {
+            $existingVersionMetadata[strtolower($version->getNormalizedName())] = $version;
+        }
 
         /** @var ?Version $primaryVersion Version to use as the package info source */
         $primaryVersion = null;
@@ -156,9 +161,7 @@ readonly class PackageMetadataResolver
             }
 
             $key = strtolower($composerPackage->getVersion());
-            if ($versionId = $existingVersionMetadata[$key] ?? null) {
-                $version = $this->entityManager->getReference(Version::class, $versionId);
-            } else {
+            if (null === $version = $existingVersionMetadata[$key] ?? null) {
                 $version = new Version($package);
                 $version->setName($composerPackage->getPrettyVersion());
                 $version->setNormalizedName($composerPackage->getVersion());
@@ -200,8 +203,7 @@ readonly class PackageMetadataResolver
         }
 
         // Remove outdated versions
-        foreach ($existingVersionMetadata as $versionId) {
-            $version = $this->entityManager->getReference(Version::class, $versionId);
+        foreach ($existingVersionMetadata as $version) {
             $this->entityManager->remove($version);
         }
 

@@ -28,6 +28,7 @@ class PackageRepository extends ServiceEntityRepository
 
     public function __construct(
         ManagerRegistry $registry,
+        private readonly MetadataRepository $metadataRepository,
         #[Autowire(param: 'dirigent.packages.periodic_update_interval')]
         ?string $periodicUpdateInterval,
     ) {
@@ -173,5 +174,25 @@ class PackageRepository extends ServiceEntityRepository
             $connection->executeStatement('DELETE FROM package_require_link WHERE package_id = :id', $queryParameters);
             $connection->executeStatement('DELETE FROM package_suggest_link WHERE package_id = :id', $queryParameters);
         });
+    }
+
+    public function fetchPackageDataForUpdate(Package $package): void
+    {
+        /** @var Version[] $versions */
+        $versions = $this->getEntityManager()->createQueryBuilder()
+            ->select('version', 'currentMetadata')
+            ->from(Version::class, 'version')
+            ->leftJoin('version.currentMetadata', 'currentMetadata')
+            ->where('version.package = :package')
+            ->setParameter('package', $package)
+            ->getQuery()
+            ->getResult();
+
+        $metadataCollection = array_map(
+            static fn (Version $version) => $version->getCurrentMetadata(),
+            $versions
+        );
+
+        $this->metadataRepository->fetchMetadataCollections(...$metadataCollection);
     }
 }
