@@ -63,6 +63,88 @@ jobs:
       - name: Load fixtures
         run: bin/console doctrine:fixtures:load -vvv --ansi --no-interaction
 
+  migration-integrity:
+    name: Migration integrity
+
+    # Verifies the integrity of migration files:
+    # 1. Existing migrations from the base branch have not been modified or deleted
+    # 2. New migrations have a higher version number than existing migrations
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine base branch
+        id: base
+        run: |
+          if [ -n "${{ github.base_ref }}" ]; then
+            BASE_REF="${{ github.base_ref }}"
+          else
+            git fetch --all --quiet
+            BEST_BRANCH="main"
+            BEST_DISTANCE=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo 999999)
+            for branch in $(git branch -r | grep -oE 'origin/[0-9]+\.x' | sed 's|origin/||'); do
+              DISTANCE=$(git rev-list --count origin/$branch..HEAD 2>/dev/null || echo 999999)
+              if [ "$DISTANCE" -lt "$BEST_DISTANCE" ]; then
+                BEST_DISTANCE=$DISTANCE
+                BEST_BRANCH=$branch
+              fi
+            done
+            BASE_REF=$BEST_BRANCH
+          fi
+          echo "base_ref=$BASE_REF" >> $GITHUB_OUTPUT
+          git fetch origin $BASE_REF
+
+      - name: Verify existing migrations are not modified or deleted
+        run: |
+          BASE_REF="${{ steps.base.outputs.base_ref }}"
+          CHANGED=$(git diff --name-only --diff-filter=MD origin/$BASE_REF...HEAD -- migrations/)
+          if [ -n "$CHANGED" ]; then
+            echo "Error: The following existing migrations were modified or deleted:"
+            echo "$CHANGED"
+            exit 1
+          fi
+          echo "No existing migrations were modified or deleted."
+
+      - name: Verify new migrations have higher version numbers than existing migrations
+        run: |
+          BASE_REF="${{ steps.base.outputs.base_ref }}"
+          BASE_MAX=$(git ls-tree -r --name-only origin/$BASE_REF -- migrations/ | grep -oE '[0-9]{14}' | sort | tail -1)
+          if [ -z "$BASE_MAX" ]; then
+            echo "No existing migrations found in base branch, skipping version check."
+            exit 0
+          fi
+          echo "Highest existing migration version: $BASE_MAX"
+
+          NEW_MIGRATIONS=$(git diff --name-only --diff-filter=A origin/$BASE_REF...HEAD -- migrations/)
+          if [ -z "$NEW_MIGRATIONS" ]; then
+            echo "No new migrations added."
+            exit 0
+          fi
+
+          FAILED=false
+          for file in $NEW_MIGRATIONS; do
+            VERSION=$(echo "$file" | grep -oE '[0-9]{14}')
+            if [ -z "$VERSION" ]; then
+              echo "Warning: Could not extract version number from $file"
+              continue
+            fi
+            if [ "$VERSION" -le "$BASE_MAX" ]; then
+              echo "Error: $file has version $VERSION which is not higher than the existing maximum $BASE_MAX"
+              FAILED=true
+            else
+              echo "OK: $file (version $VERSION > $BASE_MAX)"
+            fi
+          done
+
+          if [ "$FAILED" = true ]; then
+            exit 1
+          fi
+
   migrations:
     name: Migrations
 
