@@ -8,12 +8,21 @@ use Doctrine\ORM\Mapping as ORM;
 class PackageInstallations extends AbstractInstallations
 {
     #[ORM\Id]
-    #[ORM\OneToOne(inversedBy: 'installations')]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
+    private ?int $id = null;
+
+    #[ORM\OneToOne(mappedBy: 'installations')]
     private Package $package;
 
     public function __construct(Package $package)
     {
         $this->package = $package;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
     public function getPackage(): Package
