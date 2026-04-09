@@ -1,0 +1,221 @@
+name: Validate database components
+
+# Runs tests to validate database components. It's only triggered for new
+# commits. If any of the jobs fail for new commits they're not allowed to be
+# merged into the default branch.
+
+on: [pull_request, push]
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+
+jobs:
+  schema:
+    name: Schema
+
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: postgres:16-alpine
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: dirigent
+          POSTGRES_PASSWORD: "!ChangeMe!"
+          POSTGRES_USER: dirigent
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: Generate encryption keys
+        run: bin/console encryption:generate-keys
+
+      - name: Validate mapping
+        run: bin/console doctrine:schema:validate --skip-sync -vvv --ansi --no-interaction
+
+      - name: Execute migrations
+        run: bin/console doctrine:migrations:migrate -vvv --ansi --no-interaction
+
+      - name: Validate schema
+        run: bin/console doctrine:schema:validate --skip-mapping --skip-property-types -vvv --ansi --no-interaction
+
+      - name: Load fixtures
+        run: bin/console doctrine:fixtures:load -vvv --ansi --no-interaction
+
+  migrations:
+    name: Migrations
+
+    # Verifies that new database migrations are compatible with existing data.
+    # When migration files changed, this workflow:
+    # 1. Checks out the base branch and applies all existing migrations
+    # 2. Loads fixtures to simulate a database with real-world data
+    # 3. Switches to the current branch and applies the new migrations on top
+    # 4. Reverts the current migrations to verify the down() methods work
+    # 5. Compares the schema and data against the baseline to ensure the revert is clean
+
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: postgres:16-alpine
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: dirigent
+          POSTGRES_PASSWORD: "!ChangeMe!"
+          POSTGRES_USER: dirigent
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for migration changes
+        id: check
+        run: |
+          if [ -n "${{ github.base_ref }}" ]; then
+            BASE_REF="${{ github.base_ref }}"
+          else
+            git fetch --all --quiet
+            BEST_BRANCH="main"
+            BEST_DISTANCE=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo 999999)
+            for branch in $(git branch -r | grep -oE 'origin/[0-9]+\.x' | sed 's|origin/||'); do
+              DISTANCE=$(git rev-list --count origin/$branch..HEAD 2>/dev/null || echo 999999)
+              if [ "$DISTANCE" -lt "$BEST_DISTANCE" ]; then
+                BEST_DISTANCE=$DISTANCE
+                BEST_BRANCH=$branch
+              fi
+            done
+            BASE_REF=$BEST_BRANCH
+          fi
+          echo "base_ref=$BASE_REF" >> $GITHUB_OUTPUT
+          git fetch origin $BASE_REF
+          CHANGED=$(git diff --name-only origin/$BASE_REF...HEAD -- migrations/)
+          if [ -n "$CHANGED" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "New migration files:"
+            echo "$CHANGED"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No migration changes detected, skipping."
+          fi
+
+      - name: Install PHP with extensions
+        if: steps.check.outputs.has_changes == 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+
+      - name: Set Composer cache directory
+        if: steps.check.outputs.has_changes == 'true'
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        if: steps.check.outputs.has_changes == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Checkout base branch
+        if: steps.check.outputs.has_changes == 'true'
+        run: git checkout origin/${{ steps.check.outputs.base_ref }}
+
+      - name: Install Composer dependencies for base branch
+        if: steps.check.outputs.has_changes == 'true'
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: Generate encryption keys
+        if: steps.check.outputs.has_changes == 'true'
+        run: bin/console encryption:generate-keys
+
+      - name: Execute migrations from base branch
+        if: steps.check.outputs.has_changes == 'true'
+        run: bin/console doctrine:migrations:migrate -vvv --ansi --no-interaction
+
+      - name: Capture base branch migration version
+        id: base-version
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          VERSION=$(bin/console doctrine:migrations:latest --no-ansi | awk '{print $1}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Load fixtures
+        if: steps.check.outputs.has_changes == 'true'
+        run: bin/console doctrine:fixtures:load -vvv --ansi --no-interaction
+
+      - name: Checkout current branch
+        if: steps.check.outputs.has_changes == 'true'
+        run: git checkout ${{ github.sha }}
+
+      - name: Snapshot baseline schema and data
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          PGPASSWORD: "!ChangeMe!"
+        run: |
+          pg_dump -U dirigent -h localhost dirigent \
+            --schema-only --no-comments --no-privileges --no-owner \
+            | python3 .github/scripts/normalize-psql-dump.py \
+            > /tmp/schema_baseline.sql
+          pg_dump -U dirigent -h localhost dirigent \
+            --data-only --no-comments --no-privileges --no-owner \
+            | python3 .github/scripts/normalize-psql-dump.py \
+            > /tmp/data_baseline.sql
+
+      - name: Install Composer dependencies for current branch
+        if: steps.check.outputs.has_changes == 'true'
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: Execute new migrations
+        if: steps.check.outputs.has_changes == 'true'
+        run: bin/console doctrine:migrations:migrate -vvv --ansi --no-interaction
+
+      - name: Revert new migrations
+        if: steps.check.outputs.has_changes == 'true'
+        run: bin/console doctrine:migrations:migrate "${{ steps.base-version.outputs.version }}" -vvv --ansi --no-interaction
+
+      - name: Snapshot reverted schema and data
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          PGPASSWORD: "!ChangeMe!"
+        run: |
+          pg_dump -U dirigent -h localhost dirigent \
+            --schema-only --no-comments --no-privileges --no-owner \
+            | python3 .github/scripts/normalize-psql-dump.py \
+            > /tmp/schema_reverted.sql
+          pg_dump -U dirigent -h localhost dirigent \
+            --data-only --no-comments --no-privileges --no-owner \
+            | python3 .github/scripts/normalize-psql-dump.py \
+            > /tmp/data_reverted.sql
+
+      - name: Verify schema after revert matches baseline
+        if: steps.check.outputs.has_changes == 'true'
+        run: diff -u /tmp/schema_baseline.sql /tmp/schema_reverted.sql
+
+      - name: Verify data after revert matches baseline
+        if: steps.check.outputs.has_changes == 'true'
+        run: diff -u /tmp/data_baseline.sql /tmp/data_reverted.sql
