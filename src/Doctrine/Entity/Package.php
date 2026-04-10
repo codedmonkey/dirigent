@@ -67,7 +67,8 @@ class Package extends TrackedEntity
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
 
-    #[ORM\OneToOne(mappedBy: 'package', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'package', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private PackageInstallations $installations;
 
     /**

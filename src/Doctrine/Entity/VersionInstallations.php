@@ -8,12 +8,21 @@ use Doctrine\ORM\Mapping as ORM;
 class VersionInstallations extends AbstractInstallations
 {
     #[ORM\Id]
-    #[ORM\OneToOne(inversedBy: 'installations')]
+    #[ORM\Column]
+    #[ORM\GeneratedValue]
+    private ?int $id = null;
+
+    #[ORM\OneToOne(mappedBy: 'installations')]
     private Version $version;
 
     public function __construct(Version $version)
     {
         $this->version = $version;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
     public function getVersion(): Version
