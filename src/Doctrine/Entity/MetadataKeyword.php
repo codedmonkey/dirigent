@@ -32,7 +32,7 @@ class MetadataKeyword
         $this->keyword = $keyword;
         $this->index = $index;
 
-        $this->metadata->getKeywords()->add($this);
+        $this->metadata->getKeywords(raw: true)->add($this);
     }
 
     public function getId(): ?int

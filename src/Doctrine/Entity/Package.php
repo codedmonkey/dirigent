@@ -521,6 +521,19 @@ class Package extends TrackedEntity
         return array_filter($this->getSortedVersions(), static fn (Version $version) => str_starts_with($version->getNormalizedName(), 'dev-'));
     }
 
+    public function getVersionByNormalizedName(string $normalizedName): ?Version
+    {
+        $normalizedName = strtolower($normalizedName);
+
+        foreach ($this->versions as $version) {
+            if ($normalizedName === strtolower($version->getNormalizedName())) {
+                return $version;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Sort versions from newest to oldest.
      */

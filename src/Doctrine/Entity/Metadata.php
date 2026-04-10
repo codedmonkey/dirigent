@@ -8,6 +8,9 @@ use Composer\Package\Version\VersionParser;
 use Composer\Pcre\Preg;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Order;
+use Doctrine\Common\Collections\Selectable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -98,51 +101,45 @@ class Metadata extends TrackedEntity implements \Stringable
     private Package $package;
 
     /**
-     * @var Collection<int, MetadataRequireLink>
+     * @var Collection<int, MetadataRequireLink>&Selectable
      */
     #[ORM\OneToMany(targetEntity: MetadataRequireLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach'])]
-    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $requireLinks;
 
     /**
-     * @var Collection<int, MetadataDevRequireLink>
+     * @var Collection<int, MetadataDevRequireLink>&Selectable
      */
     #[ORM\OneToMany(targetEntity: MetadataDevRequireLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach'])]
-    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $devRequireLinks;
 
     /**
-     * @var Collection<int, MetadataConflictLink>
+     * @var Collection<int, MetadataConflictLink>&Selectable
      */
     #[ORM\OneToMany(targetEntity: MetadataConflictLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach'])]
-    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $conflictLinks;
 
     /**
-     * @var Collection<int, MetadataProvideLink>
+     * @var Collection<int, MetadataProvideLink>&Selectable
      */
     #[ORM\OneToMany(targetEntity: MetadataProvideLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach'])]
-    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $provideLinks;
 
     /**
-     * @var Collection<int, MetadataReplaceLink>
+     * @var Collection<int, MetadataReplaceLink>&Selectable
      */
     #[ORM\OneToMany(targetEntity: MetadataReplaceLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach'])]
-    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $replaceLinks;
 
     /**
-     * @var Collection<int, MetadataSuggestLink>
+     * @var Collection<int, MetadataSuggestLink>&Selectable
      */
     #[ORM\OneToMany(targetEntity: MetadataSuggestLink::class, mappedBy: 'metadata', cascade: ['persist', 'detach'])]
-    #[ORM\OrderBy(['index' => 'ASC'])]
     private Collection $suggestLinks;
 
     /**
-     * @var Collection<int, MetadataKeyword>
+     * @var Collection<int, MetadataKeyword>&Selectable
      */
-    #[ORM\OneToMany(mappedBy: 'metadata', targetEntity: MetadataKeyword::class, cascade: ['persist', 'detach'])]
+    #[ORM\OneToMany(targetEntity: MetadataKeyword::class, mappedBy: 'metadata', cascade: ['persist', 'detach'])]
     private Collection $keywords;
 
     public function __construct(Version $version)
@@ -416,57 +413,57 @@ class Metadata extends TrackedEntity implements \Stringable
     /**
      * @return Collection<int, MetadataRequireLink>
      */
-    public function getRequireLinks(): Collection
+    public function getRequireLinks(bool $raw = false): Collection
     {
-        return $this->requireLinks;
+        return self::getOrderedCollection($this->requireLinks, $raw);
     }
 
     /**
      * @return Collection<int, MetadataDevRequireLink>
      */
-    public function getDevRequireLinks(): Collection
+    public function getDevRequireLinks(bool $raw = false): Collection
     {
-        return $this->devRequireLinks;
+        return self::getOrderedCollection($this->devRequireLinks, $raw);
     }
 
     /**
      * @return Collection<int, MetadataConflictLink>
      */
-    public function getConflictLinks(): Collection
+    public function getConflictLinks(bool $raw = false): Collection
     {
-        return $this->conflictLinks;
+        return self::getOrderedCollection($this->conflictLinks, $raw);
     }
 
     /**
      * @return Collection<int, MetadataProvideLink>
      */
-    public function getProvideLinks(): Collection
+    public function getProvideLinks(bool $raw = false): Collection
     {
-        return $this->provideLinks;
+        return self::getOrderedCollection($this->provideLinks, $raw);
     }
 
     /**
      * @return Collection<int, MetadataReplaceLink>
      */
-    public function getReplaceLinks(): Collection
+    public function getReplaceLinks(bool $raw = false): Collection
     {
-        return $this->replaceLinks;
+        return self::getOrderedCollection($this->replaceLinks, $raw);
     }
 
     /**
      * @return Collection<int, MetadataSuggestLink>
      */
-    public function getSuggestLinks(): Collection
+    public function getSuggestLinks(bool $raw = false): Collection
     {
-        return $this->suggestLinks;
+        return self::getOrderedCollection($this->suggestLinks, $raw);
     }
 
     /**
      * @return Collection<int, MetadataKeyword>
      */
-    public function getKeywords(): Collection
+    public function getKeywords(bool $raw = false): Collection
     {
-        return $this->keywords;
+        return self::getOrderedCollection($this->keywords, $raw);
     }
 
     public function hasSource(): bool
@@ -674,5 +671,23 @@ class Metadata extends TrackedEntity implements \Stringable
         }
 
         return $data;
+    }
+
+    /**
+     * Sorts a Doctrine collection by an index field. If the $raw parameter is true, the collection is returned as-is.
+     */
+    private static function getOrderedCollection(Collection&Selectable $collection, bool $raw): Collection
+    {
+        if ($raw) {
+            return $collection;
+        }
+
+        static $criteria = Criteria::create()
+            ->orderBy(['index' => Order::Ascending]);
+
+        /** @var Collection $collection */
+        $collection = $collection->matching($criteria);
+
+        return $collection;
     }
 }

@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Entity\MetadataLinkType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -37,6 +38,49 @@ class MetadataRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * Initializes all link and keyword collections for the given metadata.
+     */
+    public function fetchMetadataCollections(Metadata ...$metadata): void
+    {
+        if ([] === $metadata) {
+            return;
+        }
+
+        $metadataCollection = $metadata;
+
+        foreach (MetadataLinkType::cases() as $linkType) {
+            $association = match ($linkType) {
+                MetadataLinkType::Require => 'requireLinks',
+                MetadataLinkType::DevRequire => 'devRequireLinks',
+                MetadataLinkType::Conflict => 'conflictLinks',
+                MetadataLinkType::Provide => 'provideLinks',
+                MetadataLinkType::Replace => 'replaceLinks',
+                MetadataLinkType::Suggest => 'suggestLinks',
+            };
+
+            $this->getEntityManager()->createQueryBuilder()
+                ->select('metadata', $association)
+                ->from(Metadata::class, 'metadata')
+                ->leftJoin("metadata.$association", $association)
+                ->where('metadata IN (:metadata)')
+                ->setParameter('metadata', $metadataCollection)
+                ->getQuery()
+                ->getResult();
+        }
+
+        $this->getEntityManager()->createQueryBuilder()
+            ->select('metadata', 'keywords')
+            ->from(Metadata::class, 'metadata')
+            ->leftJoin('metadata.keywords', 'keywords')
+            ->leftJoin('keywords.keyword', 'keyword')
+            ->addSelect('keyword')
+            ->where('metadata IN (:metadata)')
+            ->setParameter('metadata', $metadataCollection)
+            ->getQuery()
+            ->getResult();
     }
 
     public function getNextRevision(Metadata $metadata): int
