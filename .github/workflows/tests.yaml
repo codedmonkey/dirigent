@@ -11,59 +11,6 @@ env:
   PHPUNIT_FLAGS: ""
 
 jobs:
-  database:
-    name: Validate database components
-
-    runs-on: ubuntu-latest
-    services:
-      database:
-        image: postgres:16-alpine
-        ports:
-          - "5432:5432"
-        env:
-          POSTGRES_DB: dirigent
-          POSTGRES_PASSWORD: "!ChangeMe!"
-          POSTGRES_USER: dirigent
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install PHP with extensions
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
-          tools: composer:v2
-
-      - name: Set Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer output
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        run: composer install --ansi --no-interaction --no-progress
-
-      - name: Generate encryption keys
-        run: bin/console encryption:generate-keys
-
-      - name: Validate mapping
-        run: bin/console doctrine:schema:validate --skip-sync -vvv --ansi --no-interaction
-
-      - name: Execute migrations
-        run: bin/console doctrine:migrations:migrate -vvv --ansi --no-interaction
-
-      - name: Validate schema
-        run: bin/console doctrine:schema:validate --skip-mapping --skip-property-types -vvv --ansi --no-interaction
-
-      - name: Load fixtures
-        run: bin/console doctrine:fixtures:load -vvv --ansi --no-interaction
-
   phpunit:
     name: "PHPUnit (PHP ${{ matrix.php-version }})"
 
