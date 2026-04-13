@@ -88,7 +88,7 @@ class ApiController extends AbstractController
         $packageName = $request->attributes->getString('package');
         $basePackageName = u($packageName)->trimSuffix('~dev')->toString();
 
-        if (null === $this->findPackage($basePackageName)) {
+        if (null === $this->findPackage($basePackageName, create: true)) {
             throw $this->createNotFoundException();
         }
 
