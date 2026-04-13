@@ -4,7 +4,6 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Attribute\MapPackage;
-use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageRequireLink;
@@ -23,6 +22,7 @@ class DashboardPackagesInfoController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly MetadataRepository $metadataRepository,
     ) {
     }
 
@@ -31,7 +31,7 @@ class DashboardPackagesInfoController extends AbstractController
      */
     #[Route('/packages/{package}', name: 'dashboard_packages_info', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
     #[IsGrantedAccess]
-    public function info(#[MapPackage] Package $package): Response
+    public function info(Request $request, #[MapPackage] Package $package): Response
     {
         $version = $package->getLatestVersion();
 
@@ -39,16 +39,32 @@ class DashboardPackagesInfoController extends AbstractController
             return $this->redirectToRoute('dashboard_packages_versions', ['package' => $package->getName()]);
         }
 
-        return $this->versionInfo($package, $version);
+        return $this->versionInfo($request, $package, $version, latest: true);
     }
 
     #[Route('/packages/{package}/versions/{version}', name: 'dashboard_packages_version_info', requirements: ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'])]
     #[IsGrantedAccess]
-    public function versionInfo(#[MapPackage] Package $package, #[MapPackage] Version $version): Response
-    {
-        /** @var MetadataRepository $metadataRepository */
-        $metadataRepository = $this->entityManager->getRepository(Metadata::class);
-        $metadataRepository->fetchMetadataCollections($version->getCurrentMetadata());
+    public function versionInfo(
+        Request $request,
+        #[MapPackage] Package $package,
+        #[MapPackage] Version $version,
+        bool $latest = false,
+    ): Response {
+        $metadata = $version->getCurrentMetadata();
+        $revision = $request->query->getInt('revision');
+
+        // Only check for a revision number if the route is for a specific version: $latest !== true
+        if ($revision > 0 && !$latest) {
+            $metadata = $this->metadataRepository->findOneBy(['version' => $version, 'revision' => $revision]);
+
+            if (null === $metadata) {
+                throw $this->createNotFoundException('The revision does not exist.');
+            }
+        }
+
+        $this->metadataRepository->fetchMetadataCollections($metadata);
+
+        $metadataCount = $this->metadataRepository->getMetadataCountForVersion($version);
 
         $dependentCount = $this->entityManager->getRepository(PackageRequireLink::class)->count(['linkedPackageName' => $package->getName()]);
         $implementationCount = $this->entityManager->getRepository(PackageProvideLink::class)->count(['linkedPackageName' => $package->getName(), 'implementation' => true]);
@@ -58,12 +74,29 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'version' => $version,
-            'metadata' => $version->getCurrentMetadata(),
+            'metadata' => $metadata,
 
             'dependentCount' => $dependentCount,
             'implementationCount' => $implementationCount,
+            'metadataCount' => $metadataCount,
             'providerCount' => $providerCount,
             'suggesterCount' => $suggesterCount,
+        ]);
+    }
+
+    #[Route('/packages/{package}/revisions/{version}', name: 'dashboard_packages_version_metadata_list', requirements: ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'])]
+    #[IsGrantedAccess]
+    public function versionMetadataList(
+        #[MapPackage] Package $package,
+        #[MapPackage] Version $version,
+    ): Response {
+        $metadataCollection = $this->metadataRepository->getMetadataCollectionForVersion($version);
+
+        return $this->render('dashboard/packages/package_version_revisions.html.twig', [
+            'package' => $package,
+            'version' => $version,
+
+            'metadataCollection' => $metadataCollection,
         ]);
     }
 

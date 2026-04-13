@@ -77,3 +77,8 @@ body.ea-dark-scheme img.img-light {
 body:not(.ea-dark-scheme) img.img-dark {
   display: none;
 }
+
+.text-monospace {
+  font-family: var(--font-family-monospace);
+  font-size: 13px;
+}

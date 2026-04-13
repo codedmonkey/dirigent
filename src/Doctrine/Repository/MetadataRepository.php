@@ -3,8 +3,10 @@
 namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Entity\MetadataLinkType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Order;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -38,6 +40,19 @@ class MetadataRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function getMetadataCountForVersion(Version $version): int
+    {
+        return $this->count(['version' => $version]);
+    }
+
+    public function getMetadataCollectionForVersion(Version $version): array
+    {
+        return $this->findBy(
+            ['version' => $version],
+            ['revision' => Order::Descending->value],
+        );
     }
 
     /**

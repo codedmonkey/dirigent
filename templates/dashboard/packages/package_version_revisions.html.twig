@@ -1,0 +1,37 @@
+{% extends 'dashboard/packages/package_base.html.twig' %}
+
+{% block page_title %}
+  {%- apply spaceless -%}
+    {{ package.name }}
+    <small>{{ version.extendedName }}</small>
+  {%- endapply -%}
+{% endblock %}
+
+{% block page_content %}
+  {{ include('dashboard/packages/_package_header.html.twig') }}
+
+  <h2 class="h4">{{ 'Revisions'|trans }}</h2>
+
+  <div class="list-group list-group-flush border-bottom mb-3">
+    {% for metadata in metadataCollection %}
+      {% set infoUrl = metadata.isCurrentMetadata
+        ? path('dashboard_packages_version_info', {package: package.name, version: version.name})
+        : path('dashboard_packages_version_info', {package: package.name, version: version.name, revision: metadata.revision})
+      %}
+      <a href="{{ infoUrl }}" class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <div>
+            <span>{{ 'Revision'|trans }} {{ metadata.revision }}: <span class="text-monospace">{{ metadata.reference }}</span></span>
+          </div>
+          <span class="text-muted">{{ metadata.releasedAt ? metadata.releasedAt.format('Y-m-d') }}</span>
+        </div>
+        <div>
+          <span>{{ 'Indexed on %date%'|trans({'%date%': metadata.createdAt.format('Y-m-d')}) }}</span>
+          {% if metadata.isCurrentMetadata %}
+            <span class="badge text-bg-secondary ms-1">{{ 'Current revision'|trans }}</span>
+          {% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% endblock %}

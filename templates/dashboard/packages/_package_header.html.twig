@@ -2,10 +2,13 @@
 {% set attrActive = 'class="nav-link active" aria-current="page"' %}
 {% set attr = 'class="nav-link text-primary"' %}
 
-<ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 pb-3 mb-3 border-bottom">
+<ul class="nav nav-pills nav-justified d-grid d-md-flex gap-1 pb-2 mb-3 border-bottom">
   <li class="nav-item">
     {% if package.versions|length > 0 %}
-      {% set packageInfoUrl = path('dashboard_packages_info', {package: package.name}) %}
+      {% set packageInfoUrl = version is defined
+        ? path('dashboard_packages_version_info', {package: package.name, version: version.name})
+        : path('dashboard_packages_info', {package: package.name})
+      %}
       <a {{ (currentPage == 'info' ? attrActive : attr)|raw }} href="{{ packageInfoUrl }}">{{ 'Info'|trans }}</a>
     {% else %}
       <span class="nav-link disabled">{{ 'Info'|trans }}</span>
