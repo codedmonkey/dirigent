@@ -23,6 +23,7 @@ use Composer\Package\Link as ComposerPackageLink;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
@@ -36,6 +37,10 @@ readonly class PackageMetadataResolver
         private KeywordRepository $keywordRepository,
         private RegistryRepository $registryRepository,
         private PackageRepository $packageRepository,
+        #[Autowire(param: 'dirigent.metadata.retain_revisions.tagged_versions')]
+        private bool $retainRevisionsTagged,
+        #[Autowire(param: 'dirigent.metadata.retain_revisions.dev_versions')]
+        private bool $retainRevisionsDev,
     ) {
     }
 
@@ -214,12 +219,18 @@ readonly class PackageMetadataResolver
 
     private function updateVersion(Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
     {
+        $currentMetadata = $version->hasCurrentMetadata() ? $version->getCurrentMetadata() : null;
         $metadata = $this->createMetadata($version, $data, $driver);
 
-        if (!$version->hasCurrentMetadata() || $this->hasMetadataChanged($version->getCurrentMetadata(), $metadata)) {
+        if (null === $currentMetadata || $this->hasMetadataChanged($currentMetadata, $metadata)) {
             $version->setCurrentMetadata($metadata);
 
             $this->entityManager->persist($metadata);
+
+            $removePreviousMetadata = $version->isDevelopment() ? !$this->retainRevisionsDev : !$this->retainRevisionsTagged;
+            if (null !== $currentMetadata && $removePreviousMetadata) {
+                $this->entityManager->remove($currentMetadata);
+            }
         }
 
         $version->setDefaultBranch($data->isDefaultBranch());
