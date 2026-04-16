@@ -231,19 +231,18 @@ readonly class PackageMetadataResolver
 
     private function updateVersion(Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
     {
+        $currentMetadata = $version->hasCurrentMetadata() ? $version->getCurrentMetadata() : null;
         $metadata = $this->createMetadata($version, $data, $driver);
 
-        if (!$version->hasCurrentMetadata() || $this->hasMetadataChanged($version->getCurrentMetadata(), $metadata)) {
-            $existingMetadata = $version->getCurrentMetadata();
-
+        if (null === $currentMetadata || $this->hasMetadataChanged($currentMetadata, $metadata)) {
             $version->setCurrentMetadata($metadata);
 
-            $pruneMetadata = $version->isDevelopment() ? !$this->retainRevisionsDev : !$this->retainRevisionsTagged;
-            if ($pruneMetadata) {
-                $this->entityManager->remove($existingMetadata);
-            }
-
             $this->entityManager->persist($metadata);
+
+            $removePreviousMetadata = $version->isDevelopment() ? !$this->retainRevisionsDev : !$this->retainRevisionsTagged;
+            if (null !== $currentMetadata && $removePreviousMetadata) {
+                $this->entityManager->remove($currentMetadata);
+            }
         }
 
         $version->setDefaultBranch($data->isDefaultBranch());
