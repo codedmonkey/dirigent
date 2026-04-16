@@ -56,11 +56,21 @@ class DirigentExtension extends ConfigurableExtension
     }
 
     /**
-     * @param array{mirror_vcs_repositories: bool, retain_stale_revisions: array{enabled: bool, tagged_versions: bool, dev_versions: bool}} $config
+     * @param array{mirror_vcs_repositories: bool, retain_stale_revisions: array{enabled: bool, tagged_versions: bool, dev_versions: bool}, retain_pruned_versions: array{enabled: bool, tagged_versions: bool, dev_versions: bool}} $config
      */
     private function registerMetadataConfiguration(array $config, ContainerBuilder $container): void
     {
         $container->setParameter('dirigent.metadata.mirror_vcs_repositories', $config['mirror_vcs_repositories']);
+
+        $retainPrunedVersions = $config['retain_pruned_versions']['enabled'];
+        $container->setParameter(
+            name: 'dirigent.metadata.retain_pruned_versions.tagged_versions',
+            value: $retainPrunedVersions && $config['retain_pruned_versions']['tagged_versions'],
+        );
+        $container->setParameter(
+            name: 'dirigent.metadata.retain_pruned_versions.dev_versions',
+            value: $retainPrunedVersions && $config['retain_pruned_versions']['dev_versions'],
+        );
 
         $retainStaleRevisions = $config['retain_stale_revisions']['enabled'];
         $container->setParameter(
