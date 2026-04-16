@@ -12,7 +12,7 @@
         "ext-iconv": "*",
         "ext-sodium": "*",
         "cebe/markdown": "^1.2.1",
-        "composer/composer": "^2.9.5",
+        "composer/composer": "^2.9.7",
         "composer/pcre": "^3.3.2",
         "doctrine/doctrine-bundle": "^2.18.2",
         "doctrine/doctrine-fixtures-bundle": "^4.3.1",
