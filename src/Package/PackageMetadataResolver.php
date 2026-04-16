@@ -41,6 +41,10 @@ readonly class PackageMetadataResolver
         private bool $retainRevisionsTagged,
         #[Autowire(param: 'dirigent.metadata.retain_revisions.dev_versions')]
         private bool $retainRevisionsDev,
+        #[Autowire(param: 'dirigent.metadata.retain_versions.tagged_versions')]
+        private bool $retainVersionsTagged,
+        #[Autowire(param: 'dirigent.metadata.retain_versions.dev_versions')]
+        private bool $retainVersionsDev,
     ) {
     }
 
@@ -209,7 +213,15 @@ readonly class PackageMetadataResolver
 
         // Remove outdated versions
         foreach ($existingVersionMetadata as $version) {
-            $this->entityManager->remove($version);
+            $removeVersion = $version->isDevelopment() ? !$this->retainVersionsDev : !$this->retainVersionsTagged;
+            if ($removeVersion) {
+                $this->entityManager->remove($version);
+            } else {
+                $version->setPruned(true);
+                $version->setUpdatedAt(new \DateTimeImmutable());
+
+                $this->entityManager->persist($version);
+            }
         }
 
         $package->setUpdatedAt(new \DateTimeImmutable());
