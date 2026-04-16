@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class PackageProvideLink extends AbstractPackageLink
 {
-    #[ORM\Id, ORM\ManyToOne(targetEntity: Package::class), ORM\JoinColumn(nullable: false)]
+    #[ORM\Id, ORM\ManyToOne(targetEntity: Package::class)]
     protected Package $package;
 
     #[ORM\Id, ORM\Column]
