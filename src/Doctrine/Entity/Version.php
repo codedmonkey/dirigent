@@ -24,6 +24,9 @@ class Version extends TrackedEntity implements \Stringable
     private bool $development;
 
     #[ORM\Column]
+    private bool $pruned = false;
+
+    #[ORM\Column]
     private bool $defaultBranch = false;
 
     #[ORM\Column(nullable: true)]
@@ -89,6 +92,16 @@ class Version extends TrackedEntity implements \Stringable
     public function setDevelopment(bool $development): void
     {
         $this->development = $development;
+    }
+
+    public function isPruned(): bool
+    {
+        return $this->pruned;
+    }
+
+    public function setPruned(bool $pruned): void
+    {
+        $this->pruned = $pruned;
     }
 
     public function isDefaultBranch(): bool
