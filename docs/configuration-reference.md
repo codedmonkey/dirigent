@@ -35,6 +35,10 @@ dirigent:
     dev_packages: false
   metadata:
     mirror_vcs_repositories: false
+    retain_versions:
+      enabled: true
+      tagged_versions: true
+      dev_versions: false
     retain_revisions:
       enabled: true
       tagged_versions: true
@@ -134,6 +138,26 @@ Type: `boolean` | Default: `false`
 Fetch mirrored packages from their VCS repositories by default when possible.
 
 Sets the fetch strategy of new mirrored packages to **Fetch from VCS**.
+
+### retain_versions
+
+#### enabled
+
+Type: `boolean` | Default: `true`
+
+Whether to enable or disable retaining deleted versions of packages.
+
+#### tagged_versions
+
+Type: `boolean` | Default: `true`
+
+Retain deleted tagged package versions.
+
+#### dev_versions
+
+Type: `boolean` | Default: `false`
+
+Retain deleted development package versions.
 
 ### retain_revisions
 
