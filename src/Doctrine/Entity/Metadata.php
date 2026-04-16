@@ -682,7 +682,7 @@ class Metadata extends TrackedEntity implements \Stringable
             return $collection;
         }
 
-        static $criteria = Criteria::create()
+        static $criteria = Criteria::create(true)
             ->orderBy(['index' => Order::Ascending]);
 
         /** @var Collection $collection */
