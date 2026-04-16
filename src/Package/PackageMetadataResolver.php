@@ -23,6 +23,7 @@ use Composer\Package\Link as ComposerPackageLink;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
@@ -36,6 +37,10 @@ readonly class PackageMetadataResolver
         private KeywordRepository $keywordRepository,
         private RegistryRepository $registryRepository,
         private PackageRepository $packageRepository,
+        #[Autowire(param: 'dirigent.metadata.retain_revisions.tagged_versions')]
+        private bool $retainRevisionsTagged,
+        #[Autowire(param: 'dirigent.metadata.retain_revisions.dev_versions')]
+        private bool $retainRevisionsDev,
     ) {
     }
 
@@ -217,7 +222,14 @@ readonly class PackageMetadataResolver
         $metadata = $this->createMetadata($version, $data, $driver);
 
         if (!$version->hasCurrentMetadata() || $this->hasMetadataChanged($version->getCurrentMetadata(), $metadata)) {
+            $existingMetadata = $version->getCurrentMetadata();
+
             $version->setCurrentMetadata($metadata);
+
+            $pruneMetadata = $version->isDevelopment() ? !$this->retainRevisionsDev : !$this->retainRevisionsTagged;
+            if ($pruneMetadata) {
+                $this->entityManager->remove($existingMetadata);
+            }
 
             $this->entityManager->persist($metadata);
         }
