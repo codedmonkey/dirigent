@@ -1,5 +1,9 @@
 # Changelog
 
+* 0.6.3 (2026-04-17)
+  * Fixed packages not being mirrored automatically when requested from the API
+  * Updated Composer to version 2.9.7 to fix vulnerabilities 
+
 * 0.6.2 (2026-03-31)
   * Improved sorting of package keywords by adding an index to the stored metadata
 
