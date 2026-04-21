@@ -20,6 +20,7 @@
         "doctrine/orm": "^3.6.2",
         "easycorp/easyadmin-bundle": "^4.29.3",
         "endroid/qr-code": "^6.0.9",
+        "knpuniversity/oauth2-client-bundle": "^2.20",
         "league/commonmark": "^2.8.2",
         "phpdocumentor/reflection-docblock": "^5.6.7",
         "phpstan/phpdoc-parser": "^2.3.2",
