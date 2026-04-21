@@ -30,6 +30,8 @@ security:
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
+            custom_authenticator:
+                - CodedMonkey\Dirigent\Security\OauthAuthenticator
             logout:
                 target: dashboard
             switch_user: true
