@@ -3,6 +3,7 @@
 namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Entity\MetadataLinkType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -53,6 +54,30 @@ class MetadataRepository extends ServiceEntityRepository
             ['version' => $version],
             ['revision' => Order::Descending->value],
         );
+    }
+
+    /**
+     * Returns a map of version ID => metadata count for all versions of the given package.
+     *
+     * @return array<int, int>
+     */
+    public function getMetadataCountsForPackage(Package $package): array
+    {
+        $rows = $this->createQueryBuilder('metadata')
+            ->select('IDENTITY(metadata.version) as version_id, COUNT(metadata.id) as revision_count')
+            ->join('metadata.version', 'version')
+            ->where('version.package = :package')
+            ->groupBy('metadata.version')
+            ->setParameter('package', $package)
+            ->getQuery()
+            ->getResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['version_id']] = (int) $row['revision_count'];
+        }
+
+        return $counts;
     }
 
     /**
