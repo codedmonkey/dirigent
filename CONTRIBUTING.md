@@ -1,36 +1,14 @@
 # Contributing to Dirigent
 
-Dirigent is an open-source project, contributions of all kind are welcome, including
+Dirigent is an open-source project, contributions of all kinds are welcome, including
 [financial contributions][codedmonkey-sponsor].
 
-This guide contains technical information and instructions about the development process of the project that you should
+This guide contains instructions about the development process of the project that you should
 follow when contributing code.
 
-## Project information
+## Architecture
 
-### Technology stack
-
-- **Languages & frameworks**:
-    - PHP 8.3+
-    - Symfony 7.3
-    - PostgreSQL 16.x (via Doctrine ORM 3.x)
-    - TypeScript
-- **Development requirements**:
-    - Docker
-    - Symfony CLI
-- **Package managers**:
-    - **PHP**: Composer
-    - **TypeScript**: NPM
-- **Frontend**: Twig, EasyAdmin 4.x
-- **Frontend (JavaScript)**: Webpack Encore, Stimulus
-- **Linting**: Rector, PHP-CS-Fixer, PHPStan
-- **Testing**: PHPUnit 12.x, Testcontainers
-
-### Coding style
-
-#### PHP
-
-Dirigent follows the [PER coding style][per-coding-style] and the [Symfony coding standards][symfony-coding-standards].
+For an overview of the architecture of this project, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Running Dirigent locally
 
