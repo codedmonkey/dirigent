@@ -2,38 +2,9 @@
 
 Dirigent is a free and open package registry for Composer, the PHP package manager. It allows users to publish private packages and mirror packages from external registries like Packagist.
 
-### Project structure
+## Architecture
 
-```
-assets/                         # Frontend assets
-config/                         # Symfony configuration
-migrations/                     # Doctrine migrations (PostgreSQL)
-src/
-├── Attribute/                  # PHP attributes
-├── Command/                    # Symfony console commands
-├── Composer/                   # Composer integration logic
-├── Controller/                 # HTTP controllers
-│   └── Dashboard/              # EasyAdmin dashboard controllers
-├── Doctrine/
-│   ├── Entity/                 # Doctrine ORM entities
-│   ├── Repository/             # Doctrine repositories
-│   ├── Type/                   # Custom Doctrine types
-│   └── DataFixtures/           # Database fixtures
-├── Encryption/                 # Encryption utilities
-├── Entity/                     # Enums (UserRole, PackageUpdateSource)
-├── EventListener/              # Symfony event listeners
-├── Form/                       # Symfony form types
-├── Message/                    # Symfony messenger messages and handlers (async jobs)
-├── Package/                    # Package management services
-├── Routing/                    # Symfony routing logic
-├── Twig/                       # Twig extensions
-└── Validator/                  # Symfony validators
-templates/                      # Twig templates
-tests/
-├── UnitTests/                  # Unit tests
-├── FunctionalTests/            # Functional/Integration tests
-└── Docker/                     # Docker image tests
-```
+@ARCHITECTURE.md
 
 ## Coding style
 
