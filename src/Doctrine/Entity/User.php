@@ -39,13 +39,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[Column(type: Types::STRING, length: 64, enumType: UserRole::class)]
     private UserRole $role = UserRole::User;
 
-    #[Column]
+    /**
+     * User's (hashed) password.
+     *
+     * The password can only be NULL when OAuth credentials are available.
+     */
+    #[Column(nullable: true)]
     private ?string $password = null;
 
     private ?string $plainPassword = null;
 
     #[Column(nullable: true)]
     private ?string $totpSecret = null;
+
+    #[Column(nullable: true)]
+    private ?string $oauthProvider = null;
+
+    #[Column(nullable: true)]
+    private ?string $oauthSub = null;
 
     public function getId(): ?int
     {
@@ -128,6 +139,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     public function setTotpSecret(?string $totpSecret): void
     {
         $this->totpSecret = $totpSecret;
+    }
+
+    public function getOauthProvider(): ?string
+    {
+        return $this->oauthProvider;
+    }
+
+    public function setOauthProvider(?string $oauthProvider): void
+    {
+        $this->oauthProvider = $oauthProvider;
+    }
+
+    public function getOauthSub(): ?string
+    {
+        return $this->oauthSub;
+    }
+
+    public function setOauthSub(?string $oauthSub): void
+    {
+        $this->oauthSub = $oauthSub;
     }
 
     public function getUserIdentifier(): string

@@ -18,6 +18,11 @@ readonly class UserListener
 
     public function prePersist(User $user): void
     {
+        if (null !== $user->getOauthProvider() && null !== $user->getOauthSub()) {
+            // Skip password hashing for users authenticating through OAuth
+            return;
+        }
+
         if (null === $user->getPlainPassword()) {
             throw new \LogicException('A new user can\'t be created without a password.');
         }
