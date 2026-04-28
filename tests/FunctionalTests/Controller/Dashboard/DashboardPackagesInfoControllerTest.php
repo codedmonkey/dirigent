@@ -50,6 +50,16 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
+    public function testPackageMetadataList(): void
+    {
+        $client = static::createClient();
+        $this->loginUser();
+
+        $client->request('GET', '/packages/psr/log/revisions/1.0.0');
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+    }
+
     public function testVersions(): void
     {
         $client = static::createClient();

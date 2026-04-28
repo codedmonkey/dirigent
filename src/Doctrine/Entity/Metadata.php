@@ -466,6 +466,16 @@ class Metadata extends TrackedEntity implements \Stringable
         return self::getOrderedCollection($this->keywords, $raw);
     }
 
+    public function isCurrentMetadata(): bool
+    {
+        return $this->version->hasCurrentMetadata() && $this === $this->version->getCurrentMetadata();
+    }
+
+    public function getReference(): ?string
+    {
+        return $this->getSourceReference() ?? $this->getDistReference();
+    }
+
     public function hasSource(): bool
     {
         return null !== $this->source;

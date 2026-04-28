@@ -16,10 +16,10 @@
   {% endapply %}
 
   {% if package.versions|length > 0 %}
-    {{ _self.versionList('Latest versions', package.activeVersions) }}
-    {{ _self.versionList('Development versions', package.devVersions) }}
-    {{ _self.versionList('Historical versions', package.historicalVersions) }}
-    {{ _self.versionList('Development branch versions', package.devBranchVersions) }}
+    {{ _self.versionList('Latest versions', package.activeVersions, metadataCounts) }}
+    {{ _self.versionList('Development versions', package.devVersions, metadataCounts) }}
+    {{ _self.versionList('Historical versions', package.historicalVersions, metadataCounts) }}
+    {{ _self.versionList('Development branch versions', package.devBranchVersions, metadataCounts) }}
   {% else %}
     <table class="table datagrid datagrid-empty">
       <tbody>
@@ -46,22 +46,30 @@
   {% endif %}
 {% endblock %}
 
-{% macro versionList(title, versions) %}
+{% macro versionList(title, versions, metadataCounts) %}
   {% if versions|length %}
     <h2 class="h4">{{ title|trans }}</h2>
     <div class="list-group list-group-flush border-bottom mb-3">
       {% for version in versions %}
-        {{ _self.versionListItem(version) }}
+        {{ _self.versionListItem(version, metadataCounts) }}
       {% endfor %}
     </div>
   {% endif %}
 {% endmacro %}
 
-{% macro versionListItem(version) %}
+{% macro versionListItem(version, metadataCounts) %}
   {% set packageVersionInfoUrl = path('dashboard_packages_version_info', {package: version.package.name, version: version.name}) %}
   <a href="{{ packageVersionInfoUrl }}" class="list-group-item">
     <div class="d-flex justify-content-between">
-      <span>{{ version.extendedName }}</span>
+      <span>
+        <span>{{ version.extendedName }}</span>
+        {% if metadataCounts[version.id] > 1 %}
+          <span class="text-muted ms-1" title="{{ 'This version has multiple revisions'|trans }}">
+            <span class="fa-solid fa-file-alt" aria-hidden="true"></span>
+            <span class="visually-hidden">{{ 'This version has multiple revisions'|trans }}</span>
+          </span>
+        {% endif %}
+      </span>
       <span class="text-muted">{{ version.currentMetadata.releasedAt ? version.currentMetadata.releasedAt.format('Y-m-d') }}</span>
     </div>
   </a>

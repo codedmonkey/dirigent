@@ -72,6 +72,15 @@ Requires: Requires
 Requires (dev): Requires (dev)
 Suggests: Suggests
 
+# Package labels (Revisions)
+Current revision: Current revision
+Indexed on %date%: Indexed on %date%
+Multiple revisions found for version %version% of package %package%: Multiple revisions found for version %version% of package %package%.
+Revision: Revision
+Revisions: Revisions
+This version has multiple revisions: This version has multiple revisions
+You're viewing an inactive revision of this package: You're viewing an inactive revision of this package.
+
 # Package labels (Statistics)
 Daily installations: Daily installations
 Daily installations per version: Daily installations per version

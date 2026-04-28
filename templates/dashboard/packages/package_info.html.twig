@@ -100,66 +100,99 @@
     {% endif %}
   </div>
 
-  <div class="row border-bottom pb-3 mb-3">
-    {{ _self.linkBlock('Requires', metadata.requireLinks) }}
-    {{ _self.linkBlock('Requires (dev)', metadata.devRequireLinks) }}
-    {{ _self.provideBlock(metadata.provideLinks) }}
-    {{ _self.linkBlock('Suggests', metadata.suggestLinks) }}
-    {{ _self.linkBlock('Conflicts', metadata.conflictLinks) }}
-    {{ _self.linkBlock('Replaces', metadata.replaceLinks) }}
+  <div class="border-bottom mb-3">
+    <div class="row g-0">
+      {{ _self.linkBlock('Requires', metadata.requireLinks) }}
+      {{ _self.linkBlock('Requires (dev)', metadata.devRequireLinks) }}
+      {{ _self.provideBlock(metadata.provideLinks) }}
+      {{ _self.linkBlock('Suggests', metadata.suggestLinks) }}
+      {{ _self.linkBlock('Conflicts', metadata.conflictLinks) }}
+      {{ _self.linkBlock('Replaces', metadata.replaceLinks) }}
+    </div>
   </div>
 
-  <div class="row border-bottom pb-3 mb-3">
-    <div class="col-md-6">
-      {% if metadata.hasSource() %}
-        <div class="h5">
-          {{ 'Source'|trans }}
-          <span class="badge text-bg-secondary">{{ metadata.sourceType }}</span>
-        </div>
-
-        <div class="mb-2">
-          <code>{{ metadata.sourceUrl }}</code>
-        </div>
-
-        <div class="mb-2">
-          {{ 'Reference'|trans }}: <code>{{ metadata.sourceReference }}</code>
-        </div>
-
-        <div class="mb-2">
-          {% set browseUrl = metadata.browsableRepositoryUrl %}
-          {% if browseUrl %}
-            <a class="btn btn-sm btn-secondary" href="{{ browseUrl }}">
-              <span class="fa-solid fa-code me-1" aria-hidden="true"></span>
-              {{ 'Browse code'|trans }}
+  <div class="border-bottom pb-3 mb-3">
+    {% if metadataCount > 1 %}
+      <div class="bg-body-tertiary border border-warning-subtle px-3 py-2 mb-3 rounded">
+        <p>
+          {{ 'Multiple revisions found for version %version% of package %package%'|trans({
+            '%package%': "<strong>#{package.name|escape}</strong>",
+            '%version%': "<strong>#{version.name|escape}</strong>",
+          })|raw }}
+        </p>
+        {% if not metadata.isCurrentMetadata %}
+          <p class="text-warning">
+            <strong>
+              {{ "You're viewing an inactive revision of this package"|trans }}
+            </strong>
+          </p>
+        {% endif %}
+        <div class="btn-toolbar gap-1">
+          <a class="btn btn-sm btn-secondary" href="{{ path('dashboard_packages_version_metadata_list', {package: package.name, version: version.name}) }}">
+            <span class="fa-solid fa-list me-1" aria-hidden="true"></span>
+            <span class="btn-label">{{ 'Revisions'|trans }}</span>
+          </a>
+          {% if not metadata.isCurrentMetadata %}
+            <a class="btn btn-sm btn-secondary" href="{{ path('dashboard_packages_version_info', {package: package.name, version: version.name}) }}">
+              <span class="fa-solid fa-code-commit me-1" aria-hidden="true"></span>
+              <span class="btn-label">{{ 'Current revision'|trans }}</span>
             </a>
           {% endif %}
         </div>
-      {% else %}
-        <div class="h5">{{ 'Source'|trans }}</div>
-        -
-      {% endif %}
-    </div>
-    <div class="col-md-6">
-      {% if metadata.hasDist() %}
-        <div class="h5">
-          {{ 'Distribution'|trans }}
-          <span class="badge text-bg-secondary">{{ metadata.distType }}</span>
-        </div>
+      </div>
+    {% endif %}
+    <div class="row g-0">
+      <div class="col-md-6">
+        {% if metadata.hasSource() %}
+          <div class="h5">
+            {{ 'Source'|trans }}
+            <span class="badge text-bg-secondary">{{ metadata.sourceType }}</span>
+          </div>
 
-        <div class="mb-2">
-          {{ 'Reference'|trans }}: <code>{{ metadata.distReference }}</code>
-        </div>
+          <div class="mb-2">
+            <code>{{ metadata.sourceUrl }}</code>
+          </div>
 
-        <div class="mb-2">
-          <a class="btn btn-sm btn-secondary" href="{{ metadata.distUrl }}" download>
-            <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
-            {{ 'Download' }}
-          </a>
-        </div>
-      {% else %}
-        <div class="h5">{{ 'Distribution'|trans }}</div>
-        -
-      {% endif %}
+          <div class="mb-2">
+            {{ 'Reference'|trans }}: <code>{{ metadata.sourceReference }}</code>
+          </div>
+
+          <div>
+            {% set browseUrl = metadata.browsableRepositoryUrl %}
+            {% if browseUrl %}
+              <a class="btn btn-sm btn-secondary" href="{{ browseUrl }}">
+                <span class="fa-solid fa-code me-1" aria-hidden="true"></span>
+                <span class="btn-label">{{ 'Browse code'|trans }}</span>
+              </a>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="h5">{{ 'Source'|trans }}</div>
+          -
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        {% if metadata.hasDist() %}
+          <div class="h5">
+            {{ 'Distribution'|trans }}
+            <span class="badge text-bg-secondary">{{ metadata.distType }}</span>
+          </div>
+
+          <div class="mb-2">
+            {{ 'Reference'|trans }}: <code>{{ metadata.distReference }}</code>
+          </div>
+
+          <div>
+            <a class="btn btn-sm btn-secondary" href="{{ metadata.distUrl }}" download>
+              <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
+              <span class="btn-label">{{ 'Download' }}</span>
+            </a>
+          </div>
+        {% else %}
+          <div class="h5">{{ 'Distribution'|trans }}</div>
+          -
+        {% endif %}
+      </div>
     </div>
   </div>
 
