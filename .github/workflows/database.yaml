@@ -102,13 +102,36 @@ jobs:
       - name: Verify existing migrations are not modified or deleted
         run: |
           BASE_REF="${{ steps.base.outputs.base_ref }}"
-          CHANGED=$(git diff --name-only --diff-filter=MD origin/$BASE_REF...HEAD -- migrations/)
+          CHANGED=$(git diff --name-only --diff-filter=MD origin/$BASE_REF...HEAD -- migrations/ | grep -E 'Version[0-9]{14}\.php$' || true)
           if [ -n "$CHANGED" ]; then
             echo "Error: The following existing migrations were modified or deleted:"
             echo "$CHANGED"
             exit 1
           fi
           echo "No existing migrations were modified or deleted."
+
+      - name: Verify new migrations follow naming convention
+        run: |
+          BASE_REF="${{ steps.base.outputs.base_ref }}"
+          NEW_FILES=$(git diff --name-only --diff-filter=A origin/$BASE_REF...HEAD -- migrations/ | grep '\.php$' || true)
+          if [ -z "$NEW_FILES" ]; then
+            echo "No new migrations added."
+            exit 0
+          fi
+
+          FAILED=false
+          for file in $NEW_FILES; do
+            if ! echo "$file" | grep -qE 'Version[0-9]{14}\.php$'; then
+              echo "Error: $file does not follow the migration naming convention (Version{14digits}.php)"
+              FAILED=true
+            else
+              echo "OK: $file"
+            fi
+          done
+
+          if [ "$FAILED" = true ]; then
+            exit 1
+          fi
 
       - name: Verify new migrations have higher version numbers than existing migrations
         run: |
@@ -128,11 +151,10 @@ jobs:
 
           FAILED=false
           for file in $NEW_MIGRATIONS; do
-            VERSION=$(echo "$file" | grep -oE '[0-9]{14}')
-            if [ -z "$VERSION" ]; then
-              echo "Warning: Could not extract version number from $file"
+            if ! echo "$file" | grep -qE 'Version[0-9]{14}\.php$'; then
               continue
             fi
+            VERSION=$(echo "$file" | grep -oE '[0-9]{14}')
             if [ "$VERSION" -le "$BASE_MAX" ]; then
               echo "Error: $file has version $VERSION which is not higher than the existing maximum $BASE_MAX"
               FAILED=true
