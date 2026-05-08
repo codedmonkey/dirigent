@@ -44,6 +44,14 @@ readonly class PackageProviderManager
         $package->setDumpedAt(new \DateTimeImmutable());
     }
 
+    public function remove(Package $package): void
+    {
+        $packageName = $package->getName();
+
+        $this->filesystem->remove($this->path($packageName));
+        $this->filesystem->remove($this->path("$packageName~dev"));
+    }
+
     public function exists(string $packageName): bool
     {
         return $this->filesystem->exists($this->path($packageName));
