@@ -41,6 +41,10 @@ readonly class PackageMetadataResolver
         private bool $retainStaleRevisionsTagged,
         #[Autowire(param: 'dirigent.metadata.retain_stale_revisions.dev_versions')]
         private bool $retainStaleRevisionsDev,
+        #[Autowire(param: 'dirigent.metadata.retain_pruned_versions.tagged_versions')]
+        private bool $retainPrunedVersionsTagged,
+        #[Autowire(param: 'dirigent.metadata.retain_pruned_versions.dev_versions')]
+        private bool $retainPrunedVersionsDev,
     ) {
     }
 
@@ -209,7 +213,15 @@ readonly class PackageMetadataResolver
 
         // Remove outdated versions
         foreach ($existingVersionMetadata as $version) {
-            $this->entityManager->remove($version);
+            $removeVersion = $version->isDevelopment() ? !$this->retainPrunedVersionsDev : !$this->retainPrunedVersionsTagged;
+            if ($removeVersion) {
+                $this->entityManager->remove($version);
+            } elseif (!$version->isPruned()) {
+                $version->setPruned(true);
+                $version->setUpdatedAt(new \DateTimeImmutable());
+
+                $this->entityManager->persist($version);
+            }
         }
 
         $package->setUpdatedAt(new \DateTimeImmutable());
@@ -234,6 +246,7 @@ readonly class PackageMetadataResolver
         }
 
         $version->setDefaultBranch($data->isDefaultBranch());
+        $version->setPruned(false);
         $version->setUpdatedAt(new \DateTimeImmutable());
 
         $this->entityManager->persist($version);
