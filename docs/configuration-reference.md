@@ -35,6 +35,14 @@ dirigent:
     dev_packages: false
   metadata:
     mirror_vcs_repositories: false
+    retain_pruned_versions:
+      enabled: true
+      tagged_versions: true
+      dev_versions: false
+    retain_stale_revisions:
+      enabled: true
+      tagged_versions: true
+      dev_versions: false
 ```
 
 ## dirigent (root)
@@ -130,6 +138,46 @@ Type: `boolean` | Default: `false`
 Fetch mirrored packages from their VCS repositories by default when possible.
 
 Sets the fetch strategy of new mirrored packages to **Fetch from VCS**.
+
+### retain_pruned_versions
+
+#### enabled
+
+Type: `boolean` | Default: `true`
+
+Whether to enable or disable retaining pruned versions of packages.
+
+#### tagged_versions
+
+Type: `boolean` | Default: `true`
+
+Retain pruned tagged package versions.
+
+#### dev_versions
+
+Type: `boolean` | Default: `false`
+
+Retain pruned development package versions.
+
+### retain_stale_revisions
+
+#### enabled
+
+Type: `boolean` | Default: `true`
+
+Whether to enable or disable retaining stale revisions of packages.
+
+#### tagged_versions
+
+Type: `boolean` | Default: `true`
+
+Retain stale revisions of tagged package versions.
+
+#### dev_versions
+
+Type: `boolean` | Default: `false`
+
+Retain stale revisions of development package versions.
 
 [iso-8601-durations]: https://en.wikipedia.org/wiki/ISO_8601#Durations
 [symfony]: https://symfony.com

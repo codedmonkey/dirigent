@@ -23,6 +23,7 @@ use Composer\Package\Link as ComposerPackageLink;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
@@ -36,6 +37,14 @@ readonly class PackageMetadataResolver
         private KeywordRepository $keywordRepository,
         private RegistryRepository $registryRepository,
         private PackageRepository $packageRepository,
+        #[Autowire(param: 'dirigent.metadata.retain_stale_revisions.tagged_versions')]
+        private bool $retainStaleRevisionsTagged,
+        #[Autowire(param: 'dirigent.metadata.retain_stale_revisions.dev_versions')]
+        private bool $retainStaleRevisionsDev,
+        #[Autowire(param: 'dirigent.metadata.retain_pruned_versions.tagged_versions')]
+        private bool $retainPrunedVersionsTagged,
+        #[Autowire(param: 'dirigent.metadata.retain_pruned_versions.dev_versions')]
+        private bool $retainPrunedVersionsDev,
     ) {
     }
 
@@ -204,7 +213,15 @@ readonly class PackageMetadataResolver
 
         // Remove outdated versions
         foreach ($existingVersionMetadata as $version) {
-            $this->entityManager->remove($version);
+            $removeVersion = $version->isDevelopment() ? !$this->retainPrunedVersionsDev : !$this->retainPrunedVersionsTagged;
+            if ($removeVersion) {
+                $this->entityManager->remove($version);
+            } elseif (!$version->isPruned()) {
+                $version->setPruned(true);
+                $version->setUpdatedAt(new \DateTimeImmutable());
+
+                $this->entityManager->persist($version);
+            }
         }
 
         $package->setUpdatedAt(new \DateTimeImmutable());
@@ -214,15 +231,22 @@ readonly class PackageMetadataResolver
 
     private function updateVersion(Version $version, CompletePackageInterface $data, ?VcsDriverInterface $driver = null): void
     {
+        $currentMetadata = $version->hasCurrentMetadata() ? $version->getCurrentMetadata() : null;
         $metadata = $this->createMetadata($version, $data, $driver);
 
-        if (!$version->hasCurrentMetadata() || $this->hasMetadataChanged($version->getCurrentMetadata(), $metadata)) {
+        if (null === $currentMetadata || $this->hasMetadataChanged($currentMetadata, $metadata)) {
             $version->setCurrentMetadata($metadata);
 
             $this->entityManager->persist($metadata);
+
+            $removePreviousMetadata = $version->isDevelopment() ? !$this->retainStaleRevisionsDev : !$this->retainStaleRevisionsTagged;
+            if (null !== $currentMetadata && $removePreviousMetadata) {
+                $this->entityManager->remove($currentMetadata);
+            }
         }
 
         $version->setDefaultBranch($data->isDefaultBranch());
+        $version->setPruned(false);
         $version->setUpdatedAt(new \DateTimeImmutable());
 
         $this->entityManager->persist($version);
