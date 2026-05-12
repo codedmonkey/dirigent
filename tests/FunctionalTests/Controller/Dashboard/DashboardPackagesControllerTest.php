@@ -5,6 +5,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -12,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DashboardPackagesControllerTest extends WebTestCase
 {
+    use EntityManagerTestTrait;
     use MockEntityFactoryTrait;
     use WebTestCaseTrait;
 

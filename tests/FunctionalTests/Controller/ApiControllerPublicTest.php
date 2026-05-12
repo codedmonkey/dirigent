@@ -6,6 +6,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Tests\FunctionalTests\PublicKernel;
+use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -14,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApiControllerPublicTest extends KernelTestCase
 {
+    use EntityManagerTestTrait;
     use KernelTestCaseTrait;
     use MockEntityFactoryTrait;
 

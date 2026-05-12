@@ -8,7 +8,6 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use Composer\Semver\VersionParser;
-use Doctrine\ORM\EntityManagerInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticator;
 
 trait MockEntityFactoryTrait
@@ -57,7 +56,10 @@ trait MockEntityFactoryTrait
         $user->setPlainPassword('PlainPassword99');
 
         if ($mfaEnabled) {
-            $totpAuthenticator = $this->getService(TotpAuthenticator::class);
+            /** @var TotpAuthenticator $totpAuthenticator */
+            $totpAuthenticator = $this->getMockBuilder(TotpAuthenticator::class)
+                ->disableOriginalConstructor()
+                ->getMock();
 
             $user->setTotpSecret($totpAuthenticator->generateSecret());
         }
@@ -73,44 +75,5 @@ trait MockEntityFactoryTrait
         $version->setDevelopment($development);
 
         return $version;
-    }
-
-    /**
-     * Find a single entity by its ID or an array of criteria.
-     *
-     * @template T of object
-     *
-     * @param class-string<T> $className
-     *
-     * @return T|null
-     */
-    protected function findEntity(string $className, array|int $criteria): ?object
-    {
-        if (is_array($criteria)) {
-            return $this->getService(EntityManagerInterface::class)->getRepository($className)->findOneBy($criteria);
-        }
-
-        return $this->getService(EntityManagerInterface::class)->find($className, $criteria);
-    }
-
-    /**
-     * Persist and flush all given entities.
-     *
-     * @param object ...$entities
-     */
-    protected function persistEntities(...$entities): void
-    {
-        $entityManager = $this->getService(EntityManagerInterface::class);
-
-        foreach ($entities as $entity) {
-            $entityManager->persist($entity);
-        }
-
-        $entityManager->flush();
-    }
-
-    protected function clearEntities(): void
-    {
-        $this->getService(EntityManagerInterface::class)->clear();
     }
 }
