@@ -4,6 +4,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Controller\Dashboard\DashboardAccountController;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 #[CoversClass(DashboardAccountController::class)]
 class DashboardAccountControllerTest extends WebTestCase
 {
+    use EntityManagerTestTrait;
     use MockEntityFactoryTrait;
     use WebTestCaseTrait;
 

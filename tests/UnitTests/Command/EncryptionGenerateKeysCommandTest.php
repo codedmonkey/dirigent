@@ -9,38 +9,27 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 
 class EncryptionGenerateKeysCommandTest extends KernelTestCase
 {
-    private string $privateKeyPath = __DIR__ . '/keys/private.key';
-    private string $publicKeyPath = __DIR__ . '/keys/public.key';
-
+    private string $storagePath;
+    private string $privateKeyPath;
+    private string $publicKeyPath;
     private Filesystem $filesystem;
 
+    #[\Override]
     protected function setUp(): void
     {
+        $this->storagePath = sys_get_temp_dir() . '/dirigent-encryption-keys-' . uniqid();
+        $this->privateKeyPath = "$this->storagePath/private.key";
+        $this->publicKeyPath = "$this->storagePath/public.key";
         $this->filesystem = new Filesystem();
-
-        $this->clearKeys();
     }
 
     #[\Override]
     protected function tearDown(): void
     {
-        $this->clearKeys();
-    }
-
-    private function clearKeys(): void
-    {
-        $files = Finder::create()
-            ->files()
-            ->in(__DIR__ . '/keys')
-            ->name('*.key');
-
-        foreach ($files as $file) {
-            $this->filesystem->remove($file->getRealPath());
-        }
+        (new Filesystem())->remove($this->storagePath);
     }
 
     public function testGenerateNewKeys(): void
