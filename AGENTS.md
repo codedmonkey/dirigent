@@ -52,6 +52,6 @@ symfony composer run test:php
 symfony composer run test:php:unit
 symfony composer run test:php:functional
 
-# Run tests for Docker images
-symfony composer run test:docker
+# Run only tests for OCI images
+symfony composer run test:images
 ```

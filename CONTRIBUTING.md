@@ -76,9 +76,9 @@ symfony composer test:php
 symfony composer test:php:unit
 symfony composer test:php:functional
 
-# Run tests for Docker images
-symfony composer test:docker
-symfony composer test:docker:standalone
+# Run only tests for OCI images
+symfony composer test:images
+symfony composer test:images:standalone
 ```
 
 [codedmonkey-sponsor]: https://github.com/sponsors/codedmonkey

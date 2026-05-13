@@ -130,14 +130,14 @@
         "lint:yaml": "bin/console lint:yaml .github config translations --parse-tags",
         "test": [
             "@test:php",
-            "@test:docker"
+            "@test:images"
         ],
-        "test:docker": [
-            "@test:docker:standalone"
+        "test:images": [
+            "@test:images:standalone"
         ],
-        "test:docker:standalone": [
+        "test:images:standalone": [
             "@build:standalone",
-            "bin/phpunit --configuration phpunit.docker.xml tests/Docker/Standalone"
+            "bin/phpunit --configuration phpunit.images.xml tests/Docker/Standalone"
         ],
         "test:php": [
             "@test:php:unit",
@@ -164,8 +164,8 @@
         "lint:translations": "Validate the translations",
         "lint:yaml": "Validate YAML files",
         "test": "Perform all code tests",
-        "test:docker": "Run all tests for images",
-        "test:docker:standalone": "Run tests in the standalone image",
+        "test:images": "Run all tests for OCI images",
+        "test:images:standalone": "Run tests for the standalone OCI image",
         "test:php": "Run all PHP tests",
         "test:php:functional": "Run the functional test suite",
         "test:php:unit": "Run the unit test suite",
