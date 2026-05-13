@@ -64,21 +64,21 @@ symfony composer lint:templates       # Twig template validation
 
 ```shell
 # Prepare the Symfony test environment (if the database schema changed)
-symfony composer tests:setup
+symfony composer test:setup
 ```
 
 ```shell
 # Run all tests
-symfony composer tests
+symfony composer test
 
 # Run only PHP tests
-symfony composer tests:php
-symfony composer tests:php:unit
-symfony composer tests:php:functional
+symfony composer test:php
+symfony composer test:php:unit
+symfony composer test:php:functional
 
 # Run tests for Docker images
-symfony composer tests:docker
-symfony composer tests:docker:standalone
+symfony composer test:docker
+symfony composer test:docker:standalone
 ```
 
 [codedmonkey-sponsor]: https://github.com/sponsors/codedmonkey

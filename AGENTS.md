@@ -42,16 +42,16 @@ symfony composer run lint:templates       # Twig template validation
 
 ```shell
 # Prepare the Symfony test environment for tests (if the database schema changed)
-symfony composer run tests:setup
+symfony composer run test:setup
 
 # Run all tests
-symfony composer run tests
+symfony composer run test
 
 # Run only PHP tests
-symfony composer run tests:php
-symfony composer run tests:php:unit
-symfony composer run tests:php:functional
+symfony composer run test:php
+symfony composer run test:php:unit
+symfony composer run test:php:functional
 
 # Run tests for Docker images
-symfony composer run tests:docker
+symfony composer run test:docker
 ```
