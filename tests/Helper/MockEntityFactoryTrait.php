@@ -17,6 +17,7 @@ trait MockEntityFactoryTrait
         $package = $version->getPackage();
 
         $metadata = new Metadata($version);
+        $metadata->setRevision($version->getNextRevision());
         $metadata->setPackageName($package->getName());
         $metadata->setVersionName($version->getName());
         $metadata->setNormalizedVersionName($version->getNormalizedName());
