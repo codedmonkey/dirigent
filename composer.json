@@ -147,7 +147,8 @@
         "test:php:unit": "bin/phpunit tests/UnitTests",
         "test:setup": [
             "bin/console --env=test doctrine:database:create --if-not-exists",
-            "bin/console --env=test doctrine:schema:update --force",
+            "bin/console --env=test doctrine:schema:drop --full-database --force",
+            "bin/console --env=test doctrine:schema:create",
             "bin/console --env=test doctrine:fixtures:load --no-interaction"
         ]
     },
