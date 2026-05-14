@@ -1,6 +1,6 @@
 <?php
 
-namespace CodedMonkey\Dirigent\Tests\Docker\Standalone;
+namespace CodedMonkey\Dirigent\Tests\ImageTests\Standalone;
 
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpClient\ScopingHttpClient;

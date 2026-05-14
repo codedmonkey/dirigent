@@ -137,7 +137,7 @@
         ],
         "test:images:standalone": [
             "@build:standalone",
-            "bin/phpunit --configuration phpunit.images.xml tests/Docker/Standalone"
+            "bin/phpunit --configuration phpunit.images.xml tests/ImageTests/Standalone"
         ],
         "test:php": [
             "@test:php:unit",
