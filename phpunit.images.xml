@@ -16,7 +16,7 @@
 
     <testsuites>
         <testsuite name="Dirigent Standalone Image Tests Suite">
-            <directory>tests/Docker/Standalone</directory>
+            <directory>tests/ImageTests/Standalone</directory>
         </testsuite>
     </testsuites>
 </phpunit>

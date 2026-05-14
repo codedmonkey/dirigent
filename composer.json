@@ -128,26 +128,27 @@
         "lint:templates": "bin/console lint:twig templates",
         "lint:translations": "bin/console lint:translations",
         "lint:yaml": "bin/console lint:yaml .github config translations --parse-tags",
-        "tests": [
-            "@tests:php",
-            "@tests:docker"
+        "test": [
+            "@test:php",
+            "@test:images"
         ],
-        "tests:docker": [
-            "@tests:docker:standalone"
+        "test:images": [
+            "@test:images:standalone"
         ],
-        "tests:docker:standalone": [
+        "test:images:standalone": [
             "@build:standalone",
-            "bin/phpunit --configuration phpunit.docker.xml tests/Docker/Standalone"
+            "bin/phpunit --configuration phpunit.images.xml tests/ImageTests/Standalone"
         ],
-        "tests:php": [
-            "@tests:php:unit",
-            "@tests:php:functional"
+        "test:php": [
+            "@test:php:unit",
+            "@test:php:functional"
         ],
-        "tests:php:functional": "bin/phpunit tests/FunctionalTests",
-        "tests:php:unit": "bin/phpunit tests/UnitTests",
-        "tests:setup": [
+        "test:php:functional": "bin/phpunit tests/FunctionalTests",
+        "test:php:unit": "bin/phpunit tests/UnitTests",
+        "test:setup": [
             "bin/console --env=test doctrine:database:create --if-not-exists",
-            "bin/console --env=test doctrine:schema:update --force",
+            "bin/console --env=test doctrine:schema:drop --full-database --force",
+            "bin/console --env=test doctrine:schema:create",
             "bin/console --env=test doctrine:fixtures:load --no-interaction"
         ]
     },
@@ -162,13 +163,13 @@
         "lint:templates": "Validate the Twig templates",
         "lint:translations": "Validate the translations",
         "lint:yaml": "Validate YAML files",
-        "tests": "Perform all code tests",
-        "tests:docker": "Run all tests for images",
-        "tests:docker:standalone": "Run tests in the standalone image",
-        "tests:php": "Run all PHP tests",
-        "tests:php:functional": "Run the functional test suite",
-        "tests:php:unit": "Run the unit test suite",
-        "tests:setup": "Prepare the Symfony test environment"
+        "test": "Perform all code tests",
+        "test:images": "Run all tests for OCI images",
+        "test:images:standalone": "Run tests for the standalone OCI image",
+        "test:php": "Run all PHP tests",
+        "test:php:functional": "Run the functional test suite",
+        "test:php:unit": "Run the unit test suite",
+        "test:setup": "Prepare the Symfony test environment"
     },
     "config": {
         "allow-plugins": {
