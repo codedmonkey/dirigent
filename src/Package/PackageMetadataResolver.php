@@ -235,6 +235,7 @@ readonly class PackageMetadataResolver
         $metadata = $this->createMetadata($version, $data, $driver);
 
         if (null === $currentMetadata || $this->hasMetadataChanged($currentMetadata, $metadata)) {
+            $metadata->setRevision($version->getNextRevision(increment: true));
             $version->setCurrentMetadata($metadata);
 
             $this->entityManager->persist($metadata);

@@ -122,22 +122,4 @@ class MetadataRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
-    public function getNextRevision(Metadata $metadata): int
-    {
-        $version = $metadata->getVersion();
-
-        if (null === $version->getId()) {
-            return 1;
-        }
-
-        $lastRevision = $this->createQueryBuilder('metadata')
-            ->select('MAX(metadata.revision)')
-            ->where('metadata.version = :version')
-            ->setParameter('version', $metadata->getVersion())
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return (int) $lastRevision + 1;
-    }
 }

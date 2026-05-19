@@ -29,6 +29,9 @@ class Version extends TrackedEntity implements \Stringable
     #[ORM\Column]
     private bool $defaultBranch = false;
 
+    #[ORM\Column]
+    private int $nextRevision = 1;
+
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
@@ -112,6 +115,17 @@ class Version extends TrackedEntity implements \Stringable
     public function setDefaultBranch(bool $defaultBranch): void
     {
         $this->defaultBranch = $defaultBranch;
+    }
+
+    public function getNextRevision(bool $increment = false): int
+    {
+        $nextRevision = $this->nextRevision;
+
+        if ($increment) {
+            ++$this->nextRevision;
+        }
+
+        return $nextRevision;
     }
 
     public function getUpdatedAt(): ?\DateTimeImmutable
