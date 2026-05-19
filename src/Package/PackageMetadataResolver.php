@@ -213,7 +213,7 @@ readonly class PackageMetadataResolver
 
         // Remove outdated versions
         foreach ($existingVersionMetadata as $version) {
-            $removeVersion = $version->isDevelopment() ? !$this->retainPrunedVersionsDev : !$this->retainPrunedVersionsTagged;
+            $removeVersion = !$version->isPinned() && ($version->isDevelopment() ? !$this->retainPrunedVersionsDev : !$this->retainPrunedVersionsTagged);
             if ($removeVersion) {
                 $this->entityManager->remove($version);
             } elseif (!$version->isPruned()) {
@@ -236,13 +236,17 @@ readonly class PackageMetadataResolver
 
         if (null === $currentMetadata || $this->hasMetadataChanged($currentMetadata, $metadata)) {
             $metadata->setRevision($version->getNextRevision(increment: true));
-            $version->setCurrentMetadata($metadata);
 
             $this->entityManager->persist($metadata);
 
-            $removePreviousMetadata = $version->isDevelopment() ? !$this->retainStaleRevisionsDev : !$this->retainStaleRevisionsTagged;
-            if (null !== $currentMetadata && $removePreviousMetadata) {
-                $this->entityManager->remove($currentMetadata);
+            $retainStaleRevisions = $version->isDevelopment() ? $this->retainStaleRevisionsDev : $this->retainStaleRevisionsTagged;
+            if (!$version->isPinned() || !$retainStaleRevisions) {
+                $version->setCurrentMetadata($metadata);
+                $version->setPinned(false);
+
+                if (null !== $currentMetadata && !$retainStaleRevisions) {
+                    $this->entityManager->remove($currentMetadata);
+                }
             }
         }
 
