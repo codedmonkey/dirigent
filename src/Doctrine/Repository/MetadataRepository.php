@@ -48,11 +48,26 @@ class MetadataRepository extends ServiceEntityRepository
         return $this->count(['version' => $version]);
     }
 
-    public function getMetadataCollectionForVersion(Version $version): array
+    public function findMetadataForVersion(Version $version, int $revision): ?Metadata
+    {
+        return $this->findOneBy(
+            criteria: ['version' => $version, 'revision' => $revision],
+        );
+    }
+
+    public function findLatestMetadataForVersion(Version $version): ?Metadata
+    {
+        return $this->findOneBy(
+            criteria: ['version' => $version],
+            orderBy: ['revision' => Order::Descending->value],
+        );
+    }
+
+    public function findAllMetadataForVersion(Version $version): array
     {
         return $this->findBy(
-            ['version' => $version],
-            ['revision' => Order::Descending->value],
+            criteria: ['version' => $version],
+            orderBy: ['revision' => Order::Descending->value],
         );
     }
 

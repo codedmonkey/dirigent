@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class DashboardPackagesInfoController extends AbstractController
 {
@@ -90,13 +91,53 @@ class DashboardPackagesInfoController extends AbstractController
         #[MapPackage] Package $package,
         #[MapPackage] Version $version,
     ): Response {
-        $metadataCollection = $this->metadataRepository->getMetadataCollectionForVersion($version);
+        $metadataCollection = $this->metadataRepository->findAllMetadataForVersion($version);
 
         return $this->render('dashboard/packages/package_version_revisions.html.twig', [
             'package' => $package,
             'version' => $version,
 
             'metadataCollection' => $metadataCollection,
+        ]);
+    }
+
+    #[Route('/packages/{package}/pin-metadata/{version}', name: 'dashboard_packages_version_pin', requirements: ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'], methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function pinMetadata(
+        Request $request,
+        #[MapPackage] Package $package,
+        #[MapPackage] Version $version,
+    ): Response {
+        $action = (string) $request->request->get('action');
+
+        if (!$this->isCsrfTokenValid($action . '-revision-' . $version->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ('pin' === $action) {
+            $revision = $request->request->getInt('revision');
+            if (null === $metadata = $this->metadataRepository->findMetadataForVersion($version, $revision)) {
+                throw $this->createNotFoundException('The revision does not exist.');
+            }
+
+            $version->setCurrentMetadata($metadata);
+            $version->setPinned(true);
+        } elseif ('unpin' === $action) {
+            if (null === $latestMetadata = $this->metadataRepository->findLatestMetadataForVersion($version)) {
+                throw $this->createNotFoundException('No metadata available for this version.');
+            }
+
+            $version->setCurrentMetadata($latestMetadata);
+            $version->setPinned(false);
+        } else {
+            throw $this->createNotFoundException('Invalid action.');
+        }
+
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('dashboard_packages_version_info', [
+            'package' => $package->getName(),
+            'version' => $version->getName(),
         ]);
     }
 

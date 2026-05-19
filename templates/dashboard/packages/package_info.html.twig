@@ -120,16 +120,29 @@
             '%version%': "<strong>#{version.name|escape}</strong>",
           })|raw }}
         </p>
-        {% if not metadata.isCurrentMetadata %}
-          <p class="text-warning">
-            <strong>
-              {{ "You're viewing an inactive revision of this package"|trans }}
-            </strong>
-          </p>
+        {% if not metadata.isCurrentMetadata or version.pinned %}
+          <div class="mb-3">
+            {% if not metadata.isCurrentMetadata %}
+              <div class="d-flex align-items-center">
+                <span class="fa-solid fa-fw fa-code-branch text-warning me-1" aria-hidden="true"></span>
+                <strong>
+                  {{ "You're viewing an inactive revision of this package"|trans }}
+                </strong>
+              </div>
+            {% endif %}
+            {% if version.pinned %}
+              <div class="d-flex align-items-center">
+                <span class="fa-solid fa-fw fa-thumbtack text-warning me-1" aria-hidden="true"></span>
+                <strong>
+                  {{ 'This version is pinned. Future updates will not change the active metadata until it is unpinned.'|trans }}
+                </strong>
+              </div>
+            {% endif %}
+          </div>
         {% endif %}
         <div class="btn-toolbar gap-1">
           <a class="btn btn-sm btn-secondary" href="{{ path('dashboard_packages_version_metadata_list', {package: package.name, version: version.name}) }}">
-            <span class="fa-solid fa-list me-1" aria-hidden="true"></span>
+            <span class="fa-solid fa-hexagon-nodes me-1" aria-hidden="true"></span>
             <span class="btn-label">{{ 'Revisions'|trans }}</span>
           </a>
           {% if not metadata.isCurrentMetadata %}
@@ -137,6 +150,26 @@
               <span class="fa-solid fa-code-commit me-1" aria-hidden="true"></span>
               <span class="btn-label">{{ 'Current revision'|trans }}</span>
             </a>
+          {% endif %}
+          {% if version.pinned and metadata.isCurrentMetadata %}
+            <form method="post" action="{{ path('dashboard_packages_version_pin', {package: package.name, version: version.name}) }}">
+              <input type="hidden" name="_token" value="{{ csrf_token('unpin-revision-' ~ version.id) }}">
+              <input type="hidden" name="action" value="unpin">
+              <button type="submit" class="btn btn-sm btn-secondary">
+                <span class="fa-solid fa-thumbtack-slash me-1" aria-hidden="true"></span>
+                <span class="btn-label">{{ 'Unpin revision'|trans }}</span>
+              </button>
+            </form>
+          {% elseif not version.pinned %}
+            <form method="post" action="{{ path('dashboard_packages_version_pin', {package: package.name, version: version.name}) }}">
+              <input type="hidden" name="_token" value="{{ csrf_token('pin-revision-' ~ version.id) }}">
+              <input type="hidden" name="action" value="pin">
+              <input type="hidden" name="revision" value="{{ metadata.revision }}">
+              <button type="submit" class="btn btn-sm btn-secondary">
+                <span class="fa-solid fa-thumbtack me-1" aria-hidden="true"></span>
+                <span class="btn-label">{{ 'Pin revision'|trans }}</span>
+              </button>
+            </form>
           {% endif %}
         </div>
       </div>
