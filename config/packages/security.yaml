@@ -2,6 +2,7 @@ security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         database_users:
@@ -14,7 +15,8 @@ security:
 
     firewalls:
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            # Ensure dev tools and static assets are always allowed
+            pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
         api:
             pattern: ^/(packages.json|downloads|p2/|dist/)
@@ -24,6 +26,10 @@ security:
         main:
             lazy: true
             provider: database_users
+
+            # Activate different ways to authenticate:
+            # https://symfony.com/doc/current/security.html#the-firewall
+
             form_login:
                 login_path: dashboard_login
                 check_path: dashboard_login
@@ -32,17 +38,14 @@ security:
                 lifetime: 604800 # 1 week in seconds
             logout:
                 target: dashboard
-            switch_user: true
-
             two_factor:
                 auth_form_path: mfa_login
                 check_path: mfa_login_check
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            switch_user: true
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+    # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/logout, role: PUBLIC_ACCESS }
         - { path: ^/mfa, role: IS_AUTHENTICATED_2FA_IN_PROGRESS }
@@ -50,10 +53,8 @@ security:
 when@test:
     security:
         password_hashers:
-            # By default, password hashers are resource intensive and take time. This is
-            # important to generate secure password hashes. In tests however, secure hashes
-            # are not important, waste resources and increase test times. The following
-            # reduces the work factor to the lowest possible values.
+            # Password hashers are resource-intensive by design to ensure security.
+            # In tests, it's safe to reduce their cost to improve performance.
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
                 cost: 4 # Lowest possible value for bcrypt
