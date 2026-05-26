@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cef2e7372d58810ffd09f5d995bfe132",
+    "content-hash": "5cc7234ab77cc3e24ac860916e98a3a0",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4002,31 +4002,31 @@
         },
         {
             "name": "scheb/2fa-bundle",
-            "version": "v7.13.1",
+            "version": "v8.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/scheb/2fa-bundle.git",
-                "reference": "edcc14456b508aab37ec792cfc36793d04226784"
+                "reference": "ae26ae91723685e3a8622f2f3b9119016de23e20"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/scheb/2fa-bundle/zipball/edcc14456b508aab37ec792cfc36793d04226784",
-                "reference": "edcc14456b508aab37ec792cfc36793d04226784",
+                "url": "https://api.github.com/repos/scheb/2fa-bundle/zipball/ae26ae91723685e3a8622f2f3b9119016de23e20",
+                "reference": "ae26ae91723685e3a8622f2f3b9119016de23e20",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
-                "symfony/config": "^6.4 || ^7.0",
-                "symfony/dependency-injection": "^6.4 || ^7.0",
-                "symfony/event-dispatcher": "^6.4 || ^7.0",
-                "symfony/framework-bundle": "^6.4 || ^7.0",
-                "symfony/http-foundation": "^6.4 || ^7.0",
-                "symfony/http-kernel": "^6.4 || ^7.0",
-                "symfony/property-access": "^6.4 || ^7.0",
-                "symfony/security-bundle": "^6.4 || ^7.0",
+                "php": "~8.4.0 || ~8.5.0",
+                "symfony/config": "^7.4 || ^8.0",
+                "symfony/dependency-injection": "^7.4 || ^8.0",
+                "symfony/event-dispatcher": "^7.4 || ^8.0",
+                "symfony/framework-bundle": "^7.4 || ^8.0",
+                "symfony/http-foundation": "^7.4 || ^8.0",
+                "symfony/http-kernel": "^7.4 || ^8.0",
+                "symfony/property-access": "^7.4 || ^8.0",
+                "symfony/security-bundle": "^7.4 || ^8.0",
                 "symfony/service-contracts": "^2.5|^3",
-                "symfony/twig-bundle": "^6.4 || ^7.0"
+                "symfony/twig-bundle": "^7.4 || ^8.0"
             },
             "conflict": {
                 "scheb/two-factor-bundle": "*"
@@ -4064,28 +4064,28 @@
                 "two-step"
             ],
             "support": {
-                "source": "https://github.com/scheb/2fa-bundle/tree/v7.13.1"
+                "source": "https://github.com/scheb/2fa-bundle/tree/v8.5.0"
             },
-            "time": "2025-12-18T15:29:07+00:00"
+            "time": "2026-03-24T18:33:45+00:00"
         },
         {
             "name": "scheb/2fa-totp",
-            "version": "v7.13.1",
+            "version": "v8.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/scheb/2fa-totp.git",
-                "reference": "89a0557e191cc3b49d138452e095e8b5fb703f40"
+                "reference": "ca7562c6b6f9e5bb30cadcc98123327c2540e18f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/scheb/2fa-totp/zipball/89a0557e191cc3b49d138452e095e8b5fb703f40",
-                "reference": "89a0557e191cc3b49d138452e095e8b5fb703f40",
+                "url": "https://api.github.com/repos/scheb/2fa-totp/zipball/ca7562c6b6f9e5bb30cadcc98123327c2540e18f",
+                "reference": "ca7562c6b6f9e5bb30cadcc98123327c2540e18f",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "php": "~8.4.0 || ~8.5.0",
                 "scheb/2fa-bundle": "self.version",
-                "spomky-labs/otphp": "^11.0"
+                "spomky-labs/otphp": "^11.4"
             },
             "suggest": {
                 "symfony/validator": "Needed if you want to use the TOTP validator constraint"
@@ -4117,9 +4117,9 @@
                 "two-step"
             ],
             "support": {
-                "source": "https://github.com/scheb/2fa-totp/tree/v7.13.1"
+                "source": "https://github.com/scheb/2fa-totp/tree/v8.5.0"
             },
-            "time": "2025-12-04T15:55:14+00:00"
+            "time": "2026-01-24T13:27:55+00:00"
         },
         {
             "name": "seld/jsonlint",

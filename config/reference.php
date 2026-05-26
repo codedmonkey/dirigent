@@ -1278,28 +1278,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             target_route?: scalar|Param|null, // Default: null
  *         },
  *         required_badges?: list<scalar|Param|null>,
- *         two_factor?: array{
- *             check_path?: scalar|Param|null, // Default: "/2fa_check"
- *             post_only?: bool|Param, // Default: true
- *             auth_form_path?: scalar|Param|null, // Default: "/2fa"
- *             always_use_default_target_path?: bool|Param, // Default: false
- *             default_target_path?: scalar|Param|null, // Default: "/"
- *             success_handler?: scalar|Param|null, // Default: null
- *             failure_handler?: scalar|Param|null, // Default: null
- *             authentication_required_handler?: scalar|Param|null, // Default: null
- *             auth_code_parameter_name?: scalar|Param|null, // Default: "_auth_code"
- *             trusted_parameter_name?: scalar|Param|null, // Default: "_trusted"
- *             remember_me_sets_trusted?: scalar|Param|null, // Default: false
- *             multi_factor?: bool|Param, // Default: false
- *             prepare_on_login?: bool|Param, // Default: false
- *             prepare_on_access_denied?: bool|Param, // Default: false
- *             enable_csrf?: scalar|Param|null, // Default: false
- *             csrf_parameter?: scalar|Param|null, // Default: "_csrf_token"
- *             csrf_token_id?: scalar|Param|null, // Default: "two_factor"
- *             csrf_header?: scalar|Param|null, // Default: null
- *             csrf_token_manager?: scalar|Param|null, // Default: "scheb_two_factor.csrf_token_manager"
- *             provider?: scalar|Param|null, // Default: null
- *         },
  *         custom_authenticators?: list<scalar|Param|null>,
  *         login_throttling?: array{
  *             limiter?: scalar|Param|null, // A service id implementing "Symfony\Component\HttpFoundation\RateLimiter\RequestRateLimiterInterface".
@@ -1501,6 +1479,28 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             samesite?: null|"lax"|"strict"|"none"|Param, // Default: null
  *             always_remember_me?: bool|Param, // Default: false
  *             remember_me_parameter?: scalar|Param|null, // Default: "_remember_me"
+ *         },
+ *         two_factor?: array{
+ *             check_path?: scalar|Param|null, // Default: "/2fa_check"
+ *             post_only?: bool|Param, // Default: true
+ *             auth_form_path?: scalar|Param|null, // Default: "/2fa"
+ *             always_use_default_target_path?: bool|Param, // Default: false
+ *             default_target_path?: scalar|Param|null, // Default: "/"
+ *             success_handler?: scalar|Param|null, // Default: null
+ *             failure_handler?: scalar|Param|null, // Default: null
+ *             authentication_required_handler?: scalar|Param|null, // Default: null
+ *             auth_code_parameter_name?: scalar|Param|null, // Default: "_auth_code"
+ *             trusted_parameter_name?: scalar|Param|null, // Default: "_trusted"
+ *             remember_me_sets_trusted?: scalar|Param|null, // Default: false
+ *             multi_factor?: bool|Param, // Default: false
+ *             prepare_on_login?: bool|Param, // Default: false
+ *             prepare_on_access_denied?: bool|Param, // Default: false
+ *             enable_csrf?: scalar|Param|null, // Default: false
+ *             csrf_parameter?: scalar|Param|null, // Default: "_csrf_token"
+ *             csrf_token_id?: scalar|Param|null, // Default: "two_factor"
+ *             csrf_header?: scalar|Param|null, // Default: null
+ *             csrf_token_manager?: scalar|Param|null, // Default: "scheb_two_factor.csrf_token_manager"
+ *             provider?: scalar|Param|null, // Default: null
  *         },
  *     }>,
  *     access_control?: list<array{ // Default: []
