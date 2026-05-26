@@ -41,7 +41,7 @@ class ConsoleApplication extends Application
         $commands = $container->get('dirigent_command_locator');
 
         foreach ($commands as $command) {
-            $this->add($command);
+            $this->addCommand($command);
         }
     }
 }
