@@ -23,6 +23,12 @@ class Version extends TrackedEntity implements \Stringable
     #[ORM\Column]
     private bool $development;
 
+    /**
+     * Whether the current metadata is pinned.
+     */
+    #[ORM\Column]
+    private bool $pinned = false;
+
     #[ORM\Column]
     private bool $pruned = false;
 
@@ -95,6 +101,16 @@ class Version extends TrackedEntity implements \Stringable
     public function setDevelopment(bool $development): void
     {
         $this->development = $development;
+    }
+
+    public function isPinned(): bool
+    {
+        return $this->pinned;
+    }
+
+    public function setPinned(bool $pinned): void
+    {
+        $this->pinned = $pinned;
     }
 
     public function isPruned(): bool

@@ -76,9 +76,12 @@ Suggests: Suggests
 Current revision: Current revision
 Indexed on %date%: Indexed on %date%
 Multiple revisions found for version %version% of package %package%: Multiple revisions found for version %version% of package %package%.
+Pin revision: Pin revision
 Revision: Revision
 Revisions: Revisions
 This version has multiple revisions: This version has multiple revisions
+This version is pinned. Future updates will not change the active metadata until it is unpinned.: This version is pinned. Future updates will not change the active metadata until it is unpinned.
+Unpin revision: Unpin revision
 You're viewing an inactive revision of this package: You're viewing an inactive revision of this package.
 
 # Package labels (Statistics)

@@ -11,6 +11,7 @@ Dirigent is a free and open package registry for Composer, the PHP package manag
 ### Project
 
 - Environment variables are stored in `.env.dirigent` and `.env.dirigent.*` (not `.env`).
+- When adding new user-facing text, add the corresponding entries to the relevant file in `translations/` (e.g. `translations/messages.en.yaml`). Keep keys in their existing section and alphabetical order.
 
 ### PHP
 
