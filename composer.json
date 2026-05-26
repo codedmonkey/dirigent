@@ -21,7 +21,6 @@
         "easycorp/easyadmin-bundle": "^5.0.9",
         "endroid/qr-code": "^6.0.9",
         "league/commonmark": "^2.8.2",
-        "phpdocumentor/reflection-docblock": "^5.6.7",
         "phpstan/phpdoc-parser": "^2.3.2",
         "scheb/2fa-bundle": "^8.5.0",
         "scheb/2fa-totp": "^8.5.0",
