@@ -113,7 +113,7 @@ class DashboardResetPasswordController extends AbstractController
             try {
                 $resetToken = $this->resetPasswordHelper->generateResetToken($user);
 
-                $email = (new TemplatedEmail())
+                $email = new TemplatedEmail()
                     ->from(new Address('i@e.x', 'Example'))
                     ->to($user->getEmail())
                     ->subject('Your password reset request')

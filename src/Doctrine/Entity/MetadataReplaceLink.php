@@ -9,5 +9,6 @@ class MetadataReplaceLink extends AbstractMetadataLink
 {
     #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'replaceLinks')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[\Override]
     protected Metadata $metadata;
 }

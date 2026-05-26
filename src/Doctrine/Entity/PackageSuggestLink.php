@@ -8,5 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 class PackageSuggestLink extends AbstractPackageLink
 {
     #[ORM\Id, ORM\ManyToOne(targetEntity: Package::class)]
+    #[\Override]
     protected Package $package;
 }

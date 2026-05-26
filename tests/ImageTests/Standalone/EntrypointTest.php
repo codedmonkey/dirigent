@@ -11,7 +11,7 @@ class EntrypointTest extends TestCase
     public function testInit(): void
     {
         // Running the container without a command must result in a running application.
-        (new GenericContainer('dirigent-standalone'))
+        new GenericContainer('dirigent-standalone')
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start()
             ->stop();
@@ -19,7 +19,7 @@ class EntrypointTest extends TestCase
         $this->addToAssertionCount(1);
 
         // Running the container with the `-init` command must result in a running application.
-        (new GenericContainer('dirigent-standalone'))
+        new GenericContainer('dirigent-standalone')
             ->withCommand(['-init'])
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start()
@@ -30,7 +30,7 @@ class EntrypointTest extends TestCase
 
     public function testDirigent(): void
     {
-        $container = (new GenericContainer('dirigent-standalone'))
+        $container = new GenericContainer('dirigent-standalone')
             ->withCommand(['list'])
             ->withWait(new WaitForLog('Dirigent'))
             ->start();
@@ -44,7 +44,7 @@ class EntrypointTest extends TestCase
 
     public function testPassthrough(): void
     {
-        $container = (new GenericContainer('dirigent-standalone'))
+        $container = new GenericContainer('dirigent-standalone')
             ->withCommand(['--', 'echo', 'i have a dream'])
             ->withWait(new WaitForLog('dream'))
             ->start();

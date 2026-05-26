@@ -20,7 +20,7 @@ class EncryptionTest extends TestCase
             ->name('*.key');
 
         foreach ($files as $file) {
-            (new Filesystem())->remove($file->getRealPath());
+            new Filesystem()->remove($file->getRealPath());
         }
     }
 

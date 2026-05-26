@@ -12,7 +12,7 @@ class DirigentExtension extends ConfigurableExtension
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $slug = $mergedConfig['slug'];
-        $slug ??= (new AsciiSlugger())->slug($mergedConfig['title'])->lower()->toString();
+        $slug ??= new AsciiSlugger()->slug($mergedConfig['title'])->lower()->toString();
 
         $container->setParameter('dirigent.title', $mergedConfig['title']);
         $container->setParameter('dirigent.slug', $slug);

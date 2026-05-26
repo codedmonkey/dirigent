@@ -72,7 +72,7 @@ trait MockEntityFactoryTrait
     {
         $version = new Version($package);
         $version->setName($versionName);
-        $version->setNormalizedName((new VersionParser())->normalize($versionName));
+        $version->setNormalizedName(new VersionParser()->normalize($versionName));
         $version->setDevelopment($development);
 
         return $version;

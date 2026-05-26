@@ -29,7 +29,7 @@ class EncryptionGenerateKeysCommandTest extends KernelTestCase
     #[\Override]
     protected function tearDown(): void
     {
-        (new Filesystem())->remove($this->storagePath);
+        new Filesystem()->remove($this->storagePath);
     }
 
     public function testGenerateNewKeys(): void

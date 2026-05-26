@@ -27,7 +27,7 @@ class PackageProviderManagerTest extends TestCase
     #[\Override]
     protected function tearDown(): void
     {
-        (new Filesystem())->remove($this->storagePath);
+        new Filesystem()->remove($this->storagePath);
     }
 
     public function testPath(): void

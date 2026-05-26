@@ -88,7 +88,7 @@ class PackageRepository extends ServiceEntityRepository
             return [];
         }
 
-        $staleFrom = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
+        $staleFrom = new \DateTimeImmutable()->setTimezone(new \DateTimeZone('UTC'));
         $staleFrom = $staleFrom->sub($this->periodicUpdateInterval);
 
         // Find package (id)s that have:

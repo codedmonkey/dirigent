@@ -9,5 +9,6 @@ class MetadataRequireLink extends AbstractMetadataLink
 {
     #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'requireLinks')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[\Override]
     protected Metadata $metadata;
 }

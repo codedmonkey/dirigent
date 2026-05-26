@@ -133,7 +133,7 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
 
         $this->assertAnySelectorTextSame('#total_all .display-6', number_format($package->getInstallations()->getTotal(), thousands_separator: ' '));
 
-        $todayKey = (new \DateTimeImmutable())->format('Ymd');
+        $todayKey = new \DateTimeImmutable()->format('Ymd');
         $this->assertAnySelectorTextSame('#total_today .display-6', number_format($package->getInstallations()->getData()[$todayKey] ?? 0, thousands_separator: ' '));
     }
 }

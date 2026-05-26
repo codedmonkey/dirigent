@@ -13,7 +13,7 @@ abstract class DockerStandaloneTestCase extends TestCase
 
     protected function setUp(): void
     {
-        $this->container = (new GenericContainer('dirigent-standalone'))
+        $this->container = new GenericContainer('dirigent-standalone')
             ->withExposedPorts(7015)
             ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
             ->withWait(new WaitForLog('ready to handle connections'))

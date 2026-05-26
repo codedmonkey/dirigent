@@ -53,7 +53,7 @@ class InitTest extends DockerStandaloneIsolatedTestCase
         $this->filesystem->chmod(__DIR__ . '/config', 0777, recursive: true);
 
         // Generate kernel secret first
-        $this->container = (new GenericContainer('dirigent-standalone'))
+        $this->container = new GenericContainer('dirigent-standalone')
             ->withMount(__DIR__ . '/config', '/srv/config')
             ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
             ->withWait(new WaitForLog('ready to handle connections'))
@@ -63,7 +63,7 @@ class InitTest extends DockerStandaloneIsolatedTestCase
 
         $this->container->stop();
 
-        $this->container = (new GenericContainer('dirigent-standalone'))
+        $this->container = new GenericContainer('dirigent-standalone')
             ->withMount(__DIR__ . '/config', '/srv/config')
             ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
             ->withWait(new WaitForLog('ready to handle connections'))
@@ -90,7 +90,7 @@ class InitTest extends DockerStandaloneIsolatedTestCase
         $this->filesystem->mkdir(__DIR__ . '/config/secrets');
         $this->filesystem->chmod(__DIR__ . '/config', 0777, recursive: true);
 
-        $this->container = (new GenericContainer('dirigent-standalone'))
+        $this->container = new GenericContainer('dirigent-standalone')
             ->withMount(__DIR__ . '/config', '/srv/config')
             ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
             ->withEnvironment([$varName => $varValue])

@@ -9,5 +9,6 @@ class MetadataSuggestLink extends AbstractMetadataLink
 {
     #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'suggestLinks')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[\Override]
     protected Metadata $metadata;
 }

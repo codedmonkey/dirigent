@@ -6,5 +6,6 @@ use Symfony\Component\Security\Core\Validator\Constraints\UserPassword as BaseCo
 
 class UserPassword extends BaseConstraint
 {
+    #[\Override]
     public string $message = 'The password is incorrect';
 }
