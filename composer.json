@@ -6,7 +6,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.5",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
@@ -39,7 +39,6 @@
         "symfony/mailer": "^7.3.10",
         "symfony/mime": "^7.3.11",
         "symfony/monolog-bundle": "^3.11.1",
-        "symfony/polyfill-php85": "^1.33",
         "symfony/process": "^7.3.11",
         "symfony/property-access": "^7.3.10",
         "symfony/property-info": "^7.3.11",
@@ -86,7 +85,9 @@
         "symfony/polyfill-php80": "*",
         "symfony/polyfill-php81": "*",
         "symfony/polyfill-php82": "*",
-        "symfony/polyfill-php83": "*"
+        "symfony/polyfill-php83": "*",
+        "symfony/polyfill-php84": "*",
+        "symfony/polyfill-php85": "*"
     },
     "autoload": {
         "psr-4": {
@@ -179,7 +180,7 @@
         },
         "bump-after-update": true,
         "platform": {
-            "php": "8.3.0"
+            "php": "8.5"
         },
         "sort-packages": true
     },

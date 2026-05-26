@@ -3,7 +3,7 @@
 ## Technology stack
 
 - **Languages & frameworks**:
-    - PHP 8.3+
+    - PHP 8.5+
     - Symfony 7.3
     - PostgreSQL 16.x (via Doctrine ORM 3.x)
     - TypeScript

@@ -18,7 +18,7 @@ Running the project from the source code is not guaranteed to work on every syst
 To install Dirigent on your system from source you need to have the following packages installed on your system:
 
 - Git
-- PHP 8.3 or higher
+- PHP 8.5 or higher
 - Composer 2
 - Web server (like Nginx or Caddy)
 - PHP-FPM

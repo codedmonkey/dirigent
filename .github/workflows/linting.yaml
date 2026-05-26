@@ -19,7 +19,7 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.5
           tools: composer:v2
 
       - name: Set Composer cache directory
@@ -75,7 +75,7 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.5
           tools: composer:v2
 
       - name: Set Composer cache directory
@@ -107,7 +107,7 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.5
           tools: composer:v2
 
       - name: Set Composer cache directory
@@ -139,7 +139,7 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.5
           tools: composer:v2
 
       - name: Set Composer cache directory

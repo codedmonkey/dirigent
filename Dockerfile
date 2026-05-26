@@ -26,7 +26,7 @@ RUN set -e; \
     npm install; \
     npm run production;
 
-FROM alpine:3.19
+FROM alpine:3.23
 
 LABEL org.opencontainers.image.source=https://github.com/codedmonkey/dirigent
 LABEL org.opencontainers.image.description="Dirigent PHP Package Registry"
@@ -46,28 +46,28 @@ RUN set -e; \
         curl \
         git \
         openssl \
-        php83 \
-        php83-ctype \
-        php83-curl \
-        php83-dom \
-        php83-fileinfo \
-        php83-fpm \
-        php83-iconv \
-        php83-intl \
-        php83-mbstring \
-        php83-openssl \
-        php83-pdo \
-        php83-pdo_pgsql \
-        php83-phar \
-        php83-session \
-        php83-simplexml \
-        php83-sodium \
-        php83-tokenizer \
-        php83-xml \
+        php85 \
+        php85-ctype \
+        php85-curl \
+        php85-dom \
+        php85-fileinfo \
+        php85-fpm \
+        php85-iconv \
+        php85-intl \
+        php85-mbstring \
+        php85-openssl \
+        php85-pdo \
+        php85-pdo_pgsql \
+        php85-phar \
+        php85-session \
+        php85-simplexml \
+        php85-sodium \
+        php85-tokenizer \
+        php85-xml \
         postgresql \
         supervisor; \
-    ln -s /usr/bin/php83 /usr/bin/php; \
-    ln -s /usr/sbin/php-fpm83 /usr/sbin/php-fpm; \
+    ln -s /usr/bin/php85 /usr/bin/php; \
+    ln -s /usr/sbin/php-fpm85 /usr/sbin/php-fpm; \
     mkdir -p /run/postgresql /srv/config /srv/data; \
     chown -R dirigent:dirigent /run /srv; \
     chmod +x /srv/entrypoint.sh /srv/init.sh;
@@ -75,8 +75,8 @@ RUN set -e; \
 COPY --from=composer_build /usr/bin/composer /usr/bin/composer
 
 COPY docker/Caddyfile /etc/caddy/
-COPY docker/php.ini /etc/php83/conf.d/
-COPY docker/php-fpm.conf /etc/php83/
+COPY docker/php.ini /etc/php85/conf.d/
+COPY docker/php-fpm.conf /etc/php85/
 COPY docker/supervisord.conf /etc/
 COPY docker/process /srv/process/
 COPY docker/scripts /srv/scripts/
