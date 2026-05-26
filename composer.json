@@ -16,7 +16,7 @@
         "composer/pcre": "^3.3.2",
         "doctrine/doctrine-bundle": "^3.2.2",
         "doctrine/doctrine-fixtures-bundle": "^4.3.1",
-        "doctrine/doctrine-migrations-bundle": "^3.7",
+        "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.6.2",
         "easycorp/easyadmin-bundle": "^4.29.3",
         "endroid/qr-code": "^6.0.9",
