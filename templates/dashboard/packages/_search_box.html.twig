@@ -1,3 +1,5 @@
+{% set searchQuery = app.request.query.get('query') %}
+
 <div class="content-search">
   <form class="form-action-search" action="{{ path('dashboard_packages') }}" method="get">
     <div class="form-group">
@@ -7,9 +9,9 @@
         <label class="content-search-label">
           <input
             name="query"
-            class="form-control {{ app.request.get('query') is null ? 'is-blank' }}"
+            class="form-control {{ searchQuery is null ? 'is-blank' }}"
             type="search"
-            value="{{ app.request.get('query') ?? '' }}"
+            value="{{ searchQuery ?? '' }}"
             placeholder="{{ 'Search packages'|trans }}"
             spellcheck="false"
             autocorrect="off"
@@ -17,8 +19,8 @@
           >
         </label>
 
-        {% if app.request.get('query') %}
-          {% set clearRouteParameters = app.request.get('_route_params')|filter((value, key) => key != 'query' and key != 'page') %}
+        {% if searchQuery %}
+          {% set clearRouteParameters = app.request.attributes.get('_route_params')|filter((value, key) => key != 'query' and key != 'page') %}
           <a href="{{ path('dashboard_packages', clearRouteParameters) }}" class="content-search-reset">
             <i class="fas fa-fw fa-times"></i>
           </a>
