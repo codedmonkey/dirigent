@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Validator;
 
 use Symfony\Component\Security\Core\Validator\Constraints\UserPassword as BaseConstraint;

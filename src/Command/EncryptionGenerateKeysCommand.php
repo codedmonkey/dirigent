@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Command;
 
 use CodedMonkey\Dirigent\Encryption\Encryption;

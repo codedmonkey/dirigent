@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Encryption;
 
 use Symfony\Component\Filesystem\Filesystem;

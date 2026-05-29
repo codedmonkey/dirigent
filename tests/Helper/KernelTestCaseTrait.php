@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\Helper;
 
 trait KernelTestCaseTrait

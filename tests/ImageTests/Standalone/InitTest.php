@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\ImageTests\Standalone;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Filesystem\Filesystem;
 use Testcontainers\Container\GenericContainer;
 use Testcontainers\Wait\WaitForLog;

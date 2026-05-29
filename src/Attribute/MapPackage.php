@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Attribute;
 
 use CodedMonkey\Dirigent\Routing\PackageValueResolver;

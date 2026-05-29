@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\DependencyInjection;
 
 use Symfony\Component\Config\Definition\ConfigurationInterface;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'APP_ENV' => 'prod',
     'DIRIGENT_IMAGE' => '1',

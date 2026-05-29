@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Command;
 
 use CodedMonkey\Dirigent\Command\EncryptionGenerateKeysCommand;
