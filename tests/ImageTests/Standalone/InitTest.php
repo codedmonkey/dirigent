@@ -9,12 +9,14 @@ use Testcontainers\Wait\WaitForLog;
 
 class InitTest extends DockerStandaloneIsolatedTestCase
 {
-    protected Filesystem $filesystem;
+    private Filesystem $filesystem;
+    private string $configPath;
 
     #[\Override]
     protected function setUp(): void
     {
         $this->filesystem = new Filesystem();
+        $this->configPath = sys_get_temp_dir() . '/dirigent-config-' . uniqid();
     }
 
     #[\Override]
@@ -47,59 +49,63 @@ class InitTest extends DockerStandaloneIsolatedTestCase
         );
     }
 
-    public function testKernelSecretNotRegeneratedOnRestart(): void
+    public function testKernelSecretNotRegenerated(): void
     {
-        $this->filesystem->mkdir(__DIR__ . '/config/secrets');
-        $this->filesystem->chmod(__DIR__ . '/config', 0777, recursive: true);
-
-        // Generate kernel secret first
-        $this->container = new GenericContainer('dirigent-standalone')
-            ->withMount(__DIR__ . '/config', '/srv/config')
-            ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
-            ->withWait(new WaitForLog('ready to handle connections'))
-            ->start();
-
-        $initialSecret = $this->filesystem->readFile(__DIR__ . '/config/secrets/kernel_secret');
-
-        $this->container->stop();
+        $this->filesystem->mkdir($this->configPath . '/secrets');
+        $this->filesystem->chmod($this->configPath, 0777, recursive: true);
+        $this->filesystem->dumpFile($this->configPath . '/secrets/kernel_secret', 'fernando');
 
         $this->container = new GenericContainer('dirigent-standalone')
-            ->withMount(__DIR__ . '/config', '/srv/config')
+            ->withMount($this->configPath, '/srv/config')
             ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start();
 
         $this->assertContainerLogsContain('Kernel secret exists');
 
-        $secret = $this->filesystem->readFile(__DIR__ . '/config/secrets/kernel_secret');
+        $secret = $this->filesystem->readFile($this->configPath . '/secrets/kernel_secret');
 
-        $this->assertSame($initialSecret, $secret, 'The kernel_secret file must not be changed if it already exists.');
+        $this->assertSame('fernando', $secret, 'The default kernel secret file must not be changed if it already exists.');
     }
 
-    public static function kernelSecretEnvVarProvider(): array
+    public function testKernelSecretFileNotGeneratedIfKernelSecretEnvVarExists(): void
     {
-        return [
-            ['KERNEL_SECRET', 'fernando'],
-            ['KERNEL_SECRET_FILE', '/srv/config/secrets/kernel_secret'],
-        ];
-    }
-
-    #[DataProvider('kernelSecretEnvVarProvider')]
-    public function testKernelSecretNotGeneratedIfEnvVarExists(string $varName, string $varValue): void
-    {
-        $this->filesystem->mkdir(__DIR__ . '/config/secrets');
-        $this->filesystem->chmod(__DIR__ . '/config', 0777, recursive: true);
+        $this->filesystem->mkdir($this->configPath . '/secrets');
+        $this->filesystem->chmod($this->configPath, 0777, recursive: true);
 
         $this->container = new GenericContainer('dirigent-standalone')
-            ->withMount(__DIR__ . '/config', '/srv/config')
+            ->withMount($this->configPath, '/srv/config')
             ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
-            ->withEnvironment([$varName => $varValue])
+            ->withEnvironment(['KERNEL_SECRET' => 'fernando'])
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start();
 
         $this->assertContainerLogsContain('Kernel secret is defined as an environment variable');
 
-        $kernelSecretExists = $this->filesystem->exists(__DIR__ . '/config/secrets/kernel_secret');
-        $this->assertFalse($kernelSecretExists, 'The kernel_secret file must not be generated if the kernel secret is defined through an environment variable.');
+        $this->assertFalse(
+            $this->filesystem->exists(__DIR__ . '/config/secrets/kernel_secret'),
+            'The kernel_secret file must not be generated if the kernel secret is defined through an environment variable.',
+        );
+    }
+
+    public function testKernelSecretFileNotGeneratedIfKernelSecretFileEnvVarExists(): void
+    {
+        $this->filesystem->mkdir($this->configPath . '/secrets');
+        $this->filesystem->chmod($this->configPath, 0777, recursive: true);
+        $this->filesystem->dumpFile($this->configPath . '/secrets/alt_kernel_secret', 'fernando');
+
+        $this->container = new GenericContainer('dirigent-standalone')
+            ->withMount($this->configPath, '/srv/config')
+            ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
+            ->withEnvironment(['KERNEL_SECRET_FILE' => '/srv/config/secrets/alt_kernel_secret'])
+            ->withWait(new WaitForLog('ready to handle connections'))
+            ->start();
+
+        $this->assertContainerLogsContain('Kernel secret is defined as an environment variable');
+
+        $this->assertFalse(
+            $this->filesystem->exists(__DIR__ . '/config/secrets/kernel_secret'),
+            'The kernel_secret file must not be generated if the kernel secret is defined through an environment variable.',
+        );
     }
 }
