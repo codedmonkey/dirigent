@@ -65,7 +65,7 @@ class DashboardRegistryController extends AbstractCrudController
         yield AssociationField::new('credentials')
             ->onlyOnForms();
 
-        yield FormField::addPanel('Packages');
+        yield FormField::addFieldset('Packages');
 
         yield ChoiceField::new('packageMirroring')
             ->setSortable(false)

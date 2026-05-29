@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 readonly class DashboardRoutingListener
 {
     /**
-     * Imitate that dashboard routes are created by EasyAdmin to use the EasyAdmin context (like template functions).
+     * Imitate that the scheb/2fa-bundle login route is created by EasyAdmin to use the EasyAdmin context (like template functions).
      */
     #[AsEventListener(priority: 10)]
     public function dashboardContext(RequestEvent $event): void
@@ -18,7 +18,8 @@ readonly class DashboardRoutingListener
         $request = $event->getRequest();
         $routeName = $request->attributes->getString('_route');
 
-        if (str_starts_with($routeName, 'dashboard_') || 'mfa_login' === $routeName) {
+        if ('mfa_login' === $routeName) {
+            $request->attributes->set(EA::ROUTE_CREATED_BY_EASYADMIN, true);
             $request->attributes->set(EA::DASHBOARD_CONTROLLER_FQCN, DashboardRootController::class);
         }
     }

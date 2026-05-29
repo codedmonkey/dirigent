@@ -15,12 +15,12 @@ use CodedMonkey\Dirigent\Form\PackageFormType;
 use CodedMonkey\Dirigent\Message\UpdatePackage;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class DashboardPackagesController extends AbstractController
@@ -35,7 +35,7 @@ class DashboardPackagesController extends AbstractController
     ) {
     }
 
-    #[Route('/packages', name: 'dashboard_packages')]
+    #[AdminRoute('/packages', name: 'packages')]
     #[IsGrantedAccess]
     public function list(Request $request): Response
     {
@@ -53,7 +53,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/add-mirroring', name: 'dashboard_packages_add_mirroring')]
+    #[AdminRoute('/packages/add-mirroring', name: 'packages_add_mirroring')]
     #[IsGranted('ROLE_ADMIN')]
     public function addMirroring(Request $request): Response
     {
@@ -136,7 +136,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/add-vcs', name: 'dashboard_packages_add_vcs')]
+    #[AdminRoute('/packages/add-vcs', name: 'packages_add_vcs')]
     #[IsGranted('ROLE_ADMIN')]
     public function addVcsRepository(Request $request): Response
     {
@@ -159,7 +159,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{package}/edit', name: 'dashboard_packages_edit', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/edit', name: 'packages_edit', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, #[MapPackage] Package $package): Response
     {
@@ -183,7 +183,7 @@ class DashboardPackagesController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{package}/update', name: 'dashboard_packages_update', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/update', name: 'packages_update', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGranted('ROLE_ADMIN')]
     public function update(#[MapPackage] Package $package): Response
     {
@@ -192,7 +192,7 @@ class DashboardPackagesController extends AbstractController
         return $this->redirectToRoute('dashboard_packages_info', ['package' => $package->getName()]);
     }
 
-    #[Route('/packages/{package}/delete', name: 'dashboard_packages_delete', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/delete', name: 'packages_delete', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(#[MapPackage] Package $package): Response
     {

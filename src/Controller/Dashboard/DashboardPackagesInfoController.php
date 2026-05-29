@@ -13,10 +13,10 @@ use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class DashboardPackagesInfoController extends AbstractController
@@ -30,7 +30,7 @@ class DashboardPackagesInfoController extends AbstractController
     /**
      * Show info for the latest available version of the package.
      */
-    #[Route('/packages/{package}', name: 'dashboard_packages_info', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}', name: 'packages_info', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGrantedAccess]
     public function info(Request $request, #[MapPackage] Package $package): Response
     {
@@ -43,7 +43,7 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->versionInfo($request, $package, $version, latest: true);
     }
 
-    #[Route('/packages/{package}/versions/{version}', name: 'dashboard_packages_version_info', requirements: ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'])]
+    #[AdminRoute('/packages/{package}/versions/{version}', name: 'packages_version_info', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*']])]
     #[IsGrantedAccess]
     public function versionInfo(
         Request $request,
@@ -85,7 +85,7 @@ class DashboardPackagesInfoController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{package}/revisions/{version}', name: 'dashboard_packages_version_metadata_list', requirements: ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'])]
+    #[AdminRoute('/packages/{package}/revisions/{version}', name: 'packages_version_metadata_list', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*']])]
     #[IsGrantedAccess]
     public function versionMetadataList(
         #[MapPackage] Package $package,
@@ -101,7 +101,7 @@ class DashboardPackagesInfoController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{package}/pin-metadata/{version}', name: 'dashboard_packages_version_pin', requirements: ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'], methods: ['POST'])]
+    #[AdminRoute('/packages/{package}/pin-metadata/{version}', name: 'packages_version_pin', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'], 'methods' => ['POST']])]
     #[IsGranted('ROLE_ADMIN')]
     public function pinMetadata(
         Request $request,
@@ -141,7 +141,7 @@ class DashboardPackagesInfoController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{package}/versions', name: 'dashboard_packages_versions', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/versions', name: 'packages_versions', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGrantedAccess]
     public function versions(#[MapPackage] Package $package): Response
     {
@@ -151,14 +151,14 @@ class DashboardPackagesInfoController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{package}/dependents', name: 'dashboard_packages_dependents', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/dependents', name: 'packages_dependents', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGrantedAccess]
     public function dependents(Request $request, #[MapPackage] Package $package): Response
     {
         return $this->packageLinks($request, $package, PackageRequireLink::class, 'Dependents');
     }
 
-    #[Route('/packages/{package}/implementations', name: 'dashboard_packages_implementations', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/implementations', name: 'packages_implementations', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGrantedAccess]
     public function implementations(Request $request, #[MapPackage] Package $package): Response
     {
@@ -173,7 +173,7 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->packageLinks($request, $package, PackageProvideLink::class, 'Implementations', queryBuilder: $queryBuilder);
     }
 
-    #[Route('/packages/{package}/providers', name: 'dashboard_packages_providers', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/providers', name: 'packages_providers', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGrantedAccess]
     public function providers(Request $request, #[MapPackage] Package $package): Response
     {
@@ -188,7 +188,7 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->packageLinks($request, $package, PackageProvideLink::class, 'Providers', queryBuilder: $queryBuilder);
     }
 
-    #[Route('/packages/{package}/suggesters', name: 'dashboard_packages_suggesters', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/suggesters', name: 'packages_suggesters', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGrantedAccess]
     public function suggesters(Request $request, #[MapPackage] Package $package): Response
     {
@@ -217,7 +217,7 @@ class DashboardPackagesInfoController extends AbstractController
         ]);
     }
 
-    #[Route('/packages/{package}/statistics', name: 'dashboard_packages_statistics', requirements: ['package' => MapPackage::PACKAGE_REGEX])]
+    #[AdminRoute('/packages/{package}/statistics', name: 'packages_statistics', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX]])]
     #[IsGrantedAccess]
     public function statistics(#[MapPackage] Package $package): Response
     {

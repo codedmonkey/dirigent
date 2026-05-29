@@ -37,7 +37,7 @@
           {% if 3 == loop.index %}
             <tr class="no-results">
               <td colspan="100">
-                {{ t('datagrid.no_results', ea.i18n.translationParameters, 'EasyAdminBundle')|trans }}
+                {{ t('datagrid.no_results', ea().i18n.translationParameters, 'EasyAdminBundle')|trans }}
               </td>
             </tr>
           {% endif %}
@@ -50,7 +50,7 @@
 {% if packages|length or paginator.currentPage > 1 %}
   <div class="content-panel-footer without-padding without-border">
     {% block paginator %}
-      {{ include(ea.templatePath('crud/paginator')) }}
+      {{ include(ea().templatePath('crud/paginator')) }}
     {% endblock paginator %}
   </div>
 {% endif %}
