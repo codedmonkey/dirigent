@@ -30,7 +30,7 @@
         "symfony/doctrine-messenger": "^8.1.0",
         "symfony/dotenv": "^8.1.0",
         "symfony/expression-language": "^8.1.0",
-        "symfony/flex": "^2.10",
+        "symfony/flex": "^2.11",
         "symfony/form": "^8.1.0",
         "symfony/framework-bundle": "^8.1.0",
         "symfony/http-client": "^8.1.0",
@@ -55,11 +55,11 @@
         "symfonycasts/reset-password-bundle": "^1.25",
         "twig/extra-bundle": "^3.24",
         "twig/markdown-extra": "^3.26",
-        "twig/twig": "^3.27"
+        "twig/twig": "^3.27.1"
     },
     "require-dev": {
         "dama/doctrine-test-bundle": "^8.6",
-        "friendsofphp/php-cs-fixer": "^3.95.2",
+        "friendsofphp/php-cs-fixer": "^3.95.3",
         "phpstan/phpstan": "^2.2.1",
         "phpunit/phpunit": "^13.1.13",
         "rector/rector": "^2.4.5",
