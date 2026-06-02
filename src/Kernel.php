@@ -54,4 +54,14 @@ class Kernel extends BaseKernel
     {
         return sprintf('%s/var/cache/symfony/%s', $this->getProjectDir(), $this->environment);
     }
+
+    /**
+     * @return list<string> An array of allowed values for APP_ENV
+     *
+     * @phpstan-ignore method.unused (Method is called from KernelTrait which is not analyzed by PHPStan)
+     */
+    private function getAllowedEnvs(): array
+    {
+        return ['prod', 'dev', 'test'];
+    }
 }
