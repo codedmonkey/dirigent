@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -9,5 +11,6 @@ class MetadataRequireLink extends AbstractMetadataLink
 {
     #[ORM\ManyToOne(targetEntity: Metadata::class, inversedBy: 'requireLinks')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[\Override]
     protected Metadata $metadata;
 }

@@ -1,6 +1,6 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block page_title %}Edit Package{% endblock %}
+{% block content_title %}Edit Package{% endblock %}
 
 {% block search_wrapper %}
   {{ include('dashboard/packages/_search_box.html.twig', {autofocus: false}, with_context: false) }}
@@ -12,7 +12,7 @@
   </div>
 {% endblock %}
 
-{% block page_content %}
+{% block main %}
   {{ form_start(form, {'attr': {'id': 'package_form'}}) }}
     {{ form_row(form.name) }}
 

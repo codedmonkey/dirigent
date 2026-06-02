@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Controller;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;

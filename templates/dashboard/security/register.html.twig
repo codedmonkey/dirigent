@@ -1,5 +1,7 @@
 {% extends 'dashboard/security/security_layout.html.twig' %}
 
+{% form_theme form 'dashboard/dashboard_form_theme.html.twig' %}
+
 {% block main %}
   <p class="lead">Create an account</p>
 
@@ -8,8 +10,8 @@
     {{ form_row(form.email) }}
     {{ form_row(form.plainPassword) }}
 
-    <div class="form-group">
-      <button class="btn btn-primary">Create account</button>
+    <div class="btn-toolbar">
+      <button class="btn btn-primary btn-lg btn-block">Create account</button>
     </div>
   {{ form_end(form) }}
 {% endblock main %}

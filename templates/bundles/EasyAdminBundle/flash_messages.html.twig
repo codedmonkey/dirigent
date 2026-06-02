@@ -1,7 +1,8 @@
 {# template override to limit flash messages to Boostrap color types #}
 
-{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
-{% trans_default_domain ea.i18n.translationDomain %}
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContext #}
+{% set ea = ea() %}
+{% trans_default_domain null != ea ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? 'messages') %}
 
 {% set flash_messages = app.flashes(['primary', 'secondary', 'danger', 'info', 'success', 'warning']) %}
 
@@ -9,10 +10,12 @@
     <div id="flash-messages">
         {% for label, messages in flash_messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    {{ message|trans|raw }}
-                </div>
+                {# the message must be translated outside of the Twig component because
+                   the trans_default_domain value is ignored inside the component #}
+                {% set translated_message = message|trans %}
+                <twig:ea:Alert variant="{{ label }}" withDismissButton>
+                    {{ translated_message|raw }}
+                </twig:ea:Alert>
             {% endfor %}
         {% endfor %}
     </div>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;

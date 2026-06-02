@@ -8,6 +8,7 @@ parameters:
         - src/
         - tests/
     excludePaths:
+        - config/reference.php
         - tests/bootstrap.php
     ignoreErrors:
         - '#^Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\NodeDefinition\:\:children\(\)\.$#'

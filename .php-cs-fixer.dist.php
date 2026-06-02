@@ -8,7 +8,6 @@ $finder = (new PhpCsFixer\Finder())
     ->in(__DIR__)
     ->exclude('var')
     ->notPath([
-        'config/bundles.php',
         'config/reference.php',
     ])
     ->append($binFinder);
@@ -22,6 +21,7 @@ return (new PhpCsFixer\Config())
         'blank_line_between_import_groups' => false,
         'concat_space' => ['spacing' => 'one'],
         'date_time_immutable' => true,
+        'declare_strict_types' => true,
         'linebreak_after_opening_tag' => true,
         'mb_str_functions' => false,
         'native_constant_invocation' => false,

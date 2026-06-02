@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Validator;
 
 use Symfony\Component\Security\Core\Validator\Constraints\UserPassword as BaseConstraint;
 
 class UserPassword extends BaseConstraint
 {
+    #[\Override]
     public string $message = 'The password is incorrect';
 }

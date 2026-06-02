@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
@@ -524,7 +526,7 @@ class Metadata extends TrackedEntity implements \Stringable
     public function getVersionAlias(): string
     {
         if (null !== $alias = $this->extra['branch-alias'][$this->versionName] ?? null) {
-            $alias = (new VersionParser())->normalizeBranch(str_replace('-dev', '', $alias));
+            $alias = new VersionParser()->normalizeBranch(str_replace('-dev', '', $alias));
             $alias = Preg::replace('{(\.9{7})+}', '.x', $alias);
 
             return $alias;

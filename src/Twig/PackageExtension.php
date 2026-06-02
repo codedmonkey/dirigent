@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Twig;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;

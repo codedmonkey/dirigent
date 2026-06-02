@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Encryption;
 
 use CodedMonkey\Dirigent\Encryption\Encryption;
@@ -20,7 +22,7 @@ class EncryptionTest extends TestCase
             ->name('*.key');
 
         foreach ($files as $file) {
-            (new Filesystem())->remove($file->getRealPath());
+            new Filesystem()->remove($file->getRealPath());
         }
     }
 

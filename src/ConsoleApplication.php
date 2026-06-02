@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent;
 
 use Symfony\Component\Console\Application;
@@ -41,7 +43,7 @@ class ConsoleApplication extends Application
         $commands = $container->get('dirigent_command_locator');
 
         foreach ($commands as $command) {
-            $this->add($command);
+            $this->addCommand($command);
         }
     }
 }

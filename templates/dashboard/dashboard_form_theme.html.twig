@@ -10,3 +10,8 @@
     {%- endfor -%}
   {%- endif -%}
 {%- endblock form_errors -%}
+
+{%- block form_row_render -%}
+  {%- set row_class = row_class|default(row_attr.class|default('form-group')|trim) -%}
+  {{ parent() }}
+{%- endblock form_row_render -%}

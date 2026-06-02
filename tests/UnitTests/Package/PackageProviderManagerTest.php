@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Package;
 
 use CodedMonkey\Dirigent\Package\PackageProviderManager;
@@ -27,7 +29,7 @@ class PackageProviderManagerTest extends TestCase
     #[\Override]
     protected function tearDown(): void
     {
-        (new Filesystem())->remove($this->storagePath);
+        new Filesystem()->remove($this->storagePath);
     }
 
     public function testPath(): void

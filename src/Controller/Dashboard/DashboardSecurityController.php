@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use CodedMonkey\Dirigent\Entity\UserRole;
 use CodedMonkey\Dirigent\Form\RegistrationFormType;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class DashboardSecurityController extends AbstractController
@@ -20,7 +22,7 @@ class DashboardSecurityController extends AbstractController
     ) {
     }
 
-    #[Route('/login', name: 'dashboard_login')]
+    #[AdminRoute('/login', name: 'login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->userRepository->noUsers()) {
@@ -37,7 +39,7 @@ class DashboardSecurityController extends AbstractController
         ]);
     }
 
-    #[Route('/register', name: 'dashboard_register')]
+    #[AdminRoute('/register', name: 'register')]
     public function register(Request $request, Security $security): Response
     {
         $registrationEnabled = $this->getParameter('dirigent.security.registration_enabled');

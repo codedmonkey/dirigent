@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Message;
 
 use Symfony\Component\Messenger\Attribute\AsMessage;

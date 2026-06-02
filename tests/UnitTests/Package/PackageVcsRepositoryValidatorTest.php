@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;

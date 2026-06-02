@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
@@ -8,13 +10,13 @@ use CodedMonkey\Dirigent\Form\AccountFormType;
 use CodedMonkey\Dirigent\Form\ChangePasswordFormType;
 use CodedMonkey\Dirigent\Form\MfaClearFormType;
 use CodedMonkey\Dirigent\Form\MfaSetupFormType;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Endroid\QrCode\Builder\Builder as QrCodeBuilder;
 use Endroid\QrCode\Color\Color;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -26,7 +28,7 @@ class DashboardAccountController extends AbstractController
     ) {
     }
 
-    #[Route('/account', name: 'dashboard_account')]
+    #[AdminRoute('/account', name: 'account')]
     #[IsGranted('ROLE_USER')]
     public function account(Request $request, #[CurrentUser] User $user): Response
     {
@@ -60,7 +62,7 @@ class DashboardAccountController extends AbstractController
         ]);
     }
 
-    #[Route('/account/mfa', name: 'dashboard_account_mfa')]
+    #[AdminRoute('/account/mfa', name: 'account_mfa')]
     #[IsGranted('ROLE_USER')]
     public function mfa(Request $request, #[CurrentUser] User $user): Response
     {
@@ -122,7 +124,7 @@ class DashboardAccountController extends AbstractController
         ]);
     }
 
-    #[Route('/account/mfa/qr-code', name: 'dashboard_account_mfa_qr_code', methods: ['GET'])]
+    #[AdminRoute('/account/mfa/qr-code', name: 'account_mfa_qr_code', options: ['methods' => ['GET']])]
     #[IsGranted('ROLE_USER')]
     public function mfaQrCode(Request $request, #[CurrentUser] User $user): Response
     {

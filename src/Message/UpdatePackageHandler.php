@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Message;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
@@ -56,7 +58,7 @@ readonly class UpdatePackageHandler
         // Override update delay from registry
         $dynamicUpdateDelay = $package->getMirrorRegistry()?->getDynamicUpdateDelay() ?? $this->dynamicUpdateDelay;
 
-        $freshFrom = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
+        $freshFrom = new \DateTimeImmutable()->setTimezone(new \DateTimeZone('UTC'));
         $freshFrom = $freshFrom->sub($dynamicUpdateDelay ?? new \DateInterval('PT0'));
 
         // Check if the package was updated recently, and therefore fresh

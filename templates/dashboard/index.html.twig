@@ -1,12 +1,12 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block page_title %}{{ ea.dashboardTitle }}{% endblock %}
+{% block content_title %}{{ ea().dashboardTitle }}{% endblock %}
 
 {% block search_wrapper %}
   {{ include('dashboard/packages/_search_box.html.twig', with_context: false) }}
 {% endblock %}
 
-{% block page_content %}
+{% block main %}
   <div class="mb-3">
     <div class="row">
       <div class="col-md-4">

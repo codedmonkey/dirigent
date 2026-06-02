@@ -2,9 +2,9 @@
 
 {% form_theme form 'dashboard/dashboard_form_theme.html.twig' %}
 
-{% block page_title %}Mirror packages from registry{% endblock %}
+{% block content_title %}Mirror packages from registry{% endblock %}
 
-{% block page_content %}
+{% block main %}
   <div {{ stimulus_controller('packages-mirroring', {packageUrl: path('dashboard_packages_info', {package: 'place/holder'})}) }}>
     <div
       class="border-top border-bottom my-3"
@@ -30,7 +30,9 @@
         </div>
       </div>
 
-      <button class="btn btn-primary">Add packages</button>
+      <div class="btn-toolbar">
+        <button class="btn btn-primary">Add packages</button>
+      </div>
     {{ form_end(form) }}
   </div>
 {% endblock %}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\Helper;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
@@ -8,6 +10,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use Composer\Semver\VersionParser;
+use PHPUnit\Framework\MockObject\MockObject;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticator;
 
 trait MockEntityFactoryTrait
@@ -57,7 +60,7 @@ trait MockEntityFactoryTrait
         $user->setPlainPassword('PlainPassword99');
 
         if ($mfaEnabled) {
-            /** @var TotpAuthenticator $totpAuthenticator */
+            /** @var TotpAuthenticator&MockObject $totpAuthenticator */
             $totpAuthenticator = $this->getMockBuilder(TotpAuthenticator::class)
                 ->disableOriginalConstructor()
                 ->getMock();
@@ -72,7 +75,7 @@ trait MockEntityFactoryTrait
     {
         $version = new Version($package);
         $version->setName($versionName);
-        $version->setNormalizedName((new VersionParser())->normalize($versionName));
+        $version->setNormalizedName(new VersionParser()->normalize($versionName));
         $version->setDevelopment($development);
 
         return $version;

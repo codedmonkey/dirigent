@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
@@ -65,7 +67,7 @@ class DashboardRegistryController extends AbstractCrudController
         yield AssociationField::new('credentials')
             ->onlyOnForms();
 
-        yield FormField::addPanel('Packages');
+        yield FormField::addFieldset('Packages');
 
         yield ChoiceField::new('packageMirroring')
             ->setSortable(false)

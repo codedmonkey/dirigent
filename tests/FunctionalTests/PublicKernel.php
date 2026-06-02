@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
 
 use CodedMonkey\Dirigent\Kernel;

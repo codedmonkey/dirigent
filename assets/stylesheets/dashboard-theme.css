@@ -82,3 +82,7 @@ body:not(.ea-dark-scheme) img.img-dark {
   font-family: var(--font-family-monospace);
   font-size: 13px;
 }
+
+.login-wrapper .btn-primary {
+  margin-block-start: 0 !important; /* Negate custom EasyAdmin margin */
+}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Command;
 
 use CodedMonkey\Dirigent\Command\EncryptionGenerateKeysCommand;
@@ -29,7 +31,7 @@ class EncryptionGenerateKeysCommandTest extends KernelTestCase
     #[\Override]
     protected function tearDown(): void
     {
-        (new Filesystem())->remove($this->storagePath);
+        new Filesystem()->remove($this->storagePath);
     }
 
     public function testGenerateNewKeys(): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
@@ -10,6 +12,7 @@ use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -44,7 +47,8 @@ class ApiControllerPublicTest extends KernelTestCase
 
         $packageData = $this->requestJson('/p2/psr/log.json', 'GET');
 
-        $this->assertNotSame([], $packageData);
+        $this->assertArrayHasKey('packages', $packageData);
+        $this->assertArrayHasKey('psr/log', $packageData['packages']);
     }
 
     public function testPackageMetadataDev(): void
@@ -53,7 +57,8 @@ class ApiControllerPublicTest extends KernelTestCase
 
         $packageData = $this->requestJson('/p2/psr/log~dev.json', 'GET');
 
-        $this->assertNotSame([], $packageData);
+        $this->assertArrayHasKey('packages', $packageData);
+        $this->assertArrayHasKey('psr/log', $packageData['packages']);
     }
 
     public function testPackageMetadataIsNotFound(): void
@@ -84,7 +89,8 @@ class ApiControllerPublicTest extends KernelTestCase
         // Execute the API endpoint
         $packageData = $this->requestJson('/p2/psr/container.json', 'GET');
 
-        $this->assertNotSame([], $packageData);
+        $this->assertArrayHasKey('packages', $packageData);
+        $this->assertArrayHasKey('psr/container', $packageData['packages']);
     }
 
     private function requestJson(...$requestArguments)
@@ -94,6 +100,12 @@ class ApiControllerPublicTest extends KernelTestCase
 
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
 
-        return json_decode($response->getContent(), true);
+        $content = $response instanceof BinaryFileResponse
+            ? $response->getFile()->getContent()
+            : $response->getContent();
+
+        $this->assertNotFalse($content);
+
+        return json_decode($content, true);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -8,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 class PackageRequireLink extends AbstractPackageLink
 {
     #[ORM\Id, ORM\ManyToOne(targetEntity: Package::class)]
+    #[\Override]
     protected Package $package;
 
     #[ORM\Id, ORM\Column]

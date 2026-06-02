@@ -1,16 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
-use CodedMonkey\Dirigent\Doctrine\Entity\AccessToken;
-use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
-use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Kernel;
 use Composer\Composer;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
@@ -20,7 +20,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Kernel as HttpKernel;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
@@ -69,7 +68,7 @@ class DashboardRootController extends AbstractDashboardController
 
         yield MenuItem::section('Personal');
         if ($user) {
-            yield MenuItem::linkToCrud('Access tokens', 'fa fa-key', AccessToken::class);
+            yield MenuItem::linkTo(DashboardAccessTokenController::class, 'Access tokens', 'fa fa-key');
             yield MenuItem::linkToUrl('Account', 'fa fa-id-card', $this->generateUrl('dashboard_account'));
             yield MenuItem::linkToLogout('Sign out', 'fa fa-user-xmark');
         } else {
@@ -82,9 +81,9 @@ class DashboardRootController extends AbstractDashboardController
 
         if ($user?->isAdmin()) {
             yield MenuItem::section('Administration');
-            yield MenuItem::linkToCrud('Users', 'fa fa-users', User::class);
-            yield MenuItem::linkToCrud('Registries', 'fa fa-server', Registry::class);
-            yield MenuItem::linkToCrud('Credentials', 'fa fa-lock-open', Credentials::class);
+            yield MenuItem::linkTo(DashboardUserController::class, 'Users', 'fa fa-users');
+            yield MenuItem::linkTo(DashboardRegistryController::class, 'Registries', 'fa fa-server');
+            yield MenuItem::linkTo(DashboardCredentialsController::class, 'Credentials', 'fa fa-lock-open');
         }
 
         yield MenuItem::section('Documentation');
@@ -124,7 +123,7 @@ class DashboardRootController extends AbstractDashboardController
         ]);
     }
 
-    #[Route('/docs/usage/{page}', name: 'dashboard_usage_docs')]
+    #[AdminRoute('/docs/usage/{page}', name: 'usage_docs', options: ['defaults' => ['page' => 'readme']])]
     #[IsGrantedAccess]
     public function docs(string $page = 'readme'): Response
     {
@@ -134,7 +133,7 @@ class DashboardRootController extends AbstractDashboardController
         ]);
     }
 
-    #[Route('/docs/admin/{page}', name: 'dashboard_admin_docs')]
+    #[AdminRoute('/docs/admin/{page}', name: 'admin_docs', options: ['defaults' => ['page' => 'readme']])]
     #[IsGranted('ROLE_ADMIN')]
     public function adminDocs(string $page = 'readme'): Response
     {
@@ -144,7 +143,7 @@ class DashboardRootController extends AbstractDashboardController
         ]);
     }
 
-    #[Route('/credits', name: 'dashboard_credits')]
+    #[AdminRoute('/credits', name: 'credits')]
     public function credits(): Response
     {
         return $this->render('dashboard/credits.html.twig', [

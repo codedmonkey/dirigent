@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
@@ -88,7 +90,7 @@ class PackageRepository extends ServiceEntityRepository
             return [];
         }
 
-        $staleFrom = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone('UTC'));
+        $staleFrom = new \DateTimeImmutable()->setTimezone(new \DateTimeZone('UTC'));
         $staleFrom = $staleFrom->sub($this->periodicUpdateInterval);
 
         // Find package (id)s that have:

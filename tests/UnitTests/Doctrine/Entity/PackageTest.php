@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;

@@ -1,13 +1,13 @@
 {% extends 'dashboard/packages/package_base.html.twig' %}
 
-{% block page_title %}
+{% block content_title %}
   {%- apply spaceless -%}
     {{ package.name }}
     <small>{{ version.extendedName }}</small>
   {%- endapply -%}
 {% endblock %}
 
-{% block page_content %}
+{% block main %}
   {{ include('dashboard/packages/_package_header.html.twig') }}
 
   <h2 class="h4">{{ 'Revisions'|trans }}</h2>
