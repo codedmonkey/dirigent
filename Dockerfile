@@ -52,6 +52,7 @@ RUN set -e; \
         php85-dom \
         php85-fileinfo \
         php85-fpm \
+        php85-gd \
         php85-iconv \
         php85-intl \
         php85-mbstring \
