@@ -40,9 +40,6 @@ class Metadata extends TrackedEntity implements \Stringable
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $readme = null;
-
     #[ORM\Column(nullable: true)]
     private ?string $homepage = null;
 
@@ -102,6 +99,10 @@ class Metadata extends TrackedEntity implements \Stringable
     #[ORM\JoinColumn(nullable: false)]
     private Package $package;
 
+    #[ORM\OneToOne(inversedBy: 'metadata', cascade: ['persist', 'detach', 'remove'])]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private MetadataFiles $files;
+
     /**
      * @var Collection<int, MetadataRequireLink>&Selectable
      */
@@ -148,6 +149,7 @@ class Metadata extends TrackedEntity implements \Stringable
     {
         $this->version = $version;
         $this->package = $version->getPackage();
+        $this->files = new MetadataFiles($this);
 
         $this->requireLinks = new ArrayCollection();
         $this->devRequireLinks = new ArrayCollection();
@@ -218,14 +220,19 @@ class Metadata extends TrackedEntity implements \Stringable
         $this->description = $description;
     }
 
+    public function getFiles(): MetadataFiles
+    {
+        return $this->files;
+    }
+
     public function getReadme(): ?string
     {
-        return $this->readme;
+        return $this->files->getReadme();
     }
 
     public function setReadme(?string $readme): void
     {
-        $this->readme = $readme;
+        $this->files->setReadme($readme);
     }
 
     public function getHomepage(): ?string
