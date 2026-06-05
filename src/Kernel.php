@@ -16,7 +16,7 @@ class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
 
-    public const VERSION = '0.7.x-dev';
+    public const VERSION = '0.7.0';
 
     protected function configureContainer(ContainerConfigurator $container): void
     {
