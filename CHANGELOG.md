@@ -1,5 +1,14 @@
 # Changelog
 
+* 0.7.0 (2026-06-05)
+  * Added revisions for package versions
+  * Added configuration options to retain pruned package versions
+  * Fixed package providers not being deleted when a package is removed
+  * Fixed QR code for MFA not being rendered in standalone image
+  * Updated minimum PHP version to 8.5
+  * Updated Symfony dependencies to version 8.1
+  * Updated Composer to version 2.10
+
 * 0.6.3 (2026-04-17)
   * Fixed packages not being mirrored automatically when requested from the API
   * Updated Composer to version 2.9.7 to fix vulnerabilities 
