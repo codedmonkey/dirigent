@@ -65,7 +65,7 @@ RUN set -e; \
         php85-sodium \
         php85-tokenizer \
         php85-xml \
-        postgresql \
+        postgresql16 \
         supervisor; \
     ln -s /usr/bin/php85 /usr/bin/php; \
     ln -s /usr/sbin/php-fpm85 /usr/sbin/php-fpm; \
