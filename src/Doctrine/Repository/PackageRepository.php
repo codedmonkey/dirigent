@@ -122,14 +122,14 @@ class PackageRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
         $connection->transactional(function (Connection $connection) use ($package, $version) {
             $this->deletePackageLinks($package);
-            $queryParameters = ['id' => $package->getId(), 'version' => $version->getId()];
+            $queryParameters = ['id' => $package->getId(), 'metadata' => $version->getCurrentMetadata()->getId()];
 
             $connection->executeStatement(
                 <<<'SQL'
                 INSERT INTO package_provide_link (linked_package_name, implementation, package_id)
                     SELECT linked_package_name, FALSE, :id
-                    FROM version_provide_link
-                    WHERE version_id = :version AND linked_package_name NOT LIKE '%-implementation'
+                    FROM metadata_provide_link
+                    WHERE metadata_id = :metadata AND linked_package_name NOT LIKE '%-implementation'
                 SQL,
                 $queryParameters,
             );
@@ -137,29 +137,29 @@ class PackageRepository extends ServiceEntityRepository
                 <<<'SQL'
                 INSERT INTO package_provide_link (linked_package_name, implementation, package_id)
                     SELECT SUBSTRING(linked_package_name, 1, LENGTH(linked_package_name) - 15), TRUE, :id
-                    FROM version_provide_link
-                    WHERE version_id = :version AND linked_package_name LIKE '%-implementation'
+                    FROM metadata_provide_link
+                    WHERE metadata_id = :metadata AND linked_package_name LIKE '%-implementation'
                 SQL,
                 $queryParameters,
             );
             $connection->executeStatement(
                 <<<'SQL'
                 INSERT INTO package_require_link (linked_package_name, dev_dependency, package_id)
-                    SELECT linked_package_name, FALSE, :id FROM version_require_link WHERE version_id = :version
+                    SELECT linked_package_name, FALSE, :id FROM metadata_require_link WHERE metadata_id = :metadata
                 SQL,
                 $queryParameters,
             );
             $connection->executeStatement(
                 <<<'SQL'
                 INSERT INTO package_require_link (linked_package_name, dev_dependency, package_id)
-                    SELECT linked_package_name, TRUE, :id FROM version_dev_require_link WHERE version_id = :version
+                    SELECT linked_package_name, TRUE, :id FROM metadata_dev_require_link WHERE metadata_id = :metadata
                 SQL,
                 $queryParameters,
             );
             $connection->executeStatement(
                 <<<'SQL'
                 INSERT INTO package_suggest_link (linked_package_name, package_id)
-                    SELECT linked_package_name, :id FROM version_suggest_link WHERE version_id = :version
+                    SELECT linked_package_name, :id FROM metadata_suggest_link WHERE metadata_id = :metadata
                 SQL,
                 $queryParameters,
             );
