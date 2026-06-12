@@ -95,7 +95,7 @@ commit you want to build. Simply run the `docker build` command inside the repos
 ```shell
 git clone https://github.com/codedmonkey/dirigent.git
 cd dirigent
-git checkout v0.7.0
+git checkout v0.7.1
 docker build -t dirigent-standalone .
 ```
 
