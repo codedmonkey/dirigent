@@ -93,6 +93,8 @@ class DashboardResetPasswordController extends AbstractController
             $this->resetPasswordHelper->removeResetRequest($token);
 
             $user->setPlainPassword($form->get('plainPassword')->getData());
+
+            $this->entityManager->persist($user);
             $this->entityManager->flush();
 
             $this->cleanSessionAfterReset();
