@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
@@ -62,6 +63,116 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
         $client->request('GET', '/packages/psr/log/revisions/1.0.0');
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+    }
+
+    public function testPinMetadata(): void
+    {
+        $client = static::createClient();
+        $this->loginUser('admin');
+
+        [$package, $version, $metadata] = $this->createMockPackageWithMetadata();
+        $latestMetadata = $this->createMockMetadata($version);
+        $version->setCurrentMetadata($latestMetadata);
+        $this->persistEntities($package, $version, $metadata, $latestMetadata);
+
+        $client->request('GET', sprintf('/packages/%s/versions/%s?revision=%d', $package->getName(), $version->getName(), $metadata->getRevision()));
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $client->submitForm('Pin revision');
+
+        $this->assertResponseRedirects(sprintf('/packages/%s/versions/%s', $package->getName(), $version->getName()));
+
+        $this->clearEntities();
+
+        $savedVersion = $this->findEntity(Version::class, $version->getId());
+
+        $this->assertTrue($savedVersion->isPinned(), 'The version is pinned.');
+        $this->assertSame($metadata->getRevision(), $savedVersion->getCurrentMetadata()->getRevision(), 'The pinned revision is the current metadata.');
+    }
+
+    public function testUnpinMetadata(): void
+    {
+        $client = static::createClient();
+        $this->loginUser('admin');
+
+        [$package, $version, $metadata] = $this->createMockPackageWithMetadata();
+        $latestMetadata = $this->createMockMetadata($version);
+        $version->setPinned(true);
+        $this->persistEntities($package, $version, $metadata, $latestMetadata);
+
+        $client->request('GET', sprintf('/packages/%s/versions/%s', $package->getName(), $version->getName()));
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $client->submitForm('Unpin revision');
+
+        $this->assertResponseRedirects(sprintf('/packages/%s/versions/%s', $package->getName(), $version->getName()));
+
+        $this->clearEntities();
+
+        $savedVersion = $this->findEntity(Version::class, $version->getId());
+
+        $this->assertFalse($savedVersion->isPinned(), 'The version is no longer pinned.');
+        $this->assertSame($latestMetadata->getRevision(), $savedVersion->getCurrentMetadata()->getRevision(), 'The latest revision is the current metadata.');
+    }
+
+    public function testPinMetadataWithUnknownRevision(): void
+    {
+        $client = static::createClient();
+        $this->loginUser('admin');
+
+        [$package, $version, $metadata] = $this->createMockPackageWithMetadata();
+        $latestMetadata = $this->createMockMetadata($version);
+        $version->setCurrentMetadata($latestMetadata);
+        $this->persistEntities($package, $version, $metadata, $latestMetadata);
+
+        $client->request('GET', sprintf('/packages/%s/versions/%s', $package->getName(), $version->getName()));
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $client->submitForm('Pin revision', [
+            'revision' => '999',
+        ]);
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
+
+    public function testPinMetadataWithInvalidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $this->loginUser('admin');
+
+        $mockEntities = $this->createMockPackageWithMetadata();
+        $this->persistEntities(...$mockEntities);
+
+        [$package, $version] = $mockEntities;
+
+        $client->request('POST', sprintf('/packages/%s/pin-metadata/%s', $package->getName(), $version->getName()), [
+            'action' => 'pin',
+            'revision' => '1',
+            '_token' => 'invalid',
+        ]);
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    public function testPinMetadataRequiresAdminRole(): void
+    {
+        $client = static::createClient();
+        $this->loginUser();
+
+        $mockEntities = $this->createMockPackageWithMetadata();
+        $this->persistEntities(...$mockEntities);
+
+        [$package, $version] = $mockEntities;
+
+        $client->request('POST', sprintf('/packages/%s/pin-metadata/%s', $package->getName(), $version->getName()), [
+            'action' => 'pin',
+            'revision' => '1',
+        ]);
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
     public function testVersions(): void
