@@ -7,6 +7,7 @@ namespace CodedMonkey\Dirigent\Doctrine\Entity;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use CodedMonkey\Dirigent\Entity\UserRole;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping\ChangeTrackingPolicy;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
@@ -20,6 +21,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Entity(repositoryClass: UserRepository::class)]
+#[ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 #[Table(name: '`user`')]
 #[UniqueEntity('username', message: 'This username is already taken')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface

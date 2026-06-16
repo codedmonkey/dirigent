@@ -135,6 +135,7 @@ class DashboardPackagesInfoController extends AbstractController
             throw $this->createNotFoundException('Invalid action.');
         }
 
+        $this->entityManager->persist($version);
         $this->entityManager->flush();
 
         return $this->redirectToRoute('dashboard_packages_version_info', [

@@ -8,6 +8,7 @@ use CodedMonkey\Dirigent\Doctrine\Repository\AccessTokenRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AccessTokenRepository::class)]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 class AccessToken extends TrackedEntity
 {
     #[ORM\Column]

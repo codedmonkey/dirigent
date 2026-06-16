@@ -15,6 +15,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PackageRepository::class)]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 #[ORM\UniqueConstraint(name: 'package_name_idx', columns: ['name'])]
 #[UniquePackage]
 class Package extends TrackedEntity

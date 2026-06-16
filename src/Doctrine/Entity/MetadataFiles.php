@@ -8,6 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 class MetadataFiles
 {
     #[ORM\Id]

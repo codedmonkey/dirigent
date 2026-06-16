@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use CodedMonkey\Dirigent\Rector\DoctrineAddDeferredExplicitChangeTrackingPolicyRector;
 use Rector\Config\RectorConfig;
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 
@@ -26,6 +27,9 @@ return RectorConfig::configure()
         doctrine: true,
         phpunit: true,
     )
+    ->withRules([
+        DoctrineAddDeferredExplicitChangeTrackingPolicyRector::class,
+    ])
     ->withSkip([
         // Exclude promotion of properties to the constructor for Doctrine entities
         ClassPropertyAssignToConstructorPromotionRector::class => [__DIR__ . '/src/Doctrine/Entity'],

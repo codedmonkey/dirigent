@@ -8,6 +8,7 @@ use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VersionRepository::class)]
+#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 #[ORM\UniqueConstraint(name: 'package_version_idx', columns: ['package_id', 'normalized_name'])]
 class Version extends TrackedEntity implements \Stringable
 {
