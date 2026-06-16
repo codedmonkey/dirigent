@@ -29,10 +29,13 @@ dirigent:
     dynamic_update_delay: 'PT4H'
     periodic_updates: true
     periodic_update_interval: 'P1W'
-  dist_mirroring:
+  distributions:
     enabled: false
-    preferred: true
-    dev_packages: false
+    build: true
+    mirror: false
+    async_api_requests: false
+    dev_versions: false
+    preferred_mirror: true
   metadata:
     default_fetch_strategy: 'mirror'
     retain_pruned_versions:
@@ -117,17 +120,27 @@ The time between periodic updates being scheduled, defaults to once a week.
 
 The time must be defined in the [ISO 8601 durations][iso-8601-durations] format.
 
-## dist_mirroring
+## distributions
 
 ### enabled
 
 Type: `boolean` | Default: `false`
 
-Whether to enable or disable distribution mirroring
+Enable hosting of package distributions.
 
-### preferred
+### build
 
-### dev_packages
+Type: `boolean` | Default: `true`
+
+Enable building distribution from the source.
+
+### mirror
+
+### async_api_requests
+
+### dev_versions
+
+### preferred_mirror
 
 ## metadata
 

@@ -63,7 +63,7 @@ class ApiController extends AbstractController
             'notify-batch' => $router->generate('api_track_installations'),
         ];
 
-        if ($this->getParameter('dirigent.dist_mirroring.enabled')) {
+        if ($this->getParameter('dirigent.distributions.mirror')) {
             $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
                 ->replace('{package}', '%package%')
                 ->replace('{version}', '%version%')
@@ -73,7 +73,7 @@ class ApiController extends AbstractController
 
             $data['mirrors'] = [[
                 'dist-url' => $distributionUrlPattern,
-                'preferred' => $this->getParameter('dirigent.dist_mirroring.preferred'),
+                'preferred' => $this->getParameter('dirigent.distributions.preferred_mirror'),
             ]];
         }
 
@@ -119,7 +119,7 @@ class ApiController extends AbstractController
     #[IsGrantedAccess]
     public function packageDistribution(Request $request, string $reference, string $type): Response
     {
-        if (!$this->getParameter('dirigent.dist_mirroring.enabled')) {
+        if (!$this->getParameter('dirigent.distributions.enabled')) {
             throw $this->createNotFoundException();
         }
 
@@ -135,7 +135,7 @@ class ApiController extends AbstractController
                 throw $this->createNotFoundException();
             }
 
-            if ($version->isDevelopment() && !$this->getParameter('dirigent.dist_mirroring.dev_packages')) {
+            if ($version->isDevelopment() && !$this->getParameter('dirigent.distributions.dev_versions')) {
                 throw $this->createNotFoundException();
             }
 
