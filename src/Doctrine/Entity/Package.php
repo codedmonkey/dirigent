@@ -6,6 +6,7 @@ namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Entity\ResolveDistributionStrategy;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use CodedMonkey\Dirigent\Validator\UniquePackage;
 use Composer\Package\Version\VersionParser;
@@ -67,6 +68,9 @@ class Package extends TrackedEntity
 
     #[ORM\Column(nullable: true, enumType: PackageFetchStrategy::class)]
     private ?PackageFetchStrategy $fetchStrategy = null;
+
+    #[ORM\Column(enumType: ResolveDistributionStrategy::class)]
+    private ResolveDistributionStrategy $resolveDistributionStrategy = ResolveDistributionStrategy::Dynamic;
 
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
@@ -246,6 +250,16 @@ class Package extends TrackedEntity
     public function setFetchStrategy(PackageFetchStrategy $fetchStrategy): void
     {
         $this->fetchStrategy = $fetchStrategy;
+    }
+
+    public function getResolveDistributionStrategy(): ResolveDistributionStrategy
+    {
+        return $this->resolveDistributionStrategy;
+    }
+
+    public function setResolveDistributionStrategy(ResolveDistributionStrategy $resolveDistributionStrategy): void
+    {
+        $this->resolveDistributionStrategy = $resolveDistributionStrategy;
     }
 
     public function getMirrorRegistry(): ?Registry
