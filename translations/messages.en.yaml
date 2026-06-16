@@ -118,6 +118,10 @@ package:
   fetch-strategy:
     mirror: Fetch from registry
     vcs: Fetch from VCS
+  resolve-distribution-strategy:
+    auto: Resolve all distributions
+    dynamic: Resolve distributions on request
+    none: Never resolve distributions
 registry:
   package-mirroring:
     none: Package mirroring disabled
