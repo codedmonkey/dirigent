@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Doctrine\DataFixtures;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
-use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -30,7 +31,7 @@ class Registry implements \Stringable
     private ?Credentials $credentials = null;
 
     #[ORM\Column(type: Types::STRING, enumType: RegistryPackageMirroring::class)]
-    private RegistryPackageMirroring|string $packageMirroring = RegistryPackageMirroring::Automatic;
+    private RegistryPackageMirroring $packageMirroring = RegistryPackageMirroring::Automatic;
 
     #[ORM\Column]
     private ?int $mirroringPriority = null;
@@ -88,12 +89,12 @@ class Registry implements \Stringable
         $this->credentials = $credentials;
     }
 
-    public function getPackageMirroring(): RegistryPackageMirroring|string
+    public function getPackageMirroring(): RegistryPackageMirroring
     {
         return $this->packageMirroring;
     }
 
-    public function setPackageMirroring(RegistryPackageMirroring|string $packageMirroring): void
+    public function setPackageMirroring(RegistryPackageMirroring $packageMirroring): void
     {
         $this->packageMirroring = $packageMirroring;
     }

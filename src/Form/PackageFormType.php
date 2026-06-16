@@ -6,9 +6,9 @@ namespace CodedMonkey\Dirigent\Form;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
-use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Package\PackageVcsRepositoryValidator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -73,10 +73,9 @@ class PackageFormType extends AbstractType
                     'class' => PackageFetchStrategy::class,
                     'expanded' => true,
                     'disabled' => !$package->getRepositoryUrl(),
-                    'choice_label' => static fn (PackageFetchStrategy $choice): string => "package.fetch-strategy.{$choice->value}",
                 ]);
 
-            if (PackageFetchStrategy::Mirror === $package->getFetchStrategy()) {
+            if ($package->getFetchStrategy()->isMirror()) {
                 $form
                     ->add('repositoryCredentials', EntityType::class, [
                         'label' => 'Credentials',

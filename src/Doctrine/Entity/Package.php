@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use CodedMonkey\Dirigent\Validator\UniquePackage;
 use Composer\Package\Version\VersionParser;
@@ -65,7 +66,7 @@ class Package extends TrackedEntity
     private ?string $remoteId = null;
 
     #[ORM\Column(nullable: true, enumType: PackageFetchStrategy::class)]
-    private PackageFetchStrategy|string|null $fetchStrategy = null;
+    private ?PackageFetchStrategy $fetchStrategy = null;
 
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
@@ -233,7 +234,7 @@ class Package extends TrackedEntity
         $this->remoteId = $remoteId;
     }
 
-    public function getFetchStrategy(): PackageFetchStrategy|string
+    public function getFetchStrategy(): PackageFetchStrategy
     {
         if (!$this->fetchStrategy) {
             return $this->mirrorRegistry ? PackageFetchStrategy::Mirror : PackageFetchStrategy::Vcs;
@@ -242,7 +243,7 @@ class Package extends TrackedEntity
         return $this->fetchStrategy;
     }
 
-    public function setFetchStrategy(PackageFetchStrategy|string $fetchStrategy): void
+    public function setFetchStrategy(PackageFetchStrategy $fetchStrategy): void
     {
         $this->fetchStrategy = $fetchStrategy;
     }

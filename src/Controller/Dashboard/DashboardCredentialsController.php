@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
-use CodedMonkey\Dirigent\Doctrine\Entity\CredentialsType;
+use CodedMonkey\Dirigent\Entity\CredentialsType;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -37,10 +37,8 @@ class DashboardCredentialsController extends AbstractCrudController
         yield TextareaField::new('description')
             ->onlyOnForms();
         yield ChoiceField::new('type')
-            ->setTemplatePath('dashboard/fields/credentials_type.html.twig')
             ->setRequired(true)
             ->setChoices(CredentialsType::cases())
-            ->setFormTypeOption('choice_label', static fn (CredentialsType $choice): string => "credentials.type.{$choice->value}")
             ->renderExpanded();
         yield TextField::new('username')
             ->setFormTypeOption('row_attr', ['data-credentials-field' => 'username'])

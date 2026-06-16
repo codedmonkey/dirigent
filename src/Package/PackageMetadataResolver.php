@@ -9,14 +9,14 @@ use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\MetadataKeyword;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
-use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
-use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\KeywordRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Entity\MetadataLinkType;
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Message\DumpPackageProvider;
 use CodedMonkey\Dirigent\Message\UpdatePackageLinks;
 use Composer\Package\AliasPackage;
@@ -55,7 +55,6 @@ readonly class PackageMetadataResolver
         match ($package->getFetchStrategy()) {
             PackageFetchStrategy::Mirror => $this->resolveRegistryPackage($package),
             PackageFetchStrategy::Vcs => $this->resolveVcsPackage($package),
-            default => throw new \LogicException(),
         };
 
         $this->messenger->dispatch(new DumpPackageProvider($package->getId()));

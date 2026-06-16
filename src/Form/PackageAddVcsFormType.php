@@ -6,7 +6,7 @@ namespace CodedMonkey\Dirigent\Form;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
-use CodedMonkey\Dirigent\Doctrine\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Package\PackageVcsRepositoryValidator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
