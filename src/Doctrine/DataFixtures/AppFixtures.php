@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Doctrine\DataFixtures;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
-use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
+use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Entity\UserRole;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;

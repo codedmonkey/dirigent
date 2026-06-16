@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
-use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
+use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -25,27 +25,22 @@ class RegistryRepository extends ServiceEntityRepository
         parent::__construct($registry, Registry::class);
     }
 
-    public function createPackageMirroringQueryBuilder(RegistryPackageMirroring|string $packageMirroring): QueryBuilder
+    public function createPackageMirroringQueryBuilder(RegistryPackageMirroring $packageMirroring): QueryBuilder
     {
+        $values = match ($packageMirroring) {
+            RegistryPackageMirroring::Manual => [
+                RegistryPackageMirroring::Manual->value,
+                RegistryPackageMirroring::Automatic->value,
+            ],
+            RegistryPackageMirroring::Automatic => [
+                RegistryPackageMirroring::Automatic->value,
+            ],
+            default => throw new \LogicException(),
+        };
+
         $builder = $this->createQueryBuilder('registry');
 
-        if (is_string($packageMirroring)) {
-            $packageMirroring = RegistryPackageMirroring::from($packageMirroring);
-        }
-
-        if (RegistryPackageMirroring::Manual === $packageMirroring) {
-            $builder->andWhere($builder->expr()->orX(
-                $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('manual')),
-                $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('auto')),
-            ));
-        } elseif (RegistryPackageMirroring::Automatic === $packageMirroring) {
-            $builder->andWhere($builder->expr()->orX(
-                $builder->expr()->eq('registry.packageMirroring', $builder->expr()->literal('auto')),
-            ));
-        } else {
-            throw new \LogicException();
-        }
-
+        $builder->andWhere($builder->expr()->in('registry.packageMirroring', $values));
         $builder->addOrderBy('registry.mirroringPriority', 'ASC');
 
         return $builder;

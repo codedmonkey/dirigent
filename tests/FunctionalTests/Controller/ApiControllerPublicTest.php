@@ -6,7 +6,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
-use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
+use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Tests\FunctionalTests\PublicKernel;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;

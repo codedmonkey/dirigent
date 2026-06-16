@@ -6,6 +6,7 @@ namespace CodedMonkey\Dirigent\Form;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -19,7 +20,7 @@ class PackageAddMirroringFormType extends AbstractType
             ->add('packages', TextareaType::class)
             ->add('registry', EntityType::class, [
                 'class' => Registry::class,
-                'query_builder' => static fn (RegistryRepository $repository) => $repository->createPackageMirroringQueryBuilder('manual'),
+                'query_builder' => static fn (RegistryRepository $repository) => $repository->createPackageMirroringQueryBuilder(RegistryPackageMirroring::Manual),
             ]);
     }
 }

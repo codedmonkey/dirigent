@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
-use CodedMonkey\Dirigent\Doctrine\Entity\RegistryPackageMirroring;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\EasyAdmin\DateIntervalField;
+use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -71,10 +71,8 @@ class DashboardRegistryController extends AbstractCrudController
 
         yield ChoiceField::new('packageMirroring')
             ->setSortable(false)
-            ->setTemplatePath('dashboard/fields/registry_package_mirroring.html.twig')
             ->setRequired(true)
             ->setChoices(RegistryPackageMirroring::cases())
-            ->setFormTypeOption('choice_label', static fn (RegistryPackageMirroring $choice): string => "registry.package-mirroring.{$choice->value}")
             ->renderExpanded();
 
         yield DateIntervalField::new('dynamicUpdateDelay')
