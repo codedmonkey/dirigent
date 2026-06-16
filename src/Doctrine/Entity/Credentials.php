@@ -6,6 +6,7 @@ namespace CodedMonkey\Dirigent\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Doctrine\Repository\CredentialsRepository;
 use CodedMonkey\Dirigent\Doctrine\Type\EncryptedTextType;
+use CodedMonkey\Dirigent\Entity\CredentialsType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,7 +26,7 @@ class Credentials implements \Stringable
     private ?string $description = null;
 
     #[ORM\Column(type: Types::STRING, enumType: CredentialsType::class)]
-    private CredentialsType|string $type = CredentialsType::HttpBasic;
+    private CredentialsType $type = CredentialsType::HttpBasic;
 
     #[ORM\Column(type: EncryptedTextType::TYPE, nullable: true)]
     private ?string $username = null;
@@ -56,12 +57,12 @@ class Credentials implements \Stringable
         $this->description = $description;
     }
 
-    public function getType(): CredentialsType|string
+    public function getType(): CredentialsType
     {
         return $this->type;
     }
 
-    public function setType(CredentialsType|string $type): void
+    public function setType(CredentialsType $type): void
     {
         $this->type = $type;
     }

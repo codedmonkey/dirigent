@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Composer;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
-use CodedMonkey\Dirigent\Doctrine\Entity\CredentialsType;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
+use CodedMonkey\Dirigent\Entity\CredentialsType;
 use Composer\Config;
 use Composer\Factory;
 

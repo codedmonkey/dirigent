@@ -6,7 +6,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Controller\Dashboard\DashboardCredentialsController;
 use CodedMonkey\Dirigent\Doctrine\Entity\Credentials;
-use CodedMonkey\Dirigent\Doctrine\Entity\CredentialsType;
+use CodedMonkey\Dirigent\Entity\CredentialsType;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
