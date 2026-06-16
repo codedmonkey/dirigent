@@ -6,8 +6,11 @@ namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 readonly class PackageDistributionResolver
 {
@@ -15,9 +18,12 @@ readonly class PackageDistributionResolver
     private string $storagePath;
 
     public function __construct(
+        private MessageBusInterface $messenger,
         private ComposerClient $composer,
         #[Autowire(param: 'dirigent.distributions.mirror')]
         private bool $mirrorDistributions,
+        #[Autowire(param: 'dirigent.distributions.dev_versions')]
+        private bool $includeDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
@@ -35,7 +41,7 @@ readonly class PackageDistributionResolver
         return "{$this->storagePath}/{$packageName}/{$versionName}-{$reference}.{$type}";
     }
 
-    public function resolve(Metadata $metadata, string $type): bool
+    public function resolve(Metadata $metadata, string $type, bool $async): bool
     {
         if (!$this->mirrorDistributions) {
             return false;
@@ -51,6 +57,20 @@ readonly class PackageDistributionResolver
         }
 
         if ($reference !== $metadata->getDistributionReference() || $type !== $metadata->getDistributionType()) {
+            return false;
+        }
+
+        if ($metadata->getVersion()->isDevelopment() && !$this->includeDevVersions) {
+            return false;
+        }
+
+        if ($async) {
+            // Resolve the distribution asynchronously so it's available in the future now that we know it was requested
+            $this->messenger->dispatch(new ResolveDistribution($metadata->getId(), $type), [
+                new TransportNamesStamp('async'),
+            ]);
+
+            // Still return false so the service resolving the distribution doesn't try to fetch it anyway
             return false;
         }
 
