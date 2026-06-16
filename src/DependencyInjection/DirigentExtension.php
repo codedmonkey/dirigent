@@ -19,6 +19,7 @@ class DirigentExtension extends ConfigurableExtension
         $container->setParameter('dirigent.title', $mergedConfig['title']);
         $container->setParameter('dirigent.slug', $slug);
 
+        $this->registerDistributionsConfiguration($mergedConfig['distributions'], $mergedConfig['dist_mirroring'], $container);
         $this->registerEncryptionConfiguration($mergedConfig['encryption'], $container);
         $this->registerMetadataConfiguration($mergedConfig['metadata'], $container);
         $this->registerPackagesConfiguration($mergedConfig['packages'], $container);
@@ -31,16 +32,25 @@ class DirigentExtension extends ConfigurableExtension
         } else {
             $container->setParameter('dirigent.storage.path', $mergedConfig['storage']['path']);
         }
-
-        $container->setParameter('dirigent.dist_mirroring.enabled', $mergedConfig['dist_mirroring']['enabled']);
-        $container->setParameter('dirigent.dist_mirroring.preferred', $mergedConfig['dist_mirroring']['preferred']);
-        $container->setParameter('dirigent.dist_mirroring.dev_packages', $mergedConfig['dist_mirroring']['dev_packages']);
     }
 
     #[\Override]
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
     {
         return new DirigentConfiguration();
+    }
+
+    private function registerDistributionsConfiguration(array $config, array $distMirroringConfig, ContainerBuilder $container): void
+    {
+        $distributionsEnabled = $config['enabled'] || $distMirroringConfig['enabled'];
+
+        $container->setParameter('dirigent.distributions.enabled', $distributionsEnabled);
+        $container->setParameter('dirigent.distributions.build', $distributionsEnabled && $config['build']);
+        $container->setParameter('dirigent.distributions.mirror', $distributionsEnabled && ($config['mirror'] || $distMirroringConfig['enabled']));
+
+        $container->setParameter('dirigent.distributions.async_api_requests', $config['async_api_requests']);
+        $container->setParameter('dirigent.distributions.dev_versions', $config['dev_versions'] || $distMirroringConfig['dev_packages']);
+        $container->setParameter('dirigent.distributions.preferred_mirror', $config['preferred_mirror'] || $distMirroringConfig['preferred']);
     }
 
     /**

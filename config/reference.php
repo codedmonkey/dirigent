@@ -1643,10 +1643,18 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     storage?: array{
  *         path?: scalar|Param|null, // Default: "%kernel.project_dir%/storage"
  *     },
- *     dist_mirroring?: bool|array{
+ *     dist_mirroring?: bool|array{ // Deprecated: The node "dist_mirroring" at path "dirigent.dist_mirroring" is deprecated. Use the "distributions" section instead.
  *         enabled?: bool|Param, // Default: false
  *         preferred?: bool|Param, // Default: true
  *         dev_packages?: bool|Param, // Default: false
+ *     },
+ *     distributions?: bool|array{
+ *         enabled?: bool|Param, // Host the distributions of packages // Default: false
+ *         build?: bool|Param, // Build distributions from the source code (if not already provided) // Default: true
+ *         mirror?: bool|Param, // Mirror distributions from the original source (if provided) // Default: false
+ *         async_api_requests?: bool|Param, // Fetch distributions asynchronously instead of during execution (from the API) // Default: false
+ *         dev_versions?: bool|Param, // Include distributions of development versions // Default: false
+ *         preferred_mirror?: bool|Param, // Force Composer to download distributions from this registry first // Default: false
  *     },
  *     metadata?: array{
  *         mirror_vcs_repositories?: bool|Param, // Fetch mirrored packages from their VCS repositories by default when possible. // Default: false
