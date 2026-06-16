@@ -134,11 +134,7 @@ class ApiController extends AbstractController
                 throw $this->createNotFoundException();
             }
 
-            if ($version->isDevelopment() && !$this->getParameter('dirigent.distributions.dev_versions')) {
-                throw $this->createNotFoundException();
-            }
-
-            if (!$this->distributionResolver->resolve($version, $reference, $type)) {
+            if (!$this->distributionResolver->resolve($version, $reference, $type, async: $this->getParameter('dirigent.distributions.async_api_requests'))) {
                 throw $this->createNotFoundException();
             }
         }
