@@ -16,6 +16,8 @@ readonly class PackageDistributionResolver
 
     public function __construct(
         private ComposerClient $composer,
+        #[Autowire(param: 'dirigent.distributions.mirror')]
+        private bool $mirrorDistributions,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
@@ -35,6 +37,10 @@ readonly class PackageDistributionResolver
 
     public function resolve(Version $version, string $reference, string $type): bool
     {
+        if (!$this->mirrorDistributions) {
+            return false;
+        }
+
         $package = $version->getPackage();
         $packageName = $package->getName();
         $versionName = $version->getNormalizedName();
