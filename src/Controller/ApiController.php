@@ -7,8 +7,8 @@ namespace CodedMonkey\Dirigent\Controller;
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Attribute\MapPackage;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
-use CodedMonkey\Dirigent\Doctrine\Repository\VersionRepository;
 use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Entity\PackageUpdateSource;
 use CodedMonkey\Dirigent\Message\TrackInstallations;
@@ -36,7 +36,7 @@ class ApiController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly PackageRepository $packageRepository,
-        private readonly VersionRepository $versionRepository,
+        private readonly MetadataRepository $metadataRepository,
         private readonly PackageMetadataResolver $metadataResolver,
         private readonly PackageDistributionResolver $distributionResolver,
         private readonly PackageProviderManager $providerManager,
@@ -130,15 +130,15 @@ class ApiController extends AbstractController
                 throw $this->createNotFoundException();
             }
 
-            if (null === $version = $this->versionRepository->findOneByNormalizedName($package, $versionName)) {
+            if (null === $metadata = $this->metadataRepository->findOneByNormalizedNameAndReference($package, $versionName, $reference)) {
                 throw $this->createNotFoundException();
             }
 
-            if ($version->isDevelopment() && !$this->getParameter('dirigent.distributions.dev_versions')) {
+            if ($metadata->getVersion()->isDevelopment() && !$this->getParameter('dirigent.distributions.dev_versions')) {
                 throw $this->createNotFoundException();
             }
 
-            if (!$this->distributionResolver->resolve($version, $reference, $type)) {
+            if (!$this->distributionResolver->resolve($metadata, $type)) {
                 throw $this->createNotFoundException();
             }
         }
