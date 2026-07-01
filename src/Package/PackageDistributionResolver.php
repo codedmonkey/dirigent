@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
-use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -33,17 +33,16 @@ readonly class PackageDistributionResolver
         return "{$this->storagePath}/{$packageName}/{$versionName}-{$reference}.{$type}";
     }
 
-    public function resolve(Version $version, string $reference, string $type): bool
+    public function resolve(Metadata $metadata, string $type): bool
     {
-        $package = $version->getPackage();
+        $package = $metadata->getPackage();
         $packageName = $package->getName();
-        $versionName = $version->getNormalizedName();
+        $versionName = $metadata->getNormalizedVersionName();
+        $reference = $metadata->getDistributionReference();
 
         if ($this->exists($packageName, $versionName, $reference, $type)) {
             return true;
         }
-
-        $metadata = $version->getCurrentMetadata();
 
         if ($reference !== $metadata->getDistributionReference() || $type !== $metadata->getDistributionType()) {
             return false;

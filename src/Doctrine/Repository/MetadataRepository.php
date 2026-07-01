@@ -73,6 +73,21 @@ class MetadataRepository extends ServiceEntityRepository
         );
     }
 
+    public function findOneByNormalizedNameAndReference(Package $package, string $normalizedVersionName, string $reference): ?Metadata
+    {
+        $builder = $this->createQueryBuilder('metadata')
+            ->leftJoin('metadata.version', 'version')
+            ->andWhere('metadata.package = :package')
+            ->andWhere('version.normalizedName = :versionName')
+            ->andWhere('metadata.sourceReference = :reference OR (metadata.sourceReference IS NULL AND metadata.distributionReference = :reference)')
+            ->setParameter('package', $package)
+            ->setParameter('versionName', $normalizedVersionName)
+            ->setParameter('reference', $reference)
+            ->setMaxResults(1);
+
+        return $builder->getQuery()->getOneOrNullResult();
+    }
+
     /**
      * Returns a map of version ID => metadata count for all versions of the given package.
      *
