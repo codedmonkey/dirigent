@@ -104,6 +104,9 @@ class Metadata extends TrackedEntity implements \Stringable
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private MetadataFiles $files;
 
+    #[ORM\OneToMany(targetEntity: Distribution::class, mappedBy: 'version')]
+    private Collection $distributions;
+
     /**
      * @var Collection<int, MetadataRequireLink>&Selectable
      */
@@ -152,6 +155,7 @@ class Metadata extends TrackedEntity implements \Stringable
         $this->package = $version->getPackage();
         $this->files = new MetadataFiles($this);
 
+        $this->distributions = new ArrayCollection();
         $this->requireLinks = new ArrayCollection();
         $this->devRequireLinks = new ArrayCollection();
         $this->conflictLinks = new ArrayCollection();
@@ -418,6 +422,14 @@ class Metadata extends TrackedEntity implements \Stringable
     public function getPackage(): Package
     {
         return $this->package;
+    }
+
+    /**
+     * @return Collection<int, Distribution>
+     */
+    public function getDistributions(): Collection
+    {
+        return $this->distributions;
     }
 
     /**
