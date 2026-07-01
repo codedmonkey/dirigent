@@ -1,5 +1,9 @@
 # Changelog
 
+* 0.7.2 (2026-07-01)
+  * Fixed issue with package links not being updated
+  * Updated `guzzlehttp/psr7` dependency to fix potential security vulnerability
+
 * 0.7.1 (2026-06-12)
   * Pinned Postgres version to 16.x in standalone image
 
