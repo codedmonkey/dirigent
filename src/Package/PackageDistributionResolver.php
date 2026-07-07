@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -20,6 +22,7 @@ readonly class PackageDistributionResolver
     public function __construct(
         private MessageBusInterface $messenger,
         private ComposerClient $composer,
+        private DistributionRepository $distributionRepository,
         #[Autowire(param: 'dirigent.distributions.dev_versions')]
         private bool $includeDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
@@ -68,6 +71,10 @@ readonly class PackageDistributionResolver
             return false;
         }
 
+        if (null === $distribution = $this->distributionRepository->findOneBy(['metadata' => $metadata, 'type' => $type])) {
+            $distribution = new Distribution($metadata, $type);
+        }
+
         $distributionUrl = $metadata->getDistributionUrl();
         $path = $this->path($packageName, $versionName, $reference, $type);
 
@@ -75,6 +82,11 @@ readonly class PackageDistributionResolver
 
         $httpDownloader = $this->composer->createHttpDownloader();
         $httpDownloader->copy($distributionUrl, $path);
+
+        $distribution->setSource($distributionUrl);
+        $distribution->setResolvedAt();
+
+        $this->distributionRepository->save($distribution, true);
 
         return true;
     }
