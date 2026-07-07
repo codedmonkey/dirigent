@@ -45,17 +45,17 @@ readonly class PackageDistributionResolver
 
         $metadata = $version->getCurrentMetadata();
 
-        if ($reference !== $metadata->getDistReference() || $type !== $metadata->getDistType()) {
+        if ($reference !== $metadata->getDistributionReference() || $type !== $metadata->getDistributionType()) {
             return false;
         }
 
-        $distUrl = $metadata->getDistUrl();
+        $distributionUrl = $metadata->getDistributionUrl();
         $path = $this->path($packageName, $versionName, $reference, $type);
 
         $this->filesystem->mkdir(dirname($path));
 
         $httpDownloader = $this->composer->createHttpDownloader();
-        $httpDownloader->copy($distUrl, $path);
+        $httpDownloader->copy($distributionUrl, $path);
 
         return true;
     }

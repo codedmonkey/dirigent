@@ -303,20 +303,16 @@ readonly class PackageMetadataResolver
         }
 
         if ($data->getSourceType()) {
-            $metadata->setSource([
-                'type' => $data->getSourceType(),
-                'url' => static::optimizeRepositoryUrl($data->getSourceUrl()),
-                'reference' => $data->getSourceReference(),
-            ]);
+            $metadata->setSourceType($data->getSourceType());
+            $metadata->setSourceUrl(static::optimizeRepositoryUrl($data->getSourceUrl()));
+            $metadata->setSourceReference($data->getSourceReference());
         }
 
         if ($data->getDistType()) {
-            $metadata->setDist([
-                'type' => $data->getDistType(),
-                'url' => $data->getDistUrl(),
-                'reference' => $data->getDistReference(),
-                'shasum' => $data->getDistSha1Checksum(),
-            ]);
+            $metadata->setDistributionType($data->getDistType());
+            $metadata->setDistributionUrl($data->getDistUrl());
+            $metadata->setDistributionReference($data->getDistReference());
+            $metadata->setDistributionSha1Checksum($data->getDistSha1Checksum());
         }
 
         // Handle links

@@ -54,10 +54,25 @@ class Metadata extends TrackedEntity implements \Stringable
     private ?string $targetDir = null;
 
     #[ORM\Column(nullable: true)]
-    private ?array $source = null;
+    private ?string $sourceType = null;
 
     #[ORM\Column(nullable: true)]
-    private ?array $dist = null;
+    private ?string $sourceUrl = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $sourceReference = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $distributionType = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $distributionUrl = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $distributionReference = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $distributionSha1Checksum = null;
 
     #[ORM\Column(nullable: true)]
     private ?array $autoload = null;
@@ -282,26 +297,6 @@ class Metadata extends TrackedEntity implements \Stringable
         $this->targetDir = $targetDir;
     }
 
-    public function getSource(): ?array
-    {
-        return $this->source;
-    }
-
-    public function setSource(?array $source): void
-    {
-        $this->source = $source;
-    }
-
-    public function getDist(): ?array
-    {
-        return $this->dist;
-    }
-
-    public function setDist(?array $dist): void
-    {
-        $this->dist = $dist;
-    }
-
     public function getAutoload(): ?array
     {
         return $this->autoload;
@@ -483,47 +478,87 @@ class Metadata extends TrackedEntity implements \Stringable
 
     public function getReference(): ?string
     {
-        return $this->getSourceReference() ?? $this->getDistReference();
+        return $this->getSourceReference() ?? $this->getDistributionReference();
     }
 
     public function hasSource(): bool
     {
-        return null !== $this->source;
-    }
-
-    public function getSourceReference(): ?string
-    {
-        return $this->source['reference'] ?? null;
+        return null !== $this->sourceType;
     }
 
     public function getSourceType(): ?string
     {
-        return $this->source['type'] ?? null;
+        return $this->sourceType;
+    }
+
+    public function setSourceType(?string $sourceType): void
+    {
+        $this->sourceType = $sourceType;
     }
 
     public function getSourceUrl(): ?string
     {
-        return $this->source['url'] ?? null;
+        return $this->sourceUrl;
     }
 
-    public function hasDist(): bool
+    public function setSourceUrl(?string $sourceUrl): void
     {
-        return null !== $this->dist;
+        $this->sourceUrl = $sourceUrl;
     }
 
-    public function getDistReference(): ?string
+    public function getSourceReference(): ?string
     {
-        return $this->dist['reference'] ?? null;
+        return $this->sourceReference;
     }
 
-    public function getDistType(): ?string
+    public function setSourceReference(?string $sourceReference): void
     {
-        return $this->dist['type'] ?? null;
+        $this->sourceReference = $sourceReference;
     }
 
-    public function getDistUrl(): ?string
+    public function hasDistribution(): bool
     {
-        return $this->dist['url'] ?? null;
+        return null !== $this->distributionType;
+    }
+
+    public function getDistributionType(): ?string
+    {
+        return $this->distributionType;
+    }
+
+    public function setDistributionType(?string $distributionType): void
+    {
+        $this->distributionType = $distributionType;
+    }
+
+    public function getDistributionUrl(): ?string
+    {
+        return $this->distributionUrl;
+    }
+
+    public function setDistributionUrl(?string $distributionUrl): void
+    {
+        $this->distributionUrl = $distributionUrl;
+    }
+
+    public function getDistributionReference(): ?string
+    {
+        return $this->distributionReference;
+    }
+
+    public function setDistributionReference(?string $distributionReference): void
+    {
+        $this->distributionReference = $distributionReference;
+    }
+
+    public function getDistributionSha1Checksum(): ?string
+    {
+        return $this->distributionSha1Checksum;
+    }
+
+    public function setDistributionSha1Checksum(?string $distributionSha1Checksum): void
+    {
+        $this->distributionSha1Checksum = $distributionSha1Checksum;
     }
 
     public function hasVersionAlias(): bool
@@ -637,8 +672,17 @@ class Metadata extends TrackedEntity implements \Stringable
             'version_normalized' => $this->normalizedVersionName,
             'license' => $this->license,
             'authors' => $this->getAuthorsSorted(),
-            'source' => $this->source,
-            'dist' => $this->dist,
+            'source' => !$this->hasSource() ? null : [
+                'type' => $this->sourceType,
+                'url' => $this->sourceUrl,
+                'reference' => $this->sourceReference,
+            ],
+            'dist' => !$this->hasDistribution() ? null : [
+                'type' => $this->distributionType,
+                'url' => $this->distributionUrl,
+                'reference' => $this->distributionReference,
+                'shasum' => $this->distributionSha1Checksum,
+            ],
             'type' => $this->type,
             'autoload' => $this->autoload,
         ];

@@ -205,18 +205,18 @@
         {% endif %}
       </div>
       <div class="col-md-6">
-        {% if metadata.hasDist() %}
+        {% if metadata.hasDistribution() %}
           <div class="h5">
             {{ 'Distribution'|trans }}
-            <span class="badge text-bg-secondary">{{ metadata.distType }}</span>
+            <span class="badge text-bg-secondary">{{ metadata.distributionType }}</span>
           </div>
 
           <div class="mb-2">
-            {{ 'Reference'|trans }}: <code>{{ metadata.distReference }}</code>
+            {{ 'Reference'|trans }}: <code>{{ metadata.distributionReference }}</code>
           </div>
 
           <div>
-            <a class="btn btn-sm btn-secondary" href="{{ metadata.distUrl }}" download>
+            <a class="btn btn-sm btn-secondary" href="{{ metadata.distributionUrl }}" download>
               <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
               <span class="btn-label">{{ 'Download' }}</span>
             </a>
