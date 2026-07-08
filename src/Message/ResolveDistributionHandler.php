@@ -21,6 +21,6 @@ readonly class ResolveDistributionHandler
     {
         $metadata = $this->metadataRepository->find($message->metadataId);
 
-        $this->distributionResolver->resolve($metadata, $message->type, async: false);
+        $this->distributionResolver->resolve($metadata, $message->reference, $message->type, async: false);
     }
 }
