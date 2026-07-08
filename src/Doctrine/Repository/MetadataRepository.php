@@ -73,16 +73,38 @@ class MetadataRepository extends ServiceEntityRepository
         );
     }
 
-    public function findOneByNormalizedNameAndReference(Package $package, string $normalizedVersionName, string $reference): ?Metadata
+    /**
+     * Finds the latest metadata for a given package by the distribution reference.
+     *
+     * Note that this method may return a different metadata revision than the one that was used to generate the
+     * initial reference if there are any shenanigans going on with revisions that have the same reference.
+     */
+    public function findOneByNormalizedNameAndDistributionReference(Package $package, string $normalizedVersionName, string $distributionReference): ?Metadata
     {
         $builder = $this->createQueryBuilder('metadata')
             ->leftJoin('metadata.version', 'version')
             ->andWhere('metadata.package = :package')
             ->andWhere('version.normalizedName = :versionName')
-            ->andWhere('metadata.sourceReference = :reference OR (metadata.sourceReference IS NULL AND metadata.distributionReference = :reference)')
+            ->andWhere('metadata.distributionReference = :reference')
+            ->orderBy('metadata.revision', 'DESC')
             ->setParameter('package', $package)
             ->setParameter('versionName', $normalizedVersionName)
-            ->setParameter('reference', $reference)
+            ->setParameter('reference', $distributionReference)
+            ->setMaxResults(1);
+
+        return $builder->getQuery()->getOneOrNullResult();
+    }
+
+    public function findOneByNormalizedNameAndRevision(Package $package, string $normalizedVersionName, int $revision): ?Metadata
+    {
+        $builder = $this->createQueryBuilder('metadata')
+            ->leftJoin('metadata.version', 'version')
+            ->andWhere('metadata.package = :package')
+            ->andWhere('version.normalizedName = :versionName')
+            ->andWhere('metadata.revision = :revision')
+            ->setParameter('package', $package)
+            ->setParameter('versionName', $normalizedVersionName)
+            ->setParameter('revision', $revision)
             ->setMaxResults(1);
 
         return $builder->getQuery()->getOneOrNullResult();

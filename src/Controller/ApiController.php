@@ -41,10 +41,12 @@ class ApiController extends AbstractController
         private readonly PackageDistributionResolver $distributionResolver,
         private readonly PackageProviderManager $providerManager,
         private readonly MessageBusInterface $messenger,
+        #[Autowire(param: 'dirigent.distributions.async_api_requests')]
+        private readonly bool $asyncApiRequests,
         #[Autowire(param: 'dirigent.packages.dynamic_updates')]
         private readonly bool $dynamicUpdatesEnabled,
         #[Autowire(param: 'dirigent.metadata.mirror_vcs_repositories')]
-        private readonly bool $mirrorVcsRepositories = false,
+        private readonly bool $mirrorVcsRepositories,
     ) {
     }
 
@@ -63,7 +65,7 @@ class ApiController extends AbstractController
         ];
 
         if ($this->getParameter('dirigent.distributions.mirror')) {
-            $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution')->getPath())
+            $distributionUrlPattern = u($router->getRouteCollection()->get('api_package_distribution_mirror')->getPath())
                 ->replace('{package}', '%package%')
                 ->replace('{version}', '%version%')
                 ->replace('{reference}', '%reference%')
@@ -105,8 +107,47 @@ class ApiController extends AbstractController
         return $response;
     }
 
-    #[Route('/dist/{package}/{version}-{reference}.{type}',
+    #[Route('/dist/{package}/{version}-r{revision}-{reference}.{type}',
         name: 'api_package_distribution',
+        requirements: [
+            'package' => MapPackage::PACKAGE_REGEX,
+            'version' => '.+',
+            'revision' => '[1-9][0-9]*',
+            'reference' => '[a-z0-9]+',
+            'type' => '(zip)',
+        ],
+        methods: ['GET'],
+    )]
+    #[IsGrantedAccess]
+    public function packageDistribution(Request $request, int $revision, string $reference, string $type): Response
+    {
+        if (!$this->getParameter('dirigent.distributions.enabled')) {
+            throw $this->createNotFoundException();
+        }
+
+        $packageName = $request->attributes->get('package');
+        $versionName = $request->attributes->get('version');
+
+        if (null === $package = $this->findPackage($packageName)) {
+            throw $this->createNotFoundException();
+        }
+
+        if (null === $metadata = $this->metadataRepository->findOneByNormalizedNameAndRevision($package, $versionName, $revision)) {
+            throw $this->createNotFoundException();
+        }
+
+        if (!$this->distributionResolver->resolve($metadata, $reference, $type, async: $this->asyncApiRequests)) {
+            throw $this->createNotFoundException();
+        }
+
+        $path = $this->distributionResolver->path($metadata, $reference, $type);
+        $filename = u("$packageName-$versionName-r$revision-$reference.$type")->replace('/', '-')->toString();
+
+        return $this->file($path, $filename);
+    }
+
+    #[Route('/dist-mirror/{package}/{version}-{reference}.{type}',
+        name: 'api_package_distribution_mirror',
         requirements: [
             'package' => MapPackage::PACKAGE_REGEX,
             'version' => '.+',
@@ -116,7 +157,7 @@ class ApiController extends AbstractController
         methods: ['GET'],
     )]
     #[IsGrantedAccess]
-    public function packageDistribution(Request $request, string $reference, string $type): Response
+    public function packageDistributionMirror(Request $request, string $reference, string $type): Response
     {
         if (!$this->getParameter('dirigent.distributions.enabled')) {
             throw $this->createNotFoundException();
@@ -125,21 +166,19 @@ class ApiController extends AbstractController
         $packageName = $request->attributes->get('package');
         $versionName = $request->attributes->get('version');
 
-        if (!$this->distributionResolver->exists($packageName, $versionName, $reference, $type)) {
-            if (null === $package = $this->findPackage($packageName)) {
-                throw $this->createNotFoundException();
-            }
-
-            if (null === $metadata = $this->metadataRepository->findOneByNormalizedNameAndReference($package, $versionName, $reference)) {
-                throw $this->createNotFoundException();
-            }
-
-            if (!$this->distributionResolver->resolve($metadata, $type, async: $this->getParameter('dirigent.distributions.async_api_requests'))) {
-                throw $this->createNotFoundException();
-            }
+        if (null === $package = $this->findPackage($packageName)) {
+            throw $this->createNotFoundException();
         }
 
-        $path = $this->distributionResolver->path($packageName, $versionName, $reference, $type);
+        if (null === $metadata = $this->metadataRepository->findOneByNormalizedNameAndDistributionReference($package, $versionName, $reference)) {
+            throw $this->createNotFoundException();
+        }
+
+        if (!$this->distributionResolver->resolve($metadata, $reference, $type, async: $this->asyncApiRequests)) {
+            throw $this->createNotFoundException();
+        }
+
+        $path = $this->distributionResolver->path($metadata, $reference, $type);
         $filename = u("$packageName-$versionName-$reference.$type")->replace('/', '-')->toString();
 
         return $this->file($path, $filename);

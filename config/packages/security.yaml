@@ -19,7 +19,7 @@ security:
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
         api:
-            pattern: ^/(packages.json|downloads|p2/|dist/)
+            pattern: ^/(packages.json|downloads|p2/|dist/|dist-mirror/)
             provider: database_users
             http_basic:
                 realm: api

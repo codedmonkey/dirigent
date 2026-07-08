@@ -1,5 +1,11 @@
 # Changelog
 
+* 0.8.0
+  * **Breaking changes**
+    * The path for stored distributions has changed, so any previously downloaded distributions are no longer valid.
+      It's recommended to delete the existing `distribution/` directory in the data directory before upgrading to
+      this version to prevent any lingering distributions taking up storage space.
+
 * 0.7.2 (2026-07-01)
   * Fixed issue with package links not being updated
   * Updated `guzzlehttp/psr7` dependency to fix potential security vulnerability
