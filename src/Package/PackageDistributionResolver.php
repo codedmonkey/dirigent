@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -20,6 +22,7 @@ readonly class PackageDistributionResolver
     public function __construct(
         private MessageBusInterface $messenger,
         private ComposerClient $composer,
+        private DistributionRepository $distributionRepository,
         #[Autowire(param: 'dirigent.distributions.dev_versions')]
         private bool $includeDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
@@ -29,24 +32,27 @@ readonly class PackageDistributionResolver
         $this->storagePath = "$storagePath/distribution";
     }
 
-    public function exists(string $packageName, string $versionName, string $reference, string $type): bool
+    public function exists(Metadata|string $metadataOrPath, string $reference, string $type): bool
     {
-        return $this->filesystem->exists($this->path($packageName, $versionName, $reference, $type));
+        if ($metadataOrPath instanceof Metadata) {
+            return $this->filesystem->exists($this->path($metadataOrPath, $reference, $type));
+        }
+
+        return $this->filesystem->exists($metadataOrPath);
     }
 
-    public function path(string $packageName, string $versionName, string $reference, string $type): string
+    public function path(Metadata $metadata, string $reference, string $type): string
     {
-        return "{$this->storagePath}/{$packageName}/{$versionName}-{$reference}.{$type}";
-    }
-
-    public function resolve(Metadata $metadata, string $type, bool $async): bool
-    {
-        $package = $metadata->getPackage();
-        $packageName = $package->getName();
+        $packageName = $metadata->getPackage()->getName();
         $versionName = $metadata->getNormalizedVersionName();
-        $reference = $metadata->getDistributionReference();
+        $revision = $metadata->getRevision();
 
-        if ($this->exists($packageName, $versionName, $reference, $type)) {
+        return "{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}";
+    }
+
+    public function resolve(Metadata $metadata, string $reference, string $type, bool $async): bool
+    {
+        if ($this->exists($metadata, $reference, $type)) {
             return true;
         }
 
@@ -60,7 +66,7 @@ readonly class PackageDistributionResolver
 
         if ($async) {
             // Resolve the distribution asynchronously so it's available in the future now that we know it was requested
-            $this->messenger->dispatch(new ResolveDistribution($metadata->getId(), $type), [
+            $this->messenger->dispatch(new ResolveDistribution($metadata->getId(), $reference, $type), [
                 new TransportNamesStamp('async'),
             ]);
 
@@ -68,13 +74,22 @@ readonly class PackageDistributionResolver
             return false;
         }
 
+        if (null === $distribution = $this->distributionRepository->findOneByReferenceAndType($metadata, $reference, $type)) {
+            $distribution = new Distribution($metadata, $reference, $type);
+        }
+
         $distributionUrl = $metadata->getDistributionUrl();
-        $path = $this->path($packageName, $versionName, $reference, $type);
+        $path = $this->path($metadata, $reference, $type);
 
         $this->filesystem->mkdir(dirname($path));
 
         $httpDownloader = $this->composer->createHttpDownloader();
         $httpDownloader->copy($distributionUrl, $path);
+
+        $distribution->setSource($distributionUrl);
+        $distribution->setResolvedAt();
+
+        $this->distributionRepository->save($distribution, true);
 
         return true;
     }
