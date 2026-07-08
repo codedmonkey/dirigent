@@ -23,6 +23,6 @@ readonly class ResolveDistributionHandler
             return;
         }
 
-        $this->distributionResolver->resolve($metadata, $message->type, async: false);
+        $this->distributionResolver->resolve($metadata, $message->reference, $message->type, async: false);
     }
 }

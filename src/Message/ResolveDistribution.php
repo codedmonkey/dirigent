@@ -11,6 +11,7 @@ readonly class ResolveDistribution
 {
     public function __construct(
         public int $metadataId,
+        public string $reference,
         public string $type,
     ) {
     }
