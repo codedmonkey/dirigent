@@ -7,6 +7,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
@@ -62,6 +63,7 @@ class DashboardPackagesControllerTest extends WebTestCase
 
         $client->submitForm('Add VCS repository', [
             'package_add_vcs_form[repositoryUrl]' => 'https://github.com/php-fig/container',
+            'package_add_vcs_form[fetchStrategy]' => PackageFetchStrategy::Vcs->value,
         ]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
@@ -71,6 +73,7 @@ class DashboardPackagesControllerTest extends WebTestCase
 
         $package = $packageRepository->findOneByName('psr/container');
         self::assertNotNull($package, 'A package was created.');
+        self::assertSame(PackageFetchStrategy::Vcs, $package->getFetchStrategy());
     }
 
     public function testEdit(): void
@@ -78,13 +81,30 @@ class DashboardPackagesControllerTest extends WebTestCase
         $client = static::createClient();
         $this->loginUser('admin');
 
+        /** @var PackageRepository $packageRepository */
+        $packageRepository = self::getService(PackageRepository::class);
+
+        $package = $packageRepository->findOneByName('psr/log');
+        self::assertNotNull($package);
+        $package->setFetchStrategy(PackageFetchStrategy::Source);
+        $packageRepository->save($package, true);
+
         $client->request('GET', '/packages/psr/log/edit');
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-        $client->submitForm('Save changes');
+        $client->submitForm('Save changes', [
+            'package_form[fetchStrategy]' => PackageFetchStrategy::Vcs->value,
+        ]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_FOUND);
+
+        /** @var PackageRepository $packageRepository */
+        $packageRepository = self::getService(PackageRepository::class);
+
+        $package = $packageRepository->findOneByName('psr/log');
+        self::assertNotNull($package);
+        self::assertSame(PackageFetchStrategy::Vcs, $package->getFetchStrategy());
     }
 
     public function testDelete(): void

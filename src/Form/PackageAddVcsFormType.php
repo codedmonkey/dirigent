@@ -12,6 +12,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\SubmitEvent;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormError;
@@ -37,6 +38,12 @@ class PackageAddVcsFormType extends AbstractType
                 'class' => Credentials::class,
                 'placeholder' => 'No credentials',
             ])
+            ->add('fetchStrategy', EnumType::class, [
+                'class' => PackageFetchStrategy::class,
+                'choices' => PackageFetchStrategy::repositoryCases(),
+                'data' => $this->defaultVcsFetchStrategy,
+                'expanded' => true,
+            ])
             ->addEventListener(FormEvents::SUBMIT, $this->onSubmit(...));
     }
 
@@ -45,8 +52,6 @@ class PackageAddVcsFormType extends AbstractType
         $form = $event->getForm();
         /** @var Package $package */
         $package = $event->getData();
-
-        $package->setFetchStrategy($this->defaultVcsFetchStrategy);
 
         $validationResult = $this->vcsRepositoryValidator->validate($package);
 

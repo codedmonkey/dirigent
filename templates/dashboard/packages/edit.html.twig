@@ -21,7 +21,7 @@
         <div class="form-fieldset-header">
           <div class="form-fieldset-title">
             <span class="form-fieldset-title-content">
-              Repository
+              {{ 'form.package.title.repository'|trans }}
             </span>
           </div>
         </div>
@@ -42,7 +42,27 @@
         <div class="form-fieldset-header">
           <div class="form-fieldset-title">
             <span class="form-fieldset-title-content">
-              Mirroring
+              {{ 'form.package.title.metadata'|trans }}
+            </span>
+          </div>
+        </div>
+
+        <div class="form-fieldset-body">
+          <div class="row">
+            <div>
+              {{ form_row(form.fetchStrategy) }}
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="form-fieldset">
+      <fieldset>
+        <div class="form-fieldset-header">
+          <div class="form-fieldset-title">
+            <span class="form-fieldset-title-content">
+              {{ 'form.package.title.mirroring'|trans }}
             </span>
           </div>
         </div>
@@ -51,9 +71,6 @@
           <div class="row">
             <div>
               {{ form_row(form.mirrorRegistry) }}
-              {% if form.fetchStrategy is defined %}
-                {{ form_row(form.fetchStrategy) }}
-              {% endif %}
             </div>
           </div>
         </div>

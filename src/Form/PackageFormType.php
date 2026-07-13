@@ -42,6 +42,11 @@ class PackageFormType extends AbstractType
                 'class' => Credentials::class,
                 'placeholder' => 'No credentials',
             ])
+            ->add('fetchStrategy', EnumType::class, [
+                'class' => PackageFetchStrategy::class,
+                'choices' => PackageFetchStrategy::repositoryCases(),
+                'expanded' => true,
+            ])
             ->add('mirrorRegistry', TextType::class, [
                 'disabled' => true,
                 'help' => 'Adding a mirror registry to a package is not possible. Delete the package first.',
@@ -72,7 +77,6 @@ class PackageFormType extends AbstractType
                 ->add('fetchStrategy', EnumType::class, [
                     'class' => PackageFetchStrategy::class,
                     'expanded' => true,
-                    'disabled' => !$package->getRepositoryUrl(),
                 ]);
 
             if ($package->getFetchStrategy()->isMirror()) {

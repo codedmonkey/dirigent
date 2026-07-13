@@ -13,6 +13,14 @@ enum PackageFetchStrategy: string implements TranslatableInterface
     case Source = 'source';
     case Vcs = 'vcs';
 
+    public static function repositoryCases(): array
+    {
+        return [
+            self::Source,
+            self::Vcs,
+        ];
+    }
+
     public function isMirror(): bool
     {
         return self::Mirror === $this;
