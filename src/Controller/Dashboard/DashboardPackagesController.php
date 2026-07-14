@@ -108,8 +108,7 @@ class DashboardPackagesController extends AbstractController
                     continue;
                 }
 
-                $package = new Package();
-                $package->setName($packageName);
+                $package = new Package($packageName);
                 $package->setMirrorRegistry($registry);
                 $package->setFetchStrategy($this->mirrorVcsRepositories ? PackageFetchStrategy::Vcs : PackageFetchStrategy::Mirror);
 

@@ -92,8 +92,12 @@ class Package extends TrackedEntity
 
     private array $sortedVersions;
 
-    public function __construct()
+    public function __construct(?string $name = null)
     {
+        if (null !== $name) {
+            $this->setName($name);
+        }
+
         $this->installations = new PackageInstallations($this);
         $this->versions = new ArrayCollection();
     }

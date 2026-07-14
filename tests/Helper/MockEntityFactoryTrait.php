@@ -32,10 +32,7 @@ trait MockEntityFactoryTrait
 
     protected function createMockPackage(): Package
     {
-        $package = new Package();
-        $package->setName(sprintf('%s/%s', uniqid(), uniqid()));
-
-        return $package;
+        return new Package(sprintf('%s/%s', uniqid(), uniqid()));
     }
 
     /**

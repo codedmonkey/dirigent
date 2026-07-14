@@ -184,8 +184,7 @@ class ApiController extends AbstractController
                     return null;
                 }
 
-                $package = new Package();
-                $package->setName($packageName);
+                $package = new Package($packageName);
                 $package->setMirrorRegistry($registry);
                 $package->setFetchStrategy($this->mirrorVcsRepositories ? PackageFetchStrategy::Vcs : PackageFetchStrategy::Mirror);
 

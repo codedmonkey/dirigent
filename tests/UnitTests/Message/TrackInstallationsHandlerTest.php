@@ -35,8 +35,7 @@ class TrackInstallationsHandlerTest extends TestCase
 
     public function testInvoke(): void
     {
-        $package = new Package();
-        $package->setName('foo/bar');
+        $package = new Package('foo/bar');
 
         $version = new Version($package);
         $version->setNormalizedName('1.0.0');
