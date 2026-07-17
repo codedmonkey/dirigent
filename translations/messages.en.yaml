@@ -28,6 +28,7 @@ Description: Description
 Dynamic Update Delay: Dynamic update delay
 Email: Email
 Expires At: Expires at
+Fetch strategy: Fetch strategy
 Multi-factor authentication: Multi-factor authentication
 New password: New password
 Name: Name
@@ -117,6 +118,7 @@ credentials:
 package:
   fetch-strategy:
     mirror: Fetch from registry
+    source: Fetch from source
     vcs: Fetch from VCS
 registry:
   package-mirroring:
@@ -136,6 +138,11 @@ account:
     state-enabled: Multi-factor authentication is currently enabled.
 
 form:
+  package:
+    title:
+      metadata: Metadata
+      mirroring: Mirroring
+      repository: Repository
   user:
     help:
       totp-authentication-enabled: Multi-factor authentication can be disabled for users that lost their access to their MFA code, but has to be enabled by the user.

@@ -10,11 +10,25 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 enum PackageFetchStrategy: string implements TranslatableInterface
 {
     case Mirror = 'mirror';
+    case Source = 'source';
     case Vcs = 'vcs';
+
+    public static function repositoryCases(): array
+    {
+        return [
+            self::Source,
+            self::Vcs,
+        ];
+    }
 
     public function isMirror(): bool
     {
         return self::Mirror === $this;
+    }
+
+    public function isSource(): bool
+    {
+        return self::Source === $this;
     }
 
     public function isVcs(): bool

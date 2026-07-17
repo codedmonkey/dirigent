@@ -65,8 +65,8 @@ class Package extends TrackedEntity
     #[ORM\Column(nullable: true)]
     private ?string $remoteId = null;
 
-    #[ORM\Column(nullable: true, enumType: PackageFetchStrategy::class)]
-    private ?PackageFetchStrategy $fetchStrategy = null;
+    #[ORM\Column(enumType: PackageFetchStrategy::class)]
+    private PackageFetchStrategy $fetchStrategy;
 
     #[ORM\ManyToOne]
     private ?Registry $mirrorRegistry = null;
@@ -92,8 +92,12 @@ class Package extends TrackedEntity
 
     private array $sortedVersions;
 
-    public function __construct()
+    public function __construct(?string $name = null)
     {
+        if (null !== $name) {
+            $this->setName($name);
+        }
+
         $this->installations = new PackageInstallations($this);
         $this->versions = new ArrayCollection();
     }
@@ -236,10 +240,6 @@ class Package extends TrackedEntity
 
     public function getFetchStrategy(): PackageFetchStrategy
     {
-        if (!$this->fetchStrategy) {
-            return $this->mirrorRegistry ? PackageFetchStrategy::Mirror : PackageFetchStrategy::Vcs;
-        }
-
         return $this->fetchStrategy;
     }
 

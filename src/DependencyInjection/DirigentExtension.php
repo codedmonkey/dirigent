@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\DependencyInjection;
 
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
@@ -58,11 +59,25 @@ class DirigentExtension extends ConfigurableExtension
     }
 
     /**
-     * @param array{mirror_vcs_repositories: bool, retain_stale_revisions: array{enabled: bool, tagged_versions: bool, dev_versions: bool}, retain_pruned_versions: array{enabled: bool, tagged_versions: bool, dev_versions: bool}} $config
+     * @param array{default_fetch_strategy: PackageFetchStrategy, mirror_vcs_repositories: bool, retain_stale_revisions: array{enabled: bool, tagged_versions: bool, dev_versions: bool}, retain_pruned_versions: array{enabled: bool, tagged_versions: bool, dev_versions: bool}} $config
      */
     private function registerMetadataConfiguration(array $config, ContainerBuilder $container): void
     {
-        $container->setParameter('dirigent.metadata.mirror_vcs_repositories', $config['mirror_vcs_repositories']);
+        $defaultFetchStrategy = $config['default_fetch_strategy'];
+        $mirrorVcsRepositories = $config['mirror_vcs_repositories'];
+
+        if ($mirrorVcsRepositories && $defaultFetchStrategy->isMirror()) {
+            $defaultFetchStrategy = PackageFetchStrategy::Source;
+        }
+
+        $container->setParameter(
+            name: 'dirigent.metadata.default_mirror_fetch_strategy',
+            value: $defaultFetchStrategy,
+        );
+        $container->setParameter(
+            name: 'dirigent.metadata.default_vcs_fetch_strategy',
+            value: false === $defaultFetchStrategy->isMirror() ? $defaultFetchStrategy : PackageFetchStrategy::Source,
+        );
 
         $retainPrunedVersions = $config['retain_pruned_versions']['enabled'];
         $container->setParameter(

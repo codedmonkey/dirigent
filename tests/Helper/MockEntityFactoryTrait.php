@@ -9,6 +9,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\MetadataRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use Composer\Semver\VersionParser;
 use PHPUnit\Framework\MockObject\MockObject;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticator;
@@ -32,8 +33,9 @@ trait MockEntityFactoryTrait
 
     protected function createMockPackage(): Package
     {
-        $package = new Package();
-        $package->setName(sprintf('%s/%s', uniqid(), uniqid()));
+        $package = new Package(sprintf('%s/%s', uniqid(), uniqid()));
+
+        $package->setFetchStrategy(PackageFetchStrategy::Mirror);
 
         return $package;
     }

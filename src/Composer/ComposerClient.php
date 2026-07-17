@@ -11,6 +11,7 @@ use Composer\Factory;
 use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Composer\Repository\ComposerRepository;
+use Composer\Repository\Vcs as ComposerVcs;
 use Composer\Repository\VcsRepository;
 use Composer\Util\HttpDownloader;
 
@@ -41,7 +42,18 @@ class ComposerClient
         }
         $httpDownloader = $this->createHttpDownloader($io, $config);
 
-        return new VcsRepository(['url' => $repoUrl], $io, $config, $httpDownloader);
+        if ($package->getFetchStrategy()->isVcs()) {
+            $drivers = [
+                'git' => ComposerVcs\GitDriver::class,
+                'hg' => ComposerVcs\HgDriver::class,
+                'perforce' => ComposerVcs\PerforceDriver::class,
+                'fossil' => ComposerVcs\FossilDriver::class,
+                // svn must be last because identifying a subversion server for sure is practically impossible
+                'svn' => ComposerVcs\SvnDriver::class,
+            ];
+        }
+
+        return new VcsRepository(['url' => $repoUrl], $io, $config, $httpDownloader, drivers: $drivers ?? null);
     }
 
     public function createHttpDownloader(?IOInterface $io = null, ?Config $config = null): HttpDownloader

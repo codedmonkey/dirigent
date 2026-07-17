@@ -20,9 +20,7 @@ class PackageFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         foreach ($this->getPackages() as $packageData) {
-            $package = new Package();
-
-            $package->setName($packageData['name']);
+            $package = new Package($packageData['name']);
             $package->setRepositoryUrl($packageData['repositoryUrl']);
             $package->setFetchStrategy(PackageFetchStrategy::Vcs);
 
