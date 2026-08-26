@@ -48,7 +48,7 @@ class KeywordRepository extends ServiceEntityRepository
 
     public function getByName(string $name): Keyword
     {
-        if (isset($this->cachedKeywords[$name])) {
+        if (isset($this->cachedKeywords[$name]) && $this->getEntityManager()->contains($this->cachedKeywords[$name])) {
             return $this->cachedKeywords[$name];
         }
 
