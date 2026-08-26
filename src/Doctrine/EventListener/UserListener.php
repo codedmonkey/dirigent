@@ -39,6 +39,6 @@ readonly class UserListener
         $password = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
         $user->setPassword($password);
 
-        $user->eraseCredentials();
+        $user->clearPlainPassword();
     }
 }
