@@ -2,6 +2,7 @@
     "name": "@codedmonkey/dirigent",
     "license": "FSL-1.1-MIT",
     "private": true,
+    "type": "module",
     "devDependencies": {
         "@babel/core": "^8.0.0",
         "@babel/preset-env": "^8.0.0",
