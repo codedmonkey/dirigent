@@ -4,8 +4,9 @@
 
 - **Languages & frameworks**:
     - PHP 8.5+
-    - Symfony 7.3
+    - Symfony 8.1
     - PostgreSQL 16.x (via Doctrine ORM 3.x)
+    - Node 24
     - TypeScript
 - **Development requirements**:
     - Docker
@@ -56,3 +57,6 @@ tests/
 ### PHP
 
 Dirigent follows the [PER coding style][per-coding-style] and the [Symfony coding standards][symfony-coding-standards].
+
+[per-coding-style]: https://www.php-fig.org/per/coding-style/
+[symfony-coding-standards]: https://symfony.com/doc/current/contributing/code/standards.html

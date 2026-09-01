@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\ImageTests\Standalone;
 
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use PHPUnit\Framework\TestCase;
 use Testcontainers\Container\GenericContainer;
 use Testcontainers\Wait\WaitForLog;
 
 class EntrypointTest extends TestCase
 {
+    #[DoesNotPerformAssertions]
     public function testInit(): void
     {
         // Running the container without a command must result in a running application.
@@ -18,16 +20,12 @@ class EntrypointTest extends TestCase
             ->start()
             ->stop();
 
-        $this->addToAssertionCount(1);
-
         // Running the container with the `-init` command must result in a running application.
         new GenericContainer('dirigent-standalone')
             ->withCommand(['-init'])
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start()
             ->stop();
-
-        $this->addToAssertionCount(1);
     }
 
     public function testDirigent(): void

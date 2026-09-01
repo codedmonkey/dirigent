@@ -28,6 +28,7 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Routing\RouterInterface;
 use function Symfony\Component\String\u;
 
@@ -109,7 +110,7 @@ class ApiController extends AbstractController
         name: 'api_package_distribution',
         requirements: [
             'package' => MapPackage::PACKAGE_REGEX,
-            'version' => '.+',
+            'version' => Requirement::CATCH_ALL,
             'reference' => '[a-z0-9]+',
             'type' => '(zip)',
         ],

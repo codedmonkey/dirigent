@@ -75,7 +75,7 @@ class EncryptionTest extends TestCase
         $sealedData = $encryption->seal(self::DATA);
 
         $this->expectException(EncryptionException::class);
-        $this->expectExceptionMessage('Unable to decrypt data');
+        $this->expectExceptionMessageIsOrContains('Unable to decrypt data');
 
         $encryption->reveal($sealedData);
     }
@@ -140,7 +140,7 @@ class EncryptionTest extends TestCase
         $publicKey = sodium_crypto_box_publickey(sodium_crypto_box_keypair());
 
         $this->expectException(EncryptionException::class);
-        $this->expectExceptionMessage('The encryption key is not valid.');
+        $this->expectExceptionMessageIsOrContains('The encryption key is not valid.');
 
         $encryption = new Encryption($privateKey, $publicKey, []);
 

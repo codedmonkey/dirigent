@@ -51,6 +51,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[Column(nullable: true)]
     private ?string $totpSecret = null;
 
+    public function __serialize(): array
+    {
+        // todo move plain password to DTO
+        $this->clearPlainPassword();
+
+        // Prevent storing the hashed password directly in the user session
+        $data = (array) $this;
+        $data["\0" . self::class . "\0password"] = hash('crc32c', (string) $this->password);
+
+        return $data;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -124,6 +136,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return $this;
     }
 
+    public function clearPlainPassword(): void
+    {
+        $this->plainPassword = null;
+    }
+
     public function getTotpSecret(): ?string
     {
         return $this->totpSecret;
@@ -142,11 +159,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     public function getSalt(): ?string
     {
         return null;
-    }
-
-    public function eraseCredentials(): void
-    {
-        $this->plainPassword = null;
     }
 
     public function isAdmin(): bool
