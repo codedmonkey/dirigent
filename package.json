@@ -18,6 +18,13 @@
         "webpack": "^5.74.0",
         "webpack-cli": "^7.0.0"
     },
+    "devEngines": {
+        "packageManager": {
+            "name": "npm",
+            "version": ">=11.16.0",
+            "onFail": "error"
+        }
+    },
     "scripts": {
         "serve": "encore dev-server",
         "build": "encore dev",
