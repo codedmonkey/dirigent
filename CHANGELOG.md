@@ -1,5 +1,9 @@
 # Changelog
 
+* 0.7.3 (2026-08-28)
+  * Fixed issue with resolving package metadata with recurring keywords being blocked by database errors
+  * Updated `composer/composer` and `league/commonmark` dependencies to fix potential security vulnerabilities
+
 * 0.7.2 (2026-07-01)
   * Fixed issue with package links not being updated
   * Updated `guzzlehttp/psr7` dependency to fix potential security vulnerability
