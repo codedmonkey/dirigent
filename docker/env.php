@@ -14,6 +14,7 @@ return [
     'ENCRYPTION_KEY_FILE' => '/srv/config/secrets/encryption_key',
     'GITHUB_TOKEN' => '',
     'KERNEL_SECRET_FILE' => '/srv/config/secrets/kernel_secret',
+    'LOCK_DSN' => 'flock',
     'MAILER_DSN' => 'null://null',
     'SENTRY_DSN' => '',
     'TRUSTED_PROXIES' => '',
