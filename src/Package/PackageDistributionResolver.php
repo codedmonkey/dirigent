@@ -11,6 +11,7 @@ use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
@@ -23,6 +24,7 @@ readonly class PackageDistributionResolver
         private MessageBusInterface $messenger,
         private ComposerClient $composer,
         private DistributionRepository $distributionRepository,
+        private LockFactory $lockFactory,
         #[Autowire(param: 'dirigent.distributions.dev_versions')]
         private bool $includeDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
@@ -74,23 +76,34 @@ readonly class PackageDistributionResolver
             return false;
         }
 
-        if (null === $distribution = $this->distributionRepository->findOneByReferenceAndType($metadata, $reference, $type)) {
-            $distribution = new Distribution($metadata, $reference, $type);
-        }
-
         $distributionUrl = $metadata->getDistributionUrl();
         $path = $this->path($metadata, $reference, $type);
 
-        $this->filesystem->mkdir(dirname($path));
+        $lock = $this->lockFactory->createLock('distribution.' . hash('sha256', $path), ttl: null);
+        $lock->acquire(blocking: true);
 
-        $httpDownloader = $this->composer->createHttpDownloader();
-        $httpDownloader->copy($distributionUrl, $path);
+        try {
+            if ($this->filesystem->exists($path)) {
+                return true;
+            }
 
-        $distribution->setSource($distributionUrl);
-        $distribution->setResolvedAt();
+            if (null === $distribution = $this->distributionRepository->findOneByReferenceAndType($metadata, $reference, $type)) {
+                $distribution = new Distribution($metadata, $reference, $type);
+            }
 
-        $this->distributionRepository->save($distribution, true);
+            $this->filesystem->mkdir(dirname($path));
 
-        return true;
+            $httpDownloader = $this->composer->createHttpDownloader();
+            $httpDownloader->copy($distributionUrl, $path);
+
+            $distribution->setSource($distributionUrl);
+            $distribution->setResolvedAt();
+
+            $this->distributionRepository->save($distribution, true);
+
+            return true;
+        } finally {
+            $lock->release();
+        }
     }
 }
