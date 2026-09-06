@@ -35,6 +35,7 @@
         "symfony/framework-bundle": "^8.1.7",
         "symfony/http-client": "^8.1.7",
         "symfony/intl": "^8.1.5",
+        "symfony/lock": "^8.1.6",
         "symfony/mailer": "^8.1.7",
         "symfony/mime": "^8.1.7",
         "symfony/monolog-bundle": "^4.1.0",
