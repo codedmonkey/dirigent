@@ -33,6 +33,7 @@ src/
 │   └── Dashboard/              # EasyAdmin dashboard controllers
 ├── Doctrine/
 │   ├── Entity/                 # Doctrine ORM entities
+│   ├── EventListener/          # Doctrine entity lifecycle listeners
 │   ├── Repository/             # Doctrine repositories
 │   ├── Type/                   # Custom Doctrine types
 │   └── DataFixtures/           # Database fixtures

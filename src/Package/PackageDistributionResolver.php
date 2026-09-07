@@ -7,6 +7,8 @@ namespace CodedMonkey\Dirigent\Package;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -50,6 +52,47 @@ readonly class PackageDistributionResolver
         $revision = $metadata->getRevision();
 
         return "{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}";
+    }
+
+    public function remove(Distribution $distribution): void
+    {
+        $path = $this->path(
+            $distribution->getMetadata(),
+            $distribution->getReference(),
+            $distribution->getType(),
+        );
+        $this->filesystem->remove($path);
+
+        $packageDirectory = dirname($path);
+        if (is_dir($packageDirectory) && !new \FilesystemIterator($packageDirectory)->valid()) {
+            $this->filesystem->remove($packageDirectory);
+        }
+
+        $vendorDirectory = dirname($packageDirectory);
+        if (is_dir($vendorDirectory) && !new \FilesystemIterator($vendorDirectory)->valid()) {
+            $this->filesystem->remove($vendorDirectory);
+        }
+    }
+
+    public function removeMetadata(Metadata $metadata): void
+    {
+        foreach ($this->distributionRepository->findByMetadata($metadata) as $distribution) {
+            $this->remove($distribution);
+        }
+    }
+
+    public function removePackage(Package $package): void
+    {
+        foreach ($this->distributionRepository->findByPackage($package) as $distribution) {
+            $this->remove($distribution);
+        }
+    }
+
+    public function removeVersion(Version $version): void
+    {
+        foreach ($this->distributionRepository->findByVersion($version) as $distribution) {
+            $this->remove($distribution);
+        }
     }
 
     public function resolve(Metadata $metadata, string $reference, string $type, bool $async): bool
