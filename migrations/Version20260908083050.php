@@ -40,7 +40,7 @@ final class Version20260908083050 extends AbstractMigration
             ALTER TABLE
               distribution
             ADD
-              CONSTRAINT FK_A4483781DC9EE959 FOREIGN KEY (metadata_id) REFERENCES metadata (id) NOT DEFERRABLE
+              CONSTRAINT FK_A4483781DC9EE959 FOREIGN KEY (metadata_id) REFERENCES metadata (id) ON DELETE CASCADE NOT DEFERRABLE
         SQL);
     }
 
