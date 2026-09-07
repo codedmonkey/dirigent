@@ -6,6 +6,8 @@ namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -49,5 +51,43 @@ class DistributionRepository extends ServiceEntityRepository
             'reference' => $reference,
             'type' => $type,
         ]);
+    }
+
+    /**
+     * @return Distribution[]
+     */
+    public function findByMetadata(Metadata $metadata): array
+    {
+        return $this->createQueryBuilder('distribution')
+            ->where('distribution.metadata = :metadata')
+            ->setParameter('metadata', $metadata)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Distribution[]
+     */
+    public function findByPackage(Package $package): array
+    {
+        return $this->createQueryBuilder('distribution')
+            ->join('distribution.metadata', 'metadata')
+            ->where('metadata.package = :package')
+            ->setParameter('package', $package)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Distribution[]
+     */
+    public function findByVersion(Version $version): array
+    {
+        return $this->createQueryBuilder('distribution')
+            ->join('distribution.metadata', 'metadata')
+            ->where('metadata.version = :version')
+            ->setParameter('version', $version)
+            ->getQuery()
+            ->getResult();
     }
 }
