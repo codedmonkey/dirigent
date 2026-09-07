@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\RegistryRepository;
 use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
+use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
 
 class DashboardPackagesControllerTest extends WebTestCase
@@ -113,9 +116,17 @@ class DashboardPackagesControllerTest extends WebTestCase
         $this->loginUser('admin');
 
         $mockEntities = $this->createMockPackageWithMetadata();
+        $package = $mockEntities[0];
+        $metadata = $mockEntities[2];
+        $distribution = new Distribution($metadata, 'reference', 'zip');
+        $distribution->setResolvedAt();
+        $mockEntities[] = $distribution;
         $this->persistEntities(...$mockEntities);
 
-        $package = $mockEntities[0];
+        $distributionResolver = self::getService(PackageDistributionResolver::class);
+        $distributionPath = $distributionResolver->path($metadata, $distribution->getReference(), $distribution->getType());
+        $filesystem = new Filesystem();
+        $filesystem->dumpFile($distributionPath, 'distribution');
 
         // Fetch package id prior to deleting it
         $packageId = $package->getId();
@@ -129,5 +140,6 @@ class DashboardPackagesControllerTest extends WebTestCase
         $savedPackage = $this->findEntity(Package::class, $packageId);
 
         $this->assertNull($savedPackage, 'The package was deleted.');
+        $this->assertFalse($filesystem->exists($distributionPath), 'The mirrored distribution was deleted.');
     }
 }

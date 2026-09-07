@@ -7,6 +7,7 @@ namespace CodedMonkey\Dirigent\Package;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -59,6 +60,11 @@ readonly class PackageDistributionResolver
             $distribution->getReference(),
             $distribution->getType(),
         ));
+    }
+
+    public function removePackage(Package $package): void
+    {
+        $this->filesystem->remove("{$this->storagePath}/{$package->getName()}");
     }
 
     public function resolve(Metadata $metadata, string $reference, string $type, bool $async): bool
