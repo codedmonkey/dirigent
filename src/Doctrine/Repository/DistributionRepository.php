@@ -6,6 +6,7 @@ namespace CodedMonkey\Dirigent\Doctrine\Repository;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -49,5 +50,18 @@ class DistributionRepository extends ServiceEntityRepository
             'reference' => $reference,
             'type' => $type,
         ]);
+    }
+
+    /**
+     * @return Distribution[]
+     */
+    public function findByVersion(Version $version): array
+    {
+        return $this->createQueryBuilder('distribution')
+            ->join('distribution.metadata', 'metadata')
+            ->where('metadata.version = :version')
+            ->setParameter('version', $version)
+            ->getQuery()
+            ->getResult();
     }
 }

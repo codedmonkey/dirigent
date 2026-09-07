@@ -45,6 +45,8 @@ class Distribution extends TrackedEntity
         $this->metadata = $metadata;
         $this->reference = $reference;
         $this->type = $type;
+
+        $metadata->getDistributions()->add($this);
     }
 
     public function getId(): ?int
