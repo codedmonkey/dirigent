@@ -7,6 +7,7 @@ namespace CodedMonkey\Dirigent\Doctrine\EventListener;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Message\RemovePackageProvider;
+use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
@@ -17,6 +18,7 @@ readonly class PackageListener
 {
     public function __construct(
         private MessageBusInterface $messenger,
+        private PackageDistributionResolver $distributionResolver,
     ) {
     }
 
@@ -27,6 +29,9 @@ readonly class PackageListener
 
         // Delete existing package links
         $repository->deletePackageLinks($package);
+
+        // Delete mirrored package distributions
+        $this->distributionResolver->removePackage($package);
 
         // Remove package provider
         $this->messenger->dispatch(new RemovePackageProvider($package->getId()));

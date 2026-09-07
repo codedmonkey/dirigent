@@ -37,7 +37,7 @@ class Distribution extends TrackedEntity
     private ?\DateTimeImmutable $resolvedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'distributions')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Metadata $metadata;
 
     public function __construct(Metadata $metadata, string $reference, string $type)
@@ -45,6 +45,8 @@ class Distribution extends TrackedEntity
         $this->metadata = $metadata;
         $this->reference = $reference;
         $this->type = $type;
+
+        $metadata->getDistributions()->add($this);
     }
 
     public function getId(): ?int

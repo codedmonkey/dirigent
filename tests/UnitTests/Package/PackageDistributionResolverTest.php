@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
@@ -71,5 +72,25 @@ class PackageDistributionResolverTest extends TestCase
         $lock->expects(self::once())->method('release');
 
         self::assertTrue($resolver->resolve($metadata, 'reference', 'zip', async: false));
+    }
+
+    public function testRemoveDeletesDistributionFile(): void
+    {
+        [, , $metadata] = $this->createMockPackageWithMetadata();
+        $distribution = new Distribution($metadata, 'reference', 'zip');
+        $resolver = new PackageDistributionResolver(
+            $this->createStub(MessageBusInterface::class),
+            $this->createStub(ComposerClient::class),
+            $this->createStub(DistributionRepository::class),
+            $this->createStub(LockFactory::class),
+            true,
+            $this->storagePath,
+        );
+        $path = $resolver->path($metadata, 'reference', 'zip');
+        new Filesystem()->dumpFile($path, 'distribution');
+
+        $resolver->remove($distribution);
+
+        self::assertFileDoesNotExist($path);
     }
 }

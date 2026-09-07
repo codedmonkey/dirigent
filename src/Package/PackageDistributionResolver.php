@@ -7,6 +7,8 @@ namespace CodedMonkey\Dirigent\Package;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -50,6 +52,27 @@ readonly class PackageDistributionResolver
         $revision = $metadata->getRevision();
 
         return "{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}";
+    }
+
+    public function remove(Distribution $distribution): void
+    {
+        $this->filesystem->remove($this->path(
+            $distribution->getMetadata(),
+            $distribution->getReference(),
+            $distribution->getType(),
+        ));
+    }
+
+    public function removePackage(Package $package): void
+    {
+        $this->filesystem->remove("{$this->storagePath}/{$package->getName()}");
+    }
+
+    public function removeVersion(Version $version): void
+    {
+        foreach ($this->distributionRepository->findByVersion($version) as $distribution) {
+            $this->remove($distribution);
+        }
     }
 
     public function resolve(Metadata $metadata, string $reference, string $type, bool $async): bool

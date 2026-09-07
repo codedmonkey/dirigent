@@ -119,7 +119,7 @@ class Metadata extends TrackedEntity implements \Stringable
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private MetadataFiles $files;
 
-    #[ORM\OneToMany(targetEntity: Distribution::class, mappedBy: 'metadata')]
+    #[ORM\OneToMany(targetEntity: Distribution::class, mappedBy: 'metadata', cascade: ['remove'])]
     private Collection $distributions;
 
     /**
