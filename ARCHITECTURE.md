@@ -17,7 +17,7 @@
 - **Frontend**: Twig, EasyAdmin 4.x
 - **Frontend (JavaScript)**: Webpack Encore, Stimulus
 - **Linting**: Rector, PHP-CS-Fixer, PHPStan
-- **Testing**: PHPUnit 12.x, Testcontainers
+- **Testing**: PHPUnit 13.x, Testcontainers
 
 ## Directory structure
 
