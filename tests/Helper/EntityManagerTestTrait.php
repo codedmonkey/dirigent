@@ -42,6 +42,17 @@ trait EntityManagerTestTrait
         $entityManager->flush();
     }
 
+    protected function removeEntities(...$entities): void
+    {
+        $entityManager = $this->getService(EntityManagerInterface::class);
+
+        foreach ($entities as $entity) {
+            $entityManager->remove($entity);
+        }
+
+        $entityManager->flush();
+    }
+
     protected function clearEntities(): void
     {
         $this->getService(EntityManagerInterface::class)->clear();
