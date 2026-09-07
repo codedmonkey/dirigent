@@ -52,6 +52,15 @@ readonly class PackageDistributionResolver
         return "{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}";
     }
 
+    public function remove(Distribution $distribution): void
+    {
+        $this->filesystem->remove($this->path(
+            $distribution->getMetadata(),
+            $distribution->getReference(),
+            $distribution->getType(),
+        ));
+    }
+
     public function resolve(Metadata $metadata, string $reference, string $type, bool $async): bool
     {
         if ($this->exists($metadata, $reference, $type)) {
