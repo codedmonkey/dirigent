@@ -5,10 +5,18 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
+use CodedMonkey\Dirigent\Composer\ConfigFactory;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
+use Composer\IO\NullIO;
+use Composer\Pcre\Preg;
+use Composer\Util\Filesystem as ComposerFilesystem;
+use Composer\Util\Git as GitUtility;
+use Composer\Util\ProcessExecutor;
+use Composer\Util\Url;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
@@ -27,6 +35,8 @@ readonly class PackageDistributionResolver
         private ComposerClient $composer,
         private DistributionRepository $distributionRepository,
         private LockFactory $lockFactory,
+        #[Autowire(param: 'dirigent.distributions.build')]
+        private bool $buildDistributions,
         #[Autowire(param: 'dirigent.distributions.mirror')]
         private bool $mirrorDistributions,
         #[Autowire(param: 'dirigent.distributions.dev_versions')]
@@ -87,21 +97,19 @@ readonly class PackageDistributionResolver
 
     public function resolve(Metadata $metadata, string $type, bool $async): bool
     {
-        if (!$this->mirrorDistributions) {
-            return false;
-        }
-
         $path = $this->path($metadata, $type);
 
         if ($this->fileExists($path)) {
             return true;
         }
 
-        if ($type !== $metadata->getDistributionType()) {
+        if (null === $strategy = $this->getFetchStrategy($metadata)) {
             return false;
         }
 
-        if ($metadata->getVersion()->isDevelopment() && !$this->includeDevVersions) {
+        $currentType = $strategy->isMirror() ? $metadata->getDistributionType() : 'zip';
+
+        if ($type !== $currentType) {
             return false;
         }
 
@@ -115,9 +123,6 @@ readonly class PackageDistributionResolver
             return false;
         }
 
-        $distributionUrl = $metadata->getDistributionUrl();
-        $path = $this->path($metadata, $type);
-
         $lock = $this->createDistributionLock($path);
 
         try {
@@ -129,27 +134,91 @@ readonly class PackageDistributionResolver
                 $distribution = new Distribution($metadata, $type);
             }
 
-            $this->filesystem->mkdir(dirname($path));
+            $result = false;
 
-            $httpDownloader = $this->composer->createHttpDownloader();
-            $httpDownloader->copy($distributionUrl, $path);
+            // Build the distribution from VCS source
+            if ($strategy->isVcs()) {
+                $result = $this->build($distribution);
 
-            $distribution->setSource($distributionUrl);
-            $distribution->setResolvedAt();
-
-            try {
-                $this->distributionRepository->save($distribution, true);
-            } catch (\Throwable $exception) {
-                // Remove file immediately if saving the distribution to the database failed
-                $this->removePath($path);
-
-                throw $exception;
+                if (
+                    !$result
+                    && $this->mirrorDistributions
+                    && $metadata->hasDistribution()
+                    && $type === $metadata->getDistributionType()
+                ) {
+                    // Mirror the distribution if it failed to build from source
+                    // todo log fallback
+                    $strategy = PackageFetchStrategy::Mirror;
+                }
             }
 
-            return true;
+            if ($strategy->isMirror()) {
+                $result = $this->mirror($distribution, $path);
+            }
+
+            if ($result) {
+                $distribution->setResolvedAt();
+
+                try {
+                    $this->distributionRepository->save($distribution, true);
+                } catch (\Throwable $exception) {
+                    // Remove file immediately if saving the distribution to the database failed
+                    $this->removePath($path);
+
+                    throw $exception;
+                }
+            }
+
+            return $result;
         } finally {
             $lock->release();
         }
+    }
+
+    private function build(Distribution $distribution): bool
+    {
+        $metadata = $distribution->getMetadata();
+        $reference = $distribution->getReference();
+
+        $package = $metadata->getPackage();
+        $repositoryUrl = $package->getRepositoryUrl();
+        $distributionPath = $this->path($metadata, $reference);
+
+        $composerConfig = ConfigFactory::createForVcsRepository($repositoryUrl, $package->getRepositoryCredentials());
+
+        $gitUtility = new GitUtility(
+            $io = new NullIO(),
+            $composerConfig,
+            $process = new ProcessExecutor($io),
+            new ComposerFilesystem($process),
+        );
+
+        $cacheRepositoryName = Preg::replace('{[^a-z0-9.]}i', '-', Url::sanitize($repositoryUrl));
+        $cachePath = $composerConfig->get('cache-vcs-dir') . '/' . $cacheRepositoryName . '/';
+
+        $this->filesystem->mkdir(dirname($distributionPath));
+
+        $gitUtility->runCommands([
+            ['git', 'archive', '--format=zip', "--output=$distributionPath", $reference],
+        ], $repositoryUrl, $cachePath);
+
+        $distribution->setSource(null);
+
+        return true;
+    }
+
+    private function mirror(Distribution $distribution, string $path): bool
+    {
+        $url = $distribution->getMetadata()->getDistributionUrl();
+
+        $this->filesystem->mkdir(dirname($path));
+
+        $httpDownloader = $this->composer->createHttpDownloader();
+        $httpDownloader->copy($url, $path);
+
+        $distribution->setSource($url);
+
+        return true;
     }
 
     private function createDistributionLock(string $path): SharedLockInterface
@@ -160,6 +229,9 @@ readonly class PackageDistributionResolver
         return $lock;
     }
 
+    /**
+     * @phpstan-impure
+     */
     private function fileExists(string $path): bool
     {
         return $this->filesystem->exists($path);
@@ -187,5 +259,26 @@ readonly class PackageDistributionResolver
             '..' => '%2E%2E',
             default => $encodedComponent,
         };
+    }
+
+    private function getFetchStrategy(Metadata $metadata): ?PackageFetchStrategy
+    {
+        $fetchStrategy = $metadata->getPackage()->getFetchStrategy();
+
+        if (!$this->includeDevVersions && $metadata->getVersion()->isDevelopment()) {
+            // Development versions are not supported by the configuration
+            return null;
+        } elseif ($this->buildDistributions && $fetchStrategy->isVcs()) {
+            // Only build distributions if the fetch strategy is VCS (not source because it might not contain VCS data)
+            return PackageFetchStrategy::Vcs;
+        } elseif (
+            $this->mirrorDistributions
+            && ($fetchStrategy->isMirror() || $metadata->hasDistribution())
+        ) {
+            // Always mirror distributions if building from source is not supported and a distribution is available
+            return PackageFetchStrategy::Mirror;
+        }
+
+        return null;
     }
 }
