@@ -46,6 +46,8 @@ class PackageDistributionResolverTest extends TestCase
             $this->createStub(DistributionRepository::class),
             $lockFactory = $this->createMock(LockFactory::class),
             true,
+            true,
+            true,
             $this->storagePath,
         );
 
@@ -76,6 +78,8 @@ class PackageDistributionResolverTest extends TestCase
             $this->createStub(ComposerClient::class),
             $this->createStub(DistributionRepository::class),
             $this->createStub(LockFactory::class),
+            true,
+            true,
             true,
             $this->storagePath,
         );
