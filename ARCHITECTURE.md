@@ -14,7 +14,7 @@
 - **Package managers**:
     - **PHP**: Composer
     - **TypeScript**: NPM
-- **Frontend**: Twig, EasyAdmin 4.x
+- **Frontend**: Twig, EasyAdmin 5.x
 - **Frontend (JavaScript)**: Webpack Encore, Stimulus
 - **Linting**: Rector, PHP-CS-Fixer, PHPStan
 - **Testing**: PHPUnit 13.x, Testcontainers
@@ -31,17 +31,20 @@ src/
 ├── Composer/                   # Composer integration logic
 ├── Controller/                 # HTTP controllers
 │   └── Dashboard/              # EasyAdmin dashboard controllers
+├── DependencyInjection/        # Symfony dependency injection configuration
 ├── Doctrine/
 │   ├── Entity/                 # Doctrine ORM entities
 │   ├── Repository/             # Doctrine repositories
 │   ├── Type/                   # Custom Doctrine types
 │   └── DataFixtures/           # Database fixtures
+├── EasyAdmin/                  # EasyAdmin fields and filters
 ├── Encryption/                 # Encryption utilities
-├── Entity/                     # Enums (UserRole, PackageUpdateSource)
+├── Entity/                     # Domain classes
 ├── EventListener/              # Symfony event listeners
 ├── Form/                       # Symfony form types
 ├── Message/                    # Symfony messenger messages and handlers (async jobs)
 ├── Package/                    # Package management services
+├── Rector/                     # Project-specific Rector rules
 ├── Routing/                    # Symfony routing logic
 ├── Twig/                       # Twig extensions
 └── Validator/                  # Symfony validators
@@ -49,7 +52,8 @@ templates/                      # Twig templates
 tests/
 ├── UnitTests/                  # Unit tests
 ├── FunctionalTests/            # Functional/Integration tests
-└── Docker/                     # Docker image tests
+├── Helper/                     # Shared test classes
+└── ImageTests/                 # OCI image tests
 ```
 
 ## Coding style
