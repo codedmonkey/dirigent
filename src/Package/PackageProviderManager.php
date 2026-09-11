@@ -8,6 +8,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use Composer\MetadataMinifier\MetadataMinifier;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 readonly class PackageProviderManager
 {
@@ -15,6 +16,11 @@ readonly class PackageProviderManager
     private string $storagePath;
 
     public function __construct(
+        private UrlGeneratorInterface $router,
+        #[Autowire(param: 'dirigent.distributions.build')]
+        private bool $buildDistributions,
+        #[Autowire(param: 'dirigent.distributions.dev_versions')]
+        private bool $includeDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
@@ -31,12 +37,34 @@ readonly class PackageProviderManager
         usort($versions, Package::sortVersions(...));
 
         foreach ($versions as $version) {
-            $versionData = $version->getCurrentMetadata()->toComposerArray();
+            $metadata = $version->getCurrentMetadata();
+            $composerMetadata = $metadata->toComposerArray();
+
+            if (
+                $this->buildDistributions
+                && $package->getFetchStrategy()->isVcs()
+                && 'git' === $metadata->getSourceType()
+                && (!$version->isDevelopment() || $this->includeDevVersions)
+                && null !== $metadata->getSourceReference()
+            ) {
+                $composerMetadata['dist'] = [
+                    'type' => 'zip',
+                    'url' => $this->router->generate('api_package_distribution', [
+                        'package' => $package->getName(),
+                        'version' => $metadata->getNormalizedVersionName(),
+                        'revision' => $metadata->getRevision(),
+                        'reference' => $metadata->getReference(),
+                        'type' => 'zip',
+                    ], UrlGeneratorInterface::ABSOLUTE_URL),
+                    'reference' => $metadata->getReference(),
+                    'shasum' => '',
+                ];
+            }
 
             if (!$version->isDevelopment()) {
-                $releasePackages[] = $versionData;
+                $releasePackages[] = $composerMetadata;
             } else {
-                $devPackages[] = $versionData;
+                $devPackages[] = $composerMetadata;
             }
         }
 

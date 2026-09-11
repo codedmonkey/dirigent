@@ -6,6 +6,8 @@ namespace CodedMonkey\Dirigent\Controller;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Attribute\MapPackage;
+use CodedMonkey\Dirigent\Distribution\DistributionFilesystem;
+use CodedMonkey\Dirigent\Distribution\DistributionResolver;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
@@ -13,7 +15,6 @@ use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Entity\PackageUpdateSource;
 use CodedMonkey\Dirigent\Message\TrackInstallations;
 use CodedMonkey\Dirigent\Message\UpdatePackage;
-use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use CodedMonkey\Dirigent\Package\PackageMetadataResolver;
 use CodedMonkey\Dirigent\Package\PackageProviderManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,7 +40,8 @@ class ApiController extends AbstractController
         private readonly PackageRepository $packageRepository,
         private readonly MetadataRepository $metadataRepository,
         private readonly PackageMetadataResolver $metadataResolver,
-        private readonly PackageDistributionResolver $distributionResolver,
+        private readonly DistributionResolver $distributionResolver,
+        private readonly DistributionFilesystem $distributionFilesystem,
         private readonly PackageProviderManager $providerManager,
         private readonly MessageBusInterface $messenger,
         #[Autowire(param: 'dirigent.distributions.async_api_requests')]
@@ -145,7 +147,7 @@ class ApiController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $path = $this->distributionResolver->path($metadata, $type);
+        $path = $this->distributionFilesystem->path($metadata, $type);
         $filename = u("$packageName-$versionName-r$revision-$reference.$type")->replace('/', '-')->toString();
 
         return $this->file($path, $filename);
@@ -189,7 +191,7 @@ class ApiController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $path = $this->distributionResolver->path($metadata, $type);
+        $path = $this->distributionFilesystem->path($metadata, $type);
         $filename = u("$packageName-$versionName-$reference.$type")->replace('/', '-')->toString();
 
         return $this->file($path, $filename);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Message;
 
+use CodedMonkey\Dirigent\Distribution\DistributionFilesystem;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
-use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\RecoverableMessageHandlingException;
 
@@ -14,7 +14,7 @@ readonly class RemoveDistributionHandler
 {
     public function __construct(
         private DistributionRepository $distributionRepository,
-        private PackageDistributionResolver $distributionResolver,
+        private DistributionFilesystem $distributionFilesystem,
     ) {
     }
 
@@ -24,6 +24,6 @@ readonly class RemoveDistributionHandler
             throw new RecoverableMessageHandlingException("Distribution (id: {$message->distributionId}) still exists.", forceRetry: false);
         }
 
-        $this->distributionResolver->removeFile($message->relativePath);
+        $this->distributionFilesystem->removeFile($message->relativePath);
     }
 }

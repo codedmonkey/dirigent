@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Doctrine\Entity;
 
+use CodedMonkey\Dirigent\Distribution\DistributionFilesystem;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Message\RemoveDistribution;
-use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
@@ -113,7 +113,7 @@ class DistributionDeletionTest extends KernelTestCase
         $distribution = new Distribution($metadata, 'zip');
         $distribution->setResolvedAt();
 
-        $path = $this->getService(PackageDistributionResolver::class)->path($metadata, $distribution->getType());
+        $path = $this->getService(DistributionFilesystem::class)->path($metadata, $distribution->getType());
         new Filesystem()->dumpFile($path, 'distribution');
 
         return [$distribution, $path];

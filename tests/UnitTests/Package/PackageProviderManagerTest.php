@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Package;
 
+use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
 use CodedMonkey\Dirigent\Package\PackageProviderManager;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use Composer\MetadataMinifier\MetadataMinifier;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[CoversClass(PackageProviderManager::class)]
 class PackageProviderManagerTest extends TestCase
@@ -23,7 +26,12 @@ class PackageProviderManagerTest extends TestCase
     protected function setUp(): void
     {
         $this->storagePath = sys_get_temp_dir() . '/' . uniqid('dirigent-provider-manager-');
-        $this->manager = new PackageProviderManager($this->storagePath);
+        $this->manager = new PackageProviderManager(
+            $this->createStub(UrlGeneratorInterface::class),
+            true,
+            false,
+            $this->storagePath,
+        );
     }
 
     #[\Override]
@@ -40,20 +48,54 @@ class PackageProviderManagerTest extends TestCase
         );
     }
 
-    public function testExistsReturnsTrueAfterDump(): void
+    public static function sourceTypes(): iterable
     {
-        $package = $this->createMockPackage();
-        $version = $this->createMockVersion($package);
-        $version->setCurrentMetadata($this->createMockMetadata($version));
-
-        $this->manager->dump($package);
-
-        self::assertTrue($this->manager->exists($package->getName()));
+        yield 'git' => ['git', true];
+        yield 'svn' => ['svn', false];
+        yield 'mercurial' => ['hg', false];
+        yield 'perforce' => ['perforce', false];
+        yield 'fossil' => ['fossil', false];
+        yield 'unknown' => [null, false];
     }
 
-    public function testExistsReturnsFalseWhenFileIsMissing(): void
+    #[DataProvider('sourceTypes')]
+    public function testOnlyGitSourcesReceiveGeneratedDistributionUrls(?string $sourceType, bool $expected): void
     {
-        self::assertFalse($this->manager->exists('foo/bar'));
+        [$package, , $metadata] = $this->createMockPackageWithMetadata();
+        $package->setFetchStrategy(PackageFetchStrategy::Vcs);
+        $metadata->setSourceType($sourceType);
+        $metadata->setSourceReference('svn' === $sourceType ? '/tags/1.0.0/@123' : 'reference');
+        $metadata->setDistributionType('zip');
+        $metadata->setDistributionUrl('https://example.com/original.zip');
+        $originalDistribution = $metadata->toComposerArray()['dist'];
+
+        $router = $this->createMock(UrlGeneratorInterface::class);
+        $router->expects($expected ? self::once() : self::never())
+            ->method('generate')->willReturn('https://example.com/generated.zip');
+
+        $manager = new PackageProviderManager($router, true, false, $this->storagePath);
+        $manager->dump($package);
+
+        $data = json_decode(file_get_contents($manager->path($package->getName())), true);
+        $packages = MetadataMinifier::expand($data['packages'][$package->getName()]);
+
+        if ($expected) {
+            self::assertSame('https://example.com/generated.zip', $packages[0]['dist']['url']);
+        } else {
+            self::assertSame($originalDistribution, $packages[0]['dist']);
+        }
+    }
+
+    public function testExists(): void
+    {
+        $packageName = sprintf('%s/%s', uniqid(), uniqid());
+        $path = $this->manager->path($packageName);
+
+        self::assertFalse($this->manager->exists($packageName), 'File must not exist before dumping.');
+
+        new Filesystem()->dumpFile($path, '{}');
+
+        self::assertTrue($this->manager->exists($packageName), 'File must exist after dumping.');
     }
 
     public function testDumpWritesReleaseAndDevelopmentProviderFiles(): void

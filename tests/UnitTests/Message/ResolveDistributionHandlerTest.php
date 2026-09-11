@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Message;
 
+use CodedMonkey\Dirigent\Distribution\DistributionResolver;
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use CodedMonkey\Dirigent\Message\ResolveDistributionHandler;
-use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +22,7 @@ class ResolveDistributionHandlerTest extends TestCase
             ->with(1972)
             ->willReturn(null);
 
-        $distributionResolver = $this->createMock(PackageDistributionResolver::class);
+        $distributionResolver = $this->createMock(DistributionResolver::class);
         $distributionResolver->expects(self::never())->method('resolve');
 
         $handler = new ResolveDistributionHandler($metadataRepository, $distributionResolver);

@@ -45,6 +45,7 @@ src/
 ├── Form/                       # Symfony form types
 ├── Message/                    # Symfony messenger messages and handlers (async jobs)
 ├── Package/                    # Package management services
+│   └── Distribution/           # Distribution management services
 ├── Rector/                     # Project-specific Rector rules
 ├── Routing/                    # Symfony routing logic
 ├── Twig/                       # Twig extensions

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Message;
 
+use CodedMonkey\Dirigent\Distribution\DistributionResolver;
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
-use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -13,7 +13,7 @@ readonly class ResolveDistributionHandler
 {
     public function __construct(
         private MetadataRepository $metadataRepository,
-        private PackageDistributionResolver $distributionResolver,
+        private DistributionResolver $distributionResolver,
     ) {
     }
 

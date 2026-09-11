@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Package;
 
+use CodedMonkey\Dirigent\Distribution\DistributionFilesystem;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
@@ -23,7 +24,7 @@ class DistributionRemovalScheduler
     public function __construct(
         private readonly MessageBusInterface $messenger,
         private readonly DistributionRepository $distributionRepository,
-        private readonly PackageDistributionResolver $distributionResolver,
+        private readonly DistributionFilesystem $distributionFilesystem,
     ) {
     }
 
@@ -35,7 +36,7 @@ class DistributionRemovalScheduler
 
         $this->pendingRemovals[$distributionId] = new RemoveDistribution(
             $distributionId,
-            $this->distributionResolver->relativePath($distribution),
+            $this->distributionFilesystem->relativePath($distribution),
         );
     }
 
