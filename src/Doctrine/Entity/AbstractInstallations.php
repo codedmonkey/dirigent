@@ -37,9 +37,7 @@ abstract class AbstractInstallations
      */
     public function getData(): array
     {
-        if (null === $this->data) {
-            $this->data = $this->doMergeData();
-        }
+        $this->data ??= $this->doMergeData();
 
         return $this->data;
     }
