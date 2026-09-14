@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "07062b5a98ef80a553731334fbed84f5",
+    "content-hash": "c2027fdfb4ede7613274410eef257d75",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -10508,20 +10508,20 @@
     "packages-dev": [
         {
             "name": "beluga-php/docker-php",
-            "version": "v1.45.8",
+            "version": "v1.45.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/beluga-php/docker-php.git",
-                "reference": "83d008d67bdfdd6a7db306585995d647dc855b4b"
+                "reference": "2eaf579e19ed08e8d3360bee545ad85f18deadc0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/beluga-php/docker-php/zipball/83d008d67bdfdd6a7db306585995d647dc855b4b",
-                "reference": "83d008d67bdfdd6a7db306585995d647dc855b4b",
+                "url": "https://api.github.com/repos/beluga-php/docker-php/zipball/2eaf579e19ed08e8d3360bee545ad85f18deadc0",
+                "reference": "2eaf579e19ed08e8d3360bee545ad85f18deadc0",
                 "shasum": ""
             },
             "require": {
-                "beluga-php/docker-php-api": ">=7.1.45.5 <7.1.46",
+                "beluga-php/docker-php-api": "7.1.45.*",
                 "nyholm/psr7": "^1.8",
                 "php": ">=8.1",
                 "php-http/client-common": "^2.7",
@@ -10568,7 +10568,7 @@
             "description": "A Docker PHP client",
             "support": {
                 "issues": "https://github.com/beluga-php/docker-php/issues",
-                "source": "https://github.com/beluga-php/docker-php/tree/v1.45.8"
+                "source": "https://github.com/beluga-php/docker-php/tree/v1.45.6"
             },
             "funding": [
                 {
@@ -10576,20 +10576,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-07T11:27:10+00:00"
+            "time": "2025-12-27T21:42:50+00:00"
         },
         {
             "name": "beluga-php/docker-php-api",
-            "version": "v7.1.45.5",
+            "version": "v7.1.45.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/beluga-php/docker-php-api.git",
-                "reference": "5d1bca566322d489f6daba6c26ec6b85f621ee39"
+                "reference": "8f3ed3b9a69e161489e07664b99eb73258e7eef2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/beluga-php/docker-php-api/zipball/5d1bca566322d489f6daba6c26ec6b85f621ee39",
-                "reference": "5d1bca566322d489f6daba6c26ec6b85f621ee39",
+                "url": "https://api.github.com/repos/beluga-php/docker-php-api/zipball/8f3ed3b9a69e161489e07664b99eb73258e7eef2",
+                "reference": "8f3ed3b9a69e161489e07664b99eb73258e7eef2",
                 "shasum": ""
             },
             "require": {
@@ -10607,9 +10607,9 @@
                 "psr/http-message": "^2.0",
                 "psr/http-message-implementation": "*",
                 "symfony/deprecation-contracts": "^3.3",
-                "symfony/options-resolver": "^6.4 || ^7.0 || ^8.0",
-                "symfony/serializer": "^6.4 || ^7.0 || ^8.0",
-                "symfony/validator": "^6.4 || ^7.0 || ^8.0"
+                "symfony/options-resolver": "^6.3 || ^7.0 || ^8.0",
+                "symfony/serializer": "^6.3 || ^7.0 || ^8.0",
+                "symfony/validator": "^6.3 || ^7.0 || ^8.0"
             },
             "conflict": {
                 "docker-php/docker-php-api": "*"
@@ -10617,7 +10617,7 @@
             "require-dev": {
                 "ergebnis/composer-normalize": "^2.42",
                 "friendsofphp/php-cs-fixer": "^3.8",
-                "jane-php/open-api-3": "^7.14",
+                "jane-php/open-api-3": "^7.4",
                 "roave/security-advisories": "dev-latest"
             },
             "type": "library",
@@ -10645,7 +10645,7 @@
             "description": "Docker API generated files from OpenAPI Specification",
             "support": {
                 "issues": "https://github.com/beluga-php/docker-php-api/issues",
-                "source": "https://github.com/beluga-php/docker-php-api/tree/v7.1.45.5"
+                "source": "https://github.com/beluga-php/docker-php-api/tree/v7.1.45.4"
             },
             "funding": [
                 {
@@ -10653,7 +10653,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-04T14:53:13+00:00"
+            "time": "2026-01-09T13:29:42+00:00"
         },
         {
             "name": "clue/ndjson-react",
