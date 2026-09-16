@@ -4,6 +4,7 @@ Dirigent is a free and open package registry for Composer, the PHP package manag
 
 ## Architecture
 
+@AGENTS-Symfony.md
 @ARCHITECTURE.md
 
 - Make sure the information in ARCHITECTURE.md is up to date and accurate.
