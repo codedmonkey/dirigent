@@ -27,6 +27,6 @@ class ResolveDistributionHandlerTest extends TestCase
 
         $handler = new ResolveDistributionHandler($metadataRepository, $distributionResolver);
 
-        $handler(new ResolveDistribution(42, 'reference', 'zip'));
+        $handler(new ResolveDistribution(42, 'zip'));
     }
 }
