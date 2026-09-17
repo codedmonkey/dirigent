@@ -126,21 +126,19 @@ class ApiController extends AbstractController
         $packageName = $request->attributes->get('package');
         $versionName = $request->attributes->get('version');
 
-        if (!$this->distributionResolver->exists($packageName, $versionName, $reference, $type)) {
-            if (null === $package = $this->findPackage($packageName)) {
-                throw $this->createNotFoundException();
-            }
-
-            if (null === $metadata = $this->metadataRepository->findOneByNormalizedNameAndReference($package, $versionName, $reference)) {
-                throw $this->createNotFoundException();
-            }
-
-            if (!$this->distributionResolver->resolve($metadata, $type, async: $this->getParameter('dirigent.distributions.async_api_requests'))) {
-                throw $this->createNotFoundException();
-            }
+        if (null === $package = $this->findPackage($packageName)) {
+            throw $this->createNotFoundException();
         }
 
-        $path = $this->distributionResolver->path($packageName, $versionName, $reference, $type);
+        if (null === $metadata = $this->metadataRepository->findOneByNormalizedNameAndReference($package, $versionName, $reference)) {
+            throw $this->createNotFoundException();
+        }
+
+        if (!$this->distributionResolver->resolve($metadata, $type, async: $this->getParameter('dirigent.distributions.async_api_requests'))) {
+            throw $this->createNotFoundException();
+        }
+
+        $path = $this->distributionResolver->path($metadata, $type);
         $filename = u("$packageName-$versionName-$reference.$type")->replace('/', '-')->toString();
 
         return $this->file($path, $filename);
