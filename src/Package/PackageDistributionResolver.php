@@ -32,24 +32,25 @@ readonly class PackageDistributionResolver
         $this->storagePath = "$storagePath/distribution";
     }
 
-    public function exists(string $packageName, string $versionName, string $reference, string $type): bool
+    public function exists(Metadata $metadata, string $reference, string $type): bool
     {
-        return $this->filesystem->exists($this->path($packageName, $versionName, $reference, $type));
+        return $this->fileExists($this->path($metadata, $reference, $type));
     }
 
-    public function path(string $packageName, string $versionName, string $reference, string $type): string
+    public function path(Metadata $metadata, string $reference, string $type): string
     {
-        return "{$this->storagePath}/{$packageName}/{$versionName}-{$reference}.{$type}";
-    }
-
-    public function resolve(Metadata $metadata, string $type, bool $async): bool
-    {
-        $package = $metadata->getPackage();
-        $packageName = $package->getName();
+        $packageName = $metadata->getPackage()->getName();
         $versionName = $metadata->getNormalizedVersionName();
-        $reference = $metadata->getDistributionReference();
+        $revision = $metadata->getRevision();
 
-        if ($this->exists($packageName, $versionName, $reference, $type)) {
+        return "{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}";
+    }
+
+    public function resolve(Metadata $metadata, string $reference, string $type, bool $async): bool
+    {
+        $path = $this->path($metadata, $reference, $type);
+
+        if ($this->fileExists($path)) {
             return true;
         }
 
@@ -75,11 +76,9 @@ readonly class PackageDistributionResolver
             $distribution = new Distribution($metadata, $type);
         }
 
-        $distributionUrl = $metadata->getDistributionUrl();
-        $path = $this->path($packageName, $versionName, $reference, $type);
-
         $this->filesystem->mkdir(dirname($path));
 
+        $distributionUrl = $metadata->getDistributionUrl();
         $httpDownloader = $this->composer->createHttpDownloader();
         $httpDownloader->copy($distributionUrl, $path);
 
@@ -89,5 +88,10 @@ readonly class PackageDistributionResolver
         $this->distributionRepository->save($distribution, true);
 
         return true;
+    }
+
+    private function fileExists(string $path): bool
+    {
+        return $this->filesystem->exists($path);
     }
 }
