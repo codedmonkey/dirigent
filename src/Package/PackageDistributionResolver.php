@@ -34,14 +34,19 @@ readonly class PackageDistributionResolver
         $this->storagePath = "$storagePath/distribution";
     }
 
-    public function exists(string $packageName, string $versionName, string $reference, string $type): bool
+    public function exists(Metadata $metadata, string $type): bool
     {
-        return $this->filesystem->exists($this->path($packageName, $versionName, $reference, $type));
+        return $this->fileExists($this->path($metadata, $type));
     }
 
-    public function path(string $packageName, string $versionName, string $reference, string $type): string
+    public function path(Metadata $metadata, string $type): string
     {
-        return "{$this->storagePath}/{$packageName}/{$versionName}-{$reference}.{$type}";
+        $packageName = $metadata->getPackage()->getName();
+        $versionName = $metadata->getNormalizedVersionName();
+        $revision = $metadata->getRevision();
+        $reference = $metadata->getReference();
+
+        return "{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}";
     }
 
     public function resolve(Metadata $metadata, string $type, bool $async): bool
@@ -50,16 +55,13 @@ readonly class PackageDistributionResolver
             return false;
         }
 
-        $package = $metadata->getPackage();
-        $packageName = $package->getName();
-        $versionName = $metadata->getNormalizedVersionName();
-        $reference = $metadata->getDistributionReference();
+        $path = $this->path($metadata, $type);
 
-        if ($this->exists($packageName, $versionName, $reference, $type)) {
+        if ($this->fileExists($path)) {
             return true;
         }
 
-        if ($reference !== $metadata->getDistributionReference() || $type !== $metadata->getDistributionType()) {
+        if ($type !== $metadata->getDistributionType()) {
             return false;
         }
 
@@ -82,7 +84,6 @@ readonly class PackageDistributionResolver
         }
 
         $distributionUrl = $metadata->getDistributionUrl();
-        $path = $this->path($packageName, $versionName, $reference, $type);
 
         $this->filesystem->mkdir(dirname($path));
 
@@ -95,5 +96,10 @@ readonly class PackageDistributionResolver
         $this->distributionRepository->save($distribution, true);
 
         return true;
+    }
+
+    private function fileExists(string $path): bool
+    {
+        return $this->filesystem->exists($path);
     }
 }
