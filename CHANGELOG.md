@@ -1,5 +1,11 @@
 # Changelog
 
+* 0.8.0
+  * **Breaking changes**
+    * The path for stored distributions has changed, so any previously downloaded distributions are no longer valid.
+      It's recommended to delete the existing `distribution/` directory in the data directory before upgrading to
+      this version to prevent any lingering distributions taking up storage space.
+
 * 0.7.3 (2026-08-28)
   * Fixed issue with resolving package metadata with recurring keywords being blocked by database errors
   * Updated `composer/composer` and `league/commonmark` dependencies to fix potential security vulnerabilities
