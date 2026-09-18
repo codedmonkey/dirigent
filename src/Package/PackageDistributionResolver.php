@@ -7,8 +7,6 @@ namespace CodedMonkey\Dirigent\Package;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
-use CodedMonkey\Dirigent\Doctrine\Entity\Package;
-use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -63,36 +61,27 @@ readonly class PackageDistributionResolver
         return $path;
     }
 
-    public function remove(Distribution $distribution): void
+    public function relativePath(Distribution $distribution): string
     {
-        $path = $this->path($distribution->getMetadata(), $distribution->getType());
+        return Path::makeRelative(
+            $this->path($distribution->getMetadata(), $distribution->getType()),
+            $this->storagePath,
+        );
+    }
+
+    public function removeFile(string $relativePath): void
+    {
+        $path = Path::canonicalize("{$this->storagePath}/$relativePath");
+        if (!Path::isBasePath($this->storagePath, $path) || $this->storagePath === $path) {
+            throw new \RuntimeException('Distribution path is outside the configured storage directory.');
+        }
+
         $lock = $this->createDistributionLock($path);
 
         try {
-            $this->removeFile($path);
+            $this->removePath($path);
         } finally {
             $lock->release();
-        }
-    }
-
-    public function removeMetadata(Metadata $metadata): void
-    {
-        foreach ($this->distributionRepository->findByMetadata($metadata) as $distribution) {
-            $this->remove($distribution);
-        }
-    }
-
-    public function removePackage(Package $package): void
-    {
-        foreach ($this->distributionRepository->findByPackage($package) as $distribution) {
-            $this->remove($distribution);
-        }
-    }
-
-    public function removeVersion(Version $version): void
-    {
-        foreach ($this->distributionRepository->findByVersion($version) as $distribution) {
-            $this->remove($distribution);
         }
     }
 
@@ -152,7 +141,7 @@ readonly class PackageDistributionResolver
                 $this->distributionRepository->save($distribution, true);
             } catch (\Throwable $exception) {
                 // Remove file immediately if saving the distribution to the database failed
-                $this->removeFile($path);
+                $this->removePath($path);
 
                 throw $exception;
             }
@@ -176,7 +165,7 @@ readonly class PackageDistributionResolver
         return $this->filesystem->exists($path);
     }
 
-    private function removeFile(string $path): void
+    private function removePath(string $path): void
     {
         $this->filesystem->remove($path);
 
