@@ -46,7 +46,7 @@ class DirigentExtension extends ConfigurableExtension
         $distributionsEnabled = $config['enabled'] || $distMirroringConfig['enabled'];
 
         $container->setParameter('dirigent.distributions.enabled', $distributionsEnabled);
-        $container->setParameter('dirigent.distributions.build', $distributionsEnabled && $config['build']);
+        $container->setParameter('dirigent.distributions.build', $config['enabled'] && $config['build']);
         $container->setParameter('dirigent.distributions.mirror', $distributionsEnabled && ($config['mirror'] || $distMirroringConfig['enabled']));
 
         $container->setParameter('dirigent.distributions.async_api_requests', $config['async_api_requests']);
