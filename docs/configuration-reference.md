@@ -35,7 +35,7 @@ dirigent:
     mirror: false
     async_api_requests: false
     dev_versions: false
-    preferred_mirror: true
+    preferred_mirror: false
   metadata:
     default_fetch_strategy: 'mirror'
     retain_pruned_versions:
