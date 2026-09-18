@@ -9,6 +9,7 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
+use Composer\Util\HttpDownloader;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
@@ -148,6 +149,62 @@ class PackageDistributionResolverTest extends TestCase
 
         self::assertFileDoesNotExist($distributionPath);
         self::assertFileExists($outsidePath);
+    }
+
+    public function testResolveDeletesDownloadedFileWhenPersistenceFails(): void
+    {
+        [, , $metadata] = $this->createMockPackageWithMetadata();
+        $metadata->setDistributionReference('reference');
+        $metadata->setDistributionType('zip');
+        $metadata->setDistributionUrl('https://example.com/distribution.zip');
+
+        $httpDownloader = $this->createMock(HttpDownloader::class);
+        $httpDownloader->expects(self::once())
+            ->method('copy')
+            ->willReturnCallback(static function (string $url, string $path): void {
+                new Filesystem()->dumpFile($path, 'distribution');
+            });
+
+        $composer = $this->createMock(ComposerClient::class);
+        $composer->expects(self::once())
+            ->method('createHttpDownloader')
+            ->willReturn($httpDownloader);
+
+        $persistenceException = new \RuntimeException('Persistence failed');
+        $distributionRepository = $this->createMock(DistributionRepository::class);
+        $distributionRepository->method('findOneByMetadataAndType')->willReturn(null);
+        $distributionRepository->expects(self::once())
+            ->method('save')
+            ->willThrowException($persistenceException);
+
+        $lock = $this->createMock(SharedLockInterface::class);
+        $lock->expects(self::once())->method('acquire')->with(true);
+        $lock->expects(self::once())->method('release');
+
+        $lockFactory = $this->createMock(LockFactory::class);
+        $lockFactory->expects(self::once())
+            ->method('createLock')
+            ->willReturn($lock);
+
+        $resolver = new PackageDistributionResolver(
+            $this->createStub(MessageBusInterface::class),
+            $composer,
+            $distributionRepository,
+            $lockFactory,
+            true,
+            true,
+            $this->storagePath,
+        );
+        $path = $resolver->path($metadata, 'zip');
+
+        try {
+            $resolver->resolve($metadata, 'zip', async: false);
+            self::fail('Expected persistence to fail.');
+        } catch (\RuntimeException $exception) {
+            self::assertSame($persistenceException, $exception);
+        }
+
+        self::assertFileDoesNotExist($path);
     }
 
     private function dumpStubDistribution(PackageDistributionResolver $resolver, Distribution $distribution): string

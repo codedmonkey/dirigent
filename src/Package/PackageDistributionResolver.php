@@ -69,14 +69,7 @@ readonly class PackageDistributionResolver
         $lock = $this->createDistributionLock($path);
 
         try {
-            $this->filesystem->remove($path);
-
-            // Remove parent directories that aren't empty
-            $directory = dirname($path);
-            while ($this->storagePath !== $directory && Path::isBasePath($this->storagePath, $directory) && is_dir($directory) && !new \FilesystemIterator($directory)->valid()) {
-                $this->filesystem->remove($directory);
-                $directory = dirname($directory);
-            }
+            $this->removeFile($path);
         } finally {
             $lock->release();
         }
@@ -155,7 +148,14 @@ readonly class PackageDistributionResolver
             $distribution->setSource($distributionUrl);
             $distribution->setResolvedAt();
 
-            $this->distributionRepository->save($distribution, true);
+            try {
+                $this->distributionRepository->save($distribution, true);
+            } catch (\Throwable $exception) {
+                // Remove file immediately if saving the distribution to the database failed
+                $this->removeFile($path);
+
+                throw $exception;
+            }
 
             return true;
         } finally {
@@ -174,6 +174,18 @@ readonly class PackageDistributionResolver
     private function fileExists(string $path): bool
     {
         return $this->filesystem->exists($path);
+    }
+
+    private function removeFile(string $path): void
+    {
+        $this->filesystem->remove($path);
+
+        // Remove parent directories that aren't empty
+        $directory = dirname($path);
+        while ($this->storagePath !== $directory && Path::isBasePath($this->storagePath, $directory) && is_dir($directory) && !new \FilesystemIterator($directory)->valid()) {
+            $this->filesystem->remove($directory);
+            $directory = dirname($directory);
+        }
     }
 
     private function encodePathComponent(string $component): string
