@@ -141,7 +141,7 @@ class ApiController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $path = $this->distributionResolver->path($metadata, $reference);
+        $path = $this->distributionResolver->path($metadata, $type);
         $filename = u("$packageName-$versionName-r$revision-$reference.$type")->replace('/', '-')->toString();
 
         return $this->file($path, $filename);
@@ -166,7 +166,7 @@ class ApiController extends AbstractController
     #[IsGrantedAccess]
     public function packageDistributionMirror(Request $request, string $reference, string $type): Response
     {
-        if (!$this->getParameter('dirigent.distributions.enabled')) {
+        if (!$this->getParameter('dirigent.distributions.mirror')) {
             throw $this->createNotFoundException();
         }
 
