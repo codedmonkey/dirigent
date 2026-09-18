@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Doctrine\EventListener;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
-use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
+use CodedMonkey\Dirigent\Package\DistributionRemovalScheduler;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\Events;
 
@@ -13,12 +13,12 @@ use Doctrine\ORM\Events;
 readonly class MetadataListener
 {
     public function __construct(
-        private PackageDistributionResolver $distributionResolver,
+        private DistributionRemovalScheduler $removalScheduler,
     ) {
     }
 
     public function preRemove(Metadata $metadata): void
     {
-        $this->distributionResolver->removeMetadata($metadata);
+        $this->removalScheduler->scheduleMetadata($metadata);
     }
 }

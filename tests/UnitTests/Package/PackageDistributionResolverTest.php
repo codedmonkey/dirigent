@@ -62,7 +62,7 @@ class PackageDistributionResolverTest extends TestCase
         self::assertStringContainsString('..%2F..%2F..%2Farchive', $path);
     }
 
-    public function testRemoveDeletesDistributionFile(): void
+    public function testRemoveFileDeletesDistributionFile(): void
     {
         [, , $metadata] = $this->createMockPackageWithMetadata();
         $metadata->setDistributionReference('reference');
@@ -88,13 +88,13 @@ class PackageDistributionResolverTest extends TestCase
             ->method('createLock')
             ->willReturn($lock);
 
-        $resolver->remove($distribution);
+        $resolver->removeFile($resolver->relativePath($distribution));
 
         self::assertFileDoesNotExist($path);
         self::assertDirectoryDoesNotExist(dirname($path));
     }
 
-    public function testRemoveKeepsNonEmptyPackageDirectory(): void
+    public function testRemoveFileKeepsNonEmptyPackageDirectory(): void
     {
         [, , $metadata] = $this->createMockPackageWithMetadata();
         $metadata->setDistributionReference('reference');
@@ -114,14 +114,14 @@ class PackageDistributionResolverTest extends TestCase
         $path = $this->dumpStubDistribution($resolver, $distribution);
         $alternativePath = $this->dumpStubDistribution($resolver, $alternativeDistribution);
 
-        $resolver->remove($distribution);
+        $resolver->removeFile($resolver->relativePath($distribution));
 
         self::assertFileDoesNotExist($path);
         self::assertFileExists($alternativePath);
         self::assertDirectoryExists(dirname($path));
     }
 
-    public function testRemoveWithTraversalReferenceDoesNotDeleteOutsideDistributionStorage(): void
+    public function testRemoveFileWithTraversalReferenceDoesNotDeleteOutsideDistributionStorage(): void
     {
         [, , $metadata] = $this->createMockPackageWithMetadata();
         $metadata->setDistributionReference('../../../../outside');
@@ -145,7 +145,7 @@ class PackageDistributionResolverTest extends TestCase
         $outsidePath = $this->storagePath . '/outside.zip';
         new Filesystem()->dumpFile($outsidePath, 'outside');
 
-        $resolver->remove($distribution);
+        $resolver->removeFile($resolver->relativePath($distribution));
 
         self::assertFileDoesNotExist($distributionPath);
         self::assertFileExists($outsidePath);
