@@ -12,6 +12,7 @@ use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\SharedLockInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -33,6 +34,30 @@ class PackageDistributionResolverTest extends TestCase
     protected function tearDown(): void
     {
         new Filesystem()->remove($this->storagePath);
+    }
+
+    public function testPathEncodesMetadataAndKeepsTraversalReferenceInsideStorage(): void
+    {
+        [$package, , $metadata] = $this->createMockPackageWithMetadata();
+        $package->setName('../outside');
+        $metadata->setNormalizedVersionName('../../version');
+        $metadata->setDistributionReference('../../../archive');
+
+        $resolver = new PackageDistributionResolver(
+            $this->createStub(MessageBusInterface::class),
+            $this->createStub(ComposerClient::class),
+            $this->createStub(DistributionRepository::class),
+            $this->createStub(LockFactory::class),
+            true,
+            $this->storagePath,
+        );
+
+        $path = $resolver->path($metadata, '../zip');
+
+        self::assertTrue(Path::isBasePath($this->storagePath . '/distribution', $path));
+        self::assertStringNotContainsString('../', $path);
+        self::assertStringNotContainsString('../../../archive', $path);
+        self::assertStringContainsString('..%2F..%2F..%2Farchive', $path);
     }
 
     public function testRemoveDeletesDistributionFile(): void
@@ -90,6 +115,35 @@ class PackageDistributionResolverTest extends TestCase
         self::assertFileDoesNotExist($path);
         self::assertFileExists($alternativePath);
         self::assertDirectoryExists(dirname($path));
+    }
+
+    public function testRemoveWithTraversalReferenceDoesNotDeleteOutsideDistributionStorage(): void
+    {
+        [, , $metadata] = $this->createMockPackageWithMetadata();
+        $metadata->setDistributionReference('../../../../outside');
+        $distribution = new Distribution($metadata, 'zip');
+
+        $lock = $this->createStub(SharedLockInterface::class);
+        $lockFactory = $this->createStub(LockFactory::class);
+        $lockFactory->method('createLock')->willReturn($lock);
+
+        $resolver = new PackageDistributionResolver(
+            $this->createStub(MessageBusInterface::class),
+            $this->createStub(ComposerClient::class),
+            $this->createStub(DistributionRepository::class),
+            $lockFactory,
+            true,
+            $this->storagePath,
+        );
+
+        $distributionPath = $this->dumpStubDistribution($resolver, $distribution);
+        $outsidePath = $this->storagePath . '/outside.zip';
+        new Filesystem()->dumpFile($outsidePath, 'outside');
+
+        $resolver->remove($distribution);
+
+        self::assertFileDoesNotExist($distributionPath);
+        self::assertFileExists($outsidePath);
     }
 
     private function dumpStubDistribution(PackageDistributionResolver $resolver, Distribution $distribution): string

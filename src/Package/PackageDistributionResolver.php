@@ -13,6 +13,7 @@ use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\SharedLockInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -34,7 +35,7 @@ readonly class PackageDistributionResolver
         string $storagePath,
     ) {
         $this->filesystem = new Filesystem();
-        $this->storagePath = "$storagePath/distribution";
+        $this->storagePath = Path::canonicalize("$storagePath/distribution");
     }
 
     public function exists(Metadata $metadata, string $type): bool
@@ -44,12 +45,20 @@ readonly class PackageDistributionResolver
 
     public function path(Metadata $metadata, string $type): string
     {
-        $packageName = $metadata->getPackage()->getName();
-        $versionName = $metadata->getNormalizedVersionName();
+        $packageName = explode('/', $metadata->getPackage()->getName(), 2)
+            |> (fn($x) => array_map($this->encodePathComponent(...), $x))
+            |> (fn($x) => implode('/', $x));
+        $versionName = $this->encodePathComponent($metadata->getNormalizedVersionName());
         $revision = $metadata->getRevision();
-        $reference = $metadata->getReference();
+        $reference = $this->encodePathComponent($metadata->getReference());
+        $type = $this->encodePathComponent($type);
 
-        return "{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}";
+        $path = Path::canonicalize("{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}");
+        if (!Path::isBasePath($this->storagePath, $path) || $this->storagePath === $path) {
+            throw new \RuntimeException('Distribution path is outside the configured storage directory.');
+        }
+
+        return $path;
     }
 
     public function remove(Distribution $distribution): void
@@ -60,16 +69,11 @@ readonly class PackageDistributionResolver
         try {
             $this->filesystem->remove($path);
 
-            // Remove the package directory if it's empty
-            $packageDirectory = dirname($path);
-            if (is_dir($packageDirectory) && !new \FilesystemIterator($packageDirectory)->valid()) {
-                $this->filesystem->remove($packageDirectory);
-            }
-
-            // Remove the vendor directory if it's empty
-            $vendorDirectory = dirname($packageDirectory);
-            if (is_dir($vendorDirectory) && !new \FilesystemIterator($vendorDirectory)->valid()) {
-                $this->filesystem->remove($vendorDirectory);
+            // Remove parent directories that aren't empty
+            $directory = dirname($path);
+            while ($this->storagePath !== $directory && Path::isBasePath($this->storagePath, $directory) && is_dir($directory) && !new \FilesystemIterator($directory)->valid()) {
+                $this->filesystem->remove($directory);
+                $directory = dirname($directory);
             }
         } finally {
             $lock->release();
@@ -164,5 +168,17 @@ readonly class PackageDistributionResolver
     private function fileExists(string $path): bool
     {
         return $this->filesystem->exists($path);
+    }
+
+    private function encodePathComponent(string $component): string
+    {
+        $encodedComponent = rawurlencode($component);
+
+        return match ($encodedComponent) {
+            '' => '%00',
+            '.' => '%2E',
+            '..' => '%2E%2E',
+            default => $encodedComponent,
+        };
     }
 }
