@@ -5,9 +5,17 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Package;
 
 use CodedMonkey\Dirigent\Composer\ComposerClient;
-use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
+use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
+use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\SharedLockInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 readonly class PackageDistributionResolver
 {
@@ -15,48 +23,169 @@ readonly class PackageDistributionResolver
     private string $storagePath;
 
     public function __construct(
+        private MessageBusInterface $messenger,
         private ComposerClient $composer,
+        private DistributionRepository $distributionRepository,
+        private LockFactory $lockFactory,
+        #[Autowire(param: 'dirigent.distributions.mirror')]
+        private bool $mirrorDistributions,
+        #[Autowire(param: 'dirigent.distributions.dev_versions')]
+        private bool $includeDevVersions,
         #[Autowire(param: 'dirigent.storage.path')]
         string $storagePath,
     ) {
         $this->filesystem = new Filesystem();
-        $this->storagePath = "$storagePath/distribution";
+        $this->storagePath = Path::canonicalize("$storagePath/distribution");
     }
 
-    public function exists(string $packageName, string $versionName, string $reference, string $type): bool
+    public function exists(Metadata $metadata, string $type): bool
     {
-        return $this->filesystem->exists($this->path($packageName, $versionName, $reference, $type));
+        return $this->fileExists($this->path($metadata, $type));
     }
 
-    public function path(string $packageName, string $versionName, string $reference, string $type): string
+    public function path(Metadata $metadata, string $type): string
     {
-        return "{$this->storagePath}/{$packageName}/{$versionName}-{$reference}.{$type}";
+        $packageName = explode('/', $metadata->getPackage()->getName(), 2)
+            |> (fn ($x) => array_map($this->encodePathComponent(...), $x))
+            |> (static fn ($x) => implode('/', $x));
+        $versionName = $this->encodePathComponent($metadata->getNormalizedVersionName());
+        $revision = $metadata->getRevision();
+        $reference = $this->encodePathComponent($metadata->getReference());
+        $type = $this->encodePathComponent($type);
+
+        $path = Path::canonicalize("{$this->storagePath}/{$packageName}/{$versionName}-r{$revision}-{$reference}.{$type}");
+        if (!Path::isBasePath($this->storagePath, $path) || $this->storagePath === $path) {
+            throw new \RuntimeException('Distribution path is outside the configured storage directory.');
+        }
+
+        return $path;
     }
 
-    public function resolve(Version $version, string $reference, string $type): bool
+    public function relativePath(Distribution $distribution): string
     {
-        $package = $version->getPackage();
-        $packageName = $package->getName();
-        $versionName = $version->getNormalizedName();
+        return Path::makeRelative(
+            $this->path($distribution->getMetadata(), $distribution->getType()),
+            $this->storagePath,
+        );
+    }
 
-        if ($this->exists($packageName, $versionName, $reference, $type)) {
+    public function removeFile(string $relativePath): void
+    {
+        $path = Path::canonicalize("{$this->storagePath}/$relativePath");
+        if (!Path::isBasePath($this->storagePath, $path) || $this->storagePath === $path) {
+            throw new \RuntimeException('Distribution path is outside the configured storage directory.');
+        }
+
+        $lock = $this->createDistributionLock($path);
+
+        try {
+            $this->removePath($path);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    public function resolve(Metadata $metadata, string $type, bool $async): bool
+    {
+        if (!$this->mirrorDistributions) {
+            return false;
+        }
+
+        $path = $this->path($metadata, $type);
+
+        if ($this->fileExists($path)) {
             return true;
         }
 
-        $metadata = $version->getCurrentMetadata();
+        if ($type !== $metadata->getDistributionType()) {
+            return false;
+        }
 
-        if ($reference !== $metadata->getDistributionReference() || $type !== $metadata->getDistributionType()) {
+        if ($metadata->getVersion()->isDevelopment() && !$this->includeDevVersions) {
+            return false;
+        }
+
+        if ($async) {
+            // Resolve the distribution asynchronously so it's available in the future now that we know it was requested
+            $this->messenger->dispatch(new ResolveDistribution($metadata->getId(), $type), [
+                new TransportNamesStamp('async'),
+            ]);
+
+            // Still return false so the service resolving the distribution doesn't try to fetch it anyway
             return false;
         }
 
         $distributionUrl = $metadata->getDistributionUrl();
-        $path = $this->path($packageName, $versionName, $reference, $type);
+        $path = $this->path($metadata, $type);
 
-        $this->filesystem->mkdir(dirname($path));
+        $lock = $this->createDistributionLock($path);
 
-        $httpDownloader = $this->composer->createHttpDownloader();
-        $httpDownloader->copy($distributionUrl, $path);
+        try {
+            if ($this->fileExists($path)) {
+                return true;
+            }
 
-        return true;
+            if (null === $distribution = $this->distributionRepository->findOneByMetadataAndType($metadata, $type)) {
+                $distribution = new Distribution($metadata, $type);
+            }
+
+            $this->filesystem->mkdir(dirname($path));
+
+            $httpDownloader = $this->composer->createHttpDownloader();
+            $httpDownloader->copy($distributionUrl, $path);
+
+            $distribution->setSource($distributionUrl);
+            $distribution->setResolvedAt();
+
+            try {
+                $this->distributionRepository->save($distribution, true);
+            } catch (\Throwable $exception) {
+                // Remove file immediately if saving the distribution to the database failed
+                $this->removePath($path);
+
+                throw $exception;
+            }
+
+            return true;
+        } finally {
+            $lock->release();
+        }
+    }
+
+    private function createDistributionLock(string $path): SharedLockInterface
+    {
+        $lock = $this->lockFactory->createLock('distribution.' . hash('sha256', $path), ttl: null);
+        $lock->acquire(blocking: true);
+
+        return $lock;
+    }
+
+    private function fileExists(string $path): bool
+    {
+        return $this->filesystem->exists($path);
+    }
+
+    private function removePath(string $path): void
+    {
+        $this->filesystem->remove($path);
+
+        // Remove parent directories that aren't empty
+        $directory = dirname($path);
+        while ($this->storagePath !== $directory && Path::isBasePath($this->storagePath, $directory) && is_dir($directory) && !new \FilesystemIterator($directory)->valid()) {
+            $this->filesystem->remove($directory);
+            $directory = dirname($directory);
+        }
+    }
+
+    private function encodePathComponent(string $component): string
+    {
+        $encodedComponent = rawurlencode($component);
+
+        return match ($encodedComponent) {
+            '' => '%00',
+            '.' => '%2E',
+            '..' => '%2E%2E',
+            default => $encodedComponent,
+        };
     }
 }

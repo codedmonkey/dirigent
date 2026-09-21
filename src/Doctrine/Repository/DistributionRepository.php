@@ -1,0 +1,92 @@
+<?php
+
+declare(strict_types=1);
+
+namespace CodedMonkey\Dirigent\Doctrine\Repository;
+
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
+use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
+use CodedMonkey\Dirigent\Doctrine\Entity\Package;
+use CodedMonkey\Dirigent\Doctrine\Entity\Version;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<Distribution>
+ *
+ * @method Distribution|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Distribution[]    findAll()
+ * @method Distribution[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Distribution|null findOneBy(array $criteria, array $orderBy = null)
+ */
+class DistributionRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Distribution::class);
+    }
+
+    public function save(Distribution $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(Distribution $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function findOneByMetadataAndType(Metadata $metadata, string $type): ?Distribution
+    {
+        return $this->findOneBy([
+            'metadata' => $metadata,
+            'type' => $type,
+        ]);
+    }
+
+    /**
+     * @return Distribution[]
+     */
+    public function findByMetadata(Metadata $metadata): array
+    {
+        return $this->createQueryBuilder('distribution')
+            ->where('distribution.metadata = :metadata')
+            ->setParameter('metadata', $metadata)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Distribution[]
+     */
+    public function findByPackage(Package $package): array
+    {
+        return $this->createQueryBuilder('distribution')
+            ->join('distribution.metadata', 'metadata')
+            ->where('metadata.package = :package')
+            ->setParameter('package', $package)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return Distribution[]
+     */
+    public function findByVersion(Version $version): array
+    {
+        return $this->createQueryBuilder('distribution')
+            ->join('distribution.metadata', 'metadata')
+            ->where('metadata.version = :version')
+            ->setParameter('version', $version)
+            ->getQuery()
+            ->getResult();
+    }
+}
