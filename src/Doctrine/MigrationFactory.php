@@ -7,10 +7,11 @@ namespace CodedMonkey\Dirigent\Doctrine;
 use CodedMonkey\Dirigent\Encryption\Encryption;
 use Doctrine\DBAL\Connection;
 use Doctrine\Migrations\AbstractMigration;
-use Doctrine\Migrations\Version\MigrationFactory as BaseMigrationFactory;
+use Doctrine\Migrations\Version\MigrationFactory as MigrationFactoryInterface;
+use DoctrineMigrations\Version20250311205816;
 use Psr\Log\LoggerInterface;
 
-readonly class MigrationFactory implements BaseMigrationFactory
+readonly class MigrationFactory implements MigrationFactoryInterface
 {
     public function __construct(
         private Connection $connection,
@@ -21,10 +22,13 @@ readonly class MigrationFactory implements BaseMigrationFactory
 
     public function createVersion(string $migrationClassName): AbstractMigration
     {
-        if (str_contains($migrationClassName, '20250311205816')) {
-            return new $migrationClassName($this->connection, $this->logger, $this->encryptionUtility);
-        }
+        $additionalParameters = match ($migrationClassName) {
+            Version20250311205816::class => [$this->encryptionUtility],
+            default => [],
+        };
 
-        return new $migrationClassName($this->connection, $this->logger);
+        $parameters = [$this->connection, $this->logger, ...$additionalParameters];
+
+        return new $migrationClassName(...$parameters);
     }
 }
