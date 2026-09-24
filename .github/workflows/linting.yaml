@@ -39,9 +39,7 @@ jobs:
 
       - name: Lint Composer configuration
         if: always() && steps.composer-install.outcome == 'success'
-        run: composer validate --ansi
-        # todo enable strict mode, currently license is invalid
-        # run: composer validate --strict --ansi
+        run: composer validate --strict --ansi
 
       - name: Lint Symfony service container
         if: always() && steps.composer-install.outcome == 'success'
