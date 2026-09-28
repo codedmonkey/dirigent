@@ -55,3 +55,24 @@ jobs:
         if: always() && steps.composer-install.outcome == 'success'
         continue-on-error: true
         run: composer recipes --outdated --ansi
+
+  npm:
+    name: NPM
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          cache: npm
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Check if any NPM dependencies are compromised
+        run: npm audit
