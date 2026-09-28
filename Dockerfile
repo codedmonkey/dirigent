@@ -23,7 +23,7 @@ COPY package.json package-lock.json tsconfig.json webpack.config.js ./
 COPY assets assets/
 
 RUN set -e; \
-    npm install; \
+    npm ci; \
     npm run production;
 
 FROM alpine:3.23
