@@ -14,17 +14,26 @@ jobs:
     name: Schema
 
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://dirigent:!ChangeMe!@database:5432/dirigent?serverVersion=16&charset=utf8"
     services:
       database:
         image: postgres:16-alpine
         ports:
-          - "5432:5432"
+          - "5432"
         env:
           POSTGRES_DB: dirigent
           POSTGRES_PASSWORD: "!ChangeMe!"
           POSTGRES_USER: dirigent
 
     steps:
+      - name: Configure database endpoint on GitHub
+        if: ${{ github.server_url == 'https://github.com' }}
+        env:
+          DB_PORT: ${{ job.services.database.ports[5432] }}
+        run: |
+          echo "DATABASE_URL=postgresql://dirigent:!ChangeMe!@127.0.0.1:${DB_PORT}/dirigent?serverVersion=16&charset=utf8" >> "$GITHUB_ENV"
+
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -179,17 +188,30 @@ jobs:
     # 5. Compares the schema and data against the baseline to ensure the revert is clean
 
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://dirigent:!ChangeMe!@database:5432/dirigent?serverVersion=16&charset=utf8"
+      PGHOST: database
+      PGPORT: "5432"
     services:
       database:
         image: postgres:16-alpine
         ports:
-          - "5432:5432"
+          - "5432"
         env:
           POSTGRES_DB: dirigent
           POSTGRES_PASSWORD: "!ChangeMe!"
           POSTGRES_USER: dirigent
 
     steps:
+      - name: Configure database endpoint on GitHub
+        if: github.server_url == 'https://github.com'
+        env:
+          DB_PORT: ${{ job.services.database.ports[5432] }}
+        run: |
+          echo "DATABASE_URL=postgresql://dirigent:!ChangeMe!@127.0.0.1:${DB_PORT}/dirigent?serverVersion=16&charset=utf8" >> "$GITHUB_ENV"
+          echo "PGHOST=127.0.0.1" >> "$GITHUB_ENV"
+          echo "PGPORT=${DB_PORT}" >> "$GITHUB_ENV"
+
       - name: Checkout code
         uses: actions/checkout@v7
         with:
@@ -231,6 +253,21 @@ jobs:
         with:
           php-version: 8.5
           tools: composer:v2
+
+      - name: Install PostgreSQL 16 client
+        if: steps.check.outputs.has_changes == 'true' && github.server_url != 'https://github.com'
+        run: |
+          apt-get update
+          apt-get install -y ca-certificates curl
+          install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          . /etc/os-release
+          printf 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt %s-pgdg main\n' \
+            "$VERSION_CODENAME" > /etc/apt/sources.list.d/pgdg.list
+          apt-get update
+          apt-get install -y postgresql-client-16
+          pg_dump --version
 
       - name: Set Composer cache directory
         if: steps.check.outputs.has_changes == 'true'
@@ -281,11 +318,11 @@ jobs:
         env:
           PGPASSWORD: "!ChangeMe!"
         run: |
-          pg_dump -U dirigent -h localhost dirigent \
+          pg_dump -U dirigent -h $PGHOST -p $PGPORT dirigent \
             --schema-only --no-comments --no-privileges --no-owner \
             | python3 .github/scripts/normalize-psql-dump.py \
             > /tmp/schema_baseline.sql
-          pg_dump -U dirigent -h localhost dirigent \
+          pg_dump -U dirigent -h $PGHOST -p $PGPORT dirigent \
             --data-only --no-comments --no-privileges --no-owner \
             | python3 .github/scripts/normalize-psql-dump.py \
             > /tmp/data_baseline.sql
@@ -307,11 +344,11 @@ jobs:
         env:
           PGPASSWORD: "!ChangeMe!"
         run: |
-          pg_dump -U dirigent -h localhost dirigent \
+          pg_dump -U dirigent -h $PGHOST -p $PGPORT dirigent \
             --schema-only --no-comments --no-privileges --no-owner \
             | python3 .github/scripts/normalize-psql-dump.py \
             > /tmp/schema_reverted.sql
-          pg_dump -U dirigent -h localhost dirigent \
+          pg_dump -U dirigent -h $PGHOST -p $PGPORT dirigent \
             --data-only --no-comments --no-privileges --no-owner \
             | python3 .github/scripts/normalize-psql-dump.py \
             > /tmp/data_reverted.sql
