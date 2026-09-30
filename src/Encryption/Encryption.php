@@ -32,37 +32,39 @@ readonly class Encryption
         #[\SensitiveParameter]
         array $rotatedKeyPaths,
     ): self {
-        $useFiles = !$privateKey && !$publicKey;
+        $filesystem = new Filesystem();
 
-        if ($useFiles) {
-            if ($privateKey || $publicKey || count($rotatedKeys)) {
-                throw new \RuntimeException('Unable to load encryption from configuration, missing the private or public key.');
-            }
-
-            if (!$privateKeyPath || !$publicKeyPath) {
-                throw new \RuntimeException('Unable to load encryption from paths, missing the private or public key path.');
-            }
-
-            $filesystem = new Filesystem();
-
+        // Keys as parameter (env vars) takes precedence over file paths
+        if (!$privateKey && $privateKeyPath) {
             if (!$filesystem->exists($privateKeyPath)) {
                 throw new \RuntimeException("Private decryption key file \"$privateKeyPath\" does not exist.");
-            } elseif (!$filesystem->exists($publicKeyPath)) {
-                throw new \RuntimeException("Public encryption key file \"$publicKeyPath\" does not exist.");
-            }
-
-            foreach ($rotatedKeyPaths as $rotatedKeyPath) {
-                if (!$filesystem->exists($rotatedKeyPath)) {
-                    throw new \RuntimeException("Rotated key file \"$rotatedKeyPath\" does not exist.");
-                }
             }
 
             $privateKey = $filesystem->readFile($privateKeyPath);
+        }
+
+        if (!$privateKey) {
+            throw new \RuntimeException('Unable to load encryption keys, missing the private key.');
+        }
+
+        if (!$publicKey && $publicKeyPath) {
+            if (!$filesystem->exists($publicKeyPath)) {
+                throw new \RuntimeException("Public encryption key file \"$publicKeyPath\" does not exist.");
+            }
+
             $publicKey = $filesystem->readFile($publicKeyPath);
-            $rotatedKeys = array_map(
-                $filesystem->readFile(...),
-                $rotatedKeyPaths
-            );
+        }
+
+        if (!$publicKey) {
+            throw new \RuntimeException('Unable to load encryption keys, missing the public key.');
+        }
+
+        foreach ($rotatedKeyPaths as $rotatedKeyPath) {
+            if (!$filesystem->exists($rotatedKeyPath)) {
+                throw new \RuntimeException("Rotated key file \"$rotatedKeyPath\" does not exist.");
+            }
+
+            $rotatedKeys[] = $filesystem->readFile($rotatedKeyPath);
         }
 
         $binaryPrivateKey = sodium_hex2bin((string) $privateKey);
