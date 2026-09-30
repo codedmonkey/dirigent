@@ -15,11 +15,13 @@ jobs:
     name: "PHPUnit (PHP ${{ matrix.php-version }})"
 
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://dirigent:!ChangeMe!@database:5432/dirigent?serverVersion=16&charset=utf8"
     services:
       database:
         image: postgres:16-alpine
         ports:
-          - "5432:5432"
+          - "5432"
         env:
           POSTGRES_DB: dirigent_test
           POSTGRES_PASSWORD: "!ChangeMe!"
@@ -29,6 +31,13 @@ jobs:
         php-version: ["8.5"]
 
     steps:
+      - name: Configure database endpoint on GitHub
+        if: ${{ github.server_url == 'https://github.com' }}
+        env:
+          DB_PORT: ${{ job.services.database.ports[5432] }}
+        run: |
+          echo "DATABASE_URL=postgresql://dirigent:!ChangeMe!@127.0.0.1:${DB_PORT}/dirigent?serverVersion=16&charset=utf8" >> "$GITHUB_ENV"
+
       - name: Checkout code
         uses: actions/checkout@v7
 

@@ -17,7 +17,9 @@ abstract class DockerStandaloneTestCase extends TestCase
     {
         $this->container = new GenericContainer('dirigent-standalone')
             ->withExposedPorts(7015)
-            ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
+            ->withCopyDirectoriesToContainer([
+                ['source' => __DIR__ . '/scripts', 'target' => '/srv/scripts/tests'],
+            ])
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start();
     }

@@ -25,7 +25,7 @@ class InitTest extends DockerStandaloneIsolatedTestCase
     {
         parent::tearDown();
 
-        $this->filesystem->remove(__DIR__ . '/config');
+        $this->filesystem->remove($this->configPath);
     }
 
     public function testKernelSecretGenerated(): void
@@ -57,8 +57,10 @@ class InitTest extends DockerStandaloneIsolatedTestCase
         $this->filesystem->dumpFile($this->configPath . '/secrets/kernel_secret', 'fernando');
 
         $this->container = new GenericContainer('dirigent-standalone')
-            ->withMount($this->configPath, '/srv/config')
-            ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
+            ->withCopyDirectoriesToContainer([
+                ['source' => $this->configPath, 'target' => '/srv/config'],
+                ['source' => __DIR__ . '/scripts', 'target' => '/srv/scripts/tests'],
+            ])
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start();
 
@@ -75,8 +77,10 @@ class InitTest extends DockerStandaloneIsolatedTestCase
         $this->filesystem->chmod($this->configPath, 0777, recursive: true);
 
         $this->container = new GenericContainer('dirigent-standalone')
-            ->withMount($this->configPath, '/srv/config')
-            ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
+            ->withCopyDirectoriesToContainer([
+                ['source' => $this->configPath, 'target' => '/srv/config'],
+                ['source' => __DIR__ . '/scripts', 'target' => '/srv/scripts/tests'],
+            ])
             ->withEnvironment(['KERNEL_SECRET' => 'fernando'])
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start();
@@ -96,8 +100,10 @@ class InitTest extends DockerStandaloneIsolatedTestCase
         $this->filesystem->dumpFile($this->configPath . '/secrets/alt_kernel_secret', 'fernando');
 
         $this->container = new GenericContainer('dirigent-standalone')
-            ->withMount($this->configPath, '/srv/config')
-            ->withMount(__DIR__ . '/scripts', '/srv/scripts/tests')
+            ->withCopyDirectoriesToContainer([
+                ['source' => $this->configPath, 'target' => '/srv/config'],
+                ['source' => __DIR__ . '/scripts', 'target' => '/srv/scripts/tests'],
+            ])
             ->withEnvironment(['KERNEL_SECRET_FILE' => '/srv/config/secrets/alt_kernel_secret'])
             ->withWait(new WaitForLog('ready to handle connections'))
             ->start();
