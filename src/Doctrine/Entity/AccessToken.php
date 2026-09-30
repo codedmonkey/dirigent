@@ -88,7 +88,7 @@ class AccessToken extends TrackedEntity
 
     public function isValid(): bool
     {
-        return !$this->expiresAt || $this->expiresAt->getTimestamp() <= time();
+        return null === $this->expiresAt || $this->expiresAt->getTimestamp() > time();
     }
 
     public function hashCredentials(string $token): void
