@@ -219,25 +219,20 @@ class ApiController extends AbstractController
 
         try {
             // Search for the package in the database
-            if (null === $package = $this->packageRepository->findOneByName($packageName)) {
-                if (!$create || !$this->dynamicUpdatesEnabled) {
-                    // It doesn't exist in the database and we can't create it dynamically
-                    return null;
-                }
+            $package = $this->packageRepository->findOneByName($packageName);
 
+            if (null === $package && $create && $this->dynamicUpdatesEnabled) {
                 // Search for the package in external registries
-                if (null === $registry = $this->metadataResolver->findPackageProvider($packageName)) {
-                    return null;
+                if (null !== $registry = $this->metadataResolver->findPackageProvider($packageName)) {
+                    $package = new Package($packageName);
+                    $package->setMirrorRegistry($registry);
+                    $package->setFetchStrategy($this->defaultMirrorFetchStrategy);
+
+                    $this->packageRepository->save($package, true);
                 }
-
-                $package = new Package($packageName);
-                $package->setMirrorRegistry($registry);
-                $package->setFetchStrategy($this->defaultMirrorFetchStrategy);
-
-                $this->packageRepository->save($package, true);
             }
 
-            if ($this->dynamicUpdatesEnabled) {
+            if (null !== $package && $this->dynamicUpdatesEnabled) {
                 $this->messenger->dispatch(new UpdatePackage($package->getId(), PackageUpdateSource::Dynamic));
             }
         } catch (\Throwable $exception) {
