@@ -23,13 +23,3 @@ parameters:
             identifier: property.readOnlyAssignNotInConstructor
             count: 1
             path: src/Doctrine/Entity/TrackedEntity.php
-        -
-            message: '#^Left side of \|\| is always false\.$#'
-            identifier: booleanOr.leftAlwaysFalse
-            count: 1
-            path: src/Encryption/Encryption.php
-        -
-            message: '#^Right side of \|\| is always false\.$#'
-            identifier: booleanOr.rightAlwaysFalse
-            count: 1
-            path: src/Encryption/Encryption.php

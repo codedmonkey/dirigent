@@ -122,6 +122,39 @@ class EncryptionTest extends TestCase
         $this->validateEncryption($encryption);
     }
 
+    public function testCreateWithMissingPrivateKey(): void
+    {
+        $privateKey = sodium_crypto_box_keypair();
+        $publicKey = sodium_crypto_box_publickey($privateKey);
+
+        $this->expectExceptionMessageIs('Unable to load encryption keys, missing the private key.');
+
+        Encryption::create(
+            '',
+            '',
+            $publicKey,
+            null,
+            [],
+            [],
+        );
+    }
+
+    public function testCreateWithMissingPublicKey(): void
+    {
+        $privateKey = sodium_crypto_box_keypair();
+
+        $this->expectExceptionMessageIs('Unable to load encryption keys, missing the public key.');
+
+        Encryption::create(
+            $privateKey,
+            null,
+            '',
+            '',
+            [],
+            [],
+        );
+    }
+
     public function testValidate(): void
     {
         $this->expectNotToPerformAssertions();
