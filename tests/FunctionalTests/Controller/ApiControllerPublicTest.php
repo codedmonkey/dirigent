@@ -11,6 +11,7 @@ use CodedMonkey\Dirigent\Tests\FunctionalTests\PublicKernel;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -65,10 +66,14 @@ class ApiControllerPublicTest extends KernelTestCase
     {
         self::bootKernel();
 
+        $connection = $this->getService(EntityManagerInterface::class)->getConnection();
+        $transactionNestingLevel = $connection->getTransactionNestingLevel();
+
         $request = Request::create('/p2/psr/container.json', 'GET');
         $response = self::$kernel->handle($request);
 
         $this->assertSame(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+        $this->assertSame($transactionNestingLevel, $connection->getTransactionNestingLevel());
     }
 
     public function testPackageMetadataIsMirroredOnRequest(): void
