@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
+use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
@@ -288,5 +290,40 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertSelectorTextContains('.alert-success', 'Mirroring the distribution has been scheduled.');
+    }
+
+    public function testRemoveDistribution(): void
+    {
+        $client = static::createClient();
+        $this->loginUser();
+
+        [$package, $version, $metadata] = $this->createMockPackageWithMetadata();
+        $metadata->setDistributionReference('reference');
+
+        $distribution = new Distribution($metadata, 'zip');
+        $distribution->setResolvedAt();
+
+        $this->persistEntities($package, $version, $metadata, $distribution);
+
+        $distributionId = $distribution->getId();
+        $versionPath = sprintf('/packages/%s/versions/%s', $package->getName(), $version->getName());
+        $client->request('GET', $versionPath);
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $client->submitForm('Delete distribution');
+
+        $this->assertResponseRedirects($versionPath);
+
+        $this->clearEntities();
+
+        $this->assertNull($this->findEntity(Distribution::class, $distributionId));
+        $savedMetadata = $this->findEntity(Metadata::class, $metadata->getId());
+        $this->assertCount(0, $savedMetadata->getDistributions());
+
+        $client->followRedirect();
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+        $this->assertSelectorTextContains('.alert-success', 'The distribution has been deleted.');
     }
 }

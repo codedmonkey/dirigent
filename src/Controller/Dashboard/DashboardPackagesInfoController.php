@@ -81,6 +81,8 @@ class DashboardPackagesInfoController extends AbstractController
             $canMirrorDistribution = $mirrorDistributions && !$externalDistributionIsMirrored;
         }
 
+        $canRemoveDistribution = 0 !== $metadata->getDistributions()->count();
+
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'version' => $version,
@@ -94,6 +96,7 @@ class DashboardPackagesInfoController extends AbstractController
             'suggesterCount' => $suggesterCount,
 
             'canMirrorDistribution' => $canMirrorDistribution ?? false,
+            'canRemoveDistribution' => $canRemoveDistribution,
         ]);
     }
 
@@ -308,6 +311,35 @@ class DashboardPackagesInfoController extends AbstractController
 
             $this->addFlash('success', $translator->trans('distribution.flash.mirroring_scheduled'));
         }
+
+        return $this->redirectToMetadataPage($metadata);
+    }
+
+    #[AdminRoute(
+        path: '/packages/{package}/remove-distribution/{version}',
+        name: 'packages_distribution_remove',
+        options: ['requirements' => [
+            'package' => MapPackage::PACKAGE_REGEX,
+            'version' => Requirement::CATCH_ALL,
+        ]],
+    )]
+    #[IsGrantedAccess]
+    public function removeDistribution(
+        Request $request,
+        #[MapPackage] Metadata $metadata,
+        TranslatorInterface $translator,
+    ): Response {
+        if (!$this->isCsrfTokenValid('remove-distribution-' . $metadata->getId(), $request->request->getString('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        foreach ($metadata->getDistributions() as $distribution) {
+            $this->entityManager->remove($distribution);
+        }
+
+        $this->entityManager->flush();
+
+        $this->addFlash('success', $translator->trans('distribution.flash.removed'));
 
         return $this->redirectToMetadataPage($metadata);
     }
