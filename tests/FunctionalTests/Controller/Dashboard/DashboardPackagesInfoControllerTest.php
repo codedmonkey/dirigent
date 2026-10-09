@@ -6,17 +6,27 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\PackageRepository;
+use CodedMonkey\Dirigent\Message\ResolveDistribution;
+use CodedMonkey\Dirigent\Tests\FunctionalTests\DistributionMirroringKernel;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use CodedMonkey\Dirigent\Tests\Helper\WebTestCaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Zenstruck\Messenger\Test\InteractsWithMessenger;
 
 class DashboardPackagesInfoControllerTest extends WebTestCase
 {
     use EntityManagerTestTrait;
+    use InteractsWithMessenger;
     use MockEntityFactoryTrait;
     use WebTestCaseTrait;
+
+    #[\Override]
+    protected static function getKernelClass(): string
+    {
+        return DistributionMirroringKernel::class;
+    }
 
     public function testInfo(): void
     {
@@ -245,5 +255,38 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
 
         $todayKey = new \DateTimeImmutable()->format('Ymd');
         $this->assertAnySelectorTextSame('#total_today .display-6', number_format($package->getInstallations()->getData()[$todayKey] ?? 0, thousands_separator: ' '));
+    }
+
+    public function testResolveDistribution(): void
+    {
+        $client = static::createClient();
+        $this->loginUser('admin');
+
+        [$package, $version, $metadata] = $this->createMockPackageWithMetadata();
+        $metadata->setDistributionType('zip');
+        $metadata->setDistributionUrl('https://example.com/package.zip');
+        $this->persistEntities($package, $version, $metadata);
+
+        $versionPath = sprintf('/packages/%s/versions/%s', $package->getName(), $version->getName());
+        $client->request('GET', $versionPath);
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $client->submitForm('Mirror external distribution');
+
+        $this->assertResponseRedirects($versionPath);
+
+        $messengerQueue = $this->transport('async')->queue();
+        $messengerQueue->assertCount(1);
+        $messengerQueue->assertContains(ResolveDistribution::class);
+
+        $message = $messengerQueue->first()->getMessage();
+        $this->assertSame($metadata->getId(), $message->metadataId);
+        $this->assertSame('zip', $message->type);
+
+        $client->followRedirect();
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+        $this->assertSelectorTextContains('.alert-success', 'Mirroring the distribution has been scheduled.');
     }
 }

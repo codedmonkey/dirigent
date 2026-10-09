@@ -146,3 +146,13 @@ form:
   user:
     help:
       totp-authentication-enabled: Multi-factor authentication can be disabled for users that lost their access to their MFA code, but has to be enabled by the user.
+
+distribution:
+  action:
+    download: Download
+    download_external: Download (External)
+    mirror: Mirror external distribution
+  error:
+    external_not_found: The distribution does not exist.
+  flash:
+    mirroring_scheduled: Mirroring the distribution has been scheduled.
