@@ -237,7 +237,7 @@
               </a>
             {% endif %}
 
-            {% if canMirrorDistribution %}
+            {% if canMirrorDistribution or canRemoveDistribution %}
               <div class="dropdown">
                 <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <span class="fa-solid fa-ellipsis-h" aria-hidden="true"></span>
@@ -249,6 +249,14 @@
                         <input type="hidden" name="_token" value="{{ csrf_token('resolve-distribution-' ~ metadata.id) }}">
                         <input type="hidden" name="action" value="mirror">
                         <button type="submit" class="dropdown-item">{{ 'distribution.action.mirror'|trans }}</button>
+                      </form>
+                    </li>
+                  {% endif %}
+                  {% if canRemoveDistribution %}
+                    <li>
+                      <form method="post" action="{{ path('dashboard_packages_distribution_remove', {package: package.name, version: version.name, revision: metadata.revision}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('remove-distribution-' ~ metadata.id) }}">
+                        <button type="submit" class="dropdown-item">{{ 'distribution.action.remove'|trans }}</button>
                       </form>
                     </li>
                   {% endif %}
