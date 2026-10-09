@@ -253,6 +253,15 @@
                     </form>
                   </li>
                 {% endif %}
+                {% if canRemoveDistribution %}
+                  <li>
+                    <form method="post" action="{{ path('dashboard_packages_distribution_remove', {package: package.name, version: version.name}) }}">
+                      <input type="hidden" name="_token" value="{{ csrf_token('remove-distribution-' ~ metadata.id) }}">
+                      <input type="hidden" name="revision" value="{{ metadata.revision }}">
+                      <button type="submit" class="dropdown-item">Delete distribution</button>
+                    </form>
+                  </li>
+                {% endif %}
               </ul>
             </div>
           </div>

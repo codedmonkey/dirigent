@@ -15,7 +15,9 @@ use CodedMonkey\Dirigent\Doctrine\Entity\PackageSuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
+use CodedMonkey\Dirigent\Message\RemoveDistribution;
 use CodedMonkey\Dirigent\Message\ResolveDistribution;
+use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
@@ -79,6 +81,8 @@ class DashboardPackagesInfoController extends AbstractController
             $canMirrorDistribution = $mirrorDistributions && !$externalDistributionIsMirrored;
         }
 
+        $canRemoveDistribution = 0 !== $metadata->getDistributions()->count();
+
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'version' => $version,
@@ -92,6 +96,7 @@ class DashboardPackagesInfoController extends AbstractController
             'suggesterCount' => $suggesterCount,
 
             'canMirrorDistribution' => $canMirrorDistribution ?? false,
+            'canRemoveDistribution' => $canRemoveDistribution,
         ]);
     }
 
@@ -307,6 +312,35 @@ class DashboardPackagesInfoController extends AbstractController
 
             $this->addFlash('success', 'Mirroring the distribution has been enqueued.');
         }
+
+        return $this->redirectToMetadataPage($metadata);
+    }
+
+    #[AdminRoute(
+        path: '/packages/{package}/remove-distribution/{version}',
+        name: 'packages_distribution_remove',
+        options: ['requirements' => [
+            'package' => MapPackage::PACKAGE_REGEX,
+            'version' => Requirement::CATCH_ALL,
+        ]],
+    )]
+    #[IsGrantedAccess]
+    public function removeDistribution(
+        Request $request,
+        #[MapPackage] Metadata $metadata,
+        PackageDistributionResolver $distributionResolver,
+    ): Response {
+        if (!$this->isCsrfTokenValid('remove-distribution-' . $metadata->getId(), $request->request->getString('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        foreach ($metadata->getDistributions() as $distribution) {
+            $this->entityManager->remove($distribution);
+        }
+
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'The distribution has been removed.');
 
         return $this->redirectToMetadataPage($metadata);
     }
