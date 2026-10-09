@@ -19,7 +19,7 @@ class ResolveDistributionHandlerTest extends TestCase
         $metadataRepository = $this->createMock(MetadataRepository::class);
         $metadataRepository->expects(self::once())
             ->method('find')
-            ->with(42)
+            ->with(1972)
             ->willReturn(null);
 
         $distributionResolver = $this->createMock(PackageDistributionResolver::class);
@@ -27,6 +27,6 @@ class ResolveDistributionHandlerTest extends TestCase
 
         $handler = new ResolveDistributionHandler($metadataRepository, $distributionResolver);
 
-        $handler(new ResolveDistribution(42, 'zip'));
+        $handler(new ResolveDistribution(1972, 'zip'));
     }
 }

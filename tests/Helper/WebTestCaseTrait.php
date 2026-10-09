@@ -7,6 +7,9 @@ namespace CodedMonkey\Dirigent\Tests\Helper;
 use CodedMonkey\Dirigent\Doctrine\Entity\User;
 use CodedMonkey\Dirigent\Doctrine\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 trait WebTestCaseTrait
 {
@@ -36,5 +39,25 @@ trait WebTestCaseTrait
         $client->loginUser($user);
 
         return $user;
+    }
+
+    protected function createCsrfToken(string $name): string
+    {
+        /** @var KernelBrowser $client */
+        $client = static::getClient();
+        $session = $client->getSession();
+
+        $request = new Request();
+        $request->setSession($session);
+
+        $requestStack = self::getService(RequestStack::class);
+        $requestStack->push($request);
+
+        $csrfToken = self::getService(CsrfTokenManagerInterface::class)->getToken($name)->getValue();
+
+        $session->save();
+        $requestStack->pop();
+
+        return $csrfToken;
     }
 }

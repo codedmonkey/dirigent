@@ -62,8 +62,8 @@ class DashboardResetPasswordControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
         $client->submitForm('Reset', [
-            'reset_password_form[plainPassword][first]' => 'BrandNewPassword42',
-            'reset_password_form[plainPassword][second]' => 'BrandNewPassword42',
+            'reset_password_form[plainPassword][first]' => 'BrandNewPassword1972',
+            'reset_password_form[plainPassword][second]' => 'BrandNewPassword1972',
         ]);
 
         $this->assertResponseRedirects('/login', Response::HTTP_FOUND);
@@ -72,7 +72,7 @@ class DashboardResetPasswordControllerTest extends WebTestCase
         $user = $this->findEntity(User::class, $user->getId());
         $passwordHasher = $this->getService(UserPasswordHasherInterface::class, 'security.user_password_hasher');
 
-        $this->assertTrue($passwordHasher->isPasswordValid($user, 'BrandNewPassword42'));
+        $this->assertTrue($passwordHasher->isPasswordValid($user, 'BrandNewPassword1972'));
         $this->assertNull($this->findEntity(ResetPasswordRequest::class, ['user' => $user->getId()]));
     }
 
@@ -100,8 +100,8 @@ class DashboardResetPasswordControllerTest extends WebTestCase
         $client->followRedirect();
 
         $crawler = $client->submitForm('Reset', [
-            'reset_password_form[plainPassword][first]' => 'BrandNewPassword42',
-            'reset_password_form[plainPassword][second]' => 'AnotherPassword11',
+            'reset_password_form[plainPassword][first]' => 'BrandNewPassword1972',
+            'reset_password_form[plainPassword][second]' => 'AnotherPassword2016',
         ]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
