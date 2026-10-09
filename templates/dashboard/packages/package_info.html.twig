@@ -205,7 +205,7 @@
         {% endif %}
       </div>
       <div class="col-md-6">
-        {% if metadata.hasDistribution() %}
+        {% if metadata.hasDistribution() or metadata.distributions|length > 0 %}
           <div class="h5">
             {{ 'Distribution'|trans }}
             <span class="badge text-bg-secondary">{{ metadata.distributionType }}</span>
@@ -215,11 +215,46 @@
             {{ 'Reference'|trans }}: <code>{{ metadata.distributionReference }}</code>
           </div>
 
-          <div>
-            <a class="btn btn-sm btn-secondary" href="{{ metadata.distributionUrl }}" download>
-              <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
-              <span class="btn-label">{{ 'Download' }}</span>
-            </a>
+          <div class="btn-toolbar gap-1">
+            {% if metadata.distributions|length > 0 %}
+              {% set distribution = metadata.distributions.first %}
+              {% set distributionPath = path('api_package_distribution', {
+                package: package.name,
+                version: version.normalizedName,
+                revision: metadata.revision,
+                reference: distribution.reference,
+                type: distribution.type,
+              }) %}
+              <a class="btn btn-sm btn-secondary" href="{{ distributionPath }}" download>
+                <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
+                <span class="btn-label">{{ 'Download' }}</span>
+              </a>
+            {% endif %}
+
+            {% if metadata.distributionUrl != null %}
+              <a class="btn btn-sm btn-secondary" href="{{ metadata.distributionUrl }}" download>
+                <span class="fa-solid fa-download me-1" aria-hidden="true"></span>
+                <span class="btn-label">{{ 'Download (External)' }}</span>
+              </a>
+            {% endif %}
+
+            <div class="dropdown">
+              <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="fa-solid fa-ellipsis-h" aria-hidden="true"></span>
+              </button>
+              <ul class="dropdown-menu">
+                {% if canMirrorDistribution %}
+                  <li>
+                    <form method="post" action="{{ path('dashboard_packages_distribution_resolve', {package: package.name, version: version.name}) }}">
+                      <input type="hidden" name="_token" value="{{ csrf_token('resolve-distribution-' ~ metadata.id) }}">
+                      <input type="hidden" name="action" value="mirror">
+                      <input type="hidden" name="revision" value="{{ metadata.revision }}">
+                      <button type="submit" class="dropdown-item">Mirror external distribution</button>
+                    </form>
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
           </div>
         {% else %}
           <div class="h5">{{ 'Distribution'|trans }}</div>

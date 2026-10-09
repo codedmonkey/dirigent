@@ -6,6 +6,7 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Attribute\MapPackage;
+use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageProvideLink;
@@ -14,12 +15,15 @@ use CodedMonkey\Dirigent\Doctrine\Entity\PackageSuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
+use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class DashboardPackagesInfoController extends AbstractController
@@ -27,6 +31,7 @@ class DashboardPackagesInfoController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly MetadataRepository $metadataRepository,
+        private readonly MessageBusInterface $messenger,
     ) {
     }
 
@@ -46,7 +51,11 @@ class DashboardPackagesInfoController extends AbstractController
         return $this->versionInfo($request, $package, $version, $version->getCurrentMetadata());
     }
 
-    #[AdminRoute('/packages/{package}/versions/{version}', name: 'packages_version_info', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*']])]
+    #[AdminRoute(
+        path: '/packages/{package}/versions/{version}',
+        name: 'packages_version_info',
+        options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => Requirement::CATCH_ALL]],
+    )]
     #[IsGrantedAccess]
     public function versionInfo(
         Request $request,
@@ -63,6 +72,13 @@ class DashboardPackagesInfoController extends AbstractController
         $providerCount = $this->entityManager->getRepository(PackageProvideLink::class)->count(['linkedPackageName' => $package->getName(), 'implementation' => false]);
         $suggesterCount = $this->entityManager->getRepository(PackageSuggestLink::class)->count(['linkedPackageName' => $package->getName()]);
 
+        if ($metadata->hasDistribution()) {
+            $mirrorDistributions = $this->getParameter('dirigent.distributions.mirror');
+            $externalDistributionIsMirrored = 0 !== $metadata->getDistributions()->filter(static fn (Distribution $distribution) => $distribution->getSource() === $metadata->getDistributionUrl())->count();
+
+            $canMirrorDistribution = $mirrorDistributions && !$externalDistributionIsMirrored;
+        }
+
         return $this->render('dashboard/packages/package_info.html.twig', [
             'package' => $package,
             'version' => $version,
@@ -74,10 +90,16 @@ class DashboardPackagesInfoController extends AbstractController
             'implementationCount' => $implementationCount,
             'providerCount' => $providerCount,
             'suggesterCount' => $suggesterCount,
+
+            'canMirrorDistribution' => $canMirrorDistribution ?? false,
         ]);
     }
 
-    #[AdminRoute('/packages/{package}/revisions/{version}', name: 'packages_version_metadata_list', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*']])]
+    #[AdminRoute(
+        path: '/packages/{package}/revisions/{version}',
+        name: 'packages_version_metadata_list',
+        options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => Requirement::CATCH_ALL]],
+    )]
     #[IsGrantedAccess]
     public function versionMetadataList(
         #[MapPackage] Package $package,
@@ -93,16 +115,23 @@ class DashboardPackagesInfoController extends AbstractController
         ]);
     }
 
-    #[AdminRoute('/packages/{package}/pin-metadata/{version}', name: 'packages_version_pin', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*'], 'methods' => ['POST']])]
+    #[AdminRoute(
+        path: '/packages/{package}/pin-metadata/{version}',
+        name: 'packages_version_pin',
+        options: [
+            'requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => Requirement::CATCH_ALL],
+            'methods' => ['POST'],
+        ],
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function pinMetadata(
         Request $request,
         #[MapPackage] Package $package,
         #[MapPackage] Version $version,
     ): Response {
-        $action = (string) $request->request->get('action');
+        $action = $request->request->getString('action');
 
-        if (!$this->isCsrfTokenValid($action . '-revision-' . $version->getId(), (string) $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid($action . '-revision-' . $version->getId(), $request->request->getString('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
@@ -248,5 +277,51 @@ class DashboardPackagesInfoController extends AbstractController
             'installationsLast30Days' => $installationsLast30Days,
             'installationsToday' => $installationsToday,
         ]);
+    }
+
+    #[AdminRoute(
+        path: '/packages/{package}/resolve-distribution/{version}',
+        name: 'packages_distribution_resolve',
+        options: ['requirements' => [
+            'package' => MapPackage::PACKAGE_REGEX,
+            'version' => Requirement::CATCH_ALL,
+        ]],
+    )]
+    #[IsGrantedAccess]
+    public function resolveDistribution(
+        Request $request,
+        #[MapPackage] Metadata $metadata,
+    ): Response {
+        if (!$this->isCsrfTokenValid('resolve-distribution-' . $metadata->getId(), $request->request->getString('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $action = $request->request->getString('action');
+
+        if ('mirror' === $action) {
+            if (!$metadata->hasDistribution() || !$this->getParameter('dirigent.distributions.mirror')) {
+                throw $this->createNotFoundException('The distribution does not exist.');
+            }
+
+            $this->messenger->dispatch(new ResolveDistribution($metadata->getId(), $metadata->getDistributionType()));
+
+            $this->addFlash('success', 'Mirroring the distribution has been enqueued.');
+        }
+
+        return $this->redirectToMetadataPage($metadata);
+    }
+
+    private function redirectToMetadataPage(Metadata $metadata): Response
+    {
+        $parameters = [
+            'package' => $metadata->getPackage()->getName(),
+            'version' => $metadata->getVersion()->getName(),
+        ];
+
+        if (!$metadata->isCurrentMetadata()) {
+            $parameters['revision'] = $metadata->getRevision();
+        }
+
+        return $this->redirectToRoute('dashboard_packages_version_info', $parameters);
     }
 }
