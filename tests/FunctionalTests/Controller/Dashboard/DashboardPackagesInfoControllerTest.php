@@ -127,12 +127,9 @@ class DashboardPackagesInfoControllerTest extends WebTestCase
         $version->setCurrentMetadata($latestMetadata);
         $this->persistEntities($package, $version, $metadata, $latestMetadata);
 
-        $client->request('GET', sprintf('/packages/%s/versions/%s', $package->getName(), $version->getName()));
-
-        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-
-        $client->submitForm('Pin revision', [
-            'revision' => '999',
+        $client->request('POST', sprintf('/packages/%s/pin-metadata/%s?revision=1982', $package->getName(), $version->getName()), [
+            'action' => 'pin',
+            '_token' => $this->createCsrfToken('pin-revision-' . $metadata->getId()),
         ]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);

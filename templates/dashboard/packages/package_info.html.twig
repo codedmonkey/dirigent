@@ -161,10 +161,9 @@
               </button>
             </form>
           {% elseif not version.pinned %}
-            <form method="post" action="{{ path('dashboard_packages_version_pin', {package: package.name, version: version.name}) }}">
+            <form method="post" action="{{ path('dashboard_packages_version_pin', {package: package.name, version: version.name, revision: metadata.revision}) }}">
               <input type="hidden" name="_token" value="{{ csrf_token('pin-revision-' ~ version.id) }}">
               <input type="hidden" name="action" value="pin">
-              <input type="hidden" name="revision" value="{{ metadata.revision }}">
               <button type="submit" class="btn btn-sm btn-secondary">
                 <span class="fa-solid fa-thumbtack me-1" aria-hidden="true"></span>
                 <span class="btn-label">{{ 'Pin revision'|trans }}</span>
