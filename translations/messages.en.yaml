@@ -152,7 +152,9 @@ distribution:
     download: Download
     download_external: Download (External)
     mirror: Mirror external distribution
+    remove: Delete distribution
   error:
     external_not_found: The distribution does not exist.
   flash:
     mirroring_scheduled: Mirroring the distribution has been scheduled.
+    removed: The distribution has been deleted.
