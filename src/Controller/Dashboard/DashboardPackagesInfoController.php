@@ -6,6 +6,7 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Attribute\MapPackage;
+use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageProvideLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\PackageRequireLink;
@@ -42,7 +43,7 @@ class DashboardPackagesInfoController extends AbstractController
             return $this->redirectToRoute('dashboard_packages_versions', ['package' => $package->getName()]);
         }
 
-        return $this->versionInfo($request, $package, $version, latest: true);
+        return $this->versionInfo($request, $package, $version, $version->getCurrentMetadata());
     }
 
     #[AdminRoute('/packages/{package}/versions/{version}', name: 'packages_version_info', options: ['requirements' => ['package' => MapPackage::PACKAGE_REGEX, 'version' => '.*']])]
@@ -51,20 +52,8 @@ class DashboardPackagesInfoController extends AbstractController
         Request $request,
         #[MapPackage] Package $package,
         #[MapPackage] Version $version,
-        bool $latest = false,
+        #[MapPackage] Metadata $metadata,
     ): Response {
-        $metadata = $version->getCurrentMetadata();
-        $revision = $request->query->getInt('revision');
-
-        // Only check for a revision number if the route is for a specific version: $latest !== true
-        if ($revision > 0 && !$latest) {
-            $metadata = $this->metadataRepository->findOneBy(['version' => $version, 'revision' => $revision]);
-
-            if (null === $metadata) {
-                throw $this->createNotFoundException('The revision does not exist.');
-            }
-        }
-
         $this->metadataRepository->fetchMetadataCollections($metadata);
 
         $metadataCount = $this->metadataRepository->getMetadataCountForVersion($version);
@@ -79,9 +68,10 @@ class DashboardPackagesInfoController extends AbstractController
             'version' => $version,
             'metadata' => $metadata,
 
+            'metadataCount' => $metadataCount,
+
             'dependentCount' => $dependentCount,
             'implementationCount' => $implementationCount,
-            'metadataCount' => $metadataCount,
             'providerCount' => $providerCount,
             'suggesterCount' => $suggesterCount,
         ]);
