@@ -22,7 +22,7 @@ class PackageProviderManagerTest extends TestCase
     #[\Override]
     protected function setUp(): void
     {
-        $this->storagePath = sys_get_temp_dir() . '/dirigent-provider-manager-' . uniqid();
+        $this->storagePath = sys_get_temp_dir() . '/' . uniqid('dirigent-provider-manager-');
         $this->manager = new PackageProviderManager($this->storagePath);
     }
 

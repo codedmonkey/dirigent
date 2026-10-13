@@ -28,7 +28,7 @@ class PackageDistributionResolverTest extends TestCase
     #[\Override]
     protected function setUp(): void
     {
-        $this->storagePath = sys_get_temp_dir() . '/dirigent-distribution-resolver-' . uniqid();
+        $this->storagePath = sys_get_temp_dir() . '/' . uniqid('dirigent-distribution-resolver-');
     }
 
     #[\Override]

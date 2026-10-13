@@ -22,7 +22,7 @@ class EncryptionGenerateKeysCommandTest extends KernelTestCase
     #[\Override]
     protected function setUp(): void
     {
-        $this->storagePath = sys_get_temp_dir() . '/dirigent-encryption-keys-' . uniqid();
+        $this->storagePath = sys_get_temp_dir() . '/' . uniqid('dirigent-encryption-keys-');
         $this->privateKeyPath = "$this->storagePath/private.key";
         $this->publicKeyPath = "$this->storagePath/public.key";
         $this->filesystem = new Filesystem();

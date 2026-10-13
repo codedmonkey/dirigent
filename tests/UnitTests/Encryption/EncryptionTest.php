@@ -8,22 +8,27 @@ use CodedMonkey\Dirigent\Encryption\Encryption;
 use CodedMonkey\Dirigent\Encryption\EncryptionException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 
 class EncryptionTest extends TestCase
 {
     public const DATA = 'mamma mia';
 
+    private Filesystem $filesystem;
+    private string $storagePath;
+
+    #[\Override]
+    protected function setUp(): void
+    {
+        $this->storagePath = sys_get_temp_dir() . '/' . uniqid('dirigent-encryption-');
+        $this->filesystem = new Filesystem();
+
+        $this->filesystem->mkdir($this->storagePath);
+    }
+
+    #[\Override]
     protected function tearDown(): void
     {
-        $files = Finder::create()
-            ->files()
-            ->in(__DIR__ . '/keys')
-            ->name('*.key');
-
-        foreach ($files as $file) {
-            new Filesystem()->remove($file->getRealPath());
-        }
+        $this->filesystem->remove($this->storagePath);
     }
 
     public function testSeal(): void
@@ -99,16 +104,14 @@ class EncryptionTest extends TestCase
 
     public function testCreateFromFiles(): void
     {
-        $filesystem = new Filesystem();
-
         $privateKey = sodium_crypto_box_keypair();
         $publicKey = sodium_crypto_box_publickey($privateKey);
 
-        $privateKeyPath = __DIR__ . '/keys/private.key';
-        $publicKeyPath = __DIR__ . '/keys/public.key';
+        $privateKeyPath = $this->storagePath . '/private.key';
+        $publicKeyPath = $this->storagePath . '/public.key';
 
-        $filesystem->dumpFile($privateKeyPath, sodium_bin2hex($privateKey));
-        $filesystem->dumpFile($publicKeyPath, sodium_bin2hex($publicKey));
+        $this->filesystem->dumpFile($privateKeyPath, sodium_bin2hex($privateKey));
+        $this->filesystem->dumpFile($publicKeyPath, sodium_bin2hex($publicKey));
 
         $encryption = Encryption::create(
             null,

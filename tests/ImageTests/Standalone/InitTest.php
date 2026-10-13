@@ -17,7 +17,7 @@ class InitTest extends DockerStandaloneIsolatedTestCase
     protected function setUp(): void
     {
         $this->filesystem = new Filesystem();
-        $this->configPath = sys_get_temp_dir() . '/dirigent-config-' . uniqid();
+        $this->configPath = sys_get_temp_dir() . '/' . uniqid('dirigent-config-');
     }
 
     #[\Override]
