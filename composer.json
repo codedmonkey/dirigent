@@ -71,7 +71,8 @@
         "symfony/phpunit-bridge": "^8.1.6",
         "symfony/stopwatch": "^8.1.0",
         "symfony/web-profiler-bundle": "^8.1.8",
-        "testcontainers/testcontainers": "^1.1.0"
+        "testcontainers/testcontainers": "^1.1.0",
+        "zenstruck/messenger-test": "^1.15"
     },
     "conflict": {
         "symfony/symfony": "*"
