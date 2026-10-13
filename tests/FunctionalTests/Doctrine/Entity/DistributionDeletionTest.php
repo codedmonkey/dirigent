@@ -7,7 +7,6 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Doctrine\Entity;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Message\RemoveDistribution;
-use CodedMonkey\Dirigent\Message\RemoveDistributionHandler;
 use CodedMonkey\Dirigent\Package\PackageDistributionResolver;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;
@@ -15,11 +14,12 @@ use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
+use Zenstruck\Messenger\Test\InteractsWithMessenger;
 
 class DistributionDeletionTest extends KernelTestCase
 {
     use EntityManagerTestTrait;
+    use InteractsWithMessenger;
     use KernelTestCaseTrait;
     use MockEntityFactoryTrait;
 
@@ -94,8 +94,11 @@ class DistributionDeletionTest extends KernelTestCase
         $entityManager->getConnection()->rollBack();
         $entityManager->clear();
 
+        // todo implement outbox for distribution removals instead
+        $this->transport('async')->processOrFail(filter: RemoveDistribution::class);
+        $this->transport('async')->rejected()->assertContains(RemoveDistribution::class, 1);
+
         self::assertFileExists($path);
-        self::assertSame([], $this->receiveDistributionRemovals());
 
         new Filesystem()->remove($path);
     }
@@ -118,35 +121,8 @@ class DistributionDeletionTest extends KernelTestCase
 
     private function runQueuedDistributionRemovals(): void
     {
-        self::assertNotEmpty($messages = $this->receiveDistributionRemovals());
-
         $this->getService(EntityManagerInterface::class)->clear();
-        $handler = $this->getService(RemoveDistributionHandler::class);
 
-        foreach ($messages as $message) {
-            $handler($message);
-        }
-    }
-
-    /**
-     * @return RemoveDistribution[]
-     */
-    private function receiveDistributionRemovals(): array
-    {
-        /** @var ReceiverInterface $transport */
-        $transport = $this->getService(ReceiverInterface::class, 'messenger.transport.async');
-        $messages = [];
-
-        while ($envelopes = $transport->get()) {
-            foreach ($envelopes as $envelope) {
-                if ($envelope->getMessage() instanceof RemoveDistribution) {
-                    $messages[] = $envelope->getMessage();
-                }
-
-                $transport->ack($envelope);
-            }
-        }
-
-        return $messages;
+        $this->transport('async')->throwExceptions()->processOrFail(filter: RemoveDistribution::class);
     }
 }
