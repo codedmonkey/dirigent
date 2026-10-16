@@ -7,6 +7,7 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
+use CodedMonkey\Dirigent\Package\PackageProviderManager;
 use CodedMonkey\Dirigent\Tests\FunctionalTests\PublicKernel;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;
@@ -42,24 +43,34 @@ class ApiControllerPublicTest extends KernelTestCase
         ], $rootData);
     }
 
-    public function testPackagMetadata(): void
+    public function testPackageMetadata(): void
     {
         self::bootKernel();
 
-        $packageData = $this->requestJson('/p2/psr/log.json', 'GET');
+        $package = $this->createPackageWithProvider();
+        $packageName = $package->getName();
+
+        $packageData = $this->requestJson("/p2/$packageName.json", 'GET');
 
         $this->assertArrayHasKey('packages', $packageData);
-        $this->assertArrayHasKey('psr/log', $packageData['packages']);
+        $this->assertArrayHasKey($packageName, $packageData['packages']);
+        $this->assertCount(1, $packageData['packages'][$packageName]);
+        $this->assertSame('1.0.0', $packageData['packages'][$packageName][0]['version']);
     }
 
     public function testPackageMetadataDev(): void
     {
         self::bootKernel();
 
-        $packageData = $this->requestJson('/p2/psr/log~dev.json', 'GET');
+        $package = $this->createPackageWithProvider();
+        $packageName = $package->getName();
+
+        $packageData = $this->requestJson("/p2/$packageName~dev.json", 'GET');
 
         $this->assertArrayHasKey('packages', $packageData);
-        $this->assertArrayHasKey('psr/log', $packageData['packages']);
+        $this->assertArrayHasKey($packageName, $packageData['packages']);
+        $this->assertCount(1, $packageData['packages'][$packageName]);
+        $this->assertSame('dev-main', $packageData['packages'][$packageName][0]['version']);
     }
 
     public function testPackageMetadataIsNotFound(): void
@@ -96,6 +107,22 @@ class ApiControllerPublicTest extends KernelTestCase
 
         $this->assertArrayHasKey('packages', $packageData);
         $this->assertArrayHasKey('psr/container', $packageData['packages']);
+    }
+
+    private function createPackageWithProvider(): Package
+    {
+        [$package, $version, $metadata] = $this->createMockPackageWithMetadata();
+        $devVersion = $this->createMockVersion($package, 'dev-main', true);
+        $devMetadata = $this->createMockMetadata($devVersion);
+        $devVersion->setCurrentMetadata($devMetadata);
+
+        // Serve the generated provider without triggering a remote metadata update.
+        $package->setUpdatedAt(new \DateTimeImmutable());
+        $this->persistEntities($package, $version, $metadata, $devVersion, $devMetadata);
+
+        $this->getService(PackageProviderManager::class)->dump($package);
+
+        return $package;
     }
 
     private function requestJson(...$requestArguments)

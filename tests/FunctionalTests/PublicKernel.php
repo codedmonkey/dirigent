@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests;
 
-use CodedMonkey\Dirigent\Kernel;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
-class PublicKernel extends Kernel
+class PublicKernel extends TestKernel
 {
     #[\Override]
     protected function configureContainer(ContainerConfigurator $container): void
