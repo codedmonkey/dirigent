@@ -20,21 +20,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 #[AdminRoute(path: '/access-tokens', name: 'access_tokens')]
-class DashboardAccessTokenController extends AbstractCrudController implements EventSubscriberInterface
+class DashboardAccessTokenController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
         return AccessToken::class;
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            BeforeEntityPersistedEvent::class => 'beforeEntityPersisted',
-        ];
     }
 
     #[\Override]
@@ -74,6 +67,7 @@ class DashboardAccessTokenController extends AbstractCrudController implements E
         return $builder;
     }
 
+    #[AsEventListener(event: BeforeEntityPersistedEvent::class)]
     public function beforeEntityPersisted(BeforeEntityPersistedEvent $event): void
     {
         $accessToken = $event->getEntityInstance();
