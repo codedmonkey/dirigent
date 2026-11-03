@@ -139,14 +139,14 @@
         ],
         "test:images:standalone": [
             "@build:standalone",
-            "bin/phpunit --configuration phpunit.images.xml tests/ImageTests/Standalone"
+            "bin/phpunit --configuration phpunit.images.xml --testsuite \"Dirigent Standalone Image Tests Suite\""
         ],
         "test:php": [
             "@test:php:unit",
             "@test:php:functional"
         ],
-        "test:php:functional": "bin/phpunit tests/FunctionalTests",
-        "test:php:unit": "bin/phpunit tests/UnitTests",
+        "test:php:functional": "bin/phpunit --testsuite \"Dirigent Functional Tests Suite\"",
+        "test:php:unit": "bin/phpunit --testsuite \"Dirigent Unit Tests Suite\"",
         "test:setup": [
             "bin/console --env=test doctrine:database:create --if-not-exists",
             "bin/console --env=test doctrine:schema:drop --full-database --force",
