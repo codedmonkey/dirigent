@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Command;
 
 use CodedMonkey\Dirigent\Command\EncryptionGenerateKeysCommand;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 class EncryptionGenerateKeysCommandTest extends KernelTestCase
@@ -43,6 +45,52 @@ class EncryptionGenerateKeysCommandTest extends KernelTestCase
 
         $this->assertSame(Command::SUCCESS, $exitCode);
         $this->assertStringContainsString('Generated encryption keys.', $output->fetch());
+    }
+
+    public static function umasks(): iterable
+    {
+        yield 'permissive' => [0o000];
+        yield 'standard' => [0o022];
+        yield 'restrictive' => [0o077];
+    }
+
+    #[DataProvider('umasks')]
+    public function testGenerateNewPrivateKeyIsOwnerOnly(int $mask): void
+    {
+        if ('Windows' === PHP_OS_FAMILY) {
+            $this->markTestSkipped('POSIX file permissions are not available on Windows.');
+        }
+
+        $command = new EncryptionGenerateKeysCommand(null, $this->privateKeyPath, null, $this->publicKeyPath);
+        $originalMask = umask($mask);
+
+        try {
+            $exitCode = $command->run(new ArrayInput([]), new NullOutput());
+
+            $this->assertSame(Command::SUCCESS, $exitCode);
+            $this->assertSame($mask, umask(), 'The command must restore the caller\'s umask.');
+            $this->assertSame(0o600, fileperms($this->privateKeyPath) & 0o777);
+            $this->assertSame(0o666 & ~$mask, fileperms($this->publicKeyPath) & 0o777);
+        } finally {
+            umask($originalMask);
+        }
+    }
+
+    public function testPrivateKeyWriteFailureRestoresUmask(): void
+    {
+        $blockingPath = $this->storagePath . '/not-a-directory';
+        $this->filesystem->dumpFile($blockingPath, 'not a directory');
+        $command = new EncryptionGenerateKeysCommand(null, $blockingPath . '/private.key', null, $this->publicKeyPath);
+
+        $this->expectException(IOExceptionInterface::class);
+        $originalMask = umask(0o022);
+
+        try {
+            $command->run(new ArrayInput([]), new NullOutput());
+        } finally {
+            $actualMask = umask($originalMask);
+            $this->assertSame(0o022, $actualMask, 'The command must restore the caller\'s umask.');
+        }
     }
 
     public function testEncryptionKeysAlreadyExist(): void
