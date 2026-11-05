@@ -200,7 +200,10 @@ class ApiController extends AbstractController
     public function trackInstallations(Request $request): Response
     {
         $contents = json_decode($request->getContent(), true);
-        $invalidInputs = static fn ($item) => !isset($item['name'], $item['version']);
+        $invalidInputs = static fn ($item) => !is_array($item)
+            || !isset($item['name'], $item['version'])
+            || !is_string($item['name'])
+            || !is_string($item['version']);
 
         if (!is_array($contents) || !isset($contents['downloads']) || !is_array($contents['downloads']) || array_filter($contents['downloads'], $invalidInputs)) {
             return new JsonResponse(['status' => 'error', 'message' => 'Invalid request format, must be a json object containing a downloads key filled with an array of name/version objects'], 200);
