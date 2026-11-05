@@ -21,7 +21,7 @@ docker container run -d \
   -p "7015:7015" \
   -v /path/to/dirigent/config:/srv/config \
   -v dirigent-data:/srv/data \
-  ghcr.io/codedmonkey/dirigent:0.7
+  ghcr.io/codedmonkey/dirigent:0.8
 ```
 
 ### Docker Compose configuration
@@ -29,7 +29,7 @@ docker container run -d \
 ```yaml
 services:
   dirigent:
-    image: ghcr.io/codedmonkey/dirigent:0.7
+    image: ghcr.io/codedmonkey/dirigent:0.8
     ports:
       - "7015:7015"
     volumes:
@@ -95,7 +95,7 @@ commit you want to build. Simply run the `docker build` command inside the repos
 ```shell
 git clone https://github.com/codedmonkey/dirigent.git
 cd dirigent
-git checkout v0.7.3
+git checkout v0.8.0
 docker build -t dirigent-standalone .
 ```
 
