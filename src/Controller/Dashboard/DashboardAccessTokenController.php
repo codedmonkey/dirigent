@@ -21,8 +21,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[AdminRoute(path: '/access-tokens', name: 'access_tokens')]
+#[IsGranted('ROLE_USER')]
 class DashboardAccessTokenController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -42,8 +45,11 @@ class DashboardAccessTokenController extends AbstractCrudController
     #[\Override]
     public function configureActions(Actions $actions): Actions
     {
+        $ownsToken = new Expression('object.getUser() != null and object.getUser().getId() === user.getId()');
+
         return $actions
-            ->remove(Crud::PAGE_INDEX, Action::EDIT)
+            ->setPermission(Action::DELETE, $ownsToken)
+            ->disable(Action::DETAIL, Action::EDIT)
             ->remove(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER);
     }
 
@@ -52,6 +58,15 @@ class DashboardAccessTokenController extends AbstractCrudController
     {
         yield TextField::new('name');
         yield DateTimeField::new('expiresAt');
+    }
+
+    #[\Override]
+    public function createEntity(string $entityFqcn): ?object
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        return new AccessToken($user);
     }
 
     #[\Override]
@@ -71,14 +86,11 @@ class DashboardAccessTokenController extends AbstractCrudController
     public function beforeEntityPersisted(BeforeEntityPersistedEvent $event): void
     {
         $accessToken = $event->getEntityInstance();
-        /** @var User $user */
-        $user = $this->getUser();
 
         if (!$accessToken instanceof AccessToken) {
             return;
         }
 
-        $accessToken->setUser($user);
         $this->addFlash('access-token', $accessToken->getPlainToken());
     }
 }
