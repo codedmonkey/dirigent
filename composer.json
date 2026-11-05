@@ -187,7 +187,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "0.8.x-dev"
+            "dev-main": "0.9.x-dev"
         },
         "runtime": {
             "dotenv_path": ".env.dirigent"
