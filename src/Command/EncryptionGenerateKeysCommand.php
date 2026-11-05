@@ -73,7 +73,13 @@ class EncryptionGenerateKeysCommand extends Command
             $decryptionKey = sodium_crypto_box_keypair();
             $encryptionKey = sodium_crypto_box_publickey($decryptionKey);
 
-            $filesystem->dumpFile($this->privateKeyPath, sodium_bin2hex($decryptionKey));
+            $mask = umask(0o077);
+            try {
+                $filesystem->dumpFile($this->privateKeyPath, sodium_bin2hex($decryptionKey));
+            } finally {
+                umask($mask);
+            }
+
             $filesystem->dumpFile($this->publicKeyPath, sodium_bin2hex($encryptionKey));
 
             $io->success('Generated encryption keys.');
