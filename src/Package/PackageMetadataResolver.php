@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Package;
 
-use cebe\markdown\GithubMarkdown;
 use CodedMonkey\Dirigent\Composer\ComposerClient;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\MetadataKeyword;
@@ -25,6 +24,7 @@ use Composer\Package\Link as ComposerPackageLink;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\VcsDriverInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
@@ -423,8 +423,11 @@ readonly class PackageMetadataResolver
                     $source = $driver->getFileContent($readmeFile, $metadata->getSourceReference());
 
                     if (!empty($source)) {
-                        $parser = new GithubMarkdown();
-                        $readme = $parser->parse($source);
+                        $parser = new GithubFlavoredMarkdownConverter([
+                            'html_input' => 'escape',
+                            'allow_unsafe_links' => false,
+                        ]);
+                        $readme = (string) $parser->convert($source);
 
                         if (!empty($readme)) {
                             return $this->prepareReadmeContents($readme);

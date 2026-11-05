@@ -11,7 +11,6 @@
         "ext-curl": "*",
         "ext-iconv": "*",
         "ext-sodium": "*",
-        "cebe/markdown": "^1.2.1",
         "composer/composer": "^2.11.1",
         "composer/pcre": "^3.4.0",
         "doctrine/doctrine-bundle": "^3.3.4",
