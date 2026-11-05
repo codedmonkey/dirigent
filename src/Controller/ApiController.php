@@ -115,7 +115,7 @@ class ApiController extends AbstractController
             'version' => Requirement::CATCH_ALL,
             'revision' => Requirement::POSITIVE_INT,
             'reference' => '[a-z0-9]+',
-            'type' => '(zip)',
+            'type' => '(zip|tar|rar|7z|xz|gzip|phar)',
         ],
         methods: ['GET'],
     )]
@@ -163,7 +163,7 @@ class ApiController extends AbstractController
             'package' => MapPackage::PACKAGE_REGEX,
             'version' => Requirement::CATCH_ALL,
             'reference' => '[a-z0-9]+',
-            'type' => '(zip)',
+            'type' => '(zip|tar|rar|7z|xz|gzip|phar)',
         ],
         methods: ['GET'],
     )]
