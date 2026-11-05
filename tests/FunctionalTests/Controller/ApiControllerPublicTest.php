@@ -7,16 +7,21 @@ namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Controller;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\Registry;
 use CodedMonkey\Dirigent\Entity\RegistryPackageMirroring;
+use CodedMonkey\Dirigent\Message\TrackInstallations;
 use CodedMonkey\Dirigent\Package\PackageProviderManager;
 use CodedMonkey\Dirigent\Tests\FunctionalTests\PublicKernel;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 class ApiControllerPublicTest extends KernelTestCase
 {
@@ -107,6 +112,103 @@ class ApiControllerPublicTest extends KernelTestCase
 
         $this->assertArrayHasKey('packages', $packageData);
         $this->assertArrayHasKey('psr/container', $packageData['packages']);
+    }
+
+    public static function validDownloadNotifications(): iterable
+    {
+        yield 'empty batch' => [
+            [],
+        ];
+        yield 'single download' => [
+            [['name' => 'psr/log', 'version' => '1.0.0.0']],
+        ];
+        yield 'multiple downloads' => [
+            [
+                ['name' => 'psr/log', 'version' => '1.0.0.0'],
+                ['name' => 'psr/container', 'version' => 'dev-main', 'extra' => 'preserved'],
+            ],
+        ];
+    }
+
+    #[DataProvider('validDownloadNotifications')]
+    public function testDownloadsQueuesValidNotifications(array $downloads): void
+    {
+        self::bootKernel();
+
+        $messenger = $this->createMock(MessageBusInterface::class);
+        $messenger->expects(self::once())->method('dispatch')
+            ->with(self::callback(static fn (Envelope $envelope): bool => $envelope->getMessage() instanceof TrackInstallations
+                && $downloads === $envelope->getMessage()->installations
+                && ['async'] === $envelope->last(TransportNamesStamp::class)?->getTransportNames()
+            ))
+            ->willReturnCallback(static fn (Envelope $envelope): Envelope => $envelope);
+        self::getContainer()->set('messenger.bus.default', $messenger);
+
+        $requestBody = json_encode(['downloads' => $downloads], JSON_THROW_ON_ERROR);
+        $request = Request::create('/downloads', 'POST', content: $requestBody);
+
+        $response = self::$kernel->handle($request);
+        self::assertSame(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $responseBody = json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame(['status' => 'success'], $responseBody);
+    }
+
+    public static function invalidDownloadNotifications(): iterable
+    {
+        $invalidTypes = [
+            'array' => [],
+            'integer' => 123,
+            'float' => 1.5,
+            'boolean' => true,
+            'null' => null,
+        ];
+
+        foreach ($invalidTypes as $type => $value) {
+            yield "$type name" => [
+                [['name' => $value, 'version' => '1.0.0.0']],
+            ];
+            yield "$type version" => [
+                [['name' => 'psr/log', 'version' => $value]],
+            ];
+        }
+
+        yield 'missing name' => [
+            [['version' => '1.0.0.0']],
+        ];
+        yield 'missing version' => [
+            [['name' => 'psr/log']],
+        ];
+        yield 'scalar entry' => [
+            ['psr/log'],
+        ];
+        yield 'null entry' => [
+            [null],
+        ];
+        yield 'mixed batch' => [
+            [
+                ['name' => 'psr/log', 'version' => '1.0.0.0'],
+                ['name' => 'psr/log', 'version' => []],
+            ],
+        ];
+    }
+
+    #[DataProvider('invalidDownloadNotifications')]
+    public function testDownloadsRejectsInvalidNotifications(array $downloads): void
+    {
+        self::bootKernel();
+
+        $messenger = $this->createMock(MessageBusInterface::class);
+        $messenger->expects(self::never())->method('dispatch');
+        self::getContainer()->set('messenger.bus.default', $messenger);
+
+        $request = Request::create('/downloads', 'POST', content: json_encode([
+            'downloads' => $downloads,
+        ], JSON_THROW_ON_ERROR));
+        $response = self::$kernel->handle($request);
+
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
+        self::assertSame('error', json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR)['status']);
     }
 
     private function createPackageWithProvider(): Package
