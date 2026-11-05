@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Tests\Helper;
 
+use CodedMonkey\Dirigent\Doctrine\Entity\AccessToken;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\MetadataRequireLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
@@ -16,6 +17,14 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticator;
 
 trait MockEntityFactoryTrait
 {
+    protected function createMockAccessToken(User $user, string $name): AccessToken
+    {
+        $accessToken = new AccessToken($user);
+        $accessToken->setName($name);
+
+        return $accessToken;
+    }
+
     protected function createMockMetadata(Version $version): Metadata
     {
         $package = $version->getPackage();

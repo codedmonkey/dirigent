@@ -17,7 +17,7 @@ class AccessToken extends TrackedEntity
     private ?int $id = null;
 
     #[ORM\ManyToOne(User::class)]
-    private ?User $user = null;
+    private User $user;
 
     #[ORM\Column]
     private ?string $name = null;
@@ -28,10 +28,12 @@ class AccessToken extends TrackedEntity
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $expiresAt = null;
 
-    private ?string $plainToken = null;
+    private ?string $plainToken;
 
-    public function __construct()
+    public function __construct(User $user)
     {
+        $this->user = $user;
+
         $this->plainToken = 'dirigent-' . bin2hex(random_bytes(32));
     }
 
@@ -40,14 +42,9 @@ class AccessToken extends TrackedEntity
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getUser(): User
     {
         return $this->user;
-    }
-
-    public function setUser(?User $user): void
-    {
-        $this->user = $user;
     }
 
     public function getName(): ?string
