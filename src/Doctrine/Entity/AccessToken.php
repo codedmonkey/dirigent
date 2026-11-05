@@ -32,7 +32,7 @@ class AccessToken extends TrackedEntity
 
     public function __construct()
     {
-        $this->plainToken = uniqid('dirigent-');
+        $this->plainToken = 'dirigent-' . bin2hex(random_bytes(32));
     }
 
     public function getId(): ?int
