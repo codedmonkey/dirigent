@@ -1,10 +1,18 @@
 # Changelog
 
-* 0.8.0
+* 0.8.0 (2026-11-05)
   * **Breaking changes**
     * The path for stored distributions has changed, so any previously downloaded distributions are no longer valid.
       It's recommended to delete the existing `distribution/` directory in the data directory before upgrading to
       this version to prevent any lingering distributions taking up storage space.
+  * Added buttons to download and remove distributions for packages
+  * Added `source` package fetch strategy to distinguish between VCS and other remote providers like the GitHub API
+  * Added `default_fetch_strategy` configuration option for new packages
+  * Improved the configuration options regarding distributions
+  * Improved the encryption utility to accept keys through a mix of environment variables and files
+  * Bumped minimum Node version to 24
+  * Changes to the database now need to be explicitly marked to be persisted to improve performance
+  * Distribution information is now saved in the database
 
 * 0.7.3 (2026-08-28)
   * Fixed issue with resolving package metadata with recurring keywords being blocked by database errors
