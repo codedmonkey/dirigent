@@ -15,11 +15,11 @@ RUN composer install \
         --no-scripts \
         --prefer-dist
 
-FROM node:24 AS node_build
+FROM node:26 AS node_build
 
 WORKDIR /srv/app
 
-COPY package.json package-lock.json tsconfig.json webpack.config.js ./
+COPY package.json package-lock.json tsconfig.json vite.config.js ./
 COPY assets assets/
 
 RUN set -e; \

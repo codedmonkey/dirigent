@@ -22,7 +22,6 @@ Additional requirements:
 - Symfony binary
 - Docker
 
-
 ```shell
 # Optionally, copy the example Docker Compose configuration override file
 cp compose.override.example.yaml compose.override.yaml
@@ -46,6 +45,25 @@ symfony console doctrine:schema:update --force
 symfony console doctrine:fixtures:load --no-interaction
 ```
 
+### Frontend development
+
+Frontend assets are built with Vite and Symfony Reprise. Use one of the
+following commands to compile assets during development:
+
+```shell
+# Build an optimized production build
+npm run production
+
+# Build assets with source maps (for development only)
+npm run build
+
+# Rebuild assets on disk without a separate asset server
+npm run watch
+
+# Run a Vite development server
+npm run serve
+```
+
 ## Lint & validate the code
 
 ```shell
@@ -58,6 +76,9 @@ symfony composer lint:coding-style    # PHP-CS-Fixer (automatically applies chan
 symfony composer lint:static-analysis # PHPStan level 5
 symfony composer lint:container       # Symfony container validation
 symfony composer lint:templates       # Twig template validation
+
+# Frontend linters
+npm run lint:static-analysis # TypeScript type validation
 ```
 
 ### Running tests

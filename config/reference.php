@@ -1607,6 +1607,17 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     intercept_redirects?: bool|Param, // Default: false
  *     excluded_ajax_paths?: scalar|Param|null, // Default: "^/((index|app(_[\\w]+)?)\\.php/)?_wdt"
  * }
+ * @psalm-type RepriseConfig = array{
+ *     output_path?: scalar|Param|null, // Directory where the @symfony/reprise plugin writes entrypoints.json and manifest.json. Set to false to only use named "builds". // Default: "%kernel.project_dir%/public/build"
+ *     builds?: array<string, scalar|Param|null>,
+ *     strict_mode?: bool|Param, // Throw when the entrypoints.json file or a requested entry is missing. // Default: true
+ *     cache?: bool|Param, // Cache the parsed entrypoints.json in a compiled PHP file (warmed at cache:warmup). Enable in production; requires symfony/cache. // Default: false
+ *     preload?: bool|Param, // Register rendered assets as WebLink Link: headers (HTTP/2 preload). No-op when symfony/web-link is absent. // Default: true
+ *     asset_package?: scalar|Param|null, // Name of a framework.assets package used to resolve entry URLs (must have no version strategy). Null uses the default package. // Default: null
+ *     crossorigin?: false|"anonymous"|"use-credentials"|Param, // crossorigin attribute added alongside SRI integrity: false, "anonymous", or "use-credentials". // Default: false
+ *     script_attributes?: list<mixed>,
+ *     link_attributes?: list<mixed>,
+ * }
  * @psalm-type StimulusConfig = array{
  *     controller_paths?: list<scalar|Param|null>,
  *     controllers_json?: scalar|Param|null, // Default: "%kernel.project_dir%/assets/controllers.json"
@@ -1621,16 +1632,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         enabled?: bool|Param, // Default: "%kernel.debug%"
  *         collect_components?: bool|Param, // Collect components instances // Default: true
  *     },
- * }
- * @psalm-type WebpackEncoreConfig = array{
- *     output_path?: scalar|Param|null, // The path where Encore is building the assets - i.e. Encore.setOutputPath()
- *     crossorigin?: false|"anonymous"|"use-credentials"|Param, // crossorigin value when Encore.enableIntegrityHashes() is used, can be false (default), anonymous or use-credentials // Default: false
- *     preload?: bool|Param, // preload all rendered script and link tags automatically via the http2 Link header. // Default: false
- *     cache?: bool|Param, // Enable caching of the entry point file(s) // Default: false
- *     strict_mode?: bool|Param, // Throw an exception if the entrypoints.json file is missing or an entry is missing from the data // Default: true
- *     builds?: array<string, scalar|Param|null>,
- *     script_attributes?: array<string, scalar|Param|null>,
- *     link_attributes?: array<string, scalar|Param|null>,
  * }
  * @psalm-type SymfonycastsResetPasswordConfig = array{
  *     request_password_repository?: scalar|Param|null, // A class that implements ResetPasswordRequestRepositoryInterface - usually your ResetPasswordRequestRepository.
@@ -1748,9 +1749,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     monolog?: MonologConfig,
  *     security?: SecurityConfig,
  *     twig?: TwigConfig,
+ *     reprise?: RepriseConfig,
  *     stimulus?: StimulusConfig,
  *     twig_component?: TwigComponentConfig,
- *     webpack_encore?: WebpackEncoreConfig,
  *     symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
  *     twig_extra?: TwigExtraConfig,
  *     dirigent?: DirigentConfig,
@@ -1768,9 +1769,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         security?: SecurityConfig,
  *         twig?: TwigConfig,
  *         web_profiler?: WebProfilerConfig,
+ *         reprise?: RepriseConfig,
  *         stimulus?: StimulusConfig,
  *         twig_component?: TwigComponentConfig,
- *         webpack_encore?: WebpackEncoreConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
  *         twig_extra?: TwigExtraConfig,
  *     },
@@ -1786,9 +1787,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         monolog?: MonologConfig,
  *         security?: SecurityConfig,
  *         twig?: TwigConfig,
+ *         reprise?: RepriseConfig,
  *         stimulus?: StimulusConfig,
  *         twig_component?: TwigComponentConfig,
- *         webpack_encore?: WebpackEncoreConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
  *         twig_extra?: TwigExtraConfig,
  *     },
@@ -1805,9 +1806,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         security?: SecurityConfig,
  *         twig?: TwigConfig,
  *         web_profiler?: WebProfilerConfig,
+ *         reprise?: RepriseConfig,
  *         stimulus?: StimulusConfig,
  *         twig_component?: TwigComponentConfig,
- *         webpack_encore?: WebpackEncoreConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
  *         twig_extra?: TwigExtraConfig,
  *     },
