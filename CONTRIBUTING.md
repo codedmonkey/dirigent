@@ -76,6 +76,7 @@ symfony composer lint:coding-style    # PHP-CS-Fixer (automatically applies chan
 symfony composer lint:static-analysis # PHPStan level 5
 symfony composer lint:container       # Symfony container validation
 symfony composer lint:templates       # Twig template validation
+symfony composer lint:symfony         # Symfony Language Tools diagnostics (runtime analysis)
 
 # Frontend linters
 npm run lint:static-analysis # TypeScript type validation

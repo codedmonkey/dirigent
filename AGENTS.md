@@ -40,6 +40,7 @@ symfony composer run lint:coding-style    # PHP-CS-Fixer (automatically applies 
 symfony composer run lint:static-analysis # PHPStan level 5
 symfony composer run lint:container       # Symfony container validation
 symfony composer run lint:templates       # Twig template validation
+symfony composer run lint:symfony         # Symfony Language Tools diagnostics (runtime analysis)
 ```
 
 ### Testing

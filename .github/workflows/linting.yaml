@@ -61,6 +61,40 @@ jobs:
       #  if: always() && steps.composer-install.outcome == 'success'
       #  run: bin/console lint:xliff translations --ansi
 
+  symfony-lsp:
+    name: Symfony Language Tools
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.5
+          tools: composer:v2,symfony-cli
+
+      - name: Set Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer output
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --ansi --no-interaction --no-progress
+
+      - name: Run Symfony Language Tools
+        env:
+          GITHUB_TOKEN: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+        run: symfony lsp:check --format=github --verbose
+
   rector:
     name: Rector
 

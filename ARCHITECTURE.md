@@ -16,7 +16,7 @@
     - **TypeScript**: NPM
 - **Frontend**: Twig, EasyAdmin 5.x
 - **Frontend (JavaScript)**: Vite (via Symfony Reprise), Stimulus
-- **Linting**: Rector, PHP-CS-Fixer, PHPStan
+- **Linting**: Rector, PHP-CS-Fixer, PHPStan, Symfony Language Tools
 - **Testing**: PHPUnit 13.x, Testcontainers
 
 ## Directory structure
