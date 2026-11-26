@@ -9,10 +9,9 @@ Take back control of your dependencies:
 
 Please note that Dirigent only supports Composer 2. There are no plans to support Composer 1 at this time.
 
-## Currently under development
+## Currently in Beta
 
-Please note that Dirigent is still under heavy development, and it's currently **not safe to use in production**.
-Proceed with caution.
+Please note that Dirigent is in beta, and it's currently still undergoing heavy development.
 
 ## Installation
 
