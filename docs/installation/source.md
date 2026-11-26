@@ -23,7 +23,7 @@ To install Dirigent on your system from source you need to have the following pa
 - Web server (like Nginx or Caddy)
 - PHP-FPM
 - PostgreSQL 16
-- Node 23
+- Node 26 or higher
 
 ## Download source code
 

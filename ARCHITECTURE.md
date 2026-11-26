@@ -6,7 +6,7 @@
     - PHP 8.5+
     - Symfony 8.1
     - PostgreSQL 16.x (via Doctrine ORM 3.x)
-    - Node 24
+    - Node 26
     - TypeScript
 - **Development requirements**:
     - Docker
@@ -15,7 +15,7 @@
     - **PHP**: Composer
     - **TypeScript**: NPM
 - **Frontend**: Twig, EasyAdmin 5.x
-- **Frontend (JavaScript)**: Webpack Encore, Stimulus
+- **Frontend (JavaScript)**: Vite (via Symfony Reprise), Stimulus
 - **Linting**: Rector, PHP-CS-Fixer, PHPStan
 - **Testing**: PHPUnit 13.x, Testcontainers
 
