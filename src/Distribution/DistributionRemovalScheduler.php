@@ -2,22 +2,20 @@
 
 declare(strict_types=1);
 
-namespace CodedMonkey\Dirigent\Package;
+namespace CodedMonkey\Dirigent\Distribution;
 
-use CodedMonkey\Dirigent\Distribution\DistributionFilesystem;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
-use CodedMonkey\Dirigent\Message\RemoveDistribution;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
 class DistributionRemovalScheduler
 {
     /**
-     * @var array<int, RemoveDistribution>
+     * @var array<int, RemoveDistributionMessage>
      */
     private array $pendingRemovals = [];
 
@@ -34,7 +32,7 @@ class DistributionRemovalScheduler
             return;
         }
 
-        $this->pendingRemovals[$distributionId] = new RemoveDistribution(
+        $this->pendingRemovals[$distributionId] = new RemoveDistributionMessage(
             $distributionId,
             $this->distributionFilesystem->relativePath($distribution),
         );

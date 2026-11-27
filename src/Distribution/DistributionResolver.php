@@ -8,7 +8,6 @@ use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
 use CodedMonkey\Dirigent\Entity\PackageFetchStrategy;
-use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -50,7 +49,7 @@ class DistributionResolver
 
         if ($async) {
             // Resolve the distribution asynchronously so it's available in the future now that we know it was requested
-            $this->messenger->dispatch(new ResolveDistribution($metadata->getId(), $type), [
+            $this->messenger->dispatch(new ResolveDistributionMessage($metadata->getId(), $type), [
                 new TransportNamesStamp('async'),
             ]);
 

@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Message;
 
 use CodedMonkey\Dirigent\Distribution\DistributionFilesystem;
+use CodedMonkey\Dirigent\Distribution\RemoveDistributionMessage;
+use CodedMonkey\Dirigent\Distribution\RemoveDistributionMessageHandler;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Repository\DistributionRepository;
-use CodedMonkey\Dirigent\Message\RemoveDistribution;
-use CodedMonkey\Dirigent\Message\RemoveDistributionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Exception\RecoverableMessageHandlingException;
 
-#[CoversClass(RemoveDistributionHandler::class)]
+#[CoversClass(RemoveDistributionMessageHandler::class)]
 class RemoveDistributionHandlerTest extends TestCase
 {
     public function testInvokeRemovesFileAfterDistributionWasDeleted(): void
@@ -29,9 +29,9 @@ class RemoveDistributionHandlerTest extends TestCase
             ->method('removeFile')
             ->with('vendor/package/version-reference.zip');
 
-        $handler = new RemoveDistributionHandler($distributionRepository, $distributionFilesystem);
+        $handler = new RemoveDistributionMessageHandler($distributionRepository, $distributionFilesystem);
 
-        $handler(new RemoveDistribution(1972, 'vendor/package/version-reference.zip'));
+        $handler(new RemoveDistributionMessage(1972, 'vendor/package/version-reference.zip'));
     }
 
     public function testInvokeRetriesWhileDistributionStillExists(): void
@@ -45,9 +45,9 @@ class RemoveDistributionHandlerTest extends TestCase
         $distributionFilesystem = $this->createMock(DistributionFilesystem::class);
         $distributionFilesystem->expects(self::never())->method('removeFile');
 
-        $handler = new RemoveDistributionHandler($distributionRepository, $distributionFilesystem);
+        $handler = new RemoveDistributionMessageHandler($distributionRepository, $distributionFilesystem);
 
         $this->expectException(RecoverableMessageHandlingException::class);
-        $handler(new RemoveDistribution(1972, 'vendor/package/version-reference.zip'));
+        $handler(new RemoveDistributionMessage(1972, 'vendor/package/version-reference.zip'));
     }
 }

@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace CodedMonkey\Dirigent\Message;
+namespace CodedMonkey\Dirigent\Distribution;
 
-use CodedMonkey\Dirigent\Distribution\DistributionResolver;
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-readonly class ResolveDistributionHandler
+readonly class ResolveDistributionMessageHandler
 {
     public function __construct(
         private MetadataRepository $metadataRepository,
@@ -17,7 +16,7 @@ readonly class ResolveDistributionHandler
     ) {
     }
 
-    public function __invoke(ResolveDistribution $message): void
+    public function __invoke(ResolveDistributionMessage $message): void
     {
         if (null === $metadata = $this->metadataRepository->find($message->metadataId)) {
             return;

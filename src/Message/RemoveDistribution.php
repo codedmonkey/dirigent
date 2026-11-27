@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace CodedMonkey\Dirigent\Message;
 
+use CodedMonkey\Dirigent\Distribution\RemoveDistributionMessage;
 use Symfony\Component\Messenger\Attribute\AsMessage;
 
+/**
+ * @deprecated retained for messages queued before the distribution namespace migration
+ */
 #[AsMessage]
-readonly class RemoveDistribution
+readonly class RemoveDistribution extends RemoveDistributionMessage
 {
-    public function __construct(
-        public int $distributionId,
-        public string $relativePath,
-    ) {
-    }
 }

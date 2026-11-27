@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Tests\UnitTests\Message;
 
 use CodedMonkey\Dirigent\Distribution\DistributionResolver;
+use CodedMonkey\Dirigent\Distribution\ResolveDistributionMessage;
+use CodedMonkey\Dirigent\Distribution\ResolveDistributionMessageHandler;
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
-use CodedMonkey\Dirigent\Message\ResolveDistribution;
-use CodedMonkey\Dirigent\Message\ResolveDistributionHandler;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(ResolveDistributionHandler::class)]
+#[CoversClass(ResolveDistributionMessageHandler::class)]
 class ResolveDistributionHandlerTest extends TestCase
 {
     public function testInvokeIgnoresMissingMetadata(): void
@@ -25,8 +25,8 @@ class ResolveDistributionHandlerTest extends TestCase
         $distributionResolver = $this->createMock(DistributionResolver::class);
         $distributionResolver->expects(self::never())->method('resolve');
 
-        $handler = new ResolveDistributionHandler($metadataRepository, $distributionResolver);
+        $handler = new ResolveDistributionMessageHandler($metadataRepository, $distributionResolver);
 
-        $handler(new ResolveDistribution(1972, 'zip'));
+        $handler(new ResolveDistributionMessage(1972, 'zip'));
     }
 }

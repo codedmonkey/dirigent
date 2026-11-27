@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace CodedMonkey\Dirigent\Tests\FunctionalTests\Doctrine\Entity;
 
 use CodedMonkey\Dirigent\Distribution\DistributionFilesystem;
+use CodedMonkey\Dirigent\Distribution\RemoveDistributionMessage;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
-use CodedMonkey\Dirigent\Message\RemoveDistribution;
 use CodedMonkey\Dirigent\Tests\Helper\EntityManagerTestTrait;
 use CodedMonkey\Dirigent\Tests\Helper\KernelTestCaseTrait;
 use CodedMonkey\Dirigent\Tests\Helper\MockEntityFactoryTrait;
@@ -95,8 +95,8 @@ class DistributionDeletionTest extends KernelTestCase
         $entityManager->clear();
 
         // todo implement outbox for distribution removals instead
-        $this->transport('async')->processOrFail(filter: RemoveDistribution::class);
-        $this->transport('async')->rejected()->assertContains(RemoveDistribution::class, 1);
+        $this->transport('async')->processOrFail(filter: RemoveDistributionMessage::class);
+        $this->transport('async')->rejected()->assertContains(RemoveDistributionMessage::class, 1);
 
         self::assertFileExists($path);
 
@@ -123,6 +123,6 @@ class DistributionDeletionTest extends KernelTestCase
     {
         $this->getService(EntityManagerInterface::class)->clear();
 
-        $this->transport('async')->throwExceptions()->processOrFail(filter: RemoveDistribution::class);
+        $this->transport('async')->throwExceptions()->processOrFail(filter: RemoveDistributionMessage::class);
     }
 }

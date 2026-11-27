@@ -6,6 +6,7 @@ namespace CodedMonkey\Dirigent\Controller\Dashboard;
 
 use CodedMonkey\Dirigent\Attribute\IsGrantedAccess;
 use CodedMonkey\Dirigent\Attribute\MapPackage;
+use CodedMonkey\Dirigent\Distribution\ResolveDistributionMessage;
 use CodedMonkey\Dirigent\Doctrine\Entity\Distribution;
 use CodedMonkey\Dirigent\Doctrine\Entity\Metadata;
 use CodedMonkey\Dirigent\Doctrine\Entity\Package;
@@ -15,7 +16,6 @@ use CodedMonkey\Dirigent\Doctrine\Entity\PackageSuggestLink;
 use CodedMonkey\Dirigent\Doctrine\Entity\Version;
 use CodedMonkey\Dirigent\Doctrine\Repository\MetadataRepository;
 use CodedMonkey\Dirigent\EasyAdmin\PackagePaginator;
-use CodedMonkey\Dirigent\Message\ResolveDistribution;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
@@ -306,7 +306,7 @@ class DashboardPackagesInfoController extends AbstractController
                 throw $this->createNotFoundException($translator->trans('distribution.error.external_not_found'));
             }
 
-            $this->messenger->dispatch(new ResolveDistribution($metadata->getId(), $metadata->getDistributionType()), [
+            $this->messenger->dispatch(new ResolveDistributionMessage($metadata->getId(), $metadata->getDistributionType()), [
                 new TransportNamesStamp('async'),
             ]);
 
